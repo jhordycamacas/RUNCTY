@@ -15,7 +15,7 @@ Reto académico de la **UTPL** (materias Fundamentos de Ingeniería de Software 
 
 - Inicio: semana del 12 al 18 de octubre de 2026 (levantamiento de requisitos).
 - Fase actual: construcción del backlog, definición de épicas y sprints a partir del Excel de requisitos, y preparación del repositorio.
-- Docente tutor: Ing. Segundo Raymundo.
+- Docentes tutores: Ing. Segundo Raymundo e Ing. Jorge Landacay.
 
 ## 2. Problema
 
