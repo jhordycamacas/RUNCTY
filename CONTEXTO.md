@@ -154,9 +154,44 @@ Los RF se organizan en 11 módulos: Usuarios y accesos, Catálogo de rutas, Eval
 - Convenios con entidades.
 - Expansión real a otras ciudades.
 
-## 9. Decisiones abiertas y contradicciones (resolver con el equipo o el cliente)
+## 9. Arquitectura (decidida — 2026-10-28)
 
-1. **Backend:** el Documento de Visión dice que no habrá backend propio y que se usarán servicios de Google. Sin embargo, el Excel pide repositorio centralizado, respaldos, 99 % de disponibilidad, 5.000 concurrentes, notificaciones, ubicación en tiempo real y no depender de un único proveedor. Hay que decidir si un BaaS (Firebase, Supabase) o un backend propio cumple con eso. **Es la decisión de arquitectura principal.**
+Sin backend propio: se usan servicios de Google (Firebase) como BaaS, más Cloud Functions serverless para la lógica que no puede vivir en el cliente. Así se cumple el Documento de Visión (sin servidor propio) y también los RNF del Excel (datos centralizados, notificaciones, tiempo real, respaldos).
+
+La referencia es la arquitectura de la app **PilasOe** (Expo + Firebase + Cloud Functions + admin en Next.js), corrigiendo sus debilidades.
+
+### Stack
+
+| Capa | Tecnología |
+| --- | --- |
+| App móvil (Android/iOS) | React Native + Expo + TypeScript |
+| Autenticación | Firebase Auth |
+| Base de datos | Cloud Firestore (tiempo real con `onSnapshot`) |
+| Archivos (banners, fotos de reportes) | Firebase Storage |
+| Notificaciones push | Firebase Cloud Messaging (FCM) |
+| Lógica de servidor | Cloud Functions (pánico, índice de seguridad, validación de reportes, notificaciones) |
+| Estado / datos remotos | TanStack React Query |
+| Mapas y ubicación | Google Maps + `expo-location`, detrás de una abstracción (puerto `MapProvider`) |
+| Panel de administración | Web en Next.js (rutas, reportes, anunciantes, campañas) |
+
+### Principios
+
+- **Clean Architecture feature-first desde el día uno:** cada módulo (rutas, seguridad, entrenamiento, pánico, comunidad, publicidad) se divide en las capas `domain` / `application` / `infrastructure` / `presentation`. No se mezcla con código legado.
+- **Un solo SDK de Firebase y un solo sistema de estilos.**
+- **Reglas de Firestore estrictas:** se deniega todo por defecto y se permite solo lo necesario. Los roles se manejan con custom claims. La ubicación de un corredor solo la leen sus contactos elegidos y solo durante la sesión (RNF-05). La identidad del reportante queda reservada (RNF-04).
+- **Ubicación en segundo plano** para el entrenamiento GPS y la ubicación compartida (PilasOe solo la usa en primer plano).
+- **Offline-first en el entrenamiento:** cola local con sincronización automática (RNF-12).
+- **Pánico en el servidor:** la alerta la dispara el cliente y una Cloud Function la reparte a los contactos de confianza (meta: ≤5 s, RNF-06).
+- **Mapas desacoplados del proveedor** mediante un puerto/adaptador (RNF-15).
+- **Sin secretos en git:** las claves van en variables de entorno o en EAS Secrets. App Check se exige en las Cloud Functions.
+
+### Requisito operativo
+
+Las Cloud Functions requieren el **plan Blaze** de Firebase (pago por uso, con tarjeta registrada). Tiene una cuota gratuita amplia; para el piloto en Loja el costo esperado es prácticamente cero.
+
+## 10. Decisiones abiertas y contradicciones (resolver con el equipo o el cliente)
+
+1. ~~**Backend**~~: resuelto en la sección 9 (Firebase BaaS + Cloud Functions).
 2. **Alcance del MVP:** el Acta difiere el pánico, los contactos y las alertas; la Visión y el Excel los marcan como "Debe". Hay que definir qué entra en el primer sprint y qué se muestra el día de la presentación.
 3. **Generar o recomendar rutas:** falta decidir entre ordenar un catálogo predefinido y generar rutas nuevas. Tampoco están definidos el algoritmo ni la ponderación del índice de seguridad.
 4. **Canal de la alerta de pánico:** push, SMS o WhatsApp.
@@ -164,11 +199,11 @@ Los RF se organizan en 11 módulos: Usuarios y accesos, Catálogo de rutas, Eval
 6. **Fuentes de datos de seguridad:** falta definir quién carga los datos y con qué periodicidad (administrador de Gacelas, clubes, reportes comunitarios).
 7. **Plataforma:** el Acta deja abierta la elección entre móvil y web; la Visión decide solo móvil.
 
-## 10. Estado actual
+## 11. Estado actual
 
 - [x] Repositorio creado con README.
 - [x] CONTEXTO.md creado.
-- [ ] Definir arquitectura y stack (siguiente paso).
+- [x] Arquitectura y stack definidos (sección 9).
 - [ ] Diseño de UI/UX.
 - [ ] Backlog: épicas, historias de usuario y sprints.
 - [ ] Estructura inicial del proyecto.

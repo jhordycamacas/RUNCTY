@@ -30,6 +30,48 @@ RUNCTY no declara una ruta "segura" o "insegura" de forma absoluta. Muestra un *
 
 El piloto empieza en **Loja**. La meta es expandirse a otras ciudades del Ecuador a través de clubes aliados (Cuenca, Quito, Guayaquil y Manta) y, más adelante, a nivel internacional.
 
+## Arquitectura
+
+RUNCTY no tiene un servidor propio. Usa **servicios de Google (Firebase)** como backend como servicio, más **Cloud Functions** serverless para la lógica crítica.
+
+```text
+┌─────────────────────────┐      ┌──────────────────────────┐
+│  App móvil (Expo / RN)  │      │ Panel admin web (Next.js)│
+│  Corredor               │      │ Administrador / Club     │
+└────────────┬────────────┘      └────────────┬─────────────┘
+             │                                │
+             ▼                                ▼
+┌──────────────────────────────────────────────────────────┐
+│                      Firebase (Google)                   │
+│  Auth · Firestore · Storage · Cloud Messaging (push)     │
+│  Cloud Functions: pánico · índice de seguridad ·         │
+│                   validación de reportes · notificaciones│
+└────────────────────────────┬─────────────────────────────┘
+                             ▼
+                 Google Maps / Geolocalización
+```
+
+| Capa | Tecnología |
+| --- | --- |
+| App móvil (Android 9+ / iOS 14+) | React Native + Expo + TypeScript |
+| Autenticación | Firebase Auth |
+| Base de datos (tiempo real) | Cloud Firestore |
+| Archivos | Firebase Storage |
+| Notificaciones push | Firebase Cloud Messaging |
+| Lógica de servidor | Cloud Functions |
+| Estado / datos remotos | TanStack React Query |
+| Mapas y ubicación | Google Maps + `expo-location` (detrás de una abstracción) |
+| Panel de administración | Next.js |
+
+### Principios de diseño
+
+- **Clean Architecture feature-first:** cada módulo se divide en las capas `domain`, `application`, `infrastructure` y `presentation`.
+- **Seguridad y privacidad primero:** reglas de Firestore que deniegan todo por defecto y roles con custom claims. La ubicación solo la ven los contactos de confianza elegidos, y la identidad de quien reporta queda reservada.
+- **Offline-first en el entrenamiento:** los recorridos se guardan sin conexión y se sincronizan después.
+- **Botón de pánico gestionado en el servidor:** una Cloud Function avisa a los contactos de confianza en segundos.
+- **Mapas desacoplados del proveedor**, para poder cambiarlo sin reescribir la app.
+- **Sin secretos en el repositorio:** las claves van en variables de entorno.
+
 ## Equipo
 
 | Integrante | Rol |
