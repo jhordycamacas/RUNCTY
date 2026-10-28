@@ -199,11 +199,53 @@ Las Cloud Functions requieren el **plan Blaze** de Firebase (pago por uso, con t
 6. **Fuentes de datos de seguridad:** falta definir quién carga los datos y con qué periodicidad (administrador de Gacelas, clubes, reportes comunitarios).
 7. **Plataforma:** el Acta deja abierta la elección entre móvil y web; la Visión decide solo móvil.
 
-## 11. Estado actual
+## 11. Product Backlog (corregido — 2026-10-28)
+
+Archivo final: `C:\Users\usuario\Downloads\Backlog_RUNCTY_Final.xlsx`. El original `Backlog_RUNCTY_MegaProPlusUltraSuperSayayin.xlsx` se conserva sin cambios. Destino: importar a Jira.
+
+**Totales:** 27 épicas y 151 historias. Cada subrequisito RF-XX-N es una historia, y los IDs de RF se mantienen por trazabilidad.
+
+**Hojas del archivo:** BKL-G1, Historias de usuario, Sprint Backlog, Épicas por sprint (nueva), Plan semanal y Notas y alcance.
+
+### Correcciones pedidas por el docente
+
+- Se eliminaron historias redundantes:
+  - RF-01-5 (establecer credenciales) se unificó en RF-01-1 (registrar cuenta).
+  - RF-01-8 (eliminar credenciales) se unificó en RF-01-4 (eliminar cuenta).
+  - Cambiar contraseña pasó a RF-01-3 (actualizar datos personales).
+  - RF-01-7 queda solo como *recuperar contraseña*, una funcionalidad aparte.
+- Las preferencias son una característica del usuario, pero no forman parte de la gestión de usuarios. Por eso tienen épica propia.
+- Se agregó una hoja que muestra qué épicas se trabajan en cada sprint.
+
+### Épicas nuevas, separadas de RF-01
+
+- **EP-25 Autenticación:** RF-01-6 iniciar sesión y RF-01-7 recuperar contraseña.
+- **EP-26 Gestión de preferencias:** RF-01-13 a RF-01-16.
+- **EP-27 Administración de usuarios:** RF-01-2, consultar usuarios. El rol cambió de *corredor* a *administrador*.
+
+### Plan de sprints
+
+La semana 8 no tiene actividad y la semana 11 queda fuera de los sprints.
+
+| Sprint | Semanas | Épicas |
+| --- | --- | --- |
+| 1 | 4–5 | EP-01 Usuarios (registro, actualizar datos, eliminar cuenta, perfil deportivo), EP-25 Autenticación, EP-26 Preferencias, EP-02 Roles y permisos, EP-27 Administración de usuarios, EP-04 Ciudades y zonas |
+| 2 | 6 | EP-05 Catálogo de rutas, EP-07 Evaluación de seguridad (franjas, factores, índice) |
+| 3 | 7 | EP-06 Puntos de apoyo, EP-07 Alertas de zona de riesgo, EP-08 Incidentes y fuentes, EP-09 Generación de rutas seguras |
+| 4 | 9 | EP-03 Contactos de confianza, EP-10 Favoritas y valoraciones, EP-11 Rutas de clubes, EP-12 Entrenamientos (parte), EP-15 Botón de pánico, EP-16 Ubicación compartida |
+| 5 | 10 | EP-12 Entrenamientos (resto), EP-13 a EP-14 y EP-17 a EP-24 (metas, retos, reportes, notificaciones, clubes, encuentros, salidas, compañeros, eventos, publicidad). Entrega final a Gacelas. |
+
+### Pendientes del archivo
+
+- El formato condicional de la hoja BKL-G1 ya venía roto en el original (`#REF!`) y no se modificó.
+- Los conteos de "Épicas por sprint" son fórmulas que Excel recalcula al abrir el archivo.
+
+## 12. Estado actual
 
 - [x] Repositorio creado con README.
 - [x] CONTEXTO.md creado.
 - [x] Arquitectura y stack definidos (sección 9).
+- [x] Backlog corregido según el docente (sección 11).
+- [ ] Importar el backlog a Jira.
 - [ ] Diseño de UI/UX.
-- [ ] Backlog: épicas, historias de usuario y sprints.
 - [ ] Estructura inicial del proyecto.
