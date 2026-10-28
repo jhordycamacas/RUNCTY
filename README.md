@@ -40,6 +40,7 @@ El piloto empieza en **Loja**. La meta es expandirse a otras ciudades del Ecuado
 | Santiago Matute | Desarrollo |
 
 Tutor: Ing. Segundo Raymundo.
+Tutor: Ing. Jorge Landacay.
 
 ## Documentación
 
