@@ -14,7 +14,7 @@
 Reto académico de la **UTPL** (materias Fundamentos de Ingeniería de Software e Ingeniería Web). El club **Gacelas Running Team (Loja, Ecuador)** planteó un problema y varios grupos de estudiantes compiten por proponer y desarrollar la mejor solución. Nuestro grupo quiere ganar el reto.
 
 - Inicio: semana del 12 al 18 de octubre de 2026 (levantamiento de requisitos).
-- Fase actual: construcción del backlog, definición de épicas y sprints a partir del Excel de requisitos, y preparación del repositorio.
+- Fase actual (2026-11-02): Sprint 1 implementado (usuarios, autenticación, preferencias, roles, administración de usuarios, ciudades y zonas). Sigue el Sprint 2: catálogo de rutas y evaluación de seguridad.
 - Docentes tutores: Ing. Segundo Raymundo e Ing. Jorge Landacay.
 
 ## 2. Problema
@@ -185,6 +185,21 @@ La referencia es la arquitectura de la app **PilasOe** (Expo + Firebase + Cloud 
 - **Mapas desacoplados del proveedor** mediante un puerto/adaptador (RNF-15).
 - **Sin secretos en git:** las claves van en variables de entorno o en EAS Secrets. App Check se exige en las Cloud Functions.
 
+### Decisiones de implementación (2026-11-02)
+
+- **Estructura del repo:** tres paquetes npm independientes, sin workspaces: `mobile/` (Expo SDK 58), `admin/` (Next.js 16 + Tailwind) y `functions/` (Gen 2, `us-central1`). La configuración de Firebase vive en la raíz (`firebase.json`, `firestore.rules`, `storage.rules`).
+- **Un solo SDK de Firebase** (el SDK JS) en la app y en el panel. El panel no usa cuenta de servicio: toda operación privilegiada pasa por Cloud Functions callables.
+- **Navegación:** react-navigation v7. **Estilos:** `StyleSheet` con tokens propios en la app y Tailwind en el panel.
+- **Roles y permisos por custom claims** `{ role, perms }`, que solo asignan las Cloud Functions. Las reglas usan `hasPerm()` sin `get()`. Roles del sistema: `runner`, `admin` y `club_rep`. Un cambio de rol se aplica cuando se renueva el token (hasta 1 h o al volver a iniciar sesión).
+- **Datos:**
+  - `users/{uid}` guarda los datos personales y el consentimiento LOPDP.
+  - `users/{uid}/private/sportProfile` y `users/{uid}/private/preferences` guardan el perfil deportivo y las preferencias.
+  - `roles/{roleId}` guarda los roles y sus permisos.
+  - `cities/{id}` guarda ciudades y zonas (`type`, `parentCityId`, `coverage`). Son de lectura pública porque el registro las necesita.
+- **Desarrollo local con los emuladores de Firebase** (proyecto `demo-runcty`) y un seed que crea Loja, los roles y un admin de prueba. No hacen falta claves reales hasta desplegar.
+- **Paleta:** blanco `#FFFFFF`, negro `#111111` y rojo suave `#D9534F` como acento. Los botones rellenos usan `#C9302C`, porque `#D9534F` con texto blanco no alcanza el contraste 4,5:1.
+- **Pruebas:** Jest en la app, Vitest en el panel y en Functions, y tests de reglas contra el emulador.
+
 ### Requisito operativo
 
 Las Cloud Functions requieren el **plan Blaze** de Firebase (pago por uso, con tarjeta registrada). Tiene una cuota gratuita amplia; para el piloto en Loja el costo esperado es prácticamente cero.
@@ -198,6 +213,12 @@ Las Cloud Functions requieren el **plan Blaze** de Firebase (pago por uso, con t
 5. **Menores de edad:** implica consentimiento parental según la LOPDP.
 6. **Fuentes de datos de seguridad:** falta definir quién carga los datos y con qué periodicidad (administrador de Gacelas, clubes, reportes comunitarios).
 7. **Plataforma:** el Acta deja abierta la elección entre móvil y web; la Visión decide solo móvil.
+8. **Texto legal LOPDP** del registro: hoy es provisional y necesita revisión.
+9. **Notificaciones por defecto:** hoy vienen activadas; hay que confirmar si deben ser opt-in.
+10. **Objetivos del perfil deportivo:** salud, bajar de peso, preparar carrera, mejorar ritmo y socializar (al menos uno obligatorio). Falta validarlos con Gacelas.
+11. **Correo sin verificar:** hoy solo se muestra un aviso. Falta decidir si bloquea alguna función.
+12. **Representante de club en el panel:** hoy tiene acceso, pero solo ve lo que sus permisos permiten.
+13. **Preferencias de apariencia:** hoy se aplican al guardar. Falta decidir si deben aplicarse al instante.
 
 ## 11. Product Backlog (corregido — 2026-10-28)
 
@@ -246,6 +267,10 @@ La semana 8 no tiene actividad y la semana 11 queda fuera de los sprints.
 - [x] CONTEXTO.md creado.
 - [x] Arquitectura y stack definidos (sección 9).
 - [x] Backlog corregido según el docente (sección 11).
+- [x] Estructura inicial del proyecto (app móvil, panel admin, Cloud Functions, reglas, emuladores).
+- [x] Sprint 1 implementado y con tests: EP-01, EP-25, EP-26, EP-02, EP-27 y EP-04. El detalle está en `odd/tasks/foundation-sprint1.md`.
+- [ ] Probar el Sprint 1 en un dispositivo y en el navegador.
 - [ ] Importar el backlog a Jira.
-- [ ] Diseño de UI/UX.
-- [ ] Estructura inicial del proyecto.
+- [ ] Diseño de UI/UX (validar la paleta con el cliente).
+- [ ] Crear el proyecto real de Firebase (plan Blaze) y cargar las claves en `.env`.
+- [ ] Sprint 2: catálogo de rutas (EP-05) y evaluación de seguridad (EP-07).

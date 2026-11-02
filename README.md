@@ -166,6 +166,45 @@ npm --prefix admin run lint           # ESLint (configuración de Next.js)
 npm run admin:build                   # build de producción del panel
 ```
 
+## Estado del desarrollo
+
+Última actualización: 2026-11-02.
+
+| Sprint | Épicas | Estado |
+| --- | --- | --- |
+| Base | Configuración de Firebase, reglas, emuladores, Cloud Functions, app móvil y panel | ✅ Hecho |
+| 1 | EP-01 Usuarios, EP-25 Autenticación, EP-26 Preferencias, EP-02 Roles y permisos, EP-27 Administración de usuarios, EP-04 Ciudades y zonas | ✅ Hecho (pendiente prueba en dispositivo) |
+| 2 | EP-05 Catálogo de rutas, EP-07 Evaluación de seguridad | ⏳ Pendiente |
+| 3 | EP-06 Puntos de apoyo, EP-07 Alertas de zona, EP-08 Incidentes, EP-09 Rutas seguras | ⏳ Pendiente |
+| 4 | EP-03 Contactos, EP-10 Favoritas, EP-11 Rutas de clubes, EP-12 Entrenamientos, EP-15 Pánico, EP-16 Ubicación compartida | ⏳ Pendiente |
+| 5 | EP-12 a EP-24 (resto) | ⏳ Pendiente |
+
+### Qué funciona hoy
+
+- **App móvil:**
+  - registro con ciudad y consentimiento LOPDP;
+  - inicio de sesión y recuperación de contraseña;
+  - edición de datos personales y cambio de contraseña;
+  - eliminación de la cuenta;
+  - perfil deportivo;
+  - preferencias de tamaño de letra, modo oscuro, unidades, notificaciones y privacidad de ubicación.
+- **Panel de administración:**
+  - búsqueda de usuarios con filtros;
+  - roles con permisos (crear, editar, asignar y eliminar);
+  - ciudades y zonas, con borrado protegido si tienen rutas o zonas.
+- **Servidor:**
+  - asignación automática del rol "corredor" al registrarse;
+  - roles y permisos mediante custom claims;
+  - reglas de Firestore que niegan todo por defecto.
+
+### Pendiente
+
+- Probar los flujos en un dispositivo y en el navegador.
+- Conectar el proyecto real de Firebase (plan Blaze) para desplegar.
+- Decisiones de producto: consentimiento parental de menores, texto legal LOPDP y valores por defecto de las notificaciones (ver [CONTEXTO.md](CONTEXTO.md)).
+
+El detalle de las tareas y su evidencia está en [odd/tasks/foundation-sprint1.md](odd/tasks/foundation-sprint1.md).
+
 ## Equipo
 
 | Integrante | Rol |
