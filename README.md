@@ -72,6 +72,51 @@ RUNCTY no tiene un servidor propio. Usa **servicios de Google (Firebase)** como 
 - **Mapas desacoplados del proveedor**, para poder cambiarlo sin reescribir la app.
 - **Sin secretos en el repositorio:** las claves van en variables de entorno.
 
+## Desarrollo local
+
+Todo el desarrollo se hace contra los **emuladores de Firebase** con el proyecto `demo-runcty`. No se necesitan claves reales ni una cuenta de Firebase para trabajar en local.
+
+### Requisitos
+
+- Node.js 22 (ver `.nvmrc`).
+- Java 21 o superior (lo usan los emuladores de Firestore y Storage).
+- npm 10.
+
+### Estructura
+
+| Carpeta | Contenido |
+| --- | --- |
+| raíz | Configuración de Firebase (`firebase.json`, reglas, índices), script de datos semilla |
+| `functions/` | Cloud Functions (Gen 2, TypeScript) y tests de reglas de Firestore |
+
+Cada paquete se instala por separado (no se usan workspaces).
+
+### Instalación
+
+```bash
+npm install                    # raíz: firebase-tools y script de semilla
+npm --prefix functions install # Cloud Functions
+```
+
+### Emuladores y datos semilla
+
+```bash
+npm run functions:build # compila las functions antes de levantar el emulador
+npm run emulators       # Auth 9099 · Firestore 8080 · Functions 5001 · Storage 9199 · UI http://localhost:4000
+npm run seed            # en otra terminal: crea la ciudad Loja y el usuario administrador
+```
+
+Usuario administrador de prueba (solo emulador): `admin@runcty.dev` / `Admin123!`.
+
+Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda en `emulator-data/`, ignorado por git).
+
+### Tests
+
+```bash
+npm --prefix functions test           # tests unitarios de las functions
+npm --prefix functions run test:rules # tests de reglas de Firestore (levanta el emulador)
+```
+
 ## Equipo
 
 | Integrante | Rol |

@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Environment (keep only the examples)
+.env
+.env.*
+!.env.example
+
+# Build outputs
+lib/
+dist/
+.next/
+.expo/
+web-build/
+coverage/
+
+# Firebase
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+storage-debug.log
+ui-debug.log
+database-debug.log
+pubsub-debug.log
+.firebase/
+emulator-data/
+
+# Native credentials and signing
+google-services.json
+GoogleService-Info.plist
+*.keystore
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

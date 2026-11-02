@@ -1,0 +1,23 @@
+{
+  "name": "runcty",
+  "private": true,
+  "description": "RUNCTY: safer running routes. Root holds Firebase config and convenience scripts; each package installs on its own.",
+  "scripts": {
+    "install:all": "npm install && npm --prefix functions install && npm --prefix mobile install",
+    "emulators": "firebase emulators:start --project demo-runcty",
+    "emulators:persist": "firebase emulators:start --project demo-runcty --import=./emulator-data --export-on-exit",
+    "seed": "cross-env FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 GCLOUD_PROJECT=demo-runcty tsx scripts/seed-emulator.ts",
+    "functions:build": "npm --prefix functions run build",
+    "functions:test": "npm --prefix functions test",
+    "test:rules": "npm --prefix functions run test:rules",
+    "mobile:start": "npm --prefix mobile start",
+    "mobile:test": "npm --prefix mobile test",
+    "mobile:typecheck": "npm --prefix mobile run typecheck"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "firebase-admin": "^14.5.0",
+    "firebase-tools": "^15.34.2",
+    "tsx": "^4.23.15"
+  }
+}

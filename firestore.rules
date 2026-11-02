@@ -1,0 +1,58 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helpers ----------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Roles live only in the custom claim `role`, assigned by Cloud Functions.
+    function hasRole(r) {
+      return isSignedIn() && request.auth.token.role == r;
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    // ---------- Users ----------
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+
+      allow create: if isOwner(uid)
+        && !('role' in request.resource.data)
+        && request.resource.data.uid == request.auth.uid;
+
+      allow update: if isOwner(uid)
+        && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['role', 'uid', 'email', 'createdAt']);
+
+      // Private sub-documents (sport profile, preferences).
+      match /private/{docId} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // ---------- Catalogs ----------
+
+    match /cities/{cityId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /roles/{roleId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Everything else is denied by default (no matching rule).
+  }
+}
