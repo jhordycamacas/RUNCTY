@@ -4,12 +4,14 @@ import { ChangePasswordScreen } from '@/features/account/presentation/screens/Ch
 import { DeleteAccountScreen } from '@/features/account/presentation/screens/DeleteAccountScreen';
 import { EditPersonalDataScreen } from '@/features/account/presentation/screens/EditPersonalDataScreen';
 import { ProfileHomeScreen } from '@/features/account/presentation/screens/ProfileHomeScreen';
+import { PreferencesScreen } from '@/features/preferences/presentation/screens/PreferencesScreen';
 import { SportProfileScreen } from '@/features/sportProfile/presentation/screens/SportProfileScreen';
 
 export type ProfileStackParamList = {
   ProfileHome: undefined;
   EditPersonalData: undefined;
   SportProfile: undefined;
+  Preferences: undefined;
   ChangePassword: undefined;
   DeleteAccount: undefined;
 };
@@ -24,6 +26,7 @@ export function ProfileNavigator() {
           <ProfileHomeScreen
             onEditPersonalData={() => navigation.navigate('EditPersonalData')}
             onOpenSportProfile={() => navigation.navigate('SportProfile')}
+            onOpenPreferences={() => navigation.navigate('Preferences')}
             onChangePassword={() => navigation.navigate('ChangePassword')}
             onDeleteAccount={() => navigation.navigate('DeleteAccount')}
           />
@@ -33,6 +36,7 @@ export function ProfileNavigator() {
         {({ navigation }) => <EditPersonalDataScreen onDone={() => navigation.goBack()} />}
       </Stack.Screen>
       <Stack.Screen name="SportProfile" component={SportProfileScreen} options={{ title: 'Perfil deportivo' }} />
+      <Stack.Screen name="Preferences" component={PreferencesScreen} options={{ title: 'Preferencias' }} />
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: 'Cambiar contraseña' }} />
       <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{ title: 'Eliminar cuenta' }} />
     </Stack.Navigator>

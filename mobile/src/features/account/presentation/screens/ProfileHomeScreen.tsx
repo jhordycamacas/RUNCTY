@@ -11,6 +11,7 @@ import { useProfile } from '../hooks/useAccount';
 export interface ProfileHomeScreenProps {
   onEditPersonalData: () => void;
   onOpenSportProfile: () => void;
+  onOpenPreferences: () => void;
   onChangePassword: () => void;
   onDeleteAccount: () => void;
 }
@@ -31,6 +32,7 @@ function Row({ label, value }: { label: string; value: string }) {
 export function ProfileHomeScreen({
   onEditPersonalData,
   onOpenSportProfile,
+  onOpenPreferences,
   onChangePassword,
   onDeleteAccount,
 }: ProfileHomeScreenProps) {
@@ -67,6 +69,9 @@ export function ProfileHomeScreen({
       </View>
       <View style={gap}>
         <Button label="Perfil deportivo" variant="secondary" onPress={onOpenSportProfile} />
+      </View>
+      <View style={gap}>
+        <Button label="Preferencias" variant="secondary" onPress={onOpenPreferences} />
       </View>
       <View style={gap}>
         <Button label="Cambiar contraseña" variant="secondary" onPress={onChangePassword} />

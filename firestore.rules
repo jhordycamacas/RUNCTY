@@ -70,10 +70,12 @@ service cloud.firestore {
       // No client delete: the `deleteAccount` callable removes the account.
 
       // Private sub-documents (sport profile, preferences).
+      // Only the known sub-documents can be written, each with its schema.
       match /private/{docId} {
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid)
-          && (docId != 'sportProfile' || isValidSportProfile(request.resource.data));
+          && ((docId == 'sportProfile' && isValidSportProfile(request.resource.data))
+            || (docId == 'preferences' && isValidPreferences(request.resource.data)));
       }
     }
 
@@ -92,6 +94,25 @@ service cloud.firestore {
         && d.preferredDistanceKm is number
         && d.preferredDistanceKm >= 1
         && d.preferredDistanceKm <= 50
+        && d.updatedAt == request.time;
+    }
+
+    // RF-01-13..16. Mirrors the app's zod schema. Deleting the doc resets
+    // the preferences to the app defaults.
+    function isValidPreferences(d) {
+      return d.keys().hasAll(['language', 'fontScale', 'appearance', 'units', 'notifications', 'locationPrivacy', 'updatedAt'])
+        && d.keys().hasOnly(['language', 'fontScale', 'appearance', 'units', 'notifications', 'locationPrivacy', 'updatedAt'])
+        && d.language in ['es']
+        && d.fontScale in ['small', 'normal', 'large', 'xlarge']
+        && d.appearance in ['system', 'light', 'dark']
+        && d.units in ['metric', 'imperial']
+        && d.notifications is map
+        && d.notifications.keys().hasAll(['enabled', 'safetyAlerts', 'events'])
+        && d.notifications.keys().hasOnly(['enabled', 'safetyAlerts', 'events'])
+        && d.notifications.enabled is bool
+        && d.notifications.safetyAlerts is bool
+        && d.notifications.events is bool
+        && d.locationPrivacy in ['trustedContactsDuringSession', 'off']
         && d.updatedAt == request.time;
     }
 

@@ -7,7 +7,7 @@ import { Button } from '@/core/ui/Button';
 async function renderButton(props: Partial<ComponentProps<typeof Button>> = {}) {
   const onPress = jest.fn();
   await render(
-    <ThemeProvider scheme="light">
+    <ThemeProvider appearance="light">
       <Button label="Iniciar sesión" onPress={onPress} {...props} />
     </ThemeProvider>,
   );

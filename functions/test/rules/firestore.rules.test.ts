@@ -172,15 +172,80 @@ describe('users/{uid}', () => {
 });
 
 describe('users/{uid}/private/{doc}', () => {
-  it('lets the owner read and write private docs', async () => {
+  it('lets the owner read and write the known private docs', async () => {
     const ref = doc(alice(), 'users', ALICE, 'private', 'preferences');
-    await assertSucceeds(setDoc(ref, { darkMode: true }));
+    await assertSucceeds(setDoc(ref, validPreferences()));
     await assertSucceeds(getDoc(ref));
   });
 
   it('denies other users', async () => {
     await assertFails(getDoc(doc(bob(), 'users', ALICE, 'private', 'preferences')));
+    await assertFails(setDoc(doc(bob(), 'users', ALICE, 'private', 'preferences'), validPreferences()));
     await assertFails(setDoc(doc(bob(), 'users', ALICE, 'private', 'sportProfile'), validSportProfile()));
+  });
+
+  it('denies writing unknown private docs', async () => {
+    await assertFails(setDoc(doc(alice(), 'users', ALICE, 'private', 'anything'), { a: 1 }));
+  });
+});
+
+function validPreferences(overrides: Record<string, unknown> = {}) {
+  return {
+    language: 'es',
+    fontScale: 'normal',
+    appearance: 'system',
+    units: 'metric',
+    notifications: { enabled: true, safetyAlerts: true, events: false },
+    locationPrivacy: 'trustedContactsDuringSession',
+    updatedAt: serverTimestamp(),
+    ...overrides,
+  };
+}
+
+describe('users/{uid}/private/preferences', () => {
+  const ref = () => doc(alice(), 'users', ALICE, 'private', 'preferences');
+
+  it('lets the owner create, read, update and delete (reset) valid preferences', async () => {
+    await assertSucceeds(setDoc(ref(), validPreferences()));
+    await assertSucceeds(getDoc(ref()));
+    await assertSucceeds(
+      setDoc(ref(), validPreferences({ fontScale: 'xlarge', appearance: 'dark', units: 'imperial', locationPrivacy: 'off' })),
+    );
+    await assertSucceeds(deleteDoc(ref()));
+  });
+
+  it('denies another user deleting the preferences', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'private', 'preferences'), { language: 'es' });
+    });
+    await assertFails(deleteDoc(doc(bob(), 'users', ALICE, 'private', 'preferences')));
+  });
+
+  it('rejects values outside the enums', async () => {
+    await assertFails(setDoc(ref(), validPreferences({ language: 'en' })));
+    await assertFails(setDoc(ref(), validPreferences({ fontScale: 'huge' })));
+    await assertFails(setDoc(ref(), validPreferences({ fontScale: 1.3 })));
+    await assertFails(setDoc(ref(), validPreferences({ appearance: 'sepia' })));
+    await assertFails(setDoc(ref(), validPreferences({ units: 'nautical' })));
+    await assertFails(setDoc(ref(), validPreferences({ locationPrivacy: 'everyone' })));
+  });
+
+  it('rejects malformed notifications', async () => {
+    await assertFails(setDoc(ref(), validPreferences({ notifications: true })));
+    await assertFails(setDoc(ref(), validPreferences({ notifications: { enabled: true, safetyAlerts: true } })));
+    await assertFails(
+      setDoc(ref(), validPreferences({ notifications: { enabled: 'yes', safetyAlerts: true, events: true } })),
+    );
+    await assertFails(
+      setDoc(ref(), validPreferences({ notifications: { enabled: true, safetyAlerts: true, events: true, sms: true } })),
+    );
+  });
+
+  it('rejects missing fields, extra fields and client timestamps', async () => {
+    const { units: _omit, ...withoutUnits } = validPreferences();
+    await assertFails(setDoc(ref(), withoutUnits));
+    await assertFails(setDoc(ref(), validPreferences({ darkMode: true })));
+    await assertFails(setDoc(ref(), validPreferences({ updatedAt: 1 })));
   });
 });
 

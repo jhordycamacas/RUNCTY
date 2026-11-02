@@ -50,7 +50,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 | T2 | App móvil: Expo + TS, tema y paleta, init Firebase, React Query, navegación, componentes base, Jest | delegada | [x] |
 | T3 | Autenticación: registro, login, recuperar contraseña, guard; trigger que asigna rol `runner` | delegada | [x] |
 | T4 | Cuenta: actualizar datos, cambiar contraseña, eliminar cuenta (callable), perfil deportivo CRUD | delegada | [x] |
-| T5 | Preferencias CRUD + restablecer, aplicadas al tema (modo oscuro, tamaño de letra) | delegada | [ ] |
+| T5 | Preferencias CRUD + restablecer, aplicadas al tema (modo oscuro, tamaño de letra) | delegada | [x] |
 | T6 | Panel admin Next.js: login admin, usuarios con filtros, CRUD de roles, asignación de rol | delegada | [ ] |
 | T7 | Ciudades y zonas: CRUD en admin, selector en registro, borrado protegido | delegada | [ ] |
 
@@ -108,7 +108,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - `npm --prefix mobile run lint`: sin errores.
 - `npx expo export --platform android`: bundle generado (`dist/` borrado).
 
-### T4 — Cuenta y perfil deportivo (commit `feat(account): add profile editing, account deletion and sport profile`)
+### T4 — Cuenta y perfil deportivo (commit `68a9b32` `feat(account): add profile editing, account deletion and sport profile`)
 
 - Ruta: delegada (writer único).
 - Functions: callable `deleteAccount` (Gen 2 `onCall`). Lógica pura `deleteUserAccount` (borra `users/{uid}` con `recursiveDelete`, después el usuario de Auth; idempotente si Auth ya no existe) e `isRecentSignIn` (exige `auth_time` de hace ≤ 5 min; la app re-autentica antes de llamar).
@@ -127,6 +127,24 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - `npx expo export --platform android`: bundle generado (`dist/` borrado).
 - Sin probar de punta a punta en dispositivo/emulador con el emulador de Functions (solo tests unitarios, de reglas y bundle).
 
+### T5 — Preferencias (commit `feat(preferences): add user preferences with theme and font scale`)
+
+- Ruta: delegada (writer único).
+- Doc `users/{uid}/private/preferences` con claves exactas: `language` (`es`), `fontScale` (`small|normal|large|xlarge` → 0,9/1/1,15/1,3), `appearance` (`system|light|dark`), `units` (`metric|imperial`), `notifications` {`enabled`, `safetyAlerts`, `events`}, `locationPrivacy` (`trustedContactsDuringSession|off`), `updatedAt` del servidor.
+- Valores predeterminados en el dominio (`DEFAULT_PREFERENCES`): español, letra normal, apariencia del sistema, km, notificaciones activas, ubicación solo a contactos de confianza durante el entrenamiento. Lectura tolerante (`parsePreferences`): campos faltantes o inválidos toman el valor predeterminado. Sin doc → predeterminados sin escribir; el primer guardado crea el doc; restablecer (RF-01-16) borra el doc tras confirmar.
+- Reglas: `private/{docId}` solo acepta escrituras de `sportProfile` y `preferences` (cada uno con su esquema); preferencias con enums, mapa de notificaciones exacto y `updatedAt == request.time`. Lectura y borrado solo del dueño.
+- Móvil: feature `preferences` (domain, use cases, repositorio Firestore, caché AsyncStorage por uid `runcty:preferences:{uid}`, `PreferencesThemeProvider`, `PreferencesScreen`). El tema se aplica al abrir la app: primero la caché local, luego Firestore. Sin sesión: apariencia del sistema y letra normal. `ThemeProvider` recibe `appearance` (`resolveColorScheme`, `createTheme`). Átomo nuevo `SwitchRow`; `ChoiceGroup` admite opciones deshabilitadas ("English (próximamente)"). `formatDistance(km, units)` listo para sprints siguientes. Entrada "Preferencias" en Perfil.
+- Borrado de cuenta: el callable ya hace `recursiveDelete` de `users/{uid}` (incluye `private/preferences`); sin cambios.
+- Test-first:
+  - reglas: casos nuevos de preferencias → RED (4 fallos de 34) → GREEN.
+  - móvil: `preferences/domain/preferences.test.ts`, `preferences/domain/units.test.ts`, `preferences/application/preferencesUseCases.test.ts`, `core/theme/resolveTheme.test.ts`, `core/ui/SwitchRow.test.tsx` → RED (módulos inexistentes) → GREEN. El caso de opción deshabilitada en `choices.test.tsx` se escribió después del cambio (sin RED observado).
+- `npm --prefix functions run test:rules`: 34/34 OK.
+- `npm --prefix mobile run typecheck`: OK.
+- `npm --prefix mobile test`: 124/124 OK.
+- `npm --prefix mobile run lint`: sin errores.
+- `npx expo export --platform android`: bundle generado (`dist/` borrado).
+- Sin probar en dispositivo/emulador (solo tests unitarios, de reglas y bundle). Las notificaciones solo se guardan (no hay push todavía).
+
 ## Siguiente paso
 
-T5 (preferencias CRUD + restablecer, aplicadas al tema).
+T6 + T7 (panel admin con usuarios y roles; ciudades y zonas).

@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/core/theme';
 import { Checkbox } from '@/core/ui/Checkbox';
 import { ChoiceGroup } from '@/core/ui/ChoiceGroup';
 
-const withTheme = (ui: ReactElement) => render(<ThemeProvider scheme="light">{ui}</ThemeProvider>);
+const withTheme = (ui: ReactElement) => render(<ThemeProvider appearance="light">{ui}</ThemeProvider>);
 
 describe('Checkbox', () => {
   it('exposes its checked state and toggles', async () => {
@@ -41,5 +41,21 @@ describe('ChoiceGroup', () => {
     expect(onChange).toHaveBeenCalledWith([]);
     await fireEvent.press(screen.getByRole('checkbox', { name: 'Dos' }));
     expect(onChange).toHaveBeenCalledWith(['a', 'b']);
+  });
+
+  it('shows a disabled option that cannot be selected', async () => {
+    const onChange = jest.fn();
+    await withTheme(
+      <ChoiceGroup
+        label="Idioma"
+        options={[{ value: 'es', label: 'Español' }, { value: 'en', label: 'English', disabled: true }]}
+        value={['es']}
+        onChange={onChange}
+      />,
+    );
+    const english = screen.getByRole('radio', { name: 'English' });
+    expect(english).toBeDisabled();
+    await fireEvent.press(english);
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

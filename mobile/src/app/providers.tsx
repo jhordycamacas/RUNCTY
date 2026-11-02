@@ -3,16 +3,17 @@ import type { ReactNode } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { queryClient } from '@/core/query/queryClient';
-import { ThemeProvider } from '@/core/theme';
 import { SessionProvider } from '@/features/auth';
+import { PreferencesThemeProvider } from '@/features/preferences';
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <SessionProvider>{children}</SessionProvider>
-        </ThemeProvider>
+        <SessionProvider>
+          {/* Theme follows the signed-in user's preferences (RF-01-14). */}
+          <PreferencesThemeProvider>{children}</PreferencesThemeProvider>
+        </SessionProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
   );

@@ -7,6 +7,8 @@ import { AppText } from './AppText';
 export interface ChoiceOption {
   value: string;
   label: string;
+  /** Shown but not selectable (e.g. an upcoming option). */
+  disabled?: boolean;
 }
 
 export interface ChoiceGroupProps {
@@ -44,12 +46,14 @@ export function ChoiceGroup({ label, options, value, onChange, multiple = false,
       <View style={styles.wrap}>
         {options.map((option) => {
           const selected = value.includes(option.value);
+          const disabled = Boolean(option.disabled);
           return (
             <Pressable
               key={option.value}
               accessibilityRole={multiple ? 'checkbox' : 'radio'}
               accessibilityLabel={option.label}
-              accessibilityState={{ checked: selected }}
+              accessibilityState={{ checked: selected, disabled }}
+              disabled={disabled}
               onPress={() => toggle(option.value)}
               style={[
                 styles.chip,
@@ -60,6 +64,7 @@ export function ChoiceGroup({ label, options, value, onChange, multiple = false,
                   paddingHorizontal: spacing.lg,
                   marginRight: spacing.sm,
                   marginBottom: spacing.sm,
+                  opacity: disabled ? 0.6 : 1,
                 },
               ]}
             >

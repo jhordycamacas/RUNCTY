@@ -6,4 +6,5 @@ export { ChoiceGroup, type ChoiceGroupProps, type ChoiceOption } from './ChoiceG
 export { FormMessage } from './FormMessage';
 export { LoadingView } from './LoadingView';
 export { Screen, type ScreenProps } from './Screen';
+export { SwitchRow, type SwitchRowProps } from './SwitchRow';
 export { TextField, type TextFieldProps } from './TextField';
