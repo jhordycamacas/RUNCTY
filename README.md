@@ -118,13 +118,19 @@ Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda 
 
 ### App móvil
 
-1. Copia `mobile/.env.example` a `mobile/.env`. Con los emuladores no hace falta cambiar nada.
-2. Si pruebas en un teléfono físico, pon la IP de tu computador en la red local en `EXPO_PUBLIC_EMULATOR_HOST` (por ejemplo `192.168.1.20`). En el emulador de Android se usa `10.0.2.2` automáticamente.
+La app usa módulos nativos, así que se instala como build de desarrollo y no con Expo Go. Para instalarla en un celular Android por USB, sigue el manual [docs/manual-instalacion-android.md](docs/manual-instalacion-android.md). El resumen es este:
+
+1. Copia `mobile/.env.example` a `mobile/.env` y pon `EXPO_PUBLIC_USE_EMULATORS=true` y `EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1`.
+2. Conecta el celular y redirige los puertos con `adb reverse` (8081, 9099, 8080, 5001 y 9199).
 3. Con los emuladores levantados:
 
 ```bash
-npm run mobile:start # abre Expo; escanea el QR con Expo Go o pulsa "a" para Android
+cd mobile
+npm run android   # compila, instala y abre la app (la primera vez tarda varios minutos)
+npm start         # uso diario, cuando la app ya está instalada
 ```
+
+> **Windows:** clona el repo en una ruta corta (por ejemplo `D:\RUNCTY`). Con rutas largas, la compilación nativa falla por el límite de 260 caracteres de Windows. Ver la sección 10 del manual.
 
 ### Panel de administración
 
@@ -142,6 +148,7 @@ Solo pueden entrar las cuentas con el permiso `admin.access`; a un corredor se l
 
 - **Usuarios** (`users.read`): búsqueda por nombres y apellidos (inicio del texto, sin importar mayúsculas ni tildes), correo, identificación, fecha de nacimiento y ciudad, con paginación. Con `roles.manage` se cambia el rol de cada usuario.
 - **Roles** (`roles.manage`): crear, editar permisos y eliminar roles. Los roles del sistema (`runner`, `admin`, `club_rep`) no se eliminan, `admin` conserva todos los permisos y solo se elimina un rol sin usuarios asignados.
+- **Rutas** (`routes.manage`): crear, editar y eliminar rutas (ciudad, puntos de inicio y fin, distancia, desnivel, superficie, dificultad, activa). En el detalle de cada ruta se gestionan los tramos (coordenadas, orden), las franjas horarias (sin solapamiento) y los factores de riesgo de cada tramo. Todo pasa por Cloud Functions callables, y cada cambio recalcula el índice de seguridad. El detalle también muestra el nivel de la ruta por franja con los factores que lo explican.
 - **Ciudades y zonas** (`cities.manage`): crear y editar ciudades y sus zonas (nombre, provincia, latitud y longitud, cobertura activa, planificada o suspendida). Se guardan directo en Firestore y las reglas validan los campos; una zona pertenece a una ciudad existente. Para eliminar se usa la función `deleteCity`, que rechaza la ciudad o zona si tiene rutas asociadas o, en el caso de una ciudad, si aún tiene zonas. El registro de la app móvil lista solo las ciudades activas (sin zonas).
 
 ### Cuentas y roles
@@ -173,8 +180,8 @@ npm run admin:build                   # build de producción del panel
 | Sprint | Épicas | Estado |
 | --- | --- | --- |
 | Base | Configuración de Firebase, reglas, emuladores, Cloud Functions, app móvil y panel | ✅ Hecho |
-| 1 | EP-01 Usuarios, EP-25 Autenticación, EP-26 Preferencias, EP-02 Roles y permisos, EP-27 Administración de usuarios, EP-04 Ciudades y zonas | ✅ Hecho (pendiente prueba en dispositivo) |
-| 2 | EP-05 Catálogo de rutas, EP-07 Evaluación de seguridad | ⏳ Pendiente |
+| 1 | EP-01 Usuarios, EP-25 Autenticación, EP-26 Preferencias, EP-02 Roles y permisos, EP-27 Administración de usuarios, EP-04 Ciudades y zonas | ✅ Hecho |
+| 2 | EP-05 Catálogo de rutas, EP-07 Evaluación de seguridad (franjas, factores, índice) | ✅ Hecho (rama `feat/design-system-sprint2`) |
 | 3 | EP-06 Puntos de apoyo, EP-07 Alertas de zona, EP-08 Incidentes, EP-09 Rutas seguras | ⏳ Pendiente |
 | 4 | EP-03 Contactos, EP-10 Favoritas, EP-11 Rutas de clubes, EP-12 Entrenamientos, EP-15 Pánico, EP-16 Ubicación compartida | ⏳ Pendiente |
 | 5 | EP-12 a EP-24 (resto) | ⏳ Pendiente |
@@ -187,23 +194,30 @@ npm run admin:build                   # build de producción del panel
   - edición de datos personales y cambio de contraseña;
   - eliminación de la cuenta;
   - perfil deportivo;
-  - preferencias de tamaño de letra, modo oscuro, unidades, notificaciones y privacidad de ubicación.
+  - preferencias de tamaño de letra, modo oscuro, unidades, notificaciones y privacidad de ubicación;
+  - diseño propio con la fuente Inter, íconos y pestañas Inicio, Rutas y Perfil;
+  - inicio con la próxima franja de entrenamiento y las rutas recomendadas para ella;
+  - catálogo de rutas de la ciudad del corredor, con filtros por franja, distancia y dificultad;
+  - detalle de cada ruta con su nivel de seguridad (Alto, Medio o Bajo) por franja, los factores que lo explican y los tramos.
 - **Panel de administración:**
+  - gestión de rutas, tramos, franjas y factores de riesgo;
   - búsqueda de usuarios con filtros;
   - roles con permisos (crear, editar, asignar y eliminar);
   - ciudades y zonas, con borrado protegido si tienen rutas o zonas.
 - **Servidor:**
   - asignación automática del rol "corredor" al registrarse;
   - roles y permisos mediante custom claims;
-  - reglas de Firestore que niegan todo por defecto.
+  - reglas de Firestore que niegan todo por defecto;
+  - índice de seguridad por tramo y franja (100 puntos menos los factores de riesgo; la ruta toma su peor tramo), que se recalcula con cada cambio.
 
 ### Pendiente
 
-- Probar los flujos en un dispositivo y en el navegador.
+- Probar en el navegador la gestión de rutas del panel.
+- Mapas (hoy las coordenadas se cargan a mano).
 - Conectar el proyecto real de Firebase (plan Blaze) para desplegar.
 - Decisiones de producto: consentimiento parental de menores, texto legal LOPDP y valores por defecto de las notificaciones (ver [CONTEXTO.md](CONTEXTO.md)).
 
-El detalle de las tareas y su evidencia está en [odd/tasks/foundation-sprint1.md](odd/tasks/foundation-sprint1.md).
+El detalle de las tareas y su evidencia está en [odd/tasks/foundation-sprint1.md](odd/tasks/foundation-sprint1.md) y [odd/tasks/design-system-sprint2.md](odd/tasks/design-system-sprint2.md).
 
 ## Equipo
 

@@ -15,7 +15,7 @@
 Reto académico de la **UTPL** (materias Fundamentos de Ingeniería de Software e Ingeniería Web). El club **Gacelas Running Team (Loja, Ecuador)** planteó un problema y varios grupos de estudiantes compiten por proponer y desarrollar la mejor solución. Nuestro grupo quiere ganar el reto.
 
 - Inicio: semana del 12 al 18 de octubre de 2026 (levantamiento de requisitos).
-- Fase actual (2026-11-02): Sprint 1 implementado (usuarios, autenticación, preferencias, roles, administración de usuarios, ciudades y zonas). Sigue el Sprint 2: catálogo de rutas y evaluación de seguridad.
+- Fase actual (2026-11-02): Sprints 1 y 2 implementados en la rama `feat/design-system-sprint2`. El Sprint 1 cubre usuarios, autenticación, preferencias, roles, administración de usuarios, ciudades y zonas. El Sprint 2 cubre el catálogo de rutas y la evaluación de seguridad por franja. La app también tiene un sistema de diseño nuevo. Sigue el Sprint 3: puntos de apoyo, alertas de zona, incidentes y generación de rutas seguras.
 - Docentes tutores: Ing. Segundo Raymundo e Ing. Jorge Landacay.
 
 ## 2. Problema
@@ -209,7 +209,8 @@ Las Cloud Functions requieren el **plan Blaze** de Firebase (pago por uso, con t
 
 1. ~~**Backend**~~: resuelto en la sección 9 (Firebase BaaS + Cloud Functions).
 2. **Alcance del MVP:** el Acta difiere el pánico, los contactos y las alertas; la Visión y el Excel los marcan como "Debe". Hay que definir qué entra en el primer sprint y qué se muestra el día de la presentación.
-3. **Generar o recomendar rutas:** falta decidir entre ordenar un catálogo predefinido y generar rutas nuevas. Tampoco están definidos el algoritmo ni la ponderación del índice de seguridad.
+3. **Generar o recomendar rutas:** falta decidir entre ordenar un catálogo predefinido y generar rutas nuevas (RF-09, Sprint 3). Por ahora el catálogo se ordena por nivel de seguridad.
+   - ~~Índice de seguridad~~: resuelto el 2026-11-02. Cada tramo parte de 100 puntos por franja. Cada factor de riesgo activo en esa franja resta según su severidad: baja −10, media −20, alta −35. Los niveles son **Alto ≥70, Medio 40–69 y Bajo <40**. La ruta toma el nivel de su **peor tramo** y siempre se muestran los factores que lo explican. El cálculo tiene un punto de extensión (`extraPenalties`) para sumar los reportes comunitarios (RF-17). El código está en `functions/src/routes/domain/safety.ts`.
 4. **Canal de la alerta de pánico:** push, SMS o WhatsApp.
 5. **Menores de edad:** implica consentimiento parental según la LOPDP.
 6. **Fuentes de datos de seguridad:** falta definir quién carga los datos y con qué periodicidad (administrador de Gacelas, clubes, reportes comunitarios).
@@ -271,8 +272,12 @@ La semana 8 no tiene actividad y la semana 11 queda fuera de los sprints.
 - [x] Estructura inicial del proyecto (app móvil, panel admin, Cloud Functions, reglas, emuladores).
 - [x] Sprint 1 implementado y con tests: EP-01, EP-25, EP-26, EP-02, EP-27 y EP-04. El detalle está en `odd/tasks/foundation-sprint1.md`.
 - [x] Manual de instalación en Android por USB: `docs/manual-instalacion-android.md`.
-- [ ] Probar el Sprint 1 en un dispositivo y en el navegador.
+- [x] Sistema de diseño en la app (fuente Inter, íconos, componentes) y logo de RUNCTY como ícono de la app.
+- [x] Sprint 2: catálogo de rutas (EP-05) y evaluación de seguridad (EP-07, RF-07-1 a RF-07-11). Hay 5 rutas de ejemplo de Loja en el seed. El detalle está en `odd/tasks/design-system-sprint2.md`.
+- [x] App instalada y probada en un Infinix X678B (Inicio con el diseño nuevo).
+- [ ] Probar en el dispositivo y en el navegador el resto de los flujos (rutas en la app, gestión de rutas en el panel).
 - [ ] Importar el backlog a Jira.
-- [ ] Diseño de UI/UX (validar la paleta con el cliente).
+- [ ] Validar el diseño y la paleta con el cliente.
 - [ ] Crear el proyecto real de Firebase (plan Blaze) y cargar las claves en `.env`.
-- [ ] Sprint 2: catálogo de rutas (EP-05) y evaluación de seguridad (EP-07).
+- [ ] Mapas: integrar un proveedor detrás del puerto `MapProvider` (pospuesto; hoy las coordenadas se cargan a mano).
+- [ ] Sprint 3: puntos de apoyo (EP-06), alertas de zona (EP-07), incidentes (EP-08) y generación de rutas seguras (EP-09).
