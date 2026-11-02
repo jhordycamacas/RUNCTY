@@ -181,6 +181,38 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ---------- Routes (RF-05, RF-07) ----------
+
+    // Runners see only active routes; admins with `routes.manage` see all.
+    // Every write goes through the route callables, which validate, keep the
+    // segment order and recalculate the safety index atomically.
+    function canReadRoute(routeId) {
+      return hasPerm('routes.manage')
+        || (isSignedIn()
+          && get(/databases/$(database)/documents/routes/$(routeId)).data.get('active', false) == true);
+    }
+
+    match /routes/{routeId} {
+      allow read: if isSignedIn()
+        && (resource.data.get('active', false) == true || hasPerm('routes.manage'));
+      allow write: if false;
+
+      match /segments/{segmentId} {
+        allow read: if canReadRoute(routeId);
+        allow write: if false;
+
+        match /riskFactors/{factorId} {
+          allow read: if canReadRoute(routeId);
+          allow write: if false;
+        }
+      }
+
+      match /timeSlots/{slotId} {
+        allow read: if canReadRoute(routeId);
+        allow write: if false;
+      }
+    }
+
     // Everything else is denied by default (no matching rule).
   }
 }

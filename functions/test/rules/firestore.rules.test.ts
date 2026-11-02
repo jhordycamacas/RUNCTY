@@ -418,6 +418,74 @@ describe('permission claims (perms)', () => {
   });
 });
 
+describe('routes/{id} and subcollections', () => {
+  const routeManager = () =>
+    testEnv.authenticatedContext('routes-1', { role: 'editor', perms: ['admin.access', 'routes.manage'] }).firestore();
+  const SUBDOCS = [
+    ['segments', 's1'],
+    ['timeSlots', 't1'],
+    ['segments', 's1', 'riskFactors', 'f1'],
+  ] as const;
+
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      for (const [id, active] of [
+        ['open', true],
+        ['hidden', false],
+      ] as const) {
+        await setDoc(doc(db, 'routes', id), { name: id, cityId: 'loja', active, segmentCount: 1, safety: {} });
+        await setDoc(doc(db, 'routes', id, 'segments', 's1'), { name: 'S1', order: 0, coordinates: [], lengthM: 0, safety: {} });
+        await setDoc(doc(db, 'routes', id, 'timeSlots', 't1'), { startTime: '06:00', endTime: '09:00' });
+        await setDoc(doc(db, 'routes', id, 'segments', 's1', 'riskFactors', 'f1'), {
+          type: 'traffic',
+          severity: 'low',
+          description: 'Busy',
+        });
+      }
+    });
+  });
+
+  it('lets signed-in runners read active routes and their subcollections', async () => {
+    await assertSucceeds(getDoc(doc(alice(), 'routes', 'open')));
+    for (const path of SUBDOCS) {
+      await assertSucceeds(getDoc(doc(alice(), 'routes', 'open', ...path)));
+    }
+  });
+
+  it('hides inactive routes and their subcollections from runners', async () => {
+    await assertFails(getDoc(doc(alice(), 'routes', 'hidden')));
+    for (const path of SUBDOCS) {
+      await assertFails(getDoc(doc(alice(), 'routes', 'hidden', ...path)));
+    }
+  });
+
+  it('denies anonymous visitors', async () => {
+    await assertFails(getDoc(doc(anon(), 'routes', 'open')));
+    await assertFails(getDoc(doc(anon(), 'routes', 'open', 'segments', 's1')));
+  });
+
+  it('lets routes.manage (and admins) read inactive routes', async () => {
+    await assertSucceeds(getDoc(doc(routeManager(), 'routes', 'hidden')));
+    await assertSucceeds(getDoc(doc(admin(), 'routes', 'hidden')));
+    for (const path of SUBDOCS) {
+      await assertSucceeds(getDoc(doc(routeManager(), 'routes', 'hidden', ...path)));
+    }
+  });
+
+  it('denies every client write, even with routes.manage (the route callables write them)', async () => {
+    for (const db of [alice(), routeManager(), admin()]) {
+      await assertFails(setDoc(doc(db, 'routes', 'new'), { name: 'X', cityId: 'loja', active: true }));
+      await assertFails(updateDoc(doc(db, 'routes', 'open'), { name: 'Y' }));
+      await assertFails(deleteDoc(doc(db, 'routes', 'open')));
+      for (const path of SUBDOCS) {
+        await assertFails(setDoc(doc(db, 'routes', 'open', ...path), { name: 'X' }));
+        await assertFails(deleteDoc(doc(db, 'routes', 'open', ...path)));
+      }
+    }
+  });
+});
+
 describe('default deny', () => {
   it('denies unknown collections even to admins', async () => {
     await assertFails(getDoc(doc(admin(), 'anything', 'x')));
