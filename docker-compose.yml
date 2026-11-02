@@ -1,0 +1,14 @@
+# Local admin panel in Docker: `docker compose up -d --build admin` → http://localhost:3100
+# It talks to the Firebase emulators running on the host (`npm run emulators`).
+services:
+  admin:
+    build:
+      context: ./admin
+      args:
+        NEXT_PUBLIC_USE_EMULATORS: "true"
+        NEXT_PUBLIC_EMULATOR_HOST: 127.0.0.1
+    image: runcty-admin
+    container_name: runcty-admin
+    ports:
+      - "3100:3000"
+    restart: unless-stopped

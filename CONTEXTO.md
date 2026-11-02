@@ -6,6 +6,7 @@
 ## Reglas de trabajo en el repositorio
 
 - **Autoría:** todo commit y push debe aparecer únicamente a nombre del usuario `jhordycamacas`. Nunca agregar `Co-Authored-By`, ni mencionar a Claude o Anthropic en commits, PRs o archivos.
+- **NO CÓDIGO ZOMBIE (regla obligatoria):** no se deja en el proyecto código que no se usa. Si una función, componente, archivo, export, dependencia, script o prueba ya no sirve para nada, se **elimina** en el mismo cambio que la deja sin uso. No se comenta "por si acaso" ni se deja desactivado. Git guarda el historial si hace falta recuperarlo. Antes de cerrar cada tarea, se revisa que no queden exports sin usar ni archivos huérfanos (por ejemplo con `npx knip` en cada paquete).
 - Commits con formato Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`...).
 - Repositorio: https://github.com/jhordycamacas/RUNCTY (clon local: `D:\RUNCTY`).
 - **Ruta del clon local (2026-11-02):** el repo se clonó de nuevo en `D:\RUNCTY` y reemplaza al anterior, `D:\Proyecto5to\RunCity\RUNCTY`. En Windows, la compilación nativa de Android falla si la ruta es larga (`Filename longer than 260 characters`), porque la versión de ninja del SDK (1.10.2) no admite rutas largas. La ruta de la carpeta `mobile/` no debe superar unos 25 caracteres, y ni `subst` ni `LongPathsEnabled` lo resuelven. Además, el plugin `mobile/plugins/with-short-cxx-dir.js` mueve la carpeta temporal de CMake a `<unidad>:\.rcx` en Windows. Con las dos medidas, la app compila e instala en un Infinix X678B con `npm run android`. La memoria y el historial del asistente se copiaron de la clave de proyecto `D--Proyecto5to-RunCity-RUNCTY` a `D--RUNCTY`, así que se trabaja abriendo la sesión en `D:\RUNCTY`. El detalle está en `docs/manual-instalacion-android.md`.
@@ -288,6 +289,7 @@ La semana 8 no tiene actividad y la semana 11 queda fuera de los sprints.
 - Repo en `D:\RUNCTY` (ruta corta obligatoria en Windows; ver sección "Reglas de trabajo").
 - Emuladores: `npm run functions:build`, luego `npm run emulators`, y en otra terminal `npm run seed`. El seed crea Loja, los roles, el admin (`admin@runcty.dev` / `Admin123!`) y 5 rutas de ejemplo.
 - Celular por USB: `adb reverse` de los puertos 8081, 9099, 8080, 5001 y 9199. Después, desde `mobile/`, `npm run android` (o `npm start` si la app ya está instalada). Detalle en `docs/manual-instalacion-android.md`.
+- Panel admin en Docker: `docker compose up -d --build admin`, en http://localhost:3100 (usa los emuladores del host). Sin Docker: `npm run admin:dev`, en http://localhost:3000.
 - Si se reinician los emuladores, los usuarios se borran. La app cierra sola una sesión vieja; hay que volver a iniciar sesión.
 
 ### Plan para la demo (Firebase real)
