@@ -7,7 +7,8 @@
 
 - **Autoría:** todo commit y push debe aparecer únicamente a nombre del usuario `jhordycamacas`. Nunca agregar `Co-Authored-By`, ni mencionar a Claude o Anthropic en commits, PRs o archivos.
 - Commits con formato Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`...).
-- Repositorio: https://github.com/jhordycamacas/RUNCTY (clon local: `D:\Proyecto5to\RunCity\RUNCTY`).
+- Repositorio: https://github.com/jhordycamacas/RUNCTY (clon local: `D:\RUNCTY`).
+- **Ruta del clon local (2026-11-02):** el repo se clonó de nuevo en `D:\RUNCTY` y reemplaza al anterior, `D:\Proyecto5to\RunCity\RUNCTY`. En Windows, la compilación nativa de Android falla si la ruta es larga (`Filename longer than 260 characters`), porque la versión de ninja del SDK (1.10.2) no admite rutas largas. La ruta de la carpeta `mobile/` no debe superar unos 25 caracteres, y ni `subst` ni `LongPathsEnabled` lo resuelven. Además, el plugin `mobile/plugins/with-short-cxx-dir.js` mueve la carpeta temporal de CMake a `<unidad>:\.rcx` en Windows. Con las dos medidas, la app compila e instala en un Infinix X678B con `npm run android`. La memoria y el historial del asistente se copiaron de la clave de proyecto `D--Proyecto5to-RunCity-RUNCTY` a `D--RUNCTY`, así que se trabaja abriendo la sesión en `D:\RUNCTY`. El detalle está en `docs/manual-instalacion-android.md`.
 
 ## 1. Qué es
 
@@ -269,6 +270,7 @@ La semana 8 no tiene actividad y la semana 11 queda fuera de los sprints.
 - [x] Backlog corregido según el docente (sección 11).
 - [x] Estructura inicial del proyecto (app móvil, panel admin, Cloud Functions, reglas, emuladores).
 - [x] Sprint 1 implementado y con tests: EP-01, EP-25, EP-26, EP-02, EP-27 y EP-04. El detalle está en `odd/tasks/foundation-sprint1.md`.
+- [x] Manual de instalación en Android por USB: `docs/manual-instalacion-android.md`.
 - [ ] Probar el Sprint 1 en un dispositivo y en el navegador.
 - [ ] Importar el backlog a Jira.
 - [ ] Diseño de UI/UX (validar la paleta con el cliente).
