@@ -15,6 +15,7 @@ const NAV: { href: string; label: string; permission: Permission }[] = [
   { href: '/usuarios', label: 'Usuarios', permission: 'users.read' },
   { href: '/roles', label: 'Roles', permission: 'roles.manage' },
   { href: '/ciudades', label: 'Ciudades y zonas', permission: 'cities.manage' },
+  { href: '/rutas', label: 'Rutas', permission: 'routes.manage' },
 ];
 
 /** Protected layout: requires a session with admin.access, then shows the sidebar. */

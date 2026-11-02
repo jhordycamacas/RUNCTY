@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 
 import { Button } from './Button';
 
@@ -17,6 +17,7 @@ interface ConfirmDialogProps {
 /** Accessible confirmation built on the native <dialog> (focus trap and Esc). */
 export function ConfirmDialog({ open, title, children, confirmLabel, loading, onConfirm, onCancel }: ConfirmDialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     const dialog = ref.current;
@@ -28,14 +29,14 @@ export function ConfirmDialog({ open, title, children, confirmLabel, loading, on
   return (
     <dialog
       ref={ref}
-      aria-labelledby="confirm-title"
+      aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
         onCancel();
       }}
       className="m-auto w-full max-w-md rounded-lg border border-line p-6 backdrop:bg-black/40"
     >
-      <h2 id="confirm-title" className="text-lg font-bold text-ink">
+      <h2 id={titleId} className="text-lg font-bold text-ink">
         {title}
       </h2>
       <div className="mt-3 text-sm text-ink">{children}</div>

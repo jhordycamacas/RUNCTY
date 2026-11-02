@@ -58,4 +58,12 @@ export const COLLECTIONS = {
   users: 'users',
   roles: 'roles',
   cities: 'cities',
+  routes: 'routes',
+} as const;
+
+/** Subcollections of `routes/{id}` (risk factors hang from each segment). */
+export const ROUTE_SUBCOLLECTIONS = {
+  segments: 'segments',
+  timeSlots: 'timeSlots',
+  riskFactors: 'riskFactors',
 } as const;
