@@ -129,9 +129,49 @@ service cloud.firestore {
 
     // Public catalog without personal data: the sign-up form lists the
     // active cities before the user has an account.
+    // RF-04: written from the admin panel with `cities.manage`. Deletion goes
+    // through the `deleteCity` callable, which rejects cities with routes or
+    // zones (RF-04-4).
     match /cities/{cityId} {
       allow read: if true;
-      allow write: if isAdmin();
+
+      allow create: if hasPerm('cities.manage')
+        && isValidCity(request.resource.data, cityId)
+        && request.resource.data.createdAt == request.time;
+
+      // type and createdAt are immutable (a city with zones cannot become a zone).
+      allow update: if hasPerm('cities.manage')
+        && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['name', 'province', 'country', 'location', 'coverage', 'parentCityId', 'updatedAt'])
+        && request.resource.data.type == resource.data.get('type', 'city')
+        && isValidCity(request.resource.data, cityId);
+
+      allow delete: if false;
+    }
+
+    function isValidCity(d, cityId) {
+      return d.keys().hasAll(['name', 'province', 'country', 'type', 'location', 'coverage', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['name', 'province', 'country', 'type', 'parentCityId', 'location', 'coverage', 'createdAt', 'updatedAt'])
+        && isNonEmptyString(d.name, 80)
+        && isNonEmptyString(d.province, 80)
+        && d.country == 'EC'
+        && d.coverage in ['active', 'planned', 'suspended']
+        && d.location is map
+        && d.location.keys().hasAll(['lat', 'lng'])
+        && d.location.keys().hasOnly(['lat', 'lng'])
+        && d.location.lat is number && d.location.lat >= -90 && d.location.lat <= 90
+        && d.location.lng is number && d.location.lng >= -180 && d.location.lng <= 180
+        && d.updatedAt == request.time
+        && ((d.type == 'city' && !('parentCityId' in d))
+          || (d.type == 'zone' && isValidParentCity(d.parentCityId, cityId)));
+    }
+
+    // A zone belongs to an existing city (not to another zone).
+    function isValidParentCity(parentId, cityId) {
+      return isNonEmptyString(parentId, 64)
+        && parentId != cityId
+        && exists(/databases/$(database)/documents/cities/$(parentId))
+        && get(/databases/$(database)/documents/cities/$(parentId)).data.get('type', 'city') == 'city';
     }
 
     // RF-02: readable by signed-in users; written only by the role callables

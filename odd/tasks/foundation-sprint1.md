@@ -52,7 +52,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 | T4 | Cuenta: actualizar datos, cambiar contraseña, eliminar cuenta (callable), perfil deportivo CRUD | delegada | [x] |
 | T5 | Preferencias CRUD + restablecer, aplicadas al tema (modo oscuro, tamaño de letra) | delegada | [x] |
 | T6 | Panel admin Next.js: login admin, usuarios con filtros, CRUD de roles, asignación de rol | delegada | [x] |
-| T7 | Ciudades y zonas: CRUD en admin, selector en registro, borrado protegido | delegada | [ ] |
+| T7 | Ciudades y zonas: CRUD en admin, selector en registro, borrado protegido | delegada | [x] |
 
 ## Criterios de aceptación
 
@@ -145,7 +145,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - `npx expo export --platform android`: bundle generado (`dist/` borrado).
 - Sin probar en dispositivo/emulador (solo tests unitarios, de reglas y bundle). Las notificaciones solo se guardan (no hay push todavía).
 
-### T6 — Panel admin, usuarios y roles (commit `feat(admin): add admin panel with users and roles management`)
+### T6 — Panel admin, usuarios y roles (commit `9580679` `feat(admin): add admin panel with users and roles management`)
 
 - Ruta: delegada (writer único; paquete nuevo + functions + reglas).
 - `admin/`: Next.js 16.4 (App Router, `src/`, Tailwind 4 como único sistema de estilos), SDK cliente de Firebase 13 (auth, firestore, functions) con emuladores (`NEXT_PUBLIC_USE_EMULATORS`, `NEXT_PUBLIC_EMULATOR_HOST`), React Query 5, zod 4, Vitest 5. **Sin cuenta de servicio ni firebase-admin.** Carpetas por feature (`auth`, `users`, `roles`, `cities`) con `domain/application/infrastructure/presentation`; las páginas de `src/app` solo montan pantallas. Se quitó del template `README.md`, los SVG de ejemplo, la fuente Geist (descarga en build) y `cacheComponents`; `--no-agents-md` evitó generar `AGENTS.md`/`CLAUDE.md`. `turbopack.root` fijado al paquete (hay lockfile en la raíz). `@types/node` 22 (Vitest 5 lo exige y es el runtime del proyecto).
@@ -166,6 +166,27 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - Prueba de humo con emuladores Auth + Firestore + Functions (script temporal, no versionado): un corredor nuevo recibe `{role:'runner', perms:[]}` y `searchUsers` le responde `permission-denied`; el admin encuentra "Ángela Ordóñez" buscando `angela`/`ORDO`; crear rol, asignarlo, editarlo (`syncedUsers: 1`), borrar rol con usuarios → `role-has-users`, borrar `runner` → `system-role`, quitarse el rol admin → `self-lockout`, borrar rol sin usuarios → OK.
 - Sin probar en navegador (solo build, tests y callables contra emuladores).
 
+### T7 — Ciudades y zonas (commit `feat(cities): add city and zone management`)
+
+- Ruta: delegada (writer único).
+- Modelo `cities/{id}`: `name`, `province`, `country` (`EC`), `type` (`city|zone`), `parentCityId` (solo zonas), `location {lat,lng}`, `coverage` (`active|planned|suspended`), `createdAt`, `updatedAt`. Ids tipo slug (`loja`, `loja-centro`), sugeridos desde el nombre. El seed de Loja ahora incluye `type: 'city'` y `updatedAt`.
+- Reglas: crear/editar con `hasPerm('cities.manage')` y validación de campos (rangos de lat/lng, enums, `country == 'EC'`, timestamps del servidor); `type` y `createdAt` inmutables; una zona apunta a una ciudad existente que no es zona (`exists`/`get` del doc padre: es una validación de datos, no de roles); sin `delete` desde el cliente.
+- Callable `deleteCity` (`cities.manage`, lógica pura + envoltorio): rechaza ids inválidos, ciudades inexistentes, con rutas (`routes` donde `cityId == id`; la colección aún no existe, probado con dobles) o con zonas (`parentCityId == id`) (RF-04-4).
+- Panel: "Ciudades y zonas" con tabla (zonas bajo su ciudad, insignias de cobertura), formulario de creación/edición con lat/lng (sin mapa todavía), eliminación con confirmación y mensaje claro si está bloqueada. El filtro de ciudad de Usuarios incluye zonas marcadas "(zona)".
+- Móvil: el selector del registro y del perfil lista solo ciudades activas, sin zonas (`toPickerCities`, filtro en memoria para no requerir índice compuesto). Tipo `CityCoverage` alineado (`active|planned|suspended`).
+- Test-first:
+  - functions: `deleteCity.test.ts` → RED (módulo inexistente) → GREEN; `config.test.ts` ajustado por la colección `routes`.
+  - reglas: casos de ciudades → RED (3 fallos de 42) → GREEN. Los casos de validación ya pasaban en RED porque la regla anterior negaba todo a quien no era admin; con la regla nueva prueban la validación.
+  - admin: `cities/domain/city.test.ts` → RED (módulo inexistente) → GREEN.
+  - móvil: `cities/domain/city.test.ts` → RED (`toPickerCities` no existe) → GREEN.
+- `npm --prefix functions run build`: OK. `typecheck`: OK.
+- `npm --prefix functions test`: 60/60 OK.
+- `npm --prefix functions run test:rules`: 42/42 OK.
+- `npm --prefix admin test`: 30/30 OK; `typecheck`, `lint` y `build` OK (rutas `/login`, `/usuarios`, `/roles`, `/ciudades`).
+- `npm --prefix mobile run typecheck`: OK. `npm --prefix mobile test`: 126/126 OK. `npm --prefix mobile run lint`: sin errores.
+- Prueba de humo con emuladores (script temporal, no versionado): seed OK; borrar ciudad con zona → `city-has-zones`; borrado directo desde el cliente → `permission-denied`; borrar zona y luego ciudad → OK; borrar inexistente → `city-not-found`. Los casos de roles de T6 siguen pasando.
+- Sin probar en navegador ni en dispositivo.
+
 ## Siguiente paso
 
-T7 (ciudades y zonas).
+Sprint 1 completo en la rama. Pendiente del usuario: revisar el panel en el navegador con los emuladores, decidir push y la estrategia de PR (el forecast supera 400 líneas: `ask-on-risk`) y validar la paleta con el cliente.

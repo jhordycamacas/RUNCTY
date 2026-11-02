@@ -4,7 +4,7 @@ import { COLLECTIONS, USER_PRIVATE_DOCS } from './config';
 
 describe('config constants', () => {
   it('exposes the collection names used by the security rules', () => {
-    expect(COLLECTIONS).toEqual({ users: 'users', cities: 'cities', roles: 'roles' });
+    expect(COLLECTIONS).toEqual({ users: 'users', cities: 'cities', roles: 'roles', routes: 'routes' });
     expect(USER_PRIVATE_DOCS.preferences).toBe('preferences');
   });
 });

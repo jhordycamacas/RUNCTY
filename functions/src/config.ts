@@ -21,6 +21,7 @@ export const COLLECTIONS = {
   users: 'users',
   cities: 'cities',
   roles: 'roles',
+  routes: 'routes',
 } as const;
 
 export const USER_PRIVATE_DOCS = {

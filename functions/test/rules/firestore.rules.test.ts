@@ -63,7 +63,16 @@ beforeEach(async () => {
   await testEnv.clearFirestore();
   await testEnv.withSecurityRulesDisabled(async (ctx) => {
     await setDoc(doc(ctx.firestore(), 'users', ALICE), { ...aliceDoc, role: 'runner' });
-    await setDoc(doc(ctx.firestore(), 'cities', 'loja'), { name: 'Loja' });
+    await setDoc(doc(ctx.firestore(), 'cities', 'loja'), {
+      name: 'Loja',
+      province: 'Loja',
+      country: 'EC',
+      type: 'city',
+      location: { lat: -3.99313, lng: -79.20422 },
+      coverage: 'active',
+      createdAt: 1,
+      updatedAt: 1,
+    });
   });
 });
 
@@ -75,6 +84,8 @@ const anon = () => testEnv.unauthenticatedContext().firestore();
 /** Custom roles: permissions travel in the `perms` claim. */
 const userReader = () =>
   testEnv.authenticatedContext('support-1', { role: 'support', perms: ['admin.access', 'users.read'] }).firestore();
+const cityManager = () =>
+  testEnv.authenticatedContext('cities-1', { role: 'editor', perms: ['admin.access', 'cities.manage'] }).firestore();
 const roleManager = () =>
   testEnv.authenticatedContext('manager-1', { role: 'manager', perms: ['admin.access', 'roles.manage'] }).firestore();
 
@@ -303,14 +314,79 @@ describe('cities/{id}', () => {
     await assertSucceeds(getDoc(doc(anon(), 'cities', 'loja')));
   });
 
-  it('denies non-admin writes', async () => {
-    await assertFails(setDoc(doc(alice(), 'cities', 'quito'), { name: 'Quito' }));
+  it('denies runners writing cities', async () => {
+    await assertFails(setDoc(doc(alice(), 'cities', 'quito'), validCity()));
+    const runner = testEnv.authenticatedContext(BOB, { role: 'runner', perms: [] }).firestore();
+    await assertFails(setDoc(doc(runner, 'cities', 'quito'), validCity()));
+    await assertFails(setDoc(doc(userReader(), 'cities', 'quito'), validCity()));
   });
 
-  it('allows admin writes', async () => {
-    await assertSucceeds(setDoc(doc(admin(), 'cities', 'quito'), { name: 'Quito' }));
+  it('lets cities.manage (and admin) create valid cities and zones', async () => {
+    await assertSucceeds(setDoc(doc(cityManager(), 'cities', 'quito'), validCity()));
+    await assertSucceeds(setDoc(doc(admin(), 'cities', 'cuenca'), validCity({ name: 'Cuenca', province: 'Azuay' })));
+    await assertSucceeds(setDoc(doc(cityManager(), 'cities', 'loja-centro'), validZone()));
+  });
+
+  it('validates the city fields', async () => {
+    const ref = doc(cityManager(), 'cities', 'quito');
+    await assertFails(setDoc(ref, validCity({ name: '' })));
+    await assertFails(setDoc(ref, validCity({ country: 'PE' })));
+    await assertFails(setDoc(ref, validCity({ type: 'region' })));
+    await assertFails(setDoc(ref, validCity({ coverage: 'inactive' })));
+    await assertFails(setDoc(ref, validCity({ location: { lat: 91, lng: 0 } })));
+    await assertFails(setDoc(ref, validCity({ location: { lat: 0, lng: -181 } })));
+    await assertFails(setDoc(ref, validCity({ location: { lat: '0', lng: 0 } })));
+    await assertFails(setDoc(ref, validCity({ location: { lat: 0, lng: 0, alt: 1 } })));
+    await assertFails(setDoc(ref, validCity({ createdAt: 1 })));
+    await assertFails(setDoc(ref, validCity({ extra: true })));
+    const { province: _omit, ...withoutProvince } = validCity();
+    await assertFails(setDoc(ref, withoutProvince));
+  });
+
+  it('requires zones to belong to an existing city and cities to have no parent', async () => {
+    await assertFails(setDoc(doc(cityManager(), 'cities', 'z1'), validZone({ parentCityId: 'ghost' })));
+    const { parentCityId: _omit, ...zoneWithoutParent } = validZone();
+    await assertFails(setDoc(doc(cityManager(), 'cities', 'z1'), zoneWithoutParent));
+    await assertFails(setDoc(doc(cityManager(), 'cities', 'quito'), validCity({ parentCityId: 'loja' })));
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'cities', 'loja-centro'), { ...validZone(), createdAt: 1, updatedAt: 1 });
+    });
+    // No zones inside zones.
+    await assertFails(setDoc(doc(cityManager(), 'cities', 'z2'), validZone({ parentCityId: 'loja-centro' })));
+  });
+
+  it('lets cities.manage update a city keeping createdAt and type', async () => {
+    const ref = doc(cityManager(), 'cities', 'loja');
+    await assertSucceeds(updateDoc(ref, { coverage: 'suspended', updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { coverage: 'active' }));
+    await assertFails(updateDoc(ref, { type: 'zone', parentCityId: 'quito', updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { createdAt: 5, updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { location: { lat: -100, lng: 0 }, updatedAt: serverTimestamp() }));
+  });
+
+  it('denies client deletes (the deleteCity callable checks routes and zones)', async () => {
+    await assertFails(deleteDoc(doc(cityManager(), 'cities', 'loja')));
+    await assertFails(deleteDoc(doc(admin(), 'cities', 'loja')));
   });
 });
+
+function validCity(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    name: 'Quito',
+    province: 'Pichincha',
+    country: 'EC',
+    type: 'city',
+    location: { lat: -0.1807, lng: -78.4678 },
+    coverage: 'planned',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    ...overrides,
+  };
+}
+
+function validZone(overrides: Record<string, unknown> = {}) {
+  return validCity({ name: 'Centro', province: 'Loja', type: 'zone', parentCityId: 'loja', ...overrides });
+}
 
 describe('roles/{id}', () => {
   it('lets signed-in users read roles but not anonymous visitors', async () => {

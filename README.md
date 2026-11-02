@@ -142,6 +142,7 @@ Solo pueden entrar las cuentas con el permiso `admin.access`; a un corredor se l
 
 - **Usuarios** (`users.read`): búsqueda por nombres y apellidos (inicio del texto, sin importar mayúsculas ni tildes), correo, identificación, fecha de nacimiento y ciudad, con paginación. Con `roles.manage` se cambia el rol de cada usuario.
 - **Roles** (`roles.manage`): crear, editar permisos y eliminar roles. Los roles del sistema (`runner`, `admin`, `club_rep`) no se eliminan, `admin` conserva todos los permisos y solo se elimina un rol sin usuarios asignados.
+- **Ciudades y zonas** (`cities.manage`): crear y editar ciudades y sus zonas (nombre, provincia, latitud y longitud, cobertura activa, planificada o suspendida). Se guardan directo en Firestore y las reglas validan los campos; una zona pertenece a una ciudad existente. Para eliminar se usa la función `deleteCity`, que rechaza la ciudad o zona si tiene rutas asociadas o, en el caso de una ciudad, si aún tiene zonas. El registro de la app móvil lista solo las ciudades activas (sin zonas).
 
 ### Cuentas y roles
 
@@ -149,7 +150,7 @@ Solo pueden entrar las cuentas con el permiso `admin.access`; a un corredor se l
 - Roles y permisos (RF-02): cada rol (`roles/{id}`) tiene una lista de permisos del catálogo de `functions/src/roles/permissions.ts`. Al asignar un rol, la función `setUserRole` escribe los claims `{ role, perms }`; al editar un rol, `updateRole` vuelve a escribir los claims de todos sus usuarios. Los cambios se aplican cuando el usuario renueva su token (como máximo una hora o al volver a iniciar sesión). Las reglas de Firestore leen los permisos del token (`hasPerm`), sin consultar documentos. Un administrador no puede quitarse su propio rol.
 - Para probar el registro completo deben estar corriendo los emuladores de Auth, Firestore **y Functions** (`npm run emulators` después de `npm run functions:build`).
 - Eliminar la cuenta llama a la función `deleteAccount` (callable). La app pide la contraseña actual justo antes; la función rechaza tokens con más de 5 minutos desde el último inicio de sesión, borra `users/{uid}` con todas sus subcolecciones y luego la cuenta de Auth.
-- El catálogo `cities` es de lectura pública: el formulario de registro lista las ciudades activas antes de que exista la cuenta.
+- El catálogo `cities` es de lectura pública: el formulario de registro lista las ciudades activas (sin zonas) antes de que exista la cuenta.
 
 ### Tests
 

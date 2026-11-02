@@ -32,9 +32,11 @@ async function seedCity(): Promise<void> {
       name: 'Loja',
       province: 'Loja',
       country: 'EC',
+      type: 'city',
       location: { lat: -3.99313, lng: -79.20422 },
       coverage: 'active',
       createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     },
     { merge: true },
   );
