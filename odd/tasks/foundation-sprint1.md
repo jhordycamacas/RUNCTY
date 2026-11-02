@@ -166,7 +166,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - Prueba de humo con emuladores Auth + Firestore + Functions (script temporal, no versionado): un corredor nuevo recibe `{role:'runner', perms:[]}` y `searchUsers` le responde `permission-denied`; el admin encuentra "Ángela Ordóñez" buscando `angela`/`ORDO`; crear rol, asignarlo, editarlo (`syncedUsers: 1`), borrar rol con usuarios → `role-has-users`, borrar `runner` → `system-role`, quitarse el rol admin → `self-lockout`, borrar rol sin usuarios → OK.
 - Sin probar en navegador (solo build, tests y callables contra emuladores).
 
-### T7 — Ciudades y zonas (commit `feat(cities): add city and zone management`)
+### T7 — Ciudades y zonas (commit `e06e681` `feat(cities): add city and zone management`)
 
 - Ruta: delegada (writer único).
 - Modelo `cities/{id}`: `name`, `province`, `country` (`EC`), `type` (`city|zone`), `parentCityId` (solo zonas), `location {lat,lng}`, `coverage` (`active|planned|suspended`), `createdAt`, `updatedAt`. Ids tipo slug (`loja`, `loja-centro`), sugeridos desde el nombre. El seed de Loja ahora incluye `type: 'city'` y `updatedAt`.
