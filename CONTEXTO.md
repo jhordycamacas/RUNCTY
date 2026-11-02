@@ -294,11 +294,16 @@ La semana 8 no tiene actividad y la semana 11 queda fuera de los sprints.
 
 Objetivo: que la app funcione en cualquier celular sin la computadora, con datos compartidos.
 
-1. **El usuario** (cuenta y pago, no lo puede hacer el asistente):
-   - Crear el proyecto en Firebase Console y pasarlo al plan **Blaze**, con una alerta de presupuesto en Google Cloud.
-   - Activar Authentication con correo y contraseña, Firestore (región cercana, por ejemplo `southamerica-east1` o `us-central1`) y Storage.
-   - Registrar una app web y copiar su configuración (`apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`).
-   - Iniciar sesión en la CLI con `npx firebase login`.
+1. **El usuario** (cuenta y pago, no lo puede hacer el asistente; unos 15 minutos):
+   1. Entrar a https://console.firebase.google.com → **Agregar proyecto** → nombre `runcty`. Google Analytics no hace falta.
+   2. **Plan Blaze:** engranaje → *Uso y facturación* → *Modificar plan* → **Blaze** → cargar la tarjeta. Después, en Google Cloud Console → *Facturación* → *Presupuestos y alertas*, crear un presupuesto de **5 USD** con alertas por correo. Para el piloto, el costo esperado es casi cero.
+   3. **Authentication** → *Comenzar* → activar **Correo electrónico/contraseña**.
+   4. **Firestore Database** → *Crear base de datos* → modo **producción** → ubicación **`nam5 (us-central)`**, la misma región que las Cloud Functions (`us-central1`). La ubicación no se puede cambiar después.
+   5. **Storage** → *Comenzar* → misma ubicación.
+   6. **App web:** engranaje → *Configuración del proyecto* → *Tus apps* → ícono `</>` → registrar `runcty-web` → copiar el bloque `firebaseConfig` (`apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`). Estos valores van en `mobile/.env` y `admin/.env.local`, nunca en git.
+   7. En la terminal, desde `D:\RUNCTY`: `npx firebase login` (abre el navegador para iniciar sesión con la cuenta dueña del proyecto).
+   8. Para cargar los datos iniciales en producción hace falta una credencial de administrador. Opción simple: engranaje → *Cuentas de servicio* → *Generar nueva clave privada*. Guardar el JSON **fuera del repo** (por ejemplo `C:\Users\usuario\runcty-admin.json`) y no compartirlo.
+   9. Pasarle al asistente el `firebaseConfig` y la ruta del JSON de la cuenta de servicio.
 2. **El asistente:**
    - Configurar la app y el panel con esos valores, sin subir claves a git.
    - Desplegar las reglas, los índices y las Cloud Functions.
