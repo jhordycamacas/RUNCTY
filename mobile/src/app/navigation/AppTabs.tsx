@@ -1,6 +1,7 @@
 import { createBottomTabNavigator, type BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import { useMemo } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MIN_TOUCH_TARGET, useTheme, useTypeface } from '@/core/theme';
 import { Icon, type IconName } from '@/core/ui';
@@ -29,18 +30,27 @@ function tabIcon(outline: IconName, filled: IconName): BottomTabNavigationOption
 export function AppTabs() {
   const { colors, typography, fontScale } = useTheme();
   const labelTypeface = useTypeface('semibold');
+  const insets = useSafeAreaInsets();
 
-  const screenOptions = useMemo<BottomTabNavigationOptions>(
-    () => ({
+  const screenOptions = useMemo<BottomTabNavigationOptions>(() => {
+    const labelSize = typography.sizes.caption * fontScale;
+    // Icon (24) + label + vertical padding. The bottom inset keeps labels above the
+    // Android gesture/navigation bar, and the bar stays at least 48dp tall.
+    const contentHeight = Math.max(MIN_TOUCH_TARGET, 24 + labelSize * 1.4 + 12);
+    return {
       headerShown: false,
       tabBarActiveTintColor: colors.primaryText,
       tabBarInactiveTintColor: colors.textMuted,
-      tabBarStyle: { backgroundColor: colors.background, borderTopColor: colors.border },
-      tabBarLabelStyle: { fontSize: typography.sizes.caption * fontScale, ...labelTypeface },
-      tabBarItemStyle: { minHeight: MIN_TOUCH_TARGET },
-    }),
-    [colors, typography, fontScale, labelTypeface],
-  );
+      tabBarStyle: {
+        backgroundColor: colors.background,
+        borderTopColor: colors.border,
+        height: contentHeight + insets.bottom,
+        paddingTop: 6,
+        paddingBottom: insets.bottom + 6,
+      },
+      tabBarLabelStyle: { fontSize: labelSize, ...labelTypeface },
+    };
+  }, [colors, typography, fontScale, labelTypeface, insets.bottom]);
 
   return (
     <Tabs.Navigator screenOptions={screenOptions}>
