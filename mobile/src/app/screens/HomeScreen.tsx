@@ -132,7 +132,7 @@ function QuickAction({ icon, label, onPress }: { icon: IconName; label: string; 
       <View style={[styles.tileIcon, { backgroundColor: colors.primaryTint, marginBottom: spacing.sm }]}>
         <Icon name={icon} size={22} color="primaryText" />
       </View>
-      <AppText variant="label" weight="semibold" align="center">
+      <AppText variant="label" weight="semibold" align="center" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
         {label}
       </AppText>
     </Pressable>
