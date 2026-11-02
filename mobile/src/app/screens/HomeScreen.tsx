@@ -1,27 +1,40 @@
 import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '@/core/theme';
-import { AppText, Screen } from '@/core/ui';
+import { AppText, Card, Screen } from '@/core/ui';
+import { useSignedInUser } from '@/features/auth';
 
-/** Placeholder home. Auth and the real tabs arrive in T3. */
+/** Inicio tab. Routes and safety content arrive in later sprints. */
 export function HomeScreen() {
   const { colors, spacing } = useTheme();
+  const user = useSignedInUser();
 
   return (
-    <Screen contentStyle={styles.center}>
-      <View style={[styles.mark, { backgroundColor: colors.primary, marginBottom: spacing.xl }]} />
-      <AppText variant="display" align="center">
-        RUNCTY
-      </AppText>
-      <AppText variant="subtitle" color="textMuted" align="center" style={{ marginTop: spacing.sm }}>
-        Corre más seguro
-      </AppText>
+    <Screen>
+      <View style={styles.center}>
+        <View style={[styles.mark, { backgroundColor: colors.primary, marginBottom: spacing.xl }]} />
+        <AppText variant="display" align="center">
+          RUNCTY
+        </AppText>
+        <AppText variant="subtitle" color="textMuted" align="center" style={{ marginTop: spacing.sm }}>
+          Corre más seguro
+        </AppText>
+      </View>
+      {!user.emailVerified ? (
+        <Card>
+          <AppText weight="medium">Verifica tu correo</AppText>
+          <AppText color="textMuted">
+            Te enviamos un enlace a {user.email}. Verificar tu correo nos ayuda a proteger tu cuenta.
+          </AppText>
+        </Card>
+      ) : null}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   center: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },

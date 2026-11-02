@@ -1,19 +1,17 @@
 import { DarkTheme, DefaultTheme, NavigationContainer, type Theme as NavTheme } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useMemo } from 'react';
 
 import { useTheme } from '@/core/theme';
+import { LoadingView } from '@/core/ui';
+import { useSession } from '@/features/auth';
 
-import { HomeScreen } from '../screens/HomeScreen';
+import { AppTabs } from './AppTabs';
+import { AuthNavigator } from './AuthNavigator';
 
-export type RootStackParamList = {
-  Home: undefined;
-};
-
-const Stack = createNativeStackNavigator<RootStackParamList>();
-
+/** Auth guard: loader while the session resolves, then auth stack or app tabs. */
 export function RootNavigator() {
   const { scheme, colors } = useTheme();
+  const { status } = useSession();
 
   const navTheme = useMemo<NavTheme>(() => {
     const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
@@ -31,11 +29,13 @@ export function RootNavigator() {
     };
   }, [scheme, colors]);
 
+  if (status === 'loading') {
+    return <LoadingView label="Preparando RUNCTY…" />;
+  }
+
   return (
     <NavigationContainer theme={navTheme}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={HomeScreen} />
-      </Stack.Navigator>
+      {status === 'signedIn' ? <AppTabs /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }

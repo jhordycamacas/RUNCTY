@@ -7,7 +7,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
 
 const PROJECT_ID = 'demo-runcty';
@@ -17,7 +17,34 @@ const ADMIN = 'admin-1';
 
 let testEnv: RulesTestEnvironment;
 
-const aliceDoc = { uid: ALICE, email: 'alice@runcty.dev', firstName: 'Alice', createdAt: 1 };
+const aliceDoc = {
+  uid: ALICE,
+  email: 'alice@runcty.dev',
+  firstName: 'Alice',
+  lastName: 'Andrade',
+  birthDate: '1995-04-12',
+  cityId: 'loja',
+  consent: { lopdp: true, acceptedAt: 1 },
+  createdAt: 1,
+  updatedAt: 1,
+};
+
+/** A valid sign-up payload as the mobile app writes it. */
+function newUserDoc(uid: string, email: string, overrides: Record<string, unknown> = {}) {
+  return {
+    uid,
+    email,
+    firstName: 'Bob',
+    lastName: 'Bermeo',
+    birthDate: '2000-01-31',
+    cityId: 'loja',
+    idNumber: '1104567890',
+    consent: { lopdp: true, acceptedAt: serverTimestamp() },
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    ...overrides,
+  };
+}
 
 beforeAll(async () => {
   testEnv = await initializeTestEnvironment({
@@ -41,7 +68,8 @@ beforeEach(async () => {
 });
 
 const alice = () => testEnv.authenticatedContext(ALICE).firestore();
-const bob = () => testEnv.authenticatedContext(BOB).firestore();
+const BOB_EMAIL = 'bob@runcty.dev';
+const bob = () => testEnv.authenticatedContext(BOB, { email: BOB_EMAIL }).firestore();
 const admin = () => testEnv.authenticatedContext(ADMIN, { role: 'admin' }).firestore();
 const anon = () => testEnv.unauthenticatedContext().firestore();
 
@@ -59,17 +87,49 @@ describe('users/{uid}', () => {
     await assertSucceeds(getDoc(doc(admin(), 'users', ALICE)));
   });
 
-  it('lets a user create their own doc without a role', async () => {
-    await assertSucceeds(setDoc(doc(bob(), 'users', BOB), { uid: BOB, email: 'bob@runcty.dev' }));
+  it('lets a user create their own valid doc without a role', async () => {
+    await assertSucceeds(setDoc(doc(bob(), 'users', BOB), newUserDoc(BOB, BOB_EMAIL)));
+  });
+
+  it('lets a user sign up without the optional id number', async () => {
+    const { idNumber: _omit, ...withoutId } = newUserDoc(BOB, BOB_EMAIL);
+    await assertSucceeds(setDoc(doc(bob(), 'users', BOB), withoutId));
   });
 
   it('denies creating a doc that sets a role', async () => {
-    await assertFails(setDoc(doc(bob(), 'users', BOB), { uid: BOB, role: 'admin' }));
+    await assertFails(setDoc(doc(bob(), 'users', BOB), newUserDoc(BOB, BOB_EMAIL, { role: 'admin' })));
+    await assertFails(setDoc(doc(bob(), 'users', BOB), newUserDoc(BOB, BOB_EMAIL, { role: 'runner' })));
   });
 
   it('denies creating a doc for another uid', async () => {
-    await assertFails(setDoc(doc(bob(), 'users', ALICE), { uid: ALICE }));
-    await assertFails(setDoc(doc(bob(), 'users', BOB), { uid: ALICE }));
+    await assertFails(setDoc(doc(bob(), 'users', ALICE), newUserDoc(ALICE, BOB_EMAIL)));
+    await assertFails(setDoc(doc(bob(), 'users', BOB), newUserDoc(ALICE, BOB_EMAIL)));
+  });
+
+  it('denies an email that does not match the auth token', async () => {
+    await assertFails(setDoc(doc(bob(), 'users', BOB), newUserDoc(BOB, 'someone@runcty.dev')));
+  });
+
+  it('denies sign-up without LOPDP consent', async () => {
+    await assertFails(
+      setDoc(doc(bob(), 'users', BOB), newUserDoc(BOB, BOB_EMAIL, { consent: { lopdp: false, acceptedAt: serverTimestamp() } })),
+    );
+    const { consent: _omit, ...withoutConsent } = newUserDoc(BOB, BOB_EMAIL);
+    await assertFails(setDoc(doc(bob(), 'users', BOB), withoutConsent));
+  });
+
+  it('denies missing or malformed required fields', async () => {
+    const { lastName: _omit, ...withoutLastName } = newUserDoc(BOB, BOB_EMAIL);
+    await assertFails(setDoc(doc(bob(), 'users', BOB), withoutLastName));
+    await assertFails(setDoc(doc(bob(), 'users', BOB), newUserDoc(BOB, BOB_EMAIL, { firstName: '' })));
+    await assertFails(setDoc(doc(bob(), 'users', BOB), newUserDoc(BOB, BOB_EMAIL, { birthDate: '31/01/2000' })));
+    await assertFails(setDoc(doc(bob(), 'users', BOB), newUserDoc(BOB, BOB_EMAIL, { idNumber: '12345' })));
+    await assertFails(setDoc(doc(bob(), 'users', BOB), newUserDoc(BOB, BOB_EMAIL, { cityId: '' })));
+  });
+
+  it('denies client-chosen timestamps and unknown fields', async () => {
+    await assertFails(setDoc(doc(bob(), 'users', BOB), newUserDoc(BOB, BOB_EMAIL, { createdAt: 1 })));
+    await assertFails(setDoc(doc(bob(), 'users', BOB), newUserDoc(BOB, BOB_EMAIL, { isVerified: true })));
   });
 
   it('lets the owner update profile fields', async () => {
@@ -103,9 +163,9 @@ describe('users/{uid}/private/{doc}', () => {
 });
 
 describe('cities/{id}', () => {
-  it('lets signed-in users read cities and denies anonymous reads', async () => {
+  it('lets anyone read cities (public catalog, needed by the sign-up city picker)', async () => {
     await assertSucceeds(getDoc(doc(alice(), 'cities', 'loja')));
-    await assertFails(getDoc(doc(anon(), 'cities', 'loja')));
+    await assertSucceeds(getDoc(doc(anon(), 'cities', 'loja')));
   });
 
   it('denies non-admin writes', async () => {

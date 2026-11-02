@@ -124,6 +124,12 @@ Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda 
 npm run mobile:start # abre Expo; escanea el QR con Expo Go o pulsa "a" para Android
 ```
 
+### Cuentas y roles
+
+- El registro crea la cuenta en Firebase Auth y el documento `users/{uid}` **sin rol**. La función `onUserDocCreated` asigna el custom claim `role: runner` (sin pisar un rol existente, por ejemplo `admin`) y luego copia el rol al documento; la app detecta ese cambio y refresca el token.
+- Para probar el registro completo deben estar corriendo los emuladores de Auth, Firestore **y Functions** (`npm run emulators` después de `npm run functions:build`).
+- El catálogo `cities` es de lectura pública: el formulario de registro lista las ciudades activas antes de que exista la cuenta.
+
 ### Tests
 
 ```bash

@@ -24,12 +24,40 @@ service cloud.firestore {
 
     // ---------- Users ----------
 
+    function isNonEmptyString(v, maxLen) {
+      return v is string && v.size() > 0 && v.size() <= maxLen;
+    }
+
+    // Editable personal data. Age limits are enforced by the app; the rules
+    // only guard the shape (ISO YYYY-MM-DD).
+    function hasValidPersonalData(d) {
+      return isNonEmptyString(d.firstName, 60)
+        && isNonEmptyString(d.lastName, 60)
+        && d.birthDate is string && d.birthDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && isNonEmptyString(d.cityId, 64)
+        && (!('idNumber' in d) || (d.idNumber is string && d.idNumber.matches('^[0-9]{10}$')));
+    }
+
+    // Sign-up payload: no role (assigned by Cloud Functions), the uid and email
+    // of the token, explicit LOPDP consent and server timestamps.
+    function isValidNewUser(d) {
+      return d.keys().hasAll(['uid', 'email', 'firstName', 'lastName', 'birthDate', 'cityId', 'consent', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['uid', 'email', 'firstName', 'lastName', 'birthDate', 'cityId', 'idNumber', 'consent', 'createdAt', 'updatedAt'])
+        && d.uid == request.auth.uid
+        && d.email == request.auth.token.email
+        && hasValidPersonalData(d)
+        && d.consent is map
+        && d.consent.keys().hasOnly(['lopdp', 'acceptedAt'])
+        && d.consent.lopdp == true
+        && d.consent.acceptedAt == request.time
+        && d.createdAt == request.time
+        && d.updatedAt == request.time;
+    }
+
     match /users/{uid} {
       allow read: if isOwner(uid) || isAdmin();
 
-      allow create: if isOwner(uid)
-        && !('role' in request.resource.data)
-        && request.resource.data.uid == request.auth.uid;
+      allow create: if isOwner(uid) && isValidNewUser(request.resource.data);
 
       allow update: if isOwner(uid)
         && !request.resource.data.diff(resource.data).affectedKeys()
@@ -43,8 +71,10 @@ service cloud.firestore {
 
     // ---------- Catalogs ----------
 
+    // Public catalog without personal data: the sign-up form lists the
+    // active cities before the user has an account.
     match /cities/{cityId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if isAdmin();
     }
 

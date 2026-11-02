@@ -48,7 +48,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 | --- | --- | --- | --- |
 | T1 | Base: config Firebase raíz, reglas deny-all, emuladores, functions Gen 2, tooling, seed de Loja | delegada (2+ archivos) | [x] |
 | T2 | App móvil: Expo + TS, tema y paleta, init Firebase, React Query, navegación, componentes base, Jest | delegada | [x] |
-| T3 | Autenticación: registro, login, recuperar contraseña, guard; trigger que asigna rol `runner` | delegada | [ ] |
+| T3 | Autenticación: registro, login, recuperar contraseña, guard; trigger que asigna rol `runner` | delegada | [x] |
 | T4 | Cuenta: actualizar datos, cambiar contraseña, eliminar cuenta (callable), perfil deportivo CRUD | delegada | [ ] |
 | T5 | Preferencias CRUD + restablecer, aplicadas al tema (modo oscuro, tamaño de letra) | delegada | [ ] |
 | T6 | Panel admin Next.js: login admin, usuarios con filtros, CRUD de roles, asignación de rol | delegada | [ ] |
@@ -78,7 +78,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - `npm run seed` vía `firebase emulators:exec --only auth,firestore`: crea `cities/loja` y `admin@runcty.dev` con claim `role: admin`. Sin variables de emulador, el script se niega a correr (exit 1).
 - Versiones: firebase-functions 7.4, firebase-admin 14.5, firebase-tools 15.34, TypeScript 7.0, Vitest 5.
 
-### T2 — App móvil (commit `feat(mobile): scaffold expo app with theme and firebase setup`)
+### T2 — App móvil (commit `9b27102` `feat(mobile): scaffold expo app with theme and firebase setup`)
 
 - Ruta: delegada (writer único).
 - Expo SDK 58 (React Native 0.88, React 19.3), firebase JS SDK 13, react-navigation 7, React Query 5, Jest 30 + jest-expo.
@@ -90,6 +90,24 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - `npx expo-doctor`: 20/20 checks OK.
 - `npx expo export --platform android`: bundle generado (resuelve el alias `@/` y el build RN de `@firebase/auth`).
 
+### T3 — Autenticación (commit `feat(auth): add registration, login and password recovery`)
+
+- Ruta: delegada (writer único; 2+ archivos no triviales en functions, reglas y móvil).
+- Functions: `onUserDocCreated` (Gen 2) con lógica pura `assignDefaultRole`/`resolveRoleAssignment`. Asigna el claim `role: runner` sin pisar un rol existente (admin) y después copia el rol al doc (`update`, para no recrear una cuenta borrada). El orden claim → doc permite que la app fuerce `getIdToken(true)` al ver el rol en el doc.
+- Reglas: validación de creación de `users/{uid}` (campos requeridos y permitidos, `uid` y `email` del token, sin `role`, consentimiento LOPDP `true`, timestamps de servidor, cédula de 10 dígitos opcional). `cities` pasa a lectura pública (catálogo sin datos personales; el selector de ciudad del registro se usa antes de tener cuenta).
+- Móvil: feature `auth` (domain: schemas zod, política de contraseña, fecha de nacimiento con edad 5–110 y `TODO(product)` sobre menores/LOPDP, mapper de errores en español, puertos; application: `registerUser` con rollback, `signIn`, `requestPasswordReset` neutral; infrastructure: adaptadores Firebase; presentation: `SessionProvider`, pantallas Login/Registro/Recuperar). Feature `cities` (lista ciudades `coverage == 'active'`). Navegación: guard con loader, `AuthNavigator` y `AppTabs` (Inicio, Perfil). Átomos nuevos en `core/ui`: `Checkbox`, `ChoiceGroup`, `FormMessage`, `LoadingView`; helpers `core/forms`.
+- Test-first:
+  - functions: `assignDefaultRole.test.ts` → RED (módulo inexistente) → GREEN.
+  - reglas: 4 casos nuevos de creación → RED (4 fallos de 21) → GREEN; lectura pública de ciudades → RED (1 fallo) → GREEN.
+  - móvil: `schemas.test.ts`, `authErrors.test.ts`, `authUseCases.test.ts` → RED (módulos inexistentes) → GREEN; `choices.test.tsx` → RED → GREEN.
+- `npm --prefix functions run build`: OK.
+- `npm --prefix functions test`: 9/9 OK.
+- `npm --prefix functions run test:rules`: 21/21 OK.
+- `npm --prefix mobile run typecheck`: OK.
+- `npm --prefix mobile test`: 65/65 OK.
+- `npm --prefix mobile run lint`: sin errores.
+- `npx expo export --platform android`: bundle generado (`dist/` borrado).
+
 ## Siguiente paso
 
-T3.
+T4.
