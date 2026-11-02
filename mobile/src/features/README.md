@@ -9,6 +9,6 @@ Each feature (e.g. `auth`, `account`, `preferences`) lives in its own folder and
 | `infrastructure/` | Firebase implementations of the ports | `domain`, `@/core/firebase` |
 | `presentation/` | Screens and feature components (container + presentational) | `application`, `@/core/ui` |
 
-Shared, feature-agnostic code goes in `src/core/`. Features never import from each other's `infrastructure/` or internal files: they use another feature only through its public `index.ts` (or its `application/` hooks). Each feature wires its ports to Firebase in a private `composition.ts`; screens never import `firebase/*`.
+Shared, feature-agnostic code goes in `src/core/`. Features never import from each other's `infrastructure/` or internal files: they use another feature only through its public `index.ts` (or its `application/` hooks). Pure layers (`domain/`, `application/` use cases) import another feature's `domain/` directly, because the public `index.ts` also exports React providers that load Firebase. Each feature wires its ports to Firebase in a private `composition.ts`; screens never import `firebase/*`.
 
 Screens receive navigation as callbacks; the navigators live in `src/app/navigation/`.

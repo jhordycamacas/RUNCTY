@@ -49,7 +49,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 | T1 | Base: config Firebase raíz, reglas deny-all, emuladores, functions Gen 2, tooling, seed de Loja | delegada (2+ archivos) | [x] |
 | T2 | App móvil: Expo + TS, tema y paleta, init Firebase, React Query, navegación, componentes base, Jest | delegada | [x] |
 | T3 | Autenticación: registro, login, recuperar contraseña, guard; trigger que asigna rol `runner` | delegada | [x] |
-| T4 | Cuenta: actualizar datos, cambiar contraseña, eliminar cuenta (callable), perfil deportivo CRUD | delegada | [ ] |
+| T4 | Cuenta: actualizar datos, cambiar contraseña, eliminar cuenta (callable), perfil deportivo CRUD | delegada | [x] |
 | T5 | Preferencias CRUD + restablecer, aplicadas al tema (modo oscuro, tamaño de letra) | delegada | [ ] |
 | T6 | Panel admin Next.js: login admin, usuarios con filtros, CRUD de roles, asignación de rol | delegada | [ ] |
 | T7 | Ciudades y zonas: CRUD en admin, selector en registro, borrado protegido | delegada | [ ] |
@@ -90,7 +90,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - `npx expo-doctor`: 20/20 checks OK.
 - `npx expo export --platform android`: bundle generado (resuelve el alias `@/` y el build RN de `@firebase/auth`).
 
-### T3 — Autenticación (commit `feat(auth): add registration, login and password recovery`)
+### T3 — Autenticación (commit `6d54550` `feat(auth): add registration, login and password recovery`)
 
 - Ruta: delegada (writer único; 2+ archivos no triviales en functions, reglas y móvil).
 - Functions: `onUserDocCreated` (Gen 2) con lógica pura `assignDefaultRole`/`resolveRoleAssignment`. Asigna el claim `role: runner` sin pisar un rol existente (admin) y después copia el rol al doc (`update`, para no recrear una cuenta borrada). El orden claim → doc permite que la app fuerce `getIdToken(true)` al ver el rol en el doc.
@@ -108,6 +108,25 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - `npm --prefix mobile run lint`: sin errores.
 - `npx expo export --platform android`: bundle generado (`dist/` borrado).
 
+### T4 — Cuenta y perfil deportivo (commit `feat(account): add profile editing, account deletion and sport profile`)
+
+- Ruta: delegada (writer único).
+- Functions: callable `deleteAccount` (Gen 2 `onCall`). Lógica pura `deleteUserAccount` (borra `users/{uid}` con `recursiveDelete`, después el usuario de Auth; idempotente si Auth ya no existe) e `isRecentSignIn` (exige `auth_time` de hace ≤ 5 min; la app re-autentica antes de llamar).
+- Reglas: `update` de `users/{uid}` solo sobre `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber`, `updatedAt` (hora del servidor) y con datos válidos; sin `delete` desde el cliente. `private/sportProfile` validado (nivel, 1–5 objetivos de una lista fija, ritmo 150–1200 s/km, distancia 1–50 km, campos exactos, `updatedAt` del servidor).
+- Móvil: feature `account` (RF-01-3 datos personales y cambio de contraseña con re-autenticación; RF-01-4 eliminar cuenta con contraseña + casilla de confirmación → callable → cierre de sesión) y feature `sportProfile` (RF-01-9..12 crear, ver, editar y eliminar con confirmación; ritmo en formato `min:seg`). Pestaña Perfil: datos del usuario y secciones Datos personales, Perfil deportivo, Cambiar contraseña, Cerrar sesión y Eliminar cuenta.
+- Test-first:
+  - functions: `deleteAccount.test.ts` → RED (módulo inexistente) → GREEN.
+  - reglas: 6 casos nuevos (update y perfil deportivo) → RED (6 fallos de 28) → GREEN.
+  - móvil: `account/domain/schemas.test.ts`, `account/application/accountUseCases.test.ts`, `sportProfile/domain/sportProfile.test.ts` → RED (módulos inexistentes) → GREEN.
+- `npm --prefix functions run build`: OK.
+- `npm --prefix functions test`: 15/15 OK.
+- `npm --prefix functions run test:rules`: 28/28 OK.
+- `npm --prefix mobile run typecheck`: OK.
+- `npm --prefix mobile test`: 86/86 OK.
+- `npm --prefix mobile run lint`: sin errores.
+- `npx expo export --platform android`: bundle generado (`dist/` borrado).
+- Sin probar de punta a punta en dispositivo/emulador con el emulador de Functions (solo tests unitarios, de reglas y bundle).
+
 ## Siguiente paso
 
-T4.
+T5 (preferencias CRUD + restablecer, aplicadas al tema).

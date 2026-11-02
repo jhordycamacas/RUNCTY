@@ -128,6 +128,7 @@ npm run mobile:start # abre Expo; escanea el QR con Expo Go o pulsa "a" para And
 
 - El registro crea la cuenta en Firebase Auth y el documento `users/{uid}` **sin rol**. La función `onUserDocCreated` asigna el custom claim `role: runner` (sin pisar un rol existente, por ejemplo `admin`) y luego copia el rol al documento; la app detecta ese cambio y refresca el token.
 - Para probar el registro completo deben estar corriendo los emuladores de Auth, Firestore **y Functions** (`npm run emulators` después de `npm run functions:build`).
+- Eliminar la cuenta llama a la función `deleteAccount` (callable). La app pide la contraseña actual justo antes; la función rechaza tokens con más de 5 minutos desde el último inicio de sesión, borra `users/{uid}` con todas sus subcolecciones y luego la cuenta de Auth.
 - El catálogo `cities` es de lectura pública: el formulario de registro lista las ciudades activas antes de que exista la cuenta.
 
 ### Tests

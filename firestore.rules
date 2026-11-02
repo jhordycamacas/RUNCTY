@@ -59,14 +59,40 @@ service cloud.firestore {
 
       allow create: if isOwner(uid) && isValidNewUser(request.resource.data);
 
+      // Owners edit only their personal data (RF-01-3). role, uid, email,
+      // consent and createdAt are immutable for clients.
       allow update: if isOwner(uid)
-        && !request.resource.data.diff(resource.data).affectedKeys()
-              .hasAny(['role', 'uid', 'email', 'createdAt']);
+        && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['firstName', 'lastName', 'birthDate', 'cityId', 'idNumber', 'updatedAt'])
+        && request.resource.data.updatedAt == request.time
+        && hasValidPersonalData(request.resource.data);
+
+      // No client delete: the `deleteAccount` callable removes the account.
 
       // Private sub-documents (sport profile, preferences).
       match /private/{docId} {
-        allow read, write: if isOwner(uid);
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && (docId != 'sportProfile' || isValidSportProfile(request.resource.data));
       }
+    }
+
+    // RF-01-9..12. Mirrors the app's zod schema.
+    function isValidSportProfile(d) {
+      return d.keys().hasAll(['level', 'goals', 'usualPaceSecPerKm', 'preferredDistanceKm', 'updatedAt'])
+        && d.keys().hasOnly(['level', 'goals', 'usualPaceSecPerKm', 'preferredDistanceKm', 'updatedAt'])
+        && d.level in ['beginner', 'intermediate', 'advanced']
+        && d.goals is list
+        && d.goals.size() >= 1
+        && d.goals.size() <= 5
+        && d.goals.hasOnly(['health', 'weightLoss', 'racePrep', 'pace', 'social'])
+        && d.usualPaceSecPerKm is number
+        && d.usualPaceSecPerKm >= 150
+        && d.usualPaceSecPerKm <= 1200
+        && d.preferredDistanceKm is number
+        && d.preferredDistanceKm >= 1
+        && d.preferredDistanceKm <= 50
+        && d.updatedAt == request.time;
     }
 
     // ---------- Catalogs ----------
