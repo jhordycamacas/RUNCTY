@@ -39,6 +39,7 @@ export const collections = {
   users: 'users',
   cities: 'cities',
   roles: 'roles',
+  routes: 'routes',
 } as const;
 
 /** Sub-documents under `users/{uid}/private/{doc}`. */

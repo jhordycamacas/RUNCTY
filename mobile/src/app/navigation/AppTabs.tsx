@@ -6,12 +6,12 @@ import { MIN_TOUCH_TARGET, useTheme, useTypeface } from '@/core/theme';
 import { Icon, type IconName } from '@/core/ui';
 
 import { HomeScreen } from '../screens/HomeScreen';
-import { RoutesPlaceholderScreen } from '../screens/RoutesPlaceholderScreen';
 import { ProfileNavigator, type ProfileStackParamList } from './ProfileNavigator';
+import { RoutesNavigator, type RoutesStackParamList } from './RoutesNavigator';
 
 export type AppTabsParamList = {
   Inicio: undefined;
-  Rutas: undefined;
+  Rutas: NavigatorScreenParams<RoutesStackParamList> | undefined;
   Perfil: NavigatorScreenParams<ProfileStackParamList> | undefined;
 };
 
@@ -50,7 +50,11 @@ export function AppTabs() {
       >
         {({ navigation }) => (
           <HomeScreen
-            onOpenRoutes={() => navigation.navigate('Rutas')}
+            onOpenRoutes={() => navigation.navigate('Rutas', { screen: 'RoutesList' })}
+            onOpenRoute={(routeId, slotKey) =>
+              // initial: false keeps the catalog below the detail, so Atrás returns to it.
+              navigation.navigate('Rutas', { screen: 'RouteDetail', params: { routeId, slotKey }, initial: false })
+            }
             onOpenProfile={() => navigation.navigate('Perfil', { screen: 'ProfileHome' })}
             onOpenPreferences={() => navigation.navigate('Perfil', { screen: 'Preferences' })}
           />
@@ -58,9 +62,14 @@ export function AppTabs() {
       </Tabs.Screen>
       <Tabs.Screen
         name="Rutas"
-        component={RoutesPlaceholderScreen}
         options={{ tabBarAccessibilityLabel: 'Rutas', tabBarIcon: tabIcon('map-outline', 'map') }}
-      />
+      >
+        {({ navigation }) => (
+          <RoutesNavigator
+            onCompleteProfile={() => navigation.navigate('Perfil', { screen: 'EditPersonalData', initial: false })}
+          />
+        )}
+      </Tabs.Screen>
       <Tabs.Screen
         name="Perfil"
         component={ProfileNavigator}

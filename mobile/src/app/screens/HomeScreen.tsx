@@ -7,7 +7,6 @@ import {
   BrandMark,
   Callout,
   Card,
-  EmptyState,
   Icon,
   ScreenHeader,
   SectionHeader,
@@ -16,10 +15,13 @@ import {
 } from '@/core/ui';
 import { useProfile } from '@/features/account/presentation/hooks/useAccount';
 import { useSignedInUser } from '@/features/auth';
+import { RecommendedRoutes } from '@/features/routes/presentation/components/RecommendedRoutes';
 import { getNextTrainingSlot } from '@/features/training/domain/trainingSlots';
 
 export interface HomeScreenProps {
   onOpenRoutes: () => void;
+  /** Opens a route in the Rutas tab showing the given time slot window. */
+  onOpenRoute: (routeId: string, slotKey: string | null) => void;
   onOpenProfile: () => void;
   onOpenPreferences: () => void;
 }
@@ -34,8 +36,8 @@ function useNow(intervalMs = 60_000): Date {
   return now;
 }
 
-/** Inicio tab: greeting, next training slot, shortcuts and (soon) recommended routes. */
-export function HomeScreen({ onOpenRoutes, onOpenProfile, onOpenPreferences }: HomeScreenProps) {
+/** Inicio tab: greeting, next training slot, shortcuts and recommended routes. */
+export function HomeScreen({ onOpenRoutes, onOpenRoute, onOpenProfile, onOpenPreferences }: HomeScreenProps) {
   const { spacing } = useTheme();
   const user = useSignedInUser();
   const profile = useProfile(user.uid);
@@ -69,13 +71,7 @@ export function HomeScreen({ onOpenRoutes, onOpenProfile, onOpenPreferences }: H
       </View>
 
       <SectionHeader title="Rutas recomendadas" action={{ label: 'Ver todas', onPress: onOpenRoutes }} />
-      <Card padding="sm">
-        <EmptyState
-          icon="trail-sign-outline"
-          title="Aún no hay rutas"
-          description="Pronto verás aquí las rutas recomendadas de tu ciudad con su nivel de seguridad por horario."
-        />
-      </Card>
+      <RecommendedRoutes onOpenRoute={onOpenRoute} />
     </Screen>
   );
 }
