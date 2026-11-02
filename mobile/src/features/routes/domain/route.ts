@@ -11,7 +11,7 @@ export const SAFETY_LEVELS = ['high', 'medium', 'low'] as const;
 export type Surface = (typeof SURFACES)[number];
 export type Difficulty = (typeof DIFFICULTIES)[number];
 export type Severity = (typeof SEVERITIES)[number];
-export type SafetyLevel = (typeof SAFETY_LEVELS)[number];
+type SafetyLevel = (typeof SAFETY_LEVELS)[number];
 
 export interface LatLng {
   lat: number;

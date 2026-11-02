@@ -14,7 +14,7 @@ export function CustomFontsProvider({ enabled, children }: { enabled: boolean; c
   return <CustomFontsContext.Provider value={enabled}>{children}</CustomFontsContext.Provider>;
 }
 
-export function typefaceFor(
+function typefaceFor(
   weight: FontWeightToken,
   customFonts: boolean,
 ): Pick<TextStyle, 'fontFamily' | 'fontWeight'> {

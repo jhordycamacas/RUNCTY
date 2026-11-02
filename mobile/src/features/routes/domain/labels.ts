@@ -14,7 +14,7 @@ export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
   advanced: 'Avanzado',
 };
 
-export const FACTOR_TYPE_LABELS: Record<string, string> = {
+const FACTOR_TYPE_LABELS: Record<string, string> = {
   poor_lighting: 'Iluminación deficiente',
   traffic: 'Tráfico',
   isolated_area: 'Zona solitaria',

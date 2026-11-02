@@ -10,7 +10,7 @@
  */
 import { invalidArgument } from '../shared/errors';
 
-export const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 50;
 const DEFAULT_SCAN = { batchSize: 200, maxScanned: 1000 };
 

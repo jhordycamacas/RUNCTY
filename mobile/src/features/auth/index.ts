@@ -10,6 +10,4 @@ export {
   SessionProvider,
   useSession,
   useSignedInUser,
-  type Session,
-  type SessionStatus,
 } from './presentation/session/SessionProvider';

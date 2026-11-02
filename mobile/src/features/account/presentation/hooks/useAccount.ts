@@ -6,7 +6,7 @@ import { changePassword, deleteAccount, updatePersonalData } from '../../applica
 import { accountGateway, authGateway, profileRepository } from '../../composition';
 import type { ChangePasswordInput, DeleteAccountInput } from '../../domain';
 
-export const profileQueryKey = (uid: string) => ['profile', uid] as const;
+const profileQueryKey = (uid: string) => ['profile', uid] as const;
 
 export function useProfile(uid: string) {
   return useQuery({

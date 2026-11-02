@@ -8,8 +8,8 @@ import { invalidArgument } from '../../shared/errors';
 import { SEVERITIES, type Severity } from './safety';
 import { isIsoDate, parseTime } from './time';
 
-export const SURFACES = ['asphalt', 'trail', 'mixed', 'track'] as const;
-export const DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const;
+const SURFACES = ['asphalt', 'trail', 'mixed', 'track'] as const;
+const DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const;
 export const RISK_FACTOR_TYPES = [
   'poor_lighting',
   'traffic',
@@ -20,8 +20,8 @@ export const RISK_FACTOR_TYPES = [
   'other',
 ] as const;
 
-export type Surface = (typeof SURFACES)[number];
-export type Difficulty = (typeof DIFFICULTIES)[number];
+type Surface = (typeof SURFACES)[number];
+type Difficulty = (typeof DIFFICULTIES)[number];
 export type RiskFactorType = (typeof RISK_FACTOR_TYPES)[number];
 
 /** Firestore auto ids (20 chars) and slugs used by the seed. */

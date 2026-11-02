@@ -42,7 +42,6 @@ export function normalizePermissions(value: unknown): Permission[] | null {
 }
 
 export const ADMIN_ROLE = 'admin';
-export const RUNNER_ROLE = 'runner';
 
 export interface SystemRole {
   name: string;

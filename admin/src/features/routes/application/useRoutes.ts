@@ -8,7 +8,7 @@ import type { SegmentInput } from '../domain/segment';
 import * as repo from '../infrastructure/routesRepository';
 
 /** Every mutation can change the computed safety, so all route queries share this prefix. */
-export const routesQueryKey = ['routes'] as const;
+const routesQueryKey = ['routes'] as const;
 
 export function useRoutes() {
   return useQuery({ queryKey: [...routesQueryKey, 'list'], queryFn: repo.listRoutes });

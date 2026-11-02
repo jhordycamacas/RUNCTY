@@ -16,8 +16,8 @@ export const SEVERITIES = ['low', 'medium', 'high'] as const;
 export type Severity = (typeof SEVERITIES)[number];
 export type SafetyLevel = 'high' | 'medium' | 'low';
 
-export const MAX_SCORE = 100;
-export const SEVERITY_PENALTY: Record<Severity, number> = { low: 10, medium: 20, high: 35 };
+const MAX_SCORE = 100;
+const SEVERITY_PENALTY: Record<Severity, number> = { low: 10, medium: 20, high: 35 };
 const SEVERITY_RANK: Record<Severity, number> = { high: 0, medium: 1, low: 2 };
 
 export interface SafetySlot {
@@ -40,7 +40,7 @@ export interface SafetyPenalty extends SafetyFactorInput {
   source: string;
 }
 
-export interface SegmentFactor {
+interface SegmentFactor {
   type: string;
   severity: Severity;
   description: string;
@@ -48,7 +48,7 @@ export interface SegmentFactor {
   source?: string;
 }
 
-export interface SegmentSlotSafety {
+interface SegmentSlotSafety {
   level: SafetyLevel;
   score: number;
   factors: SegmentFactor[];
@@ -56,12 +56,12 @@ export interface SegmentSlotSafety {
 
 export type SegmentSafety = Record<string, SegmentSlotSafety>;
 
-export interface RouteFactor extends SegmentFactor {
+interface RouteFactor extends SegmentFactor {
   segmentId: string;
   segmentName: string;
 }
 
-export interface RouteSlotSafety {
+interface RouteSlotSafety {
   level: SafetyLevel;
   score: number;
   startTime: string;

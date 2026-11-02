@@ -23,7 +23,7 @@ import { FactorList } from '../components/FactorList';
 import { SlotSelector } from '../components/SlotSelector';
 import { useSlotSelection } from '../hooks/useSlotSelection';
 
-export const SAFETY_DISCLAIMER =
+const SAFETY_DISCLAIMER =
   'El nivel de seguridad es una estimación según los factores registrados. No garantiza seguridad absoluta.';
 
 export interface RouteDetailScreenProps {

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MIN_LENGTH = 8;
 
 /** Password policy (RF-01-1): at least 8 characters, one letter and one number. */
 export const passwordSchema = z

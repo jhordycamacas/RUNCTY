@@ -33,7 +33,7 @@ if (useEmulators && isFirstInit) {
   connectFunctionsEmulator(functions, emulatorHost, EMULATOR_PORTS.functions);
 }
 
-export { app, auth, db, functions };
+export { auth, db, functions };
 
 export const collections = {
   users: 'users',

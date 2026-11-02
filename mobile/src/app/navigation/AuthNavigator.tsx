@@ -6,7 +6,7 @@ import { RegisterScreen } from '@/features/auth/presentation/screens/RegisterScr
 
 import { useStackScreenOptions } from './navigationStyles';
 
-export type AuthStackParamList = {
+type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;

@@ -5,7 +5,7 @@ import { restoreSessionRole } from '../../application/restoreSessionRole';
 import { authGateway, userDocGateway } from '../../composition';
 import type { AuthUser } from '../../domain';
 
-export type SessionStatus = 'loading' | 'signedOut' | 'signedIn';
+type SessionStatus = 'loading' | 'signedOut' | 'signedIn';
 
 export interface Session {
   status: SessionStatus;

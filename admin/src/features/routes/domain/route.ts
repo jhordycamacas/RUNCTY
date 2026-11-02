@@ -17,11 +17,11 @@ export interface LatLng {
   lng: number;
 }
 
-export interface RoutePoint extends LatLng {
+interface RoutePoint extends LatLng {
   label: string;
 }
 
-export interface RouteFactor {
+interface RouteFactor {
   segmentId: string;
   segmentName: string;
   type: string;
@@ -30,7 +30,7 @@ export interface RouteFactor {
 }
 
 /** Computed by the backend per time slot id. */
-export interface RouteSlotSafety {
+interface RouteSlotSafety {
   level: SafetyLevel;
   score: number;
   startTime: string;
@@ -84,8 +84,8 @@ export const levelLabel = (level: SafetyLevel): string => LEVEL_LABELS[level];
 export const MAX_ROUTE_NAME = 80;
 export const MAX_POINT_LABEL = 80;
 export const MAX_ROUTE_DESCRIPTION = 500;
-export const MAX_DISTANCE_KM = 500;
-export const MAX_ELEVATION_M = 10000;
+const MAX_DISTANCE_KM = 500;
+const MAX_ELEVATION_M = 10000;
 
 export interface RouteFormValues {
   name: string;
@@ -200,7 +200,7 @@ export type RouteFormErrors = Partial<Record<keyof RouteFormValues, string>>;
 export type FormResult<T, E> = { ok: true; value: T } | { ok: false; errors: E };
 
 /** First message per field, keyed by the top-level path. */
-export function collectErrors<K extends string>(issues: readonly z.core.$ZodIssue[]): Partial<Record<K, string>> {
+function collectErrors<K extends string>(issues: readonly z.core.$ZodIssue[]): Partial<Record<K, string>> {
   const errors: Partial<Record<K, string>> = {};
   for (const issue of issues) {
     const key = issue.path[0] as K;

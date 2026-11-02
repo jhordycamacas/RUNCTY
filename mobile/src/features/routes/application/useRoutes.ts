@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { routeRepository } from '../composition';
 
-export const routesQueryKeys = {
+const routesQueryKeys = {
   byCity: (cityId: string) => ['routes', 'city', cityId] as const,
   detail: (routeId: string) => ['routes', 'detail', routeId] as const,
   segments: (routeId: string) => ['routes', 'segments', routeId] as const,

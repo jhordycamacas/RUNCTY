@@ -23,7 +23,7 @@ function channelToLinear(channel: number): number {
   return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
 }
 
-export function relativeLuminance(hex: string): number {
+function relativeLuminance(hex: string): number {
   const [r, g, b] = parseHex(hex).map(channelToLinear);
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { sportProfileRepository } from '../../composition';
 import type { SportProfile } from '../../domain/sportProfile';
 
-export const sportProfileQueryKey = (uid: string) => ['sportProfile', uid] as const;
+const sportProfileQueryKey = (uid: string) => ['sportProfile', uid] as const;
 
 /** RF-01-10 */
 export function useSportProfile(uid: string) {

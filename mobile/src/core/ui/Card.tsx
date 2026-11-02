@@ -2,7 +2,7 @@ import { StyleSheet, View, type ViewProps } from 'react-native';
 
 import { useTheme, type ElevationToken } from '@/core/theme';
 
-export type CardPadding = 'none' | 'sm' | 'md' | 'lg';
+type CardPadding = 'none' | 'sm' | 'md' | 'lg';
 
 export interface CardProps extends ViewProps {
   /** Inner spacing; `none` lets full-width rows (ListItem) reach the edges. */

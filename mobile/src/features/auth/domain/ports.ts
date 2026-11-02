@@ -1,6 +1,6 @@
 /** Ports of the auth feature. Implemented by Firebase adapters in `infrastructure/`. */
 
-export type Unsubscribe = () => void;
+type Unsubscribe = () => void;
 
 export interface AuthUser {
   uid: string;

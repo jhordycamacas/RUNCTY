@@ -8,13 +8,13 @@ import { DomainError, invalidArgument, isUserNotFound } from '../shared/errors';
 import { ADMIN_ROLE, ALL_PERMISSIONS, normalizePermissions, type Permission } from './permissions';
 
 /** Lowercase slug: starts with a letter, 2–32 chars of a-z, 0-9 and `_`. */
-export const ROLE_ID_PATTERN = /^[a-z][a-z0-9_]{1,31}$/;
+const ROLE_ID_PATTERN = /^[a-z][a-z0-9_]{1,31}$/;
 const MAX_NAME = 60;
 const MAX_DESCRIPTION = 200;
 /** Concurrent claim updates while re-syncing a role (Auth Admin API quota friendly). */
 const SYNC_CHUNK = 10;
 
-export interface RoleData {
+interface RoleData {
   name: string;
   description: string;
   permissions: Permission[];
@@ -47,7 +47,7 @@ export interface RolesDeps {
 const asRecord = (raw: unknown): Record<string, unknown> =>
   typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {};
 
-export function parseRoleId(value: unknown): string {
+function parseRoleId(value: unknown): string {
   if (typeof value !== 'string' || !ROLE_ID_PATTERN.test(value)) {
     throw invalidArgument('invalid-role-id', 'Role id must be a lowercase slug (a-z, 0-9, _), 2-32 chars.');
   }

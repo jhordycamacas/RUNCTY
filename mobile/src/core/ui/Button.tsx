@@ -6,7 +6,7 @@ import { AppText, type TextColor } from './AppText';
 import { Icon, type IconName } from './Icon';
 
 /** `danger` is an outlined destructive action (never a filled red block). */
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> {
   label: string;

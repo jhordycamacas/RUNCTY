@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 /** Only Spanish for now: the interface is Spanish-only (RNF). */
-export const LANGUAGES = ['es'] as const;
-export type Language = (typeof LANGUAGES)[number];
+const LANGUAGES = ['es'] as const;
 
 export const FONT_SCALES = ['small', 'normal', 'large', 'xlarge'] as const;
 export type FontScale = (typeof FONT_SCALES)[number];

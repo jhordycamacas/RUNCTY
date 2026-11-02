@@ -56,7 +56,7 @@ export type WriteOp =
   | { op: 'delete'; path: string };
 
 /** Planner run by `mutateRoute`; may run more than once (transaction retries). */
-export type RoutePlan = (state: RouteState | null) => WriteOp[];
+type RoutePlan = (state: RouteState | null) => WriteOp[];
 
 export interface RoutesDeps {
   /** `cities/{id}` exists and is a city or a zone. */
@@ -75,7 +75,7 @@ export interface RoutesDeps {
 }
 
 /** Firestore paths; `routes` matches COLLECTIONS.routes in config.ts. */
-export const routePaths = {
+const routePaths = {
   route: (routeId: string) => `routes/${routeId}`,
   segment: (routeId: string, segmentId: string) => `routes/${routeId}/segments/${segmentId}`,
   timeSlot: (routeId: string, slotId: string) => `routes/${routeId}/timeSlots/${slotId}`,

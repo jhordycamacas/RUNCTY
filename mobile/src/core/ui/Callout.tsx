@@ -6,7 +6,7 @@ import { useTheme, type ThemeColors } from '@/core/theme';
 import { AppText, type TextColor } from './AppText';
 import { Icon, type IconName } from './Icon';
 
-export type CalloutTone = 'info' | 'success' | 'warning' | 'danger';
+type CalloutTone = 'info' | 'success' | 'warning' | 'danger';
 
 const TONES: Record<CalloutTone, { color: TextColor; background: keyof ThemeColors; icon: IconName }> = {
   info: { color: 'primaryText', background: 'primaryTint', icon: 'information-circle' },

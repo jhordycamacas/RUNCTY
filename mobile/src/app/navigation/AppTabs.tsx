@@ -12,7 +12,7 @@ import { ProfileNavigator, type ProfileStackParamList } from './ProfileNavigator
 import { RoutesNavigator, type RoutesStackParamList } from './RoutesNavigator';
 import { TAB_BAR_PADDING, tabBarContentHeight } from './tabBarLayout';
 
-export type AppTabsParamList = {
+type AppTabsParamList = {
   Inicio: undefined;
   Rutas: NavigatorScreenParams<RoutesStackParamList> | undefined;
   Perfil: NavigatorScreenParams<ProfileStackParamList> | undefined;

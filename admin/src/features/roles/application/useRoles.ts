@@ -7,7 +7,7 @@ import { createRole, deleteRole, listRoles, setUserRole, updateRole } from '../i
 
 export type SaveRoleResult = { created: true } | { created: false; syncedUsers: number };
 
-export const rolesQueryKey = ['roles'] as const;
+const rolesQueryKey = ['roles'] as const;
 
 export function useRoles() {
   return useQuery({ queryKey: rolesQueryKey, queryFn: listRoles });

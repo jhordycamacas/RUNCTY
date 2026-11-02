@@ -2,21 +2,21 @@ import { z } from 'zod';
 
 import { makeBirthDateSchema } from './birthDate';
 
-export const NAME_MAX_LENGTH = 60;
+const NAME_MAX_LENGTH = 60;
 
-export const firstNameSchema = z
+const firstNameSchema = z
   .string()
   .trim()
   .min(1, 'Ingresa tus nombres.')
   .max(NAME_MAX_LENGTH, `Máximo ${NAME_MAX_LENGTH} caracteres.`);
 
-export const lastNameSchema = z
+const lastNameSchema = z
   .string()
   .trim()
   .min(1, 'Ingresa tus apellidos.')
   .max(NAME_MAX_LENGTH, `Máximo ${NAME_MAX_LENGTH} caracteres.`);
 
-export const cityIdSchema = z.string().min(1, 'Selecciona tu ciudad.');
+const cityIdSchema = z.string().min(1, 'Selecciona tu ciudad.');
 
 /**
  * Optional Ecuadorian ID (cédula). Only the shape is checked (10 digits);

@@ -4,7 +4,7 @@ import { getPreferences, resetPreferences, savePreferences } from '../../applica
 import { preferencesDeps } from '../../composition';
 import type { Preferences } from '../../domain';
 
-export const preferencesQueryKey = (uid: string) => ['preferences', uid] as const;
+const preferencesQueryKey = (uid: string) => ['preferences', uid] as const;
 
 /** RF-01-14: Firestore preferences, or the defaults when there is no doc. */
 export function usePreferences(uid: string | null) {

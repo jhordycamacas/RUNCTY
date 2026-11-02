@@ -7,7 +7,7 @@
  * an ID token refresh and get the new claim.
  */
 
-export const DEFAULT_ROLE = 'runner';
+const DEFAULT_ROLE = 'runner';
 
 export type Claims = Record<string, unknown>;
 

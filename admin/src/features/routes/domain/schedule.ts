@@ -49,7 +49,7 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MINUTES = 24 * 60;
 
 /** Minutes since midnight for "HH:MM" (00:00–24:00), or null. */
-export function parseTime(value: string): number | null {
+function parseTime(value: string): number | null {
   const match = TIME_PATTERN.exec(value);
   if (!match) return null;
   const minutes = Number(match[1]) * 60 + Number(match[2]);

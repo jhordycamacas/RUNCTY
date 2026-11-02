@@ -1,11 +1,11 @@
 import type { LatLng, SafetyLevel, Severity } from './route';
 
 /** Same limits as functions/src/routes/domain/inputs.ts. */
-export const MIN_POINTS = 2;
+const MIN_POINTS = 2;
 export const MAX_POINTS = 500;
 export const MAX_SEGMENT_NAME = 80;
 
-export interface SegmentSlotSafety {
+interface SegmentSlotSafety {
   level: SafetyLevel;
   score: number;
   factors: { type: string; severity: Severity; description: string }[];

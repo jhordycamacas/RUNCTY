@@ -5,7 +5,7 @@ import { MIN_TOUCH_TARGET, useTheme } from '@/core/theme';
 import { AppText } from './AppText';
 import { Icon } from './Icon';
 
-export interface ChoiceOption {
+interface ChoiceOption {
   value: string;
   label: string;
   /** Shown but not selectable (e.g. an upcoming option). */

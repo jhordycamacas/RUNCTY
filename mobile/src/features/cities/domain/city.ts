@@ -1,9 +1,3 @@
-/** Coverage of a city or zone (RF-04), managed from the admin panel. */
-export type CityCoverage = 'active' | 'planned' | 'suspended';
-
-/** `cities/{id}` holds cities and their zones (`type: 'zone'`, `parentCityId`). */
-export type CityType = 'city' | 'zone';
-
 export interface City {
   id: string;
   name: string;

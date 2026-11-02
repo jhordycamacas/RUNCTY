@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-export const MIN_AGE = 5;
-export const MAX_AGE = 110;
+const MIN_AGE = 5;
+const MAX_AGE = 110;
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -12,7 +12,7 @@ interface DateParts {
 }
 
 /** Parses `YYYY-MM-DD` as a calendar date (no time zone involved). */
-export function parseIsoDate(value: string): DateParts | null {
+function parseIsoDate(value: string): DateParts | null {
   const match = ISO_DATE.exec(value);
   if (!match) return null;
   const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];

@@ -14,7 +14,7 @@ export interface RouteCardProps {
 }
 
 /** "3,2 km · 15 m de desnivel · Principiante · Asfalto". */
-export function routeMeta(route: Route): string {
+function routeMeta(route: Route): string {
   return [
     formatKm(route.distanceKm),
     `${formatElevation(route.elevationGainM)} de desnivel`,

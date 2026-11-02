@@ -14,7 +14,7 @@ export interface BadgeProps extends Omit<ViewProps, 'children'> {
 }
 
 /** Text and background pairs; all are covered by the contrast tests. */
-export const BADGE_TONES: Record<BadgeTone, { text: TextColor; background: keyof ThemeColors }> = {
+const BADGE_TONES: Record<BadgeTone, { text: TextColor; background: keyof ThemeColors }> = {
   neutral: { text: 'textMuted', background: 'surface' },
   primary: { text: 'primaryText', background: 'primaryTint' },
   success: { text: 'success', background: 'successTint' },

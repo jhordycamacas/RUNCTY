@@ -20,8 +20,8 @@ export const SPORT_GOAL_LABELS: Record<SportGoal, string> = {
   social: 'Socializar',
 };
 
-export const PACE_RANGE_SEC = { min: 150, max: 1200 } as const;
-export const DISTANCE_RANGE_KM = { min: 1, max: 50 } as const;
+const PACE_RANGE_SEC = { min: 150, max: 1200 } as const;
+const DISTANCE_RANGE_KM = { min: 1, max: 50 } as const;
 
 /** Stored entity at `users/{uid}/private/sportProfile` (mirrors firestore.rules). */
 export const sportProfileSchema = z.object({

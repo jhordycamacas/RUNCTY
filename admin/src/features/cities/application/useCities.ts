@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CityData } from '../domain/city';
 import { createCity, deleteCity, listCities, listCityOptions, updateCity } from '../infrastructure/citiesRepository';
 
-export const citiesQueryKey = ['cities'] as const;
+const citiesQueryKey = ['cities'] as const;
 
 export function useCities() {
   return useQuery({ queryKey: [...citiesQueryKey, 'all'], queryFn: listCities });

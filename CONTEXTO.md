@@ -276,7 +276,8 @@ La semana 8 no tiene actividad y la semana 11 queda fuera de los sprints.
 - [x] Sistema de diseño en la app (fuente Inter, íconos, componentes) y logo de RUNCTY como ícono de la app.
 - [x] Sprint 2: catálogo de rutas (EP-05) y evaluación de seguridad (EP-07, RF-07-1 a RF-07-11). Hay 5 rutas de ejemplo de Loja en el seed. El detalle está en `odd/tasks/design-system-sprint2.md`.
 - [x] App instalada en un Infinix X678B. Arreglos hechos en el dispositivo: la hora no se veía en la barra de estado (ahora sigue el tema de la app y no el del sistema), los textos de la barra de pestañas quedaban tapados (ahora la altura se adapta al tamaño de letra y a la barra de gestos de cada celular), y una sesión de un usuario borrado dejaba la app trabada (ahora se cierra sola).
-- [x] Todo el trabajo está en la rama `feat/design-system-sprint2`, subida a GitHub. Falta abrir el PR o los PRs hacia `main`.
+- [x] Limpieza de código zombie (2026-11-02) con `npx knip` en mobile, admin y functions, verificando cada caso con búsqueda en todo el repo. Se eliminaron código sin uso (`formatDistance`, tipos y constantes huérfanos), exports innecesarios de los barrels y el script `web` de mobile, que no podía funcionar. Quedó a propósito `contrast.ts`, que solo usa su test pero vigila el contraste AA de los temas.
+- [x] Todo integrado en `main` y subido a GitHub (2026-11-02).
 - [ ] Probar en el navegador la gestión de rutas del panel. Falta `admin/.env.local` en el clon nuevo: copiarlo de `admin/.env.example`.
 - [ ] Importar el backlog a Jira.
 - [ ] Validar el diseño y la paleta con el cliente.
