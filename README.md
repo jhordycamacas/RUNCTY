@@ -88,6 +88,7 @@ Todo el desarrollo se hace contra los **emuladores de Firebase** con el proyecto
 | --- | --- |
 | raíz | Configuración de Firebase (`firebase.json`, reglas, índices), script de datos semilla |
 | `functions/` | Cloud Functions (Gen 2, TypeScript) y tests de reglas de Firestore |
+| `mobile/` | App móvil (Expo + React Native + TypeScript) |
 
 Cada paquete se instala por separado (no se usan workspaces).
 
@@ -96,7 +97,10 @@ Cada paquete se instala por separado (no se usan workspaces).
 ```bash
 npm install                    # raíz: firebase-tools y script de semilla
 npm --prefix functions install # Cloud Functions
+npm --prefix mobile install    # App móvil
 ```
+
+O todo junto: `npm run install:all`.
 
 ### Emuladores y datos semilla
 
@@ -110,11 +114,24 @@ Usuario administrador de prueba (solo emulador): `admin@runcty.dev` / `Admin123!
 
 Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda en `emulator-data/`, ignorado por git).
 
+### App móvil
+
+1. Copia `mobile/.env.example` a `mobile/.env`. Con los emuladores no hace falta cambiar nada.
+2. Si pruebas en un teléfono físico, pon la IP de tu computador en la red local en `EXPO_PUBLIC_EMULATOR_HOST` (por ejemplo `192.168.1.20`). En el emulador de Android se usa `10.0.2.2` automáticamente.
+3. Con los emuladores levantados:
+
+```bash
+npm run mobile:start # abre Expo; escanea el QR con Expo Go o pulsa "a" para Android
+```
+
 ### Tests
 
 ```bash
 npm --prefix functions test           # tests unitarios de las functions
 npm --prefix functions run test:rules # tests de reglas de Firestore (levanta el emulador)
+npm --prefix mobile run typecheck     # tipos de la app móvil
+npm --prefix mobile test              # tests de la app móvil (Jest)
+npm --prefix mobile run lint          # ESLint (configuración de Expo)
 ```
 
 ## Equipo

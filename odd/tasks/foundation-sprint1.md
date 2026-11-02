@@ -47,7 +47,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 | ID | Tarea | Ruta | Estado |
 | --- | --- | --- | --- |
 | T1 | Base: config Firebase raíz, reglas deny-all, emuladores, functions Gen 2, tooling, seed de Loja | delegada (2+ archivos) | [x] |
-| T2 | App móvil: Expo + TS, tema y paleta, init Firebase, React Query, navegación, componentes base, Jest | delegada | [ ] |
+| T2 | App móvil: Expo + TS, tema y paleta, init Firebase, React Query, navegación, componentes base, Jest | delegada | [x] |
 | T3 | Autenticación: registro, login, recuperar contraseña, guard; trigger que asigna rol `runner` | delegada | [ ] |
 | T4 | Cuenta: actualizar datos, cambiar contraseña, eliminar cuenta (callable), perfil deportivo CRUD | delegada | [ ] |
 | T5 | Preferencias CRUD + restablecer, aplicadas al tema (modo oscuro, tamaño de letra) | delegada | [ ] |
@@ -68,7 +68,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 
 ## Progreso y evidencia
 
-### T1 — Base (commit `chore: scaffold firebase config, rules and functions`)
+### T1 — Base (commit `7b4d361` `chore: scaffold firebase config, rules and functions`)
 
 - Ruta: delegada (writer único; 2+ archivos no triviales).
 - Test-first: tests de reglas escritos primero y ejecutados contra reglas deny-all → RED (8 fallos de 16, los casos permitidos). Con `firestore.rules` real → GREEN.
@@ -78,6 +78,18 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - `npm run seed` vía `firebase emulators:exec --only auth,firestore`: crea `cities/loja` y `admin@runcty.dev` con claim `role: admin`. Sin variables de emulador, el script se niega a correr (exit 1).
 - Versiones: firebase-functions 7.4, firebase-admin 14.5, firebase-tools 15.34, TypeScript 7.0, Vitest 5.
 
+### T2 — App móvil (commit `feat(mobile): scaffold expo app with theme and firebase setup`)
+
+- Ruta: delegada (writer único).
+- Expo SDK 58 (React Native 0.88, React 19.3), firebase JS SDK 13, react-navigation 7, React Query 5, Jest 30 + jest-expo.
+- Test-first: `contrast.test.ts` y `Button.test.tsx` escritos antes de la implementación → RED (módulo inexistente); luego GREEN.
+- Paleta: `#D9534F` sobre blanco da 3,96:1 (no cumple 4,5:1), así que los rellenos de acciones primarias usan `#C9302C` (5,33:1 con texto blanco). `#D9534F` queda como tono de marca para acentos. Lo verifica un test por tema (claro y oscuro).
+- `npm --prefix mobile run typecheck`: OK.
+- `npm --prefix mobile test`: 22/22 OK.
+- `npm --prefix mobile run lint` (`expo lint`, config `eslint-config-expo`): sin errores.
+- `npx expo-doctor`: 20/20 checks OK.
+- `npx expo export --platform android`: bundle generado (resuelve el alias `@/` y el build RN de `@firebase/auth`).
+
 ## Siguiente paso
 
-T2.
+T3.
