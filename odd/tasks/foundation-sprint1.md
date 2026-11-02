@@ -51,7 +51,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 | T3 | Autenticación: registro, login, recuperar contraseña, guard; trigger que asigna rol `runner` | delegada | [x] |
 | T4 | Cuenta: actualizar datos, cambiar contraseña, eliminar cuenta (callable), perfil deportivo CRUD | delegada | [x] |
 | T5 | Preferencias CRUD + restablecer, aplicadas al tema (modo oscuro, tamaño de letra) | delegada | [x] |
-| T6 | Panel admin Next.js: login admin, usuarios con filtros, CRUD de roles, asignación de rol | delegada | [ ] |
+| T6 | Panel admin Next.js: login admin, usuarios con filtros, CRUD de roles, asignación de rol | delegada | [x] |
 | T7 | Ciudades y zonas: CRUD en admin, selector en registro, borrado protegido | delegada | [ ] |
 
 ## Criterios de aceptación
@@ -127,7 +127,7 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - `npx expo export --platform android`: bundle generado (`dist/` borrado).
 - Sin probar de punta a punta en dispositivo/emulador con el emulador de Functions (solo tests unitarios, de reglas y bundle).
 
-### T5 — Preferencias (commit `feat(preferences): add user preferences with theme and font scale`)
+### T5 — Preferencias (commit `d3682f5` `feat(preferences): add user preferences with theme and font scale`)
 
 - Ruta: delegada (writer único).
 - Doc `users/{uid}/private/preferences` con claves exactas: `language` (`es`), `fontScale` (`small|normal|large|xlarge` → 0,9/1/1,15/1,3), `appearance` (`system|light|dark`), `units` (`metric|imperial`), `notifications` {`enabled`, `safetyAlerts`, `events`}, `locationPrivacy` (`trustedContactsDuringSession|off`), `updatedAt` del servidor.
@@ -145,6 +145,27 @@ Fuera de alcance: épicas de sprints 2–5, despliegue real, consentimiento pare
 - `npx expo export --platform android`: bundle generado (`dist/` borrado).
 - Sin probar en dispositivo/emulador (solo tests unitarios, de reglas y bundle). Las notificaciones solo se guardan (no hay push todavía).
 
+### T6 — Panel admin, usuarios y roles (commit `feat(admin): add admin panel with users and roles management`)
+
+- Ruta: delegada (writer único; paquete nuevo + functions + reglas).
+- `admin/`: Next.js 16.4 (App Router, `src/`, Tailwind 4 como único sistema de estilos), SDK cliente de Firebase 13 (auth, firestore, functions) con emuladores (`NEXT_PUBLIC_USE_EMULATORS`, `NEXT_PUBLIC_EMULATOR_HOST`), React Query 5, zod 4, Vitest 5. **Sin cuenta de servicio ni firebase-admin.** Carpetas por feature (`auth`, `users`, `roles`, `cities`) con `domain/application/infrastructure/presentation`; las páginas de `src/app` solo montan pantallas. Se quitó del template `README.md`, los SVG de ejemplo, la fuente Geist (descarga en build) y `cacheComponents`; `--no-agents-md` evitó generar `AGENTS.md`/`CLAUDE.md`. `turbopack.root` fijado al paquete (hay lockfile en la raíz). `@types/node` 22 (Vitest 5 lo exige y es el runtime del proyecto).
+- Permisos (RF-02): catálogo en `functions/src/roles/permissions.ts` (`admin.access`, `users.read`, `roles.manage`, `cities.manage`, `routes.manage`, `reports.validate`, `ads.manage`, `clubs.manage`); el seed lo reutiliza. Roles del sistema: `runner` (sin permisos), `admin` (todos), `club_rep` (`admin.access`, `routes.manage`, `reports.validate`). Claims `{ role, perms }`; `assignDefaultRole` ahora da `{ role: 'runner', perms: [] }`.
+- Callables Gen 2 (lógica pura + envoltorio fino, `DomainError` → `HttpsError` con `details.reason` que el panel traduce): `createRole`, `updateRole` (re-sincroniza claims de los usuarios del rol en lotes de 10), `deleteRole` (rechaza roles del sistema y roles con usuarios, RF-02-4), `setUserRole` (rol existente, claims y luego espejo en el doc; bloqueo: nadie se quita su propio rol admin ni `roles.manage`), `searchUsers` (`users.read`).
+- `searchUsers`: filtros exactos (correo, identificación, fecha de nacimiento, ciudad) como igualdades en Firestore; nombres por prefijo sin mayúsculas ni tildes en memoria sobre un escaneo acotado (lotes de 200, máximo 1000 docs por pedido, cursor por id de documento, página ≤ 50). Se eligió en lugar de campos `firstNameLower` porque Firestore no compara sin tildes, evita migrar datos y tocar la app y basta para la escala del piloto. Devuelve solo `uid, email, firstName, lastName, birthDate, cityId, role` (`select()` en la consulta; sin identificación ni consentimiento).
+- Reglas: `hasPerm(p)` lee `request.auth.token.perms` (con `admin` como superusuario); lectura de `users` con `users.read`; `roles` legible con sesión y sin escrituras de cliente.
+- Panel: `/login` (exige `admin.access`, si no cierra sesión con aviso), layout protegido con menú según permisos, Usuarios (filtros, tabla, "Cargar más", cambio de rol con `roles.manage`), Roles (lista, crear, editar permisos, eliminar con confirmación y error claro).
+- Test-first:
+  - functions: `permissions.test.ts`, `authz.test.ts`, `roleService.test.ts`, `searchUsers.test.ts` → RED (módulos inexistentes, 4 archivos) → GREEN; `assignDefaultRole.test.ts` ajustado a `perms: []` → RED (3 fallos) → GREEN.
+  - reglas: casos de roles (sin escrituras de cliente) y permisos por claim → RED (2 fallos de 38) → GREEN.
+  - admin: `permissions.test.ts`, `config.test.ts`, `errorMessages.test.ts`, `userSearch.test.ts`, `role.test.ts` → RED (módulos inexistentes) → GREEN.
+- `npm --prefix functions run build`: OK. `typecheck`: OK.
+- `npm --prefix functions test`: 55/55 OK.
+- `npm --prefix functions run test:rules`: 38/38 OK.
+- `npm --prefix admin test`: 22/22 OK; `typecheck`, `lint` y `build` OK.
+- Seed dos veces seguidas bajo `firebase emulators:exec --only auth,firestore`: crea `cities/loja`, roles `runner, admin, club_rep` y el admin con `perms` completos (idempotente).
+- Prueba de humo con emuladores Auth + Firestore + Functions (script temporal, no versionado): un corredor nuevo recibe `{role:'runner', perms:[]}` y `searchUsers` le responde `permission-denied`; el admin encuentra "Ángela Ordóñez" buscando `angela`/`ORDO`; crear rol, asignarlo, editarlo (`syncedUsers: 1`), borrar rol con usuarios → `role-has-users`, borrar `runner` → `system-role`, quitarse el rol admin → `self-lockout`, borrar rol sin usuarios → OK.
+- Sin probar en navegador (solo build, tests y callables contra emuladores).
+
 ## Siguiente paso
 
-T6 + T7 (panel admin con usuarios y roles; ciudades y zonas).
+T7 (ciudades y zonas).

@@ -1,6 +1,6 @@
 /**
  * Seeds the local Firebase emulators with the minimum data for development:
- * the pilot city (Loja) and an admin account.
+ * the pilot city (Loja), the system roles and an admin account.
  *
  * Usage: start the emulators (`npm run emulators`), then `npm run seed`.
  * It refuses to run against anything that is not the emulator.
@@ -8,6 +8,9 @@
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+
+// Pure module (no Firebase imports): single source of truth for permissions.
+import { ALL_PERMISSIONS, SYSTEM_ROLES } from '../functions/src/roles/permissions';
 
 const PROJECT_ID = 'demo-runcty';
 const ADMIN_EMAIL = 'admin@runcty.dev';
@@ -38,6 +41,27 @@ async function seedCity(): Promise<void> {
   console.log('City seeded: cities/loja');
 }
 
+/** System roles (RF-02). merge keeps createdAt stable across re-runs. */
+async function seedRoles(): Promise<void> {
+  const db = getFirestore();
+  for (const [id, role] of Object.entries(SYSTEM_ROLES)) {
+    const ref = db.collection('roles').doc(id);
+    const exists = (await ref.get()).exists;
+    await ref.set(
+      {
+        name: role.name,
+        description: role.description,
+        permissions: [...role.permissions].sort(),
+        system: true,
+        ...(exists ? {} : { createdAt: FieldValue.serverTimestamp() }),
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    );
+  }
+  console.log(`Roles seeded: ${Object.keys(SYSTEM_ROLES).join(', ')}`);
+}
+
 async function seedAdmin(): Promise<void> {
   const auth = getAuth();
   const user = await auth.getUserByEmail(ADMIN_EMAIL).catch(() =>
@@ -48,7 +72,7 @@ async function seedAdmin(): Promise<void> {
       emailVerified: true,
     }),
   );
-  await auth.setCustomUserClaims(user.uid, { role: 'admin' });
+  await auth.setCustomUserClaims(user.uid, { role: 'admin', perms: [...ALL_PERMISSIONS] });
 
   await getFirestore().collection('users').doc(user.uid).set(
     {
@@ -69,6 +93,7 @@ async function main(): Promise<void> {
   assertEmulator();
   initializeApp({ projectId: PROJECT_ID });
   await seedCity();
+  await seedRoles();
   await seedAdmin();
 }
 

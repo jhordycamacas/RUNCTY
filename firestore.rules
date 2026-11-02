@@ -13,13 +13,20 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
-    // Roles live only in the custom claim `role`, assigned by Cloud Functions.
+    // Roles and permissions live only in the custom claims `{ role, perms }`,
+    // assigned by Cloud Functions (RF-02). No get() of role docs here.
     function hasRole(r) {
       return isSignedIn() && request.auth.token.role == r;
     }
 
     function isAdmin() {
       return hasRole('admin');
+    }
+
+    // Permission from the catalog in functions/src/roles/permissions.ts.
+    // `admin` is a superuser fallback for tokens issued before `perms` existed.
+    function hasPerm(p) {
+      return isSignedIn() && (isAdmin() || p in request.auth.token.get('perms', []));
     }
 
     // ---------- Users ----------
@@ -55,7 +62,9 @@ service cloud.firestore {
     }
 
     match /users/{uid} {
-      allow read: if isOwner(uid) || isAdmin();
+      // RF-01-2: the admin panel searches users through the `searchUsers`
+      // callable; direct reads are allowed with the same permission.
+      allow read: if isOwner(uid) || hasPerm('users.read');
 
       allow create: if isOwner(uid) && isValidNewUser(request.resource.data);
 
@@ -125,9 +134,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // RF-02: readable by signed-in users; written only by the role callables
+    // (createRole, updateRole, deleteRole), which also re-sync the claims.
     match /roles/{roleId} {
       allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow write: if false;
     }
 
     // Everything else is denied by default (no matching rule).

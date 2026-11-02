@@ -5,7 +5,7 @@ import { assignDefaultRole, resolveRoleAssignment, type RoleAssignmentDeps } fro
 describe('resolveRoleAssignment', () => {
   it('assigns runner to a brand new user', () => {
     expect(resolveRoleAssignment(undefined, undefined)).toEqual({
-      claims: { role: 'runner' },
+      claims: { role: 'runner', perms: [] },
       claimsChanged: true,
       role: 'runner',
       docChanged: true,
@@ -14,7 +14,7 @@ describe('resolveRoleAssignment', () => {
 
   it('keeps unrelated existing claims when adding the role', () => {
     const result = resolveRoleAssignment({ beta: true }, undefined);
-    expect(result.claims).toEqual({ beta: true, role: 'runner' });
+    expect(result.claims).toEqual({ beta: true, role: 'runner', perms: [] });
     expect(result.claimsChanged).toBe(true);
   });
 
@@ -61,7 +61,7 @@ describe('assignDefaultRole', () => {
     const role = await assignDefaultRole('u1', undefined, deps);
 
     expect(role).toBe('runner');
-    expect(deps.setCustomClaims).toHaveBeenCalledWith('u1', { role: 'runner' });
+    expect(deps.setCustomClaims).toHaveBeenCalledWith('u1', { role: 'runner', perms: [] });
     expect(deps.setDocRole).toHaveBeenCalledWith('u1', 'runner');
     // The client refreshes its token when the doc role appears, so the claim must exist first.
     expect(order).toEqual(['claims', 'doc']);

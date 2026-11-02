@@ -3,3 +3,4 @@
  */
 export { deleteAccount } from './deleteAccountCallable';
 export { onUserDocCreated } from './onUserDocCreated';
+export { searchUsers } from './searchUsersCallable';

@@ -89,6 +89,7 @@ Todo el desarrollo se hace contra los **emuladores de Firebase** con el proyecto
 | raíz | Configuración de Firebase (`firebase.json`, reglas, índices), script de datos semilla |
 | `functions/` | Cloud Functions (Gen 2, TypeScript) y tests de reglas de Firestore |
 | `mobile/` | App móvil (Expo + React Native + TypeScript) |
+| `admin/` | Panel de administración web (Next.js + Tailwind) |
 
 Cada paquete se instala por separado (no se usan workspaces).
 
@@ -98,6 +99,7 @@ Cada paquete se instala por separado (no se usan workspaces).
 npm install                    # raíz: firebase-tools y script de semilla
 npm --prefix functions install # Cloud Functions
 npm --prefix mobile install    # App móvil
+npm --prefix admin install     # Panel de administración
 ```
 
 O todo junto: `npm run install:all`.
@@ -107,7 +109,7 @@ O todo junto: `npm run install:all`.
 ```bash
 npm run functions:build # compila las functions antes de levantar el emulador
 npm run emulators       # Auth 9099 · Firestore 8080 · Functions 5001 · Storage 9199 · UI http://localhost:4000
-npm run seed            # en otra terminal: crea la ciudad Loja y el usuario administrador
+npm run seed            # en otra terminal: crea la ciudad Loja, los roles del sistema y el usuario administrador
 ```
 
 Usuario administrador de prueba (solo emulador): `admin@runcty.dev` / `Admin123!`.
@@ -124,9 +126,27 @@ Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda 
 npm run mobile:start # abre Expo; escanea el QR con Expo Go o pulsa "a" para Android
 ```
 
+### Panel de administración
+
+Web en Next.js que usa solo el SDK cliente de Firebase (sin cuentas de servicio). Las operaciones privilegiadas pasan por Cloud Functions callables que verifican los permisos de quien llama.
+
+1. Copia `admin/.env.example` a `admin/.env.local`. Con los emuladores no hace falta cambiar nada (`NEXT_PUBLIC_USE_EMULATORS=true`).
+2. Levanta los emuladores con Functions y carga la semilla (sección anterior).
+3. Inicia el panel y entra con el administrador de prueba (`admin@runcty.dev` / `Admin123!`):
+
+```bash
+npm run admin:dev # http://localhost:3000
+```
+
+Solo pueden entrar las cuentas con el permiso `admin.access`; a un corredor se le cierra la sesión con un aviso. El menú muestra las secciones según los permisos:
+
+- **Usuarios** (`users.read`): búsqueda por nombres y apellidos (inicio del texto, sin importar mayúsculas ni tildes), correo, identificación, fecha de nacimiento y ciudad, con paginación. Con `roles.manage` se cambia el rol de cada usuario.
+- **Roles** (`roles.manage`): crear, editar permisos y eliminar roles. Los roles del sistema (`runner`, `admin`, `club_rep`) no se eliminan, `admin` conserva todos los permisos y solo se elimina un rol sin usuarios asignados.
+
 ### Cuentas y roles
 
-- El registro crea la cuenta en Firebase Auth y el documento `users/{uid}` **sin rol**. La función `onUserDocCreated` asigna el custom claim `role: runner` (sin pisar un rol existente, por ejemplo `admin`) y luego copia el rol al documento; la app detecta ese cambio y refresca el token.
+- El registro crea la cuenta en Firebase Auth y el documento `users/{uid}` **sin rol**. La función `onUserDocCreated` asigna los custom claims `{ role: 'runner', perms: [] }` (sin pisar un rol existente, por ejemplo `admin`) y luego copia el rol al documento; la app detecta ese cambio y refresca el token.
+- Roles y permisos (RF-02): cada rol (`roles/{id}`) tiene una lista de permisos del catálogo de `functions/src/roles/permissions.ts`. Al asignar un rol, la función `setUserRole` escribe los claims `{ role, perms }`; al editar un rol, `updateRole` vuelve a escribir los claims de todos sus usuarios. Los cambios se aplican cuando el usuario renueva su token (como máximo una hora o al volver a iniciar sesión). Las reglas de Firestore leen los permisos del token (`hasPerm`), sin consultar documentos. Un administrador no puede quitarse su propio rol.
 - Para probar el registro completo deben estar corriendo los emuladores de Auth, Firestore **y Functions** (`npm run emulators` después de `npm run functions:build`).
 - Eliminar la cuenta llama a la función `deleteAccount` (callable). La app pide la contraseña actual justo antes; la función rechaza tokens con más de 5 minutos desde el último inicio de sesión, borra `users/{uid}` con todas sus subcolecciones y luego la cuenta de Auth.
 - El catálogo `cities` es de lectura pública: el formulario de registro lista las ciudades activas antes de que exista la cuenta.
@@ -139,6 +159,10 @@ npm --prefix functions run test:rules # tests de reglas de Firestore (levanta el
 npm --prefix mobile run typecheck     # tipos de la app móvil
 npm --prefix mobile test              # tests de la app móvil (Jest)
 npm --prefix mobile run lint          # ESLint (configuración de Expo)
+npm --prefix admin test               # tests del panel (Vitest)
+npm --prefix admin run typecheck      # tipos del panel
+npm --prefix admin run lint           # ESLint (configuración de Next.js)
+npm run admin:build                   # build de producción del panel
 ```
 
 ## Equipo

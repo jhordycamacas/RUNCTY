@@ -1,8 +1,8 @@
 /**
  * Default role assignment for new accounts.
  *
- * Roles live in the `role` custom claim (the only source the security rules
- * trust). The doc field `users/{uid}.role` is a read-only mirror for the
+ * Roles live in the `{ role, perms }` custom claims (the only source the
+ * security rules trust). The doc field `users/{uid}.role` is a read-only mirror for the
  * clients: it is written after the claim, so a client that sees it can force
  * an ID token refresh and get the new claim.
  */
@@ -26,7 +26,8 @@ export function resolveRoleAssignment(existingClaims: Claims | undefined, docRol
   const role = existingRole ?? DEFAULT_ROLE;
 
   return {
-    claims: existingRole ? current : { ...current, role },
+    // Runners get no admin permissions; see roles/permissions.ts.
+    claims: existingRole ? current : { ...current, role, perms: [] },
     claimsChanged: !existingRole,
     role,
     docChanged: docRole !== role,

@@ -72,6 +72,11 @@ const BOB_EMAIL = 'bob@runcty.dev';
 const bob = () => testEnv.authenticatedContext(BOB, { email: BOB_EMAIL }).firestore();
 const admin = () => testEnv.authenticatedContext(ADMIN, { role: 'admin' }).firestore();
 const anon = () => testEnv.unauthenticatedContext().firestore();
+/** Custom roles: permissions travel in the `perms` claim. */
+const userReader = () =>
+  testEnv.authenticatedContext('support-1', { role: 'support', perms: ['admin.access', 'users.read'] }).firestore();
+const roleManager = () =>
+  testEnv.authenticatedContext('manager-1', { role: 'manager', perms: ['admin.access', 'roles.manage'] }).firestore();
 
 describe('users/{uid}', () => {
   it('lets the owner read their own user doc', async () => {
@@ -308,10 +313,32 @@ describe('cities/{id}', () => {
 });
 
 describe('roles/{id}', () => {
-  it('lets signed-in users read and only admins write', async () => {
+  it('lets signed-in users read roles but not anonymous visitors', async () => {
     await assertSucceeds(getDoc(doc(alice(), 'roles', 'runner')));
+    await assertFails(getDoc(doc(anon(), 'roles', 'runner')));
+  });
+
+  it('denies every client write, even to admins (the role callables write them)', async () => {
     await assertFails(setDoc(doc(alice(), 'roles', 'runner'), { name: 'Corredor' }));
-    await assertSucceeds(setDoc(doc(admin(), 'roles', 'runner'), { name: 'Corredor' }));
+    await assertFails(setDoc(doc(admin(), 'roles', 'support'), { name: 'Soporte', permissions: [] }));
+    await assertFails(setDoc(doc(roleManager(), 'roles', 'support'), { name: 'Soporte', permissions: [] }));
+    await assertFails(deleteDoc(doc(admin(), 'roles', 'runner')));
+  });
+});
+
+describe('permission claims (perms)', () => {
+  it('lets a user with users.read read any user doc', async () => {
+    await assertSucceeds(getDoc(doc(userReader(), 'users', ALICE)));
+  });
+
+  it('denies reading users without users.read', async () => {
+    await assertFails(getDoc(doc(roleManager(), 'users', ALICE)));
+    const runner = testEnv.authenticatedContext(BOB, { role: 'runner', perms: [] }).firestore();
+    await assertFails(getDoc(doc(runner, 'users', ALICE)));
+  });
+
+  it('does not let users.read write other users', async () => {
+    await assertFails(updateDoc(doc(userReader(), 'users', ALICE), { firstName: 'X', updatedAt: serverTimestamp() }));
   });
 });
 
