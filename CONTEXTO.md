@@ -15,7 +15,7 @@
 Reto académico de la **UTPL** (materias Fundamentos de Ingeniería de Software e Ingeniería Web). El club **Gacelas Running Team (Loja, Ecuador)** planteó un problema y varios grupos de estudiantes compiten por proponer y desarrollar la mejor solución. Nuestro grupo quiere ganar el reto.
 
 - Inicio: semana del 12 al 18 de octubre de 2026 (levantamiento de requisitos).
-- Fase actual (2026-11-02): Sprints 1 y 2 implementados en la rama `feat/design-system-sprint2`. El Sprint 1 cubre usuarios, autenticación, preferencias, roles, administración de usuarios, ciudades y zonas. El Sprint 2 cubre el catálogo de rutas y la evaluación de seguridad por franja. La app también tiene un sistema de diseño nuevo. Sigue el Sprint 3: puntos de apoyo, alertas de zona, incidentes y generación de rutas seguras.
+- Fase actual (2026-11-02): Sprints 1 y 2 implementados en la rama `feat/design-system-sprint2`. La demo con Gacelas es esta semana, con Firebase real. El Sprint 1 cubre usuarios, autenticación, preferencias, roles, administración de usuarios, ciudades y zonas. El Sprint 2 cubre el catálogo de rutas y la evaluación de seguridad por franja. La app también tiene un sistema de diseño nuevo. Sigue el Sprint 3: puntos de apoyo, alertas de zona, incidentes y generación de rutas seguras.
 - Docentes tutores: Ing. Segundo Raymundo e Ing. Jorge Landacay.
 
 ## 2. Problema
@@ -274,10 +274,34 @@ La semana 8 no tiene actividad y la semana 11 queda fuera de los sprints.
 - [x] Manual de instalación en Android por USB: `docs/manual-instalacion-android.md`.
 - [x] Sistema de diseño en la app (fuente Inter, íconos, componentes) y logo de RUNCTY como ícono de la app.
 - [x] Sprint 2: catálogo de rutas (EP-05) y evaluación de seguridad (EP-07, RF-07-1 a RF-07-11). Hay 5 rutas de ejemplo de Loja en el seed. El detalle está en `odd/tasks/design-system-sprint2.md`.
-- [x] App instalada y probada en un Infinix X678B (Inicio con el diseño nuevo).
-- [ ] Probar en el dispositivo y en el navegador el resto de los flujos (rutas en la app, gestión de rutas en el panel).
+- [x] App instalada en un Infinix X678B. Arreglos hechos en el dispositivo: la hora no se veía en la barra de estado (ahora sigue el tema de la app y no el del sistema), los textos de la barra de pestañas quedaban tapados (ahora la altura se adapta al tamaño de letra y a la barra de gestos de cada celular), y una sesión de un usuario borrado dejaba la app trabada (ahora se cierra sola).
+- [x] Todo el trabajo está en la rama `feat/design-system-sprint2`, subida a GitHub. Falta abrir el PR o los PRs hacia `main`.
+- [ ] Probar en el navegador la gestión de rutas del panel. Falta `admin/.env.local` en el clon nuevo: copiarlo de `admin/.env.example`.
 - [ ] Importar el backlog a Jira.
 - [ ] Validar el diseño y la paleta con el cliente.
-- [ ] Crear el proyecto real de Firebase (plan Blaze) y cargar las claves en `.env`.
+- [ ] **Demo con Gacelas (semana del 2026-11-02):** pasar a Firebase real. Ver "Plan para la demo" abajo.
 - [ ] Mapas: integrar un proveedor detrás del puerto `MapProvider` (pospuesto; hoy las coordenadas se cargan a mano).
 - [ ] Sprint 3: puntos de apoyo (EP-06), alertas de zona (EP-07), incidentes (EP-08) y generación de rutas seguras (EP-09).
+
+### Cómo trabajar hoy (desarrollo local)
+
+- Repo en `D:\RUNCTY` (ruta corta obligatoria en Windows; ver sección "Reglas de trabajo").
+- Emuladores: `npm run functions:build`, luego `npm run emulators`, y en otra terminal `npm run seed`. El seed crea Loja, los roles, el admin (`admin@runcty.dev` / `Admin123!`) y 5 rutas de ejemplo.
+- Celular por USB: `adb reverse` de los puertos 8081, 9099, 8080, 5001 y 9199. Después, desde `mobile/`, `npm run android` (o `npm start` si la app ya está instalada). Detalle en `docs/manual-instalacion-android.md`.
+- Si se reinician los emuladores, los usuarios se borran. La app cierra sola una sesión vieja; hay que volver a iniciar sesión.
+
+### Plan para la demo (Firebase real)
+
+Objetivo: que la app funcione en cualquier celular sin la computadora, con datos compartidos.
+
+1. **El usuario** (cuenta y pago, no lo puede hacer el asistente):
+   - Crear el proyecto en Firebase Console y pasarlo al plan **Blaze**, con una alerta de presupuesto en Google Cloud.
+   - Activar Authentication con correo y contraseña, Firestore (región cercana, por ejemplo `southamerica-east1` o `us-central1`) y Storage.
+   - Registrar una app web y copiar su configuración (`apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`).
+   - Iniciar sesión en la CLI con `npx firebase login`.
+2. **El asistente:**
+   - Configurar la app y el panel con esos valores, sin subir claves a git.
+   - Desplegar las reglas, los índices y las Cloud Functions.
+   - Cargar los datos iniciales en producción: Loja, roles, el admin y las rutas de ejemplo.
+   - Generar un APK instalable para compartir.
+3. **Google Maps** queda para después de la demo: las rutas todavía no usan mapa.

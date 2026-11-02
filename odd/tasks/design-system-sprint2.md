@@ -102,6 +102,13 @@
 - Probado en el dispositivo: el Inicio con el diseño nuevo (captura revisada). El catálogo de rutas llega por recarga de Metro y queda pendiente de revisión visual por el usuario.
 - Pendiente: el usuario debe cerrar los emuladores que corren desde el repo viejo (el parent no tiene permiso para matar procesos) y levantarlos desde `D:\RUNCTY` para que el panel use los callables nuevos.
 
+### Arreglos en el dispositivo (commits `89fbfab` y `1f03154`)
+
+- Barra de estado: sigue el tema de la app. Barra de pestañas: la altura depende del tamaño de letra (de la app y del sistema) más el inset inferior; tiene test (`tabBarLayout.test.ts`).
+- Sesión muerta (usuario borrado o refresh token inválido): `restoreSessionRole` cierra sesión, y con un error de red sigue offline. Test-first: RED (el módulo no existía) y luego GREEN con 7 tests.
+- mobile: 260/260, typecheck y lint OK. El usuario confirmó que la app abre y se ve.
+- Emuladores reiniciados desde `D:\RUNCTY` (con permiso del usuario) y seed recargado.
+
 ## Siguiente paso
 
-Cerrar T6: reiniciar los emuladores desde `D:\RUNCTY` y probar el panel de rutas en el navegador. Después, decidir con el usuario cómo dividir la rama en PRs (más de 400 líneas).
+Demo con Gacelas esta semana: pasar a Firebase real (plan en CONTEXTO.md, sección 12). Después, abrir los PRs hacia `main` (dividir la rama, que tiene más de 400 líneas).
