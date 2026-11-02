@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
+import { restoreSessionRole } from '../../application/restoreSessionRole';
 import { authGateway, userDocGateway } from '../../composition';
 import type { AuthUser } from '../../domain';
 
@@ -47,8 +48,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     let stopWatching: (() => void) | undefined;
 
-    authGateway
-      .getRole(false)
+    restoreSessionRole(authGateway)
       .then((current) => {
         if (cancelled) return;
         setRole(current);

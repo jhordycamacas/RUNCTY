@@ -1,14 +1,16 @@
 import { createBottomTabNavigator, type BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import { useMemo } from 'react';
+import { useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { MIN_TOUCH_TARGET, useTheme, useTypeface } from '@/core/theme';
+import { useTheme, useTypeface } from '@/core/theme';
 import { Icon, type IconName } from '@/core/ui';
 
 import { HomeScreen } from '../screens/HomeScreen';
 import { ProfileNavigator, type ProfileStackParamList } from './ProfileNavigator';
 import { RoutesNavigator, type RoutesStackParamList } from './RoutesNavigator';
+import { TAB_BAR_PADDING, tabBarContentHeight } from './tabBarLayout';
 
 export type AppTabsParamList = {
   Inicio: undefined;
@@ -31,12 +33,13 @@ export function AppTabs() {
   const { colors, typography, fontScale } = useTheme();
   const labelTypeface = useTypeface('semibold');
   const insets = useSafeAreaInsets();
+  // Device accessibility text size; RN multiplies every label by it.
+  const { fontScale: systemFontScale } = useWindowDimensions();
 
   const screenOptions = useMemo<BottomTabNavigationOptions>(() => {
     const labelSize = typography.sizes.caption * fontScale;
-    // Icon (24) + label + vertical padding. The bottom inset keeps labels above the
-    // Android gesture/navigation bar, and the bar stays at least 48dp tall.
-    const contentHeight = Math.max(MIN_TOUCH_TARGET, 24 + labelSize * 1.4 + 12);
+    const labelLineHeight = Math.ceil(labelSize * 1.35);
+    const contentHeight = tabBarContentHeight(labelLineHeight * systemFontScale);
     return {
       headerShown: false,
       tabBarActiveTintColor: colors.primaryText,
@@ -44,13 +47,14 @@ export function AppTabs() {
       tabBarStyle: {
         backgroundColor: colors.background,
         borderTopColor: colors.border,
+        // The bottom inset keeps labels above the Android gesture/button bar.
         height: contentHeight + insets.bottom,
-        paddingTop: 6,
-        paddingBottom: insets.bottom + 6,
+        paddingTop: TAB_BAR_PADDING,
+        paddingBottom: insets.bottom + TAB_BAR_PADDING,
       },
-      tabBarLabelStyle: { fontSize: labelSize, ...labelTypeface },
+      tabBarLabelStyle: { fontSize: labelSize, lineHeight: labelLineHeight, ...labelTypeface },
     };
-  }, [colors, typography, fontScale, labelTypeface, insets.bottom]);
+  }, [colors, typography, fontScale, systemFontScale, labelTypeface, insets.bottom]);
 
   return (
     <Tabs.Navigator screenOptions={screenOptions}>
