@@ -1,8 +1,9 @@
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '@/core/theme';
 
 import { AppText } from './AppText';
+import { Icon } from './Icon';
 
 export interface FormMessageProps {
   message?: string | null;
@@ -19,15 +20,35 @@ export function FormMessage({ message, tone = 'error' }: FormMessageProps) {
     <View
       accessibilityRole={isError ? 'alert' : undefined}
       accessibilityLiveRegion="polite"
-      style={{
-        borderRadius: radii.md,
-        borderWidth: 1.5,
-        borderColor: isError ? colors.danger : colors.success,
-        padding: spacing.md,
-        marginBottom: spacing.lg,
-      }}
+      style={[
+        styles.row,
+        {
+          borderRadius: radii.md,
+          backgroundColor: isError ? colors.dangerTint : colors.successTint,
+          padding: spacing.md,
+          marginBottom: spacing.lg,
+        },
+      ]}
     >
-      <AppText color={isError ? 'danger' : 'success'}>{message}</AppText>
+      <Icon
+        name={isError ? 'alert-circle' : 'checkmark-circle'}
+        size={20}
+        color={isError ? 'danger' : 'success'}
+        style={{ marginRight: spacing.sm }}
+      />
+      <AppText color={isError ? 'danger' : 'success'} weight="medium" style={styles.text}>
+        {message}
+      </AppText>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  text: {
+    flex: 1,
+  },
+});

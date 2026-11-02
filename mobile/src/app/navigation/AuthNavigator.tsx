@@ -4,6 +4,8 @@ import { ForgotPasswordScreen } from '@/features/auth/presentation/screens/Forgo
 import { LoginScreen } from '@/features/auth/presentation/screens/LoginScreen';
 import { RegisterScreen } from '@/features/auth/presentation/screens/RegisterScreen';
 
+import { useStackScreenOptions } from './navigationStyles';
+
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
@@ -14,8 +16,9 @@ const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 /** Screens receive navigation as callbacks so features stay navigation-agnostic. */
 export function AuthNavigator() {
+  const screenOptions = useStackScreenOptions();
   return (
-    <Stack.Navigator screenOptions={{ headerBackTitle: 'Atrás' }}>
+    <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="Login" options={{ headerShown: false }}>
         {({ navigation }) => (
           <LoginScreen

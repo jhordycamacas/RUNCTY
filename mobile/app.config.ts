@@ -30,7 +30,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   web: {
     favicon: './assets/favicon.png',
   },
-  plugins: ['./plugins/with-short-cxx-dir'],
+  plugins: ['expo-font', './plugins/with-short-cxx-dir'],
   extra: {
     eas: process.env.EAS_PROJECT_ID ? { projectId: process.env.EAS_PROJECT_ID } : undefined,
   },

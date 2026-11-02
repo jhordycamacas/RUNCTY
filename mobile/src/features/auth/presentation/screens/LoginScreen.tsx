@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ControlledTextField } from '@/core/forms/ControlledTextField';
 import { useTheme } from '@/core/theme';
 import { AppText, Button, FormMessage, Screen } from '@/core/ui';
 
 import { loginSchema, mapAuthError, type LoginFormValues, type LoginInput } from '../../domain';
+import { AuthHeader } from '../components/AuthHeader';
 import { useSignIn } from '../hooks/useAuthMutations';
 
 export interface LoginScreenProps {
@@ -16,7 +17,7 @@ export interface LoginScreenProps {
 
 /** RF-01-6 */
 export function LoginScreen({ onGoToRegister, onGoToForgotPassword }: LoginScreenProps) {
-  const { spacing } = useTheme();
+  const { colors, spacing } = useTheme();
   const signIn = useSignIn();
   const { control, handleSubmit } = useForm<LoginFormValues, unknown, LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -27,12 +28,7 @@ export function LoginScreen({ onGoToRegister, onGoToForgotPassword }: LoginScree
 
   return (
     <Screen scroll>
-      <View style={{ marginTop: spacing.xxxl, marginBottom: spacing.xxl }}>
-        <AppText variant="display">RUNCTY</AppText>
-        <AppText variant="subtitle" color="textMuted">
-          Inicia sesión para continuar
-        </AppText>
-      </View>
+      <AuthHeader message="Inicia sesión para continuar" />
 
       <FormMessage message={signIn.isError ? mapAuthError(signIn.error) : null} />
 
@@ -40,6 +36,8 @@ export function LoginScreen({ onGoToRegister, onGoToForgotPassword }: LoginScree
         control={control}
         name="email"
         label="Correo electrónico"
+        icon="mail-outline"
+        placeholder="tucorreo@ejemplo.com"
         keyboardType="email-address"
         autoCapitalize="none"
         autoComplete="email"
@@ -49,18 +47,52 @@ export function LoginScreen({ onGoToRegister, onGoToForgotPassword }: LoginScree
         control={control}
         name="password"
         label="Contraseña"
+        icon="lock-closed-outline"
         secureTextEntry
         autoComplete="current-password"
         textContentType="password"
         returnKeyType="go"
         onSubmitEditing={onSubmit}
       />
-
-      <Button label="Iniciar sesión" onPress={onSubmit} loading={signIn.isPending} />
-      <View style={{ marginTop: spacing.md }}>
-        <Button label="¿Olvidaste tu contraseña?" variant="ghost" onPress={onGoToForgotPassword} />
-        <Button label="Crear una cuenta" variant="secondary" onPress={onGoToRegister} />
+      <View style={[styles.forgot, { marginTop: -spacing.sm, marginBottom: spacing.md }]}>
+        <Button
+          label="¿Olvidaste tu contraseña?"
+          variant="ghost"
+          fullWidth={false}
+          onPress={onGoToForgotPassword}
+        />
       </View>
+
+      <Button label="Iniciar sesión" icon="log-in-outline" onPress={onSubmit} loading={signIn.isPending} />
+
+      <View style={[styles.divider, { marginVertical: spacing.xl }]}>
+        <View style={[styles.line, { backgroundColor: colors.border }]} />
+        <AppText variant="label" color="textMuted" style={{ marginHorizontal: spacing.md }}>
+          ¿No tienes cuenta?
+        </AppText>
+        <View style={[styles.line, { backgroundColor: colors.border }]} />
+      </View>
+      <Button
+        label="Crear una cuenta"
+        variant="secondary"
+        icon="person-add-outline"
+        onPress={onGoToRegister}
+      />
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  forgot: {
+    // The wrapper hugs the button and sits on the right.
+    alignSelf: 'flex-end',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  line: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+  },
+});

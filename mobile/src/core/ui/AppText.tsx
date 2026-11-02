@@ -1,16 +1,31 @@
 import { StyleSheet, Text, type TextProps } from 'react-native';
 
-import { useTheme, type FontSizeToken, type ThemeColors } from '@/core/theme';
+import {
+  useTheme,
+  useTypeface,
+  type FontSizeToken,
+  type FontWeightToken,
+  type ThemeColors,
+} from '@/core/theme';
 
-type TextColor = keyof Pick<
+export type TextColor = keyof Pick<
   ThemeColors,
-  'text' | 'textMuted' | 'primaryText' | 'onPrimary' | 'danger' | 'success'
+  | 'text'
+  | 'textMuted'
+  | 'primaryText'
+  | 'onPrimary'
+  | 'danger'
+  | 'success'
+  | 'warning'
+  | 'safetyHigh'
+  | 'safetyMedium'
+  | 'safetyLow'
 >;
 
 export interface AppTextProps extends TextProps {
   variant?: FontSizeToken;
   color?: TextColor;
-  weight?: 'regular' | 'medium' | 'bold';
+  weight?: FontWeightToken;
   align?: 'left' | 'center' | 'right';
 }
 
@@ -27,7 +42,7 @@ export function AppText({
   const theme = useTheme();
   const size = theme.typography.sizes[variant] * theme.fontScale;
   const isHeading = variant === 'title' || variant === 'display';
-  const resolvedWeight = weight ?? (isHeading ? 'bold' : 'regular');
+  const typeface = useTypeface(weight ?? (isHeading ? 'bold' : 'regular'));
 
   return (
     <Text
@@ -39,9 +54,10 @@ export function AppText({
           color: theme.colors[color],
           fontSize: size,
           lineHeight: Math.round(size * 1.35),
-          fontWeight: theme.typography.weights[resolvedWeight],
           textAlign: align,
+          letterSpacing: isHeading ? -0.3 : 0,
         },
+        typeface,
         style,
       ]}
       {...rest}

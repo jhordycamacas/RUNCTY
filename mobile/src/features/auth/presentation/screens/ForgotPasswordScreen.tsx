@@ -4,7 +4,7 @@ import { View } from 'react-native';
 
 import { ControlledTextField } from '@/core/forms/ControlledTextField';
 import { useTheme } from '@/core/theme';
-import { AppText, Button, FormMessage, Screen } from '@/core/ui';
+import { Button, FormMessage, Screen } from '@/core/ui';
 
 import {
   forgotPasswordSchema,
@@ -12,6 +12,7 @@ import {
   type ForgotPasswordFormValues,
   type ForgotPasswordInput,
 } from '../../domain';
+import { AuthHeader } from '../components/AuthHeader';
 import { usePasswordReset } from '../hooks/useAuthMutations';
 
 // Neutral on purpose: it must not reveal whether the account exists.
@@ -31,9 +32,10 @@ export function ForgotPasswordScreen({ onBackToLogin }: { onBackToLogin: () => v
 
   return (
     <Screen scroll>
-      <AppText color="textMuted" style={{ marginBottom: spacing.xl }}>
-        Escribe el correo de tu cuenta y te enviaremos un enlace para crear una nueva contraseña.
-      </AppText>
+      <AuthHeader
+        compact
+        message="Escribe el correo de tu cuenta y te enviaremos un enlace para crear una nueva contraseña."
+      />
 
       <FormMessage message={reset.isError ? mapAuthError(reset.error) : null} />
       <FormMessage tone="success" message={reset.isSuccess ? SENT_MESSAGE : null} />
@@ -42,15 +44,17 @@ export function ForgotPasswordScreen({ onBackToLogin }: { onBackToLogin: () => v
         control={control}
         name="email"
         label="Correo electrónico"
+        icon="mail-outline"
+        placeholder="tucorreo@ejemplo.com"
         keyboardType="email-address"
         autoCapitalize="none"
         autoComplete="email"
         returnKeyType="send"
         onSubmitEditing={onSubmit}
       />
-      <Button label="Enviar enlace" onPress={onSubmit} loading={reset.isPending} />
+      <Button label="Enviar enlace" icon="send-outline" onPress={onSubmit} loading={reset.isPending} />
       <View style={{ marginTop: spacing.md }}>
-        <Button label="Volver a iniciar sesión" variant="ghost" onPress={onBackToLogin} />
+        <Button label="Volver a iniciar sesión" variant="ghost" icon="arrow-back" onPress={onBackToLogin} />
       </View>
     </Screen>
   );

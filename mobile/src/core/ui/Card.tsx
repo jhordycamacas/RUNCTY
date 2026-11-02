@@ -1,18 +1,33 @@
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
-import { useTheme } from '@/core/theme';
+import { useTheme, type ElevationToken } from '@/core/theme';
 
-export function Card({ style, ...rest }: ViewProps) {
-  const { colors, radii, spacing } = useTheme();
+export type CardPadding = 'none' | 'sm' | 'md' | 'lg';
+
+export interface CardProps extends ViewProps {
+  /** Inner spacing; `none` lets full-width rows (ListItem) reach the edges. */
+  padding?: CardPadding;
+  elevation?: ElevationToken;
+}
+
+const PADDING = { none: 0, sm: 'md', md: 'lg', lg: 'xl' } as const;
+
+/** Elevated surface with soft shadow, hairline border and rounded corners. */
+export function Card({ padding = 'md', elevation = 'sm', style, ...rest }: CardProps) {
+  const theme = useTheme();
+  const { colors, radii, spacing } = theme;
+  const step = PADDING[padding];
+
   return (
     <View
       style={[
         styles.base,
+        theme.elevation[elevation],
         {
-          backgroundColor: colors.surface,
+          backgroundColor: colors.surfaceElevated,
           borderColor: colors.border,
           borderRadius: radii.lg,
-          padding: spacing.lg,
+          padding: step === 0 ? 0 : spacing[step],
         },
         style,
       ]}

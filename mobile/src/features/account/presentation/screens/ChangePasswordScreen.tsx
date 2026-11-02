@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { ControlledTextField } from '@/core/forms/ControlledTextField';
-import { Button, FormMessage, Screen } from '@/core/ui';
+import { Button, Callout, FormMessage, Screen } from '@/core/ui';
 import { PASSWORD_HINT, mapAuthError } from '@/features/auth';
 
 import { changePasswordSchema, type ChangePasswordFormValues, type ChangePasswordInput } from '../../domain';
@@ -20,6 +20,12 @@ export function ChangePasswordScreen() {
 
   return (
     <Screen scroll>
+      <Callout
+        tone="info"
+        icon="shield-checkmark-outline"
+        title="Protege tu cuenta"
+        message="Primero confirma tu contraseña actual y luego elige una nueva."
+      />
       <FormMessage message={change.isError ? mapAuthError(change.error, 'reauthenticate') : null} />
       <FormMessage tone="success" message={change.isSuccess ? 'Tu contraseña se actualizó.' : null} />
 
@@ -27,6 +33,7 @@ export function ChangePasswordScreen() {
         control={control}
         name="currentPassword"
         label="Contraseña actual"
+        icon="lock-closed-outline"
         secureTextEntry
         autoComplete="current-password"
         textContentType="password"
@@ -35,6 +42,7 @@ export function ChangePasswordScreen() {
         control={control}
         name="newPassword"
         label="Nueva contraseña"
+        icon="key-outline"
         hint={PASSWORD_HINT}
         secureTextEntry
         autoComplete="new-password"
@@ -44,11 +52,12 @@ export function ChangePasswordScreen() {
         control={control}
         name="confirmNewPassword"
         label="Confirmar nueva contraseña"
+        icon="key-outline"
         secureTextEntry
         autoComplete="new-password"
         textContentType="newPassword"
       />
-      <Button label="Cambiar contraseña" onPress={onSubmit} loading={change.isPending} />
+      <Button label="Cambiar contraseña" icon="checkmark" onPress={onSubmit} loading={change.isPending} />
     </Screen>
   );
 }

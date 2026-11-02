@@ -2,8 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 
 import { ControlledTextField } from '@/core/forms/ControlledTextField';
-import { useTheme } from '@/core/theme';
-import { AppText, Button, Card, Checkbox, FormMessage, Screen } from '@/core/ui';
+import { Button, Callout, Checkbox, FormMessage, Screen } from '@/core/ui';
 import { mapAuthError } from '@/features/auth';
 
 import { deleteAccountSchema, type DeleteAccountFormValues, type DeleteAccountInput } from '../../domain';
@@ -16,7 +15,6 @@ const CONFIRM_LABEL = 'Entiendo que esta acción no se puede deshacer';
  * session ends and the app returns to the login screen automatically.
  */
 export function DeleteAccountScreen() {
-  const { spacing } = useTheme();
   const remove = useDeleteAccount();
   const { control, handleSubmit } = useForm<DeleteAccountFormValues, unknown, DeleteAccountInput>({
     resolver: zodResolver(deleteAccountSchema),
@@ -27,20 +25,18 @@ export function DeleteAccountScreen() {
 
   return (
     <Screen scroll>
-      <Card style={{ marginBottom: spacing.xl }}>
-        <AppText weight="bold" color="danger" style={{ marginBottom: spacing.sm }}>
-          Eliminar tu cuenta es permanente
-        </AppText>
-        <AppText>
-          Se borrarán tu acceso, tus datos personales, tu perfil deportivo y tus preferencias. No podrás
-          recuperarlos.
-        </AppText>
-      </Card>
+      <Callout
+        tone="danger"
+        icon="warning-outline"
+        title="Eliminar tu cuenta es permanente"
+        message="Se borrarán tu acceso, tus datos personales, tu perfil deportivo y tus preferencias. No podrás recuperarlos."
+      />
 
       <ControlledTextField
         control={control}
         name="password"
         label="Contraseña actual"
+        icon="lock-closed-outline"
         secureTextEntry
         autoComplete="current-password"
         textContentType="password"
@@ -59,7 +55,13 @@ export function DeleteAccountScreen() {
       />
 
       <FormMessage message={remove.isError ? mapAuthError(remove.error, 'reauthenticate') : null} />
-      <Button label="Eliminar mi cuenta" onPress={onSubmit} loading={remove.isPending} />
+      <Button
+        label="Eliminar mi cuenta"
+        variant="danger"
+        icon="trash-outline"
+        onPress={onSubmit}
+        loading={remove.isPending}
+      />
     </Screen>
   );
 }

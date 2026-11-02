@@ -33,6 +33,18 @@ describe.each([
     ['on-primary on primary', colors.onPrimary, colors.primary],
     ['on-primary on primary pressed', colors.onPrimary, colors.primaryPressed],
     ['danger text on background', colors.danger, colors.background],
+    ['text on elevated surface', colors.text, colors.surfaceElevated],
+    ['muted text on elevated surface', colors.textMuted, colors.surfaceElevated],
+    ['primary text on elevated surface', colors.primaryText, colors.surfaceElevated],
+    ['danger text on elevated surface', colors.danger, colors.surfaceElevated],
+    ['primary text on primary tint', colors.primaryText, colors.primaryTint],
+    ['success text on success tint', colors.success, colors.successTint],
+    ['warning text on warning tint', colors.warning, colors.warningTint],
+    ['danger text on danger tint', colors.danger, colors.dangerTint],
+    ['text on warning tint', colors.text, colors.warningTint],
+    ['safety high on its tint', colors.safetyHigh, colors.successTint],
+    ['safety medium on its tint', colors.safetyMedium, colors.warningTint],
+    ['safety low on its tint', colors.safetyLow, colors.dangerTint],
   ])('%s', (_label, fg, bg) => {
     expect(contrastRatio(fg, bg)).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
   });

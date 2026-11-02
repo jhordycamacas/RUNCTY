@@ -7,6 +7,8 @@ import { ProfileHomeScreen } from '@/features/account/presentation/screens/Profi
 import { PreferencesScreen } from '@/features/preferences/presentation/screens/PreferencesScreen';
 import { SportProfileScreen } from '@/features/sportProfile/presentation/screens/SportProfileScreen';
 
+import { useStackScreenOptions } from './navigationStyles';
+
 export type ProfileStackParamList = {
   ProfileHome: undefined;
   EditPersonalData: undefined;
@@ -19,9 +21,11 @@ export type ProfileStackParamList = {
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
 export function ProfileNavigator() {
+  const screenOptions = useStackScreenOptions();
   return (
-    <Stack.Navigator screenOptions={{ headerBackTitle: 'Atrás' }}>
-      <Stack.Screen name="ProfileHome" options={{ title: 'Perfil' }}>
+    <Stack.Navigator screenOptions={screenOptions}>
+      {/* The profile home draws its own large header with the avatar. */}
+      <Stack.Screen name="ProfileHome" options={{ title: 'Perfil', headerShown: false }}>
         {({ navigation }) => (
           <ProfileHomeScreen
             onEditPersonalData={() => navigation.navigate('EditPersonalData')}
@@ -35,10 +39,22 @@ export function ProfileNavigator() {
       <Stack.Screen name="EditPersonalData" options={{ title: 'Datos personales' }}>
         {({ navigation }) => <EditPersonalDataScreen onDone={() => navigation.goBack()} />}
       </Stack.Screen>
-      <Stack.Screen name="SportProfile" component={SportProfileScreen} options={{ title: 'Perfil deportivo' }} />
+      <Stack.Screen
+        name="SportProfile"
+        component={SportProfileScreen}
+        options={{ title: 'Perfil deportivo' }}
+      />
       <Stack.Screen name="Preferences" component={PreferencesScreen} options={{ title: 'Preferencias' }} />
-      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: 'Cambiar contraseña' }} />
-      <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{ title: 'Eliminar cuenta' }} />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{ title: 'Cambiar contraseña' }}
+      />
+      <Stack.Screen
+        name="DeleteAccount"
+        component={DeleteAccountScreen}
+        options={{ title: 'Eliminar cuenta' }}
+      />
     </Stack.Navigator>
   );
 }

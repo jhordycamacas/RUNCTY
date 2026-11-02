@@ -18,12 +18,25 @@ export function PersonalDataFields<TValues extends PersonalDataInput, TOutput>({
   const shared = control as unknown as Control<PersonalDataInput, unknown, TOutput>;
   return (
     <>
-      <ControlledTextField control={shared} name="firstName" label="Nombres" autoComplete="given-name" />
-      <ControlledTextField control={shared} name="lastName" label="Apellidos" autoComplete="family-name" />
+      <ControlledTextField
+        control={shared}
+        name="firstName"
+        label="Nombres"
+        icon="person-outline"
+        autoComplete="given-name"
+      />
+      <ControlledTextField
+        control={shared}
+        name="lastName"
+        label="Apellidos"
+        icon="person-outline"
+        autoComplete="family-name"
+      />
       <ControlledTextField
         control={shared}
         name="birthDate"
         label="Fecha de nacimiento"
+        icon="calendar-outline"
         placeholder="AAAA-MM-DD"
         hint="Ejemplo: 1995-04-12"
         keyboardType="numbers-and-punctuation"
@@ -35,6 +48,7 @@ export function PersonalDataFields<TValues extends PersonalDataInput, TOutput>({
         control={shared}
         name="idNumber"
         label="Cédula (opcional)"
+        icon="card-outline"
         hint="10 dígitos. Puedes dejarlo vacío."
         keyboardType="number-pad"
         maxLength={10}

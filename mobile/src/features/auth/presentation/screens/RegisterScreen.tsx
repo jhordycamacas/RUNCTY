@@ -4,7 +4,7 @@ import { View } from 'react-native';
 
 import { ControlledTextField } from '@/core/forms/ControlledTextField';
 import { useTheme } from '@/core/theme';
-import { AppText, Button, Checkbox, FormMessage, Screen } from '@/core/ui';
+import { AppText, Button, Card, Checkbox, FormMessage, Screen, SectionHeader } from '@/core/ui';
 
 import {
   PASSWORD_HINT,
@@ -13,6 +13,7 @@ import {
   type RegisterFormValues,
   type RegisterInput,
 } from '../../domain';
+import { AuthHeader } from '../components/AuthHeader';
 import { PersonalDataFields } from '../components/PersonalDataFields';
 import { useRegister } from '../hooks/useAuthMutations';
 
@@ -36,7 +37,7 @@ const defaultValues: RegisterFormValues = {
 
 /** RF-01-1 */
 export function RegisterScreen({ onGoToLogin }: { onGoToLogin: () => void }) {
-  const { spacing } = useTheme();
+  const { colors, spacing } = useTheme();
   const register = useRegister();
   const { control, handleSubmit } = useForm<RegisterFormValues, unknown, RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -47,16 +48,18 @@ export function RegisterScreen({ onGoToLogin }: { onGoToLogin: () => void }) {
 
   return (
     <Screen scroll>
-      <AppText color="textMuted" style={{ marginBottom: spacing.xl }}>
-        Completa tus datos para crear tu cuenta de corredor.
-      </AppText>
+      <AuthHeader compact message="Completa tus datos para crear tu cuenta de corredor." />
 
+      <SectionHeader title="Tus datos" />
       <PersonalDataFields control={control} />
 
+      <SectionHeader title="Acceso" />
       <ControlledTextField
         control={control}
         name="email"
         label="Correo electrónico"
+        icon="mail-outline"
+        placeholder="tucorreo@ejemplo.com"
         keyboardType="email-address"
         autoCapitalize="none"
         autoComplete="email"
@@ -66,6 +69,7 @@ export function RegisterScreen({ onGoToLogin }: { onGoToLogin: () => void }) {
         control={control}
         name="password"
         label="Contraseña"
+        icon="lock-closed-outline"
         hint={PASSWORD_HINT}
         secureTextEntry
         autoComplete="new-password"
@@ -75,14 +79,22 @@ export function RegisterScreen({ onGoToLogin }: { onGoToLogin: () => void }) {
         control={control}
         name="confirmPassword"
         label="Confirmar contraseña"
+        icon="lock-closed-outline"
         secureTextEntry
         autoComplete="new-password"
         textContentType="newPassword"
       />
 
-      <AppText variant="label" color="textMuted" style={{ marginBottom: spacing.sm }}>
-        {LOPDP_TEXT}
-      </AppText>
+      <SectionHeader title="Privacidad" />
+      <Card
+        padding="md"
+        elevation="none"
+        style={{ backgroundColor: colors.surface, marginBottom: spacing.md }}
+      >
+        <AppText variant="label" color="textMuted">
+          {LOPDP_TEXT}
+        </AppText>
+      </Card>
       <Controller
         control={control}
         name="acceptsLopdp"
@@ -98,7 +110,12 @@ export function RegisterScreen({ onGoToLogin }: { onGoToLogin: () => void }) {
 
       <FormMessage message={register.isError ? mapAuthError(register.error) : null} />
 
-      <Button label="Crear cuenta" onPress={onSubmit} loading={register.isPending} />
+      <Button
+        label="Crear cuenta"
+        icon="person-add-outline"
+        onPress={onSubmit}
+        loading={register.isPending}
+      />
       <View style={{ marginTop: spacing.md }}>
         <Button label="Ya tengo una cuenta" variant="ghost" onPress={onGoToLogin} />
       </View>

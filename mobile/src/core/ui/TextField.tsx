@@ -1,14 +1,18 @@
 import { useState, type ComponentRef, type Ref } from 'react';
-import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
+import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
-import { MIN_TOUCH_TARGET, useTheme } from '@/core/theme';
+import { MIN_TOUCH_TARGET, useTheme, useTypeface } from '@/core/theme';
 
 import { AppText } from './AppText';
+import { Icon, type IconName } from './Icon';
+import { IconButton } from './IconButton';
 
 export interface TextFieldProps extends TextInputProps {
   label: string;
   error?: string;
   hint?: string;
+  /** Optional leading icon (decorative). */
+  icon?: IconName;
   /** React 19 passes refs as a regular prop (lets react-hook-form focus the field). */
   ref?: Ref<ComponentRef<typeof TextInput>>;
 }
@@ -17,6 +21,7 @@ export function TextField({
   label,
   error,
   hint,
+  icon,
   secureTextEntry,
   style,
   onFocus,
@@ -25,10 +30,12 @@ export function TextField({
   ...rest
 }: TextFieldProps) {
   const { colors, radii, spacing, typography, fontScale } = useTheme();
+  const typeface = useTypeface('regular');
   const [hidden, setHidden] = useState(Boolean(secureTextEntry));
   const [focused, setFocused] = useState(false);
 
   const borderColor = error ? colors.danger : focused ? colors.primaryText : colors.border;
+  const iconColor = error ? 'danger' : focused ? 'primaryText' : 'textMuted';
 
   return (
     <View style={{ marginBottom: spacing.lg }}>
@@ -41,11 +48,13 @@ export function TextField({
           {
             borderColor,
             borderRadius: radii.md,
-            backgroundColor: colors.surface,
-            paddingHorizontal: spacing.md,
+            backgroundColor: focused ? colors.surfaceElevated : colors.surface,
+            paddingLeft: spacing.md,
+            paddingRight: secureTextEntry ? 0 : spacing.md,
           },
         ]}
       >
+        {icon ? <Icon name={icon} size={20} color={iconColor} style={{ marginRight: spacing.sm }} /> : null}
         <TextInput
           ref={ref}
           accessibilityLabel={label}
@@ -61,32 +70,31 @@ export function TextField({
             setFocused(false);
             onBlur?.(e);
           }}
-          style={[styles.input, { color: colors.text, fontSize: typography.sizes.body * fontScale }, style]}
+          style={[
+            styles.input,
+            { color: colors.text, fontSize: typography.sizes.body * fontScale },
+            typeface,
+            style,
+          ]}
           {...rest}
         />
         {secureTextEntry ? (
-          <Pressable
-            accessibilityRole="button"
+          <IconButton
+            icon={hidden ? 'eye-outline' : 'eye-off-outline'}
             accessibilityLabel={hidden ? 'Mostrar contraseña' : 'Ocultar contraseña'}
+            color="textMuted"
+            size={22}
             onPress={() => setHidden((v) => !v)}
-            style={styles.toggle}
-            hitSlop={8}
-          >
-            <AppText variant="label" weight="bold" color="primaryText">
-              {hidden ? 'Mostrar' : 'Ocultar'}
-            </AppText>
-          </Pressable>
+          />
         ) : null}
       </View>
       {error ? (
-        <AppText
-          variant="label"
-          color="danger"
-          accessibilityLiveRegion="polite"
-          style={{ marginTop: spacing.xs }}
-        >
-          {error}
-        </AppText>
+        <View style={[styles.messageRow, { marginTop: spacing.xs }]}>
+          <Icon name="alert-circle" size={16} color="danger" style={{ marginRight: spacing.xs }} />
+          <AppText variant="label" color="danger" accessibilityLiveRegion="polite" style={styles.message}>
+            {error}
+          </AppText>
+        </View>
       ) : hint ? (
         <AppText variant="label" color="textMuted" style={{ marginTop: spacing.xs }}>
           {hint}
@@ -101,15 +109,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1.5,
-    minHeight: MIN_TOUCH_TARGET,
+    minHeight: MIN_TOUCH_TARGET + 4,
   },
   input: {
     flex: 1,
     paddingVertical: 12,
   },
-  toggle: {
-    minHeight: MIN_TOUCH_TARGET,
-    justifyContent: 'center',
-    paddingLeft: 8,
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  message: {
+    flex: 1,
   },
 });

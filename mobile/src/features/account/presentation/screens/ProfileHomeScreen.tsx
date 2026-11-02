@@ -1,8 +1,20 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '@/core/theme';
-import { AppText, Button, Card, FormMessage, LoadingView, Screen } from '@/core/ui';
+import {
+  AppText,
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  FormMessage,
+  ListItem,
+  LoadingView,
+  Screen,
+  ScreenHeader,
+  SectionHeader,
+} from '@/core/ui';
 import { mapAuthError, useSession, useSignedInUser } from '@/features/auth';
 import { useActiveCities } from '@/features/cities/application/useActiveCities';
 
@@ -16,18 +28,6 @@ export interface ProfileHomeScreenProps {
   onDeleteAccount: () => void;
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  const { spacing } = useTheme();
-  return (
-    <View style={{ marginBottom: spacing.md }}>
-      <AppText variant="label" color="textMuted">
-        {label}
-      </AppText>
-      <AppText weight="medium">{value}</AppText>
-    </View>
-  );
-}
-
 /** Perfil tab: user data and account sections. */
 export function ProfileHomeScreen({
   onEditPersonalData,
@@ -36,7 +36,7 @@ export function ProfileHomeScreen({
   onChangePassword,
   onDeleteAccount,
 }: ProfileHomeScreenProps) {
-  const { spacing } = useTheme();
+  const { colors, spacing } = useTheme();
   const user = useSignedInUser();
   const { signOut } = useSession();
   const profile = useProfile(user.uid);
@@ -47,44 +47,124 @@ export function ProfileHomeScreen({
 
   const data = profile.data;
   const cityName = cities.data?.find((c) => c.id === data?.cityId)?.name ?? data?.cityId ?? '—';
-  const gap = { marginBottom: spacing.md };
+  const fullName = data ? `${data.firstName} ${data.lastName}` : '';
 
   return (
     <Screen scroll>
+      <ScreenHeader title="Perfil" />
       <FormMessage message={profile.isError ? mapAuthError(profile.error) : null} />
+
       {data ? (
-        <Card style={{ marginBottom: spacing.xl }}>
-          <AppText variant="title" style={gap}>
-            {`${data.firstName} ${data.lastName}`}
-          </AppText>
-          <Row label="Correo" value={data.email || user.email} />
-          <Row label="Fecha de nacimiento" value={data.birthDate} />
-          <Row label="Ciudad" value={cityName} />
-          {data.idNumber ? <Row label="Cédula" value={data.idNumber} /> : null}
+        <Card padding="lg" style={{ marginBottom: spacing.sm }}>
+          <View style={styles.identity}>
+            <Avatar name={fullName} size={64} />
+            <View style={[styles.identityText, { marginLeft: spacing.lg }]}>
+              <AppText variant="subtitle" weight="bold">
+                {fullName}
+              </AppText>
+              <AppText variant="label" color="textMuted">
+                {data.email || user.email}
+              </AppText>
+              <View style={[styles.badges, { marginTop: spacing.sm, gap: spacing.xs }]}>
+                <Badge label={cityName} tone="primary" icon="location-outline" />
+                {user.emailVerified ? (
+                  <Badge label="Correo verificado" tone="success" icon="checkmark-circle" />
+                ) : (
+                  <Badge label="Correo sin verificar" tone="warning" icon="mail-unread-outline" />
+                )}
+              </View>
+            </View>
+          </View>
+          <View
+            style={[
+              styles.facts,
+              {
+                borderTopColor: colors.border,
+                marginTop: spacing.lg,
+                paddingTop: spacing.md,
+                gap: spacing.xl,
+              },
+            ]}
+          >
+            <Fact label="Fecha de nacimiento" value={data.birthDate} />
+            {data.idNumber ? <Fact label="Cédula" value={data.idNumber} /> : null}
+          </View>
         </Card>
       ) : null}
 
-      <View style={gap}>
-        <Button label="Datos personales" variant="secondary" onPress={onEditPersonalData} disabled={!data} />
-      </View>
-      <View style={gap}>
-        <Button label="Perfil deportivo" variant="secondary" onPress={onOpenSportProfile} />
-      </View>
-      <View style={gap}>
-        <Button label="Preferencias" variant="secondary" onPress={onOpenPreferences} />
-      </View>
-      <View style={gap}>
-        <Button label="Cambiar contraseña" variant="secondary" onPress={onChangePassword} />
-      </View>
-
-      <FormMessage message={signOutError} />
-      <View style={gap}>
-        <Button
-          label="Cerrar sesión"
-          onPress={() => signOut().catch((e: unknown) => setSignOutError(mapAuthError(e)))}
+      <SectionHeader title="Tu cuenta" />
+      <Card padding="none" style={{ overflow: 'hidden' }}>
+        <ListItem
+          icon="person-outline"
+          title="Datos personales"
+          subtitle="Nombre, fecha de nacimiento, ciudad y cédula"
+          onPress={onEditPersonalData}
+          disabled={!data}
         />
-      </View>
-      <Button label="Eliminar cuenta" variant="ghost" onPress={onDeleteAccount} />
+        <ListItem
+          divider
+          icon="fitness-outline"
+          title="Perfil deportivo"
+          subtitle="Nivel, objetivos, ritmo y distancia"
+          onPress={onOpenSportProfile}
+        />
+        <ListItem
+          divider
+          icon="options-outline"
+          title="Preferencias"
+          subtitle="Apariencia, letra, unidades y notificaciones"
+          onPress={onOpenPreferences}
+        />
+        <ListItem divider icon="lock-closed-outline" title="Cambiar contraseña" onPress={onChangePassword} />
+      </Card>
+
+      <SectionHeader title="Sesión" />
+      <FormMessage message={signOutError} />
+      <Button
+        label="Cerrar sesión"
+        variant="secondary"
+        icon="log-out-outline"
+        onPress={() => signOut().catch((e: unknown) => setSignOutError(mapAuthError(e)))}
+      />
+      <Card padding="none" style={{ marginTop: spacing.lg, overflow: 'hidden' }}>
+        <ListItem
+          icon="trash-outline"
+          tone="danger"
+          title="Eliminar cuenta"
+          subtitle="Borra tus datos de forma permanente"
+          onPress={onDeleteAccount}
+        />
+      </Card>
     </Screen>
   );
 }
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <View>
+      <AppText variant="caption" color="textMuted">
+        {label}
+      </AppText>
+      <AppText weight="medium">{value}</AppText>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  identity: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  identityText: {
+    flex: 1,
+  },
+  badges: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  facts: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+});

@@ -8,12 +8,14 @@ export const palette = {
 
   // Brand soft red. red500 is the brand tone but only reaches 3.96:1 with
   // white, so filled controls use red600/red700 to keep text at >= 4.5:1.
+  red50: '#FDF1F0',
   red100: '#FBE9E8',
   red300: '#E8807C',
   red400: '#F08A86',
   red500: '#D9534F',
   red600: '#C9302C',
   red700: '#A8322E',
+  red900: '#3A1F1E',
 
   grey50: '#F7F7F7',
   grey100: '#EFEFEF',
@@ -23,10 +25,14 @@ export const palette = {
   grey800: '#2A2A2C',
   grey900: '#1C1C1E',
 
-  green600: '#2E7D32',
+  green50: '#EEF7EE',
   green300: '#81C784',
-  amber700: '#8A5300',
+  green600: '#2E7D32',
+  green900: '#1A2E1C',
+  amber50: '#FFF3E0',
   amber300: '#FFB74D',
+  amber700: '#8A5300',
+  amber900: '#33270F',
 } as const;
 
 export const spacing = {
@@ -62,7 +68,55 @@ export const fontSizes = {
 export const fontWeights = {
   regular: '400',
   medium: '500',
+  semibold: '600',
   bold: '700',
 } as const;
 
+export type FontWeightToken = keyof typeof fontWeights;
+
+/**
+ * Inter families loaded at startup (see App.tsx). Each weight is its own
+ * family, so components pick the family instead of setting `fontWeight`.
+ */
+export const fontFamilies: Record<FontWeightToken, string> = {
+  regular: 'Inter_400Regular',
+  medium: 'Inter_500Medium',
+  semibold: 'Inter_600SemiBold',
+  bold: 'Inter_700Bold',
+};
+
 export type FontSizeToken = keyof typeof fontSizes;
+
+/** Shadow on iOS plus `elevation` on Android, from flat to floating. */
+export const elevation = {
+  none: {
+    shadowColor: palette.black,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  sm: {
+    shadowColor: palette.black,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  md: {
+    shadowColor: palette.black,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  lg: {
+    shadowColor: palette.black,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+} as const;
+
+export type ElevationToken = keyof typeof elevation;

@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Alert, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
 import { ControlledChoiceGroup } from '@/core/forms/ControlledChoiceGroup';
 import { ControlledTextField } from '@/core/forms/ControlledTextField';
 import { useTheme } from '@/core/theme';
-import { AppText, Button, Card, FormMessage, LoadingView, Screen } from '@/core/ui';
+import { AppText, Badge, Button, Callout, Card, FormMessage, LoadingView, Screen, StatTile } from '@/core/ui';
 import { mapAuthError, useSignedInUser } from '@/features/auth';
 
 import {
@@ -48,7 +48,8 @@ export function SportProfileScreen() {
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: () => remove.mutate(undefined, { onSuccess: () => setNotice('Perfil deportivo eliminado.') }),
+          onPress: () =>
+            remove.mutate(undefined, { onSuccess: () => setNotice('Perfil deportivo eliminado.') }),
         },
       ],
     );
@@ -100,31 +101,51 @@ interface SummaryProps {
 
 function SportProfileSummary({ profile, notice, error, deleting, onEdit, onDelete }: SummaryProps) {
   const { spacing } = useTheme();
-  const rows: [string, string][] = [
-    ['Nivel', SPORT_LEVEL_LABELS[profile.level]],
-    ['Objetivos', profile.goals.map((g) => SPORT_GOAL_LABELS[g]).join(', ')],
-    ['Ritmo habitual', `${formatPace(profile.usualPaceSecPerKm)} min/km`],
-    ['Distancia preferida', `${profile.preferredDistanceKm} km`],
-  ];
+  const label = { marginBottom: spacing.sm };
 
   return (
     <Screen scroll>
       <FormMessage tone="success" message={notice} />
       <FormMessage message={error} />
-      <Card style={{ marginBottom: spacing.xl }}>
-        {rows.map(([label, value]) => (
-          <View key={label} style={{ marginBottom: spacing.md }}>
-            <AppText variant="label" color="textMuted">
-              {label}
-            </AppText>
-            <AppText weight="medium">{value}</AppText>
-          </View>
-        ))}
-      </Card>
-      <View style={{ marginBottom: spacing.md }}>
-        <Button label="Editar perfil deportivo" onPress={onEdit} />
+
+      <View style={[styles.stats, { gap: spacing.md, marginBottom: spacing.lg }]}>
+        <StatTile
+          icon="speedometer-outline"
+          value={`${formatPace(profile.usualPaceSecPerKm)} min/km`}
+          label="Ritmo habitual"
+        />
+        <StatTile
+          icon="flag-outline"
+          value={`${profile.preferredDistanceKm} km`}
+          label="Distancia preferida"
+        />
       </View>
-      <Button label="Eliminar perfil deportivo" variant="ghost" onPress={onDelete} loading={deleting} />
+
+      <Card style={{ marginBottom: spacing.xl }}>
+        <AppText variant="label" color="textMuted" style={label}>
+          Nivel
+        </AppText>
+        <Badge label={SPORT_LEVEL_LABELS[profile.level]} tone="primary" icon="podium-outline" />
+        <AppText variant="label" color="textMuted" style={[label, { marginTop: spacing.lg }]}>
+          Objetivos
+        </AppText>
+        <View style={[styles.badges, { gap: spacing.sm }]}>
+          {profile.goals.map((goal) => (
+            <Badge key={goal} label={SPORT_GOAL_LABELS[goal]} tone="neutral" />
+          ))}
+        </View>
+      </Card>
+
+      <View style={{ marginBottom: spacing.md }}>
+        <Button label="Editar perfil deportivo" icon="create-outline" onPress={onEdit} />
+      </View>
+      <Button
+        label="Eliminar perfil deportivo"
+        variant="danger"
+        icon="trash-outline"
+        onPress={onDelete}
+        loading={deleting}
+      />
     </Screen>
   );
 }
@@ -149,9 +170,12 @@ function SportProfileForm({ initial, saving, error, onSubmit, onCancel }: FormPr
   return (
     <Screen scroll>
       {!initial ? (
-        <AppText color="textMuted" style={{ marginBottom: spacing.xl }}>
-          Aún no tienes perfil deportivo. Cuéntanos cómo corres para recomendarte mejores rutas.
-        </AppText>
+        <Callout
+          tone="info"
+          icon="fitness-outline"
+          title="Crea tu perfil deportivo"
+          message="Cuéntanos cómo corres para recomendarte mejores rutas."
+        />
       ) : null}
 
       <ControlledChoiceGroup control={control} name="level" label="Nivel" options={LEVEL_OPTIONS} />
@@ -167,6 +191,7 @@ function SportProfileForm({ initial, saving, error, onSubmit, onCancel }: FormPr
         control={control}
         name="pace"
         label="Ritmo habitual (min/km)"
+        icon="speedometer-outline"
         placeholder="6:30"
         hint="Formato minutos:segundos por kilómetro."
         keyboardType="numbers-and-punctuation"
@@ -176,13 +201,14 @@ function SportProfileForm({ initial, saving, error, onSubmit, onCancel }: FormPr
         control={control}
         name="distance"
         label="Distancia preferida (km)"
+        icon="flag-outline"
         placeholder="10"
         keyboardType="decimal-pad"
         maxLength={5}
       />
 
       <FormMessage message={error} />
-      <Button label="Guardar perfil deportivo" onPress={submit} loading={saving} />
+      <Button label="Guardar perfil deportivo" icon="checkmark" onPress={submit} loading={saving} />
       {onCancel ? (
         <View style={{ marginTop: spacing.md }}>
           <Button label="Cancelar" variant="ghost" onPress={onCancel} />
@@ -191,3 +217,13 @@ function SportProfileForm({ initial, saving, error, onSubmit, onCancel }: FormPr
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  stats: {
+    flexDirection: 'row',
+  },
+  badges: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+});

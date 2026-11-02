@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { MIN_TOUCH_TARGET, useTheme } from '@/core/theme';
 
 import { AppText } from './AppText';
+import { Icon } from './Icon';
 
 export interface ChoiceOption {
   value: string;
@@ -23,7 +24,15 @@ export interface ChoiceGroupProps {
 }
 
 /** Selectable chips: a radio group or a checkbox group. */
-export function ChoiceGroup({ label, options, value, onChange, multiple = false, error, hint }: ChoiceGroupProps) {
+export function ChoiceGroup({
+  label,
+  options,
+  value,
+  onChange,
+  multiple = false,
+  error,
+  hint,
+}: ChoiceGroupProps) {
   const { colors, radii, spacing } = useTheme();
 
   const toggle = (option: string) => {
@@ -55,12 +64,16 @@ export function ChoiceGroup({ label, options, value, onChange, multiple = false,
               accessibilityState={{ checked: selected, disabled }}
               disabled={disabled}
               onPress={() => toggle(option.value)}
-              style={[
+              style={({ pressed }) => [
                 styles.chip,
                 {
                   borderRadius: radii.pill,
                   borderColor: selected ? colors.primary : colors.border,
-                  backgroundColor: selected ? colors.primary : colors.surface,
+                  backgroundColor: selected
+                    ? colors.primary
+                    : pressed
+                      ? colors.primaryTint
+                      : colors.surfaceElevated,
                   paddingHorizontal: spacing.lg,
                   marginRight: spacing.sm,
                   marginBottom: spacing.sm,
@@ -68,6 +81,9 @@ export function ChoiceGroup({ label, options, value, onChange, multiple = false,
                 },
               ]}
             >
+              {selected ? (
+                <Icon name="checkmark" size={18} color="onPrimary" style={{ marginRight: spacing.xs }} />
+              ) : null}
               <AppText weight="medium" color={selected ? 'onPrimary' : 'text'}>
                 {option.label}
               </AppText>
@@ -95,6 +111,8 @@ const styles = StyleSheet.create({
   },
   chip: {
     minHeight: MIN_TOUCH_TARGET,
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
   },

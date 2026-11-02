@@ -2,7 +2,17 @@ import { useState } from 'react';
 import { Alert, View } from 'react-native';
 
 import { useTheme } from '@/core/theme';
-import { AppText, Button, Card, ChoiceGroup, FormMessage, LoadingView, Screen, SwitchRow } from '@/core/ui';
+import {
+  AppText,
+  Button,
+  Card,
+  ChoiceGroup,
+  FormMessage,
+  LoadingView,
+  Screen,
+  SectionHeader,
+  SwitchRow,
+} from '@/core/ui';
 import { mapAuthError, useSignedInUser } from '@/features/auth';
 
 import {
@@ -48,7 +58,7 @@ export function PreferencesScreen() {
     return (
       <Screen>
         <FormMessage message={mapAuthError(query.error)} />
-        <Button label="Reintentar" onPress={() => void query.refetch()} />
+        <Button label="Reintentar" icon="refresh" onPress={() => void query.refetch()} />
       </Screen>
     );
   }
@@ -63,7 +73,9 @@ export function PreferencesScreen() {
           text: 'Restablecer',
           style: 'destructive',
           onPress: () =>
-            reset.mutate(undefined, { onSuccess: () => setNotice('Se restablecieron los valores predeterminados.') }),
+            reset.mutate(undefined, {
+              onSuccess: () => setNotice('Se restablecieron los valores predeterminados.'),
+            }),
         },
       ],
     );
@@ -80,7 +92,9 @@ export function PreferencesScreen() {
       saving={save.isPending}
       resetting={reset.isPending}
       onChange={() => setNotice(null)}
-      onSave={(preferences) => save.mutate(preferences, { onSuccess: () => setNotice('Preferencias guardadas.') })}
+      onSave={(preferences) =>
+        save.mutate(preferences, { onSuccess: () => setNotice('Preferencias guardadas.') })
+      }
       onReset={confirmReset}
     />
   );
@@ -97,8 +111,17 @@ interface FormProps {
   onReset: () => void;
 }
 
-function PreferencesForm({ initial, notice, error, saving, resetting, onChange, onSave, onReset }: FormProps) {
-  const { spacing, typography } = useTheme();
+function PreferencesForm({
+  initial,
+  notice,
+  error,
+  saving,
+  resetting,
+  onChange,
+  onSave,
+  onReset,
+}: FormProps) {
+  const { colors, spacing, typography } = useTheme();
   const [draft, setDraft] = useState<Preferences>(initial);
 
   const update = (patch: Partial<Preferences>) => {
@@ -109,10 +132,10 @@ function PreferencesForm({ initial, notice, error, saving, resetting, onChange, 
     update({ notifications: { ...draft.notifications, ...patch } });
 
   const previewSize = typography.sizes.body * fontScaleMultiplier(draft.fontScale);
-  const sectionTitle = { marginBottom: spacing.sm };
 
   return (
     <Screen scroll>
+      <SectionHeader title="Idioma y lectura" />
       <ChoiceGroup
         label="Idioma"
         options={LANGUAGE_OPTIONS}
@@ -127,7 +150,7 @@ function PreferencesForm({ initial, notice, error, saving, resetting, onChange, 
         value={[draft.fontScale]}
         onChange={(next) => update({ fontScale: single(FONT_SCALES, next) ?? draft.fontScale })}
       />
-      <Card style={{ marginBottom: spacing.xl }}>
+      <Card elevation="none" style={{ backgroundColor: colors.surface, marginBottom: spacing.lg }}>
         <AppText variant="label" color="textMuted">
           Vista previa
         </AppText>
@@ -136,6 +159,7 @@ function PreferencesForm({ initial, notice, error, saving, resetting, onChange, 
         </AppText>
       </Card>
 
+      <SectionHeader title="Visualización" />
       <ChoiceGroup
         label="Apariencia"
         options={optionsOf(APPEARANCES, APPEARANCE_LABELS)}
@@ -150,10 +174,8 @@ function PreferencesForm({ initial, notice, error, saving, resetting, onChange, 
         onChange={(next) => update({ units: single(UNIT_SYSTEMS, next) ?? draft.units })}
       />
 
-      <View style={{ marginBottom: spacing.lg }}>
-        <AppText variant="label" weight="medium" accessibilityRole="header" style={sectionTitle}>
-          Notificaciones
-        </AppText>
+      <SectionHeader title="Notificaciones" />
+      <Card padding="sm" style={{ marginBottom: spacing.lg }}>
         <SwitchRow
           label="Recibir notificaciones"
           value={draft.notifications.enabled}
@@ -171,8 +193,9 @@ function PreferencesForm({ initial, notice, error, saving, resetting, onChange, 
           disabled={!draft.notifications.enabled}
           onChange={(events) => updateNotifications({ events })}
         />
-      </View>
+      </Card>
 
+      <SectionHeader title="Privacidad" />
       <ChoiceGroup
         label="Privacidad de ubicación"
         options={optionsOf(LOCATION_PRIVACY_OPTIONS, LOCATION_PRIVACY_LABELS)}
@@ -186,11 +209,18 @@ function PreferencesForm({ initial, notice, error, saving, resetting, onChange, 
       <FormMessage tone="success" message={notice} />
       <FormMessage message={error} />
       <View style={{ marginBottom: spacing.md }}>
-        <Button label="Guardar preferencias" onPress={() => onSave(draft)} loading={saving} disabled={resetting} />
+        <Button
+          label="Guardar preferencias"
+          icon="checkmark"
+          onPress={() => onSave(draft)}
+          loading={saving}
+          disabled={resetting}
+        />
       </View>
       <Button
         label="Restablecer valores predeterminados"
         variant="ghost"
+        icon="refresh"
         onPress={onReset}
         loading={resetting}
         disabled={saving}

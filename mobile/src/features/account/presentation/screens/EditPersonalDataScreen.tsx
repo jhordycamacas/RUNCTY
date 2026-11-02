@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 import { useTheme } from '@/core/theme';
-import { AppText, Button, FormMessage, LoadingView, Screen } from '@/core/ui';
+import { Button, Card, FormMessage, ListItem, LoadingView, Screen, SectionHeader } from '@/core/ui';
 import {
   PersonalDataFields,
   mapAuthError,
@@ -49,17 +49,15 @@ function EditPersonalDataForm({ profile, onDone }: { profile: UserProfile; onDon
 
   return (
     <Screen scroll>
-      <AppText variant="label" color="textMuted">
-        Correo (no se puede cambiar)
-      </AppText>
-      <AppText weight="medium" style={{ marginBottom: spacing.xl }}>
-        {profile.email}
-      </AppText>
+      <Card padding="none" style={{ marginBottom: spacing.sm }}>
+        <ListItem icon="mail-outline" title={profile.email} subtitle="Tu correo no se puede cambiar" />
+      </Card>
 
+      <SectionHeader title="Datos personales" />
       <PersonalDataFields control={control} />
 
       <FormMessage message={update.isError ? mapAuthError(update.error) : null} />
-      <Button label="Guardar cambios" onPress={onSubmit} loading={update.isPending} />
+      <Button label="Guardar cambios" icon="checkmark" onPress={onSubmit} loading={update.isPending} />
     </Screen>
   );
 }
