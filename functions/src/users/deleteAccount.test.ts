@@ -14,6 +14,7 @@ function fakeDeps(overrides: Partial<DeleteAccountDeps> = {}): DeleteAccountDeps
   return {
     deleteUserData: vi.fn(async () => undefined),
     deleteAuthUser: vi.fn(async () => undefined),
+    isLastAdmin: vi.fn(async () => false),
     ...overrides,
   };
 }
@@ -77,5 +78,14 @@ describe('deleteUserAccount', () => {
       }),
     });
     await expect(deleteUserAccount('u1', deps)).rejects.toThrow('boom');
+  });
+});
+
+describe('deleteUserAccount last admin guard (SEC-08)', () => {
+  it('refuses to delete the only remaining admin and touches nothing', async () => {
+    const deps = fakeDeps({ isLastAdmin: vi.fn(async () => true) });
+    await expect(deleteUserAccount('admin-1', deps)).rejects.toMatchObject({ reason: 'last-admin' });
+    expect(deps.deleteUserData).not.toHaveBeenCalled();
+    expect(deps.deleteAuthUser).not.toHaveBeenCalled();
   });
 });

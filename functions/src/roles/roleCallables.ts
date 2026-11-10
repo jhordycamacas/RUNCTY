@@ -3,7 +3,8 @@ import { logger } from 'firebase-functions';
 import { onCall } from 'firebase-functions/v2/https';
 
 import { COLLECTIONS, auth, db } from '../config';
-import { requirePermission, runDomain } from '../shared/callable';
+import { requirePermission, roleCaller, runDomain } from '../shared/callable';
+import { isLastAdmin } from '../shared/lastAdmin';
 import { normalizePermissions } from './permissions';
 import { createRole as createRoleLogic, deleteRole as deleteRoleLogic, setUserRole as setUserRoleLogic, updateRole as updateRoleLogic, type RolesDeps } from './roleService';
 
@@ -50,6 +51,8 @@ function rolesDeps(): RolesDeps {
     },
     getCustomClaims: async (uid) => (await auth().getUser(uid)).customClaims,
     setCustomClaims: (uid, claims) => auth().setCustomUserClaims(uid, claims),
+    revokeRefreshTokens: (uid) => auth().revokeRefreshTokens(uid),
+    isLastAdmin,
     async setDocRole(uid, role) {
       try {
         await users().doc(uid).update({ role, updatedAt: FieldValue.serverTimestamp() });
@@ -64,7 +67,7 @@ function rolesDeps(): RolesDeps {
 /** RF-02-1 */
 export const createRole = onCall(async (request) => {
   const caller = requirePermission(request, 'roles.manage');
-  await runDomain(() => createRoleLogic(request.data, rolesDeps()));
+  await runDomain(() => createRoleLogic(request.data, roleCaller(request), rolesDeps()));
   logger.info('Role created', { caller, roleId: (request.data as { id?: unknown })?.id });
   return { ok: true };
 });
@@ -72,7 +75,7 @@ export const createRole = onCall(async (request) => {
 /** RF-02-3: also re-syncs the claims of every user with the role. */
 export const updateRole = onCall(async (request) => {
   const caller = requirePermission(request, 'roles.manage');
-  const result = await runDomain(() => updateRoleLogic(request.data, rolesDeps()));
+  const result = await runDomain(() => updateRoleLogic(request.data, roleCaller(request), rolesDeps()));
   logger.info('Role updated', { caller, roleId: (request.data as { id?: unknown })?.id, ...result });
   return result;
 });
@@ -87,7 +90,7 @@ export const deleteRole = onCall(async (request) => {
 
 export const setUserRole = onCall(async (request) => {
   const caller = requirePermission(request, 'roles.manage');
-  await runDomain(() => setUserRoleLogic(request.data, caller, rolesDeps()));
+  await runDomain(() => setUserRoleLogic(request.data, roleCaller(request), rolesDeps()));
   logger.info('User role changed', { caller, uid: (request.data as { uid?: unknown })?.uid });
   return { ok: true };
 });

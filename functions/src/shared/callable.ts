@@ -1,6 +1,7 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 
-import type { Permission } from '../roles/permissions';
+import { ADMIN_ROLE, type Permission } from '../roles/permissions';
+import type { RoleCaller } from '../roles/roleService';
 import { hasPermission } from './authz';
 import { DomainError } from './errors';
 
@@ -25,4 +26,14 @@ export async function runDomain<T>(fn: () => Promise<T>): Promise<T> {
     }
     throw error;
   }
+}
+
+/** Role-operation caller (uid, admin flag and permissions) from a signed-in request. */
+export function roleCaller(request: CallableRequest): RoleCaller {
+  const token: Record<string, unknown> = request.auth?.token ?? {};
+  return {
+    uid: request.auth?.uid ?? '',
+    isAdmin: token.role === ADMIN_ROLE,
+    permissions: Array.isArray(token.perms) ? token.perms.filter((p): p is string => typeof p === 'string') : [],
+  };
 }

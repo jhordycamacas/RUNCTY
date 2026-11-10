@@ -42,6 +42,18 @@ export interface RolesDeps {
   setCustomClaims(uid: string, claims: Claims): Promise<void>;
   /** Mirrors the role on `users/{uid}`; a missing doc is ignored. */
   setDocRole(uid: string, role: string): Promise<void>;
+  /** Invalidates the refresh tokens of `uid` so stale claims stop working at the next refresh. */
+  revokeRefreshTokens(uid: string): Promise<void>;
+  /** True when `uid` is the only user left with the admin role. */
+  isLastAdmin(uid: string): Promise<boolean>;
+}
+
+/** The authenticated caller of a role operation, derived from the ID token. */
+export interface RoleCaller {
+  uid: string;
+  isAdmin: boolean;
+  /** Permissions in the token (an admin implicitly holds every permission). */
+  permissions: readonly string[];
 }
 
 const asRecord = (raw: unknown): Record<string, unknown> =>
@@ -76,19 +88,43 @@ export function parseRoleInput(raw: unknown): RoleInput {
   return { id, name, description: description.trim(), permissions };
 }
 
+const adminOnly = (message: string) => new DomainError('permission-denied', 'admin-only', message);
+
+/**
+ * SEC-02: a delegate with `roles.manage` must not be able to escalate to admin.
+ * `roles.manage` and the admin role are admin-only, and a non-admin can never
+ * grant a permission they do not hold themselves.
+ */
+function assertCanGrant(caller: RoleCaller, permissions: readonly Permission[]): void {
+  if (caller.isAdmin) return;
+  if (permissions.includes('roles.manage')) {
+    throw adminOnly('Only an admin can grant the roles.manage permission.');
+  }
+  if (permissions.some((p) => !caller.permissions.includes(p))) {
+    throw new DomainError('permission-denied', 'permission-escalation', 'You cannot grant a permission you do not hold.');
+  }
+}
+
 const roleNotFound = (id: string) => new DomainError('not-found', 'role-not-found', `Role "${id}" does not exist.`);
 
-export async function createRole(raw: unknown, deps: RolesDeps): Promise<void> {
+export async function createRole(raw: unknown, caller: RoleCaller, deps: RolesDeps): Promise<void> {
   const { id, ...data } = parseRoleInput(raw);
+  assertCanGrant(caller, data.permissions);
   if (await deps.getRole(id)) {
     throw new DomainError('already-exists', 'role-exists', `Role "${id}" already exists.`);
   }
   await deps.createRole(id, { ...data, system: false });
 }
 
-export async function updateRole(raw: unknown, deps: RolesDeps): Promise<{ syncedUsers: number }> {
+export async function updateRole(raw: unknown, caller: RoleCaller, deps: RolesDeps): Promise<{ syncedUsers: number }> {
   const { id, ...data } = parseRoleInput(raw);
-  if (!(await deps.getRole(id))) throw roleNotFound(id);
+  const current = await deps.getRole(id);
+  if (!current) throw roleNotFound(id);
+  // Keeping or removing permissions is fine; only newly granted ones count.
+  assertCanGrant(
+    caller,
+    data.permissions.filter((p) => p === 'roles.manage' || !current.permissions.includes(p)),
+  );
   if (id === ADMIN_ROLE && data.permissions.length !== ALL_PERMISSIONS.length) {
     throw new DomainError('failed-precondition', 'admin-permissions', 'The admin role must keep every permission.');
   }
@@ -98,8 +134,10 @@ export async function updateRole(raw: unknown, deps: RolesDeps): Promise<{ synce
 }
 
 /**
- * Re-issues `{ role, perms }` to every user with the role. Users see the new
- * permissions on their next token refresh (at most one hour, or on sign-in).
+ * Re-issues `{ role, perms }` to every user with the role and revokes their
+ * refresh tokens, so the old claims stop working at the next token refresh
+ * instead of living on through repeated refreshes. An already issued ID token
+ * can still be used until it expires (at most one hour).
  */
 async function syncRoleClaims(roleId: string, perms: Permission[], deps: RolesDeps): Promise<number> {
   const uids = await deps.listUserIdsWithRole(roleId);
@@ -110,6 +148,7 @@ async function syncRoleClaims(roleId: string, perms: Permission[], deps: RolesDe
         try {
           const existing = await deps.getCustomClaims(uid);
           await deps.setCustomClaims(uid, claimsFor(existing, roleId, perms));
+          await deps.revokeRefreshTokens(uid);
           return 1;
         } catch (error) {
           // A user deleted from Auth while its doc still exists: nothing to sync.
@@ -137,7 +176,7 @@ export async function deleteRole(raw: unknown, deps: RolesDeps): Promise<void> {
   await deps.deleteRole(id);
 }
 
-export async function setUserRole(raw: unknown, callerUid: string, deps: RolesDeps): Promise<void> {
+export async function setUserRole(raw: unknown, caller: RoleCaller, deps: RolesDeps): Promise<void> {
   const input = asRecord(raw);
   const uid = input.uid;
   if (typeof uid !== 'string' || uid.length === 0 || uid.length > 128) {
@@ -157,16 +196,29 @@ export async function setUserRole(raw: unknown, callerUid: string, deps: RolesDe
     throw error;
   }
 
+  // SEC-02: only an admin can assign or revoke the admin role, and a non-admin
+  // cannot hand out permissions they lack.
+  if (!caller.isAdmin && (roleId === ADMIN_ROLE || existing?.role === ADMIN_ROLE)) {
+    throw adminOnly('Only an admin can assign or revoke the admin role.');
+  }
+  assertCanGrant(caller, role.permissions);
+
   // Lockout guard: an admin cannot take away their own admin role, and nobody
   // can remove their own ability to manage roles.
-  if (uid === callerUid) {
+  if (uid === caller.uid) {
     const losesAdmin = existing?.role === ADMIN_ROLE && roleId !== ADMIN_ROLE;
     if (losesAdmin || !role.permissions.includes('roles.manage')) {
       throw new DomainError('failed-precondition', 'self-lockout', 'You cannot remove your own admin role.');
     }
   }
 
-  // Claim first, then the doc mirror (same order as assignDefaultRole).
+  // SEC-08: the panel must always keep at least one admin.
+  if (existing?.role === ADMIN_ROLE && roleId !== ADMIN_ROLE && (await deps.isLastAdmin(uid))) {
+    throw new DomainError('failed-precondition', 'last-admin', 'You cannot remove the last admin.');
+  }
+
+  // Claim first, then revoke (SEC-03), then the doc mirror (same order as assignDefaultRole).
   await deps.setCustomClaims(uid, claimsFor(existing, roleId, role.permissions));
+  await deps.revokeRefreshTokens(uid);
   await deps.setDocRole(uid, roleId);
 }

@@ -2,6 +2,8 @@ import { logger } from 'firebase-functions';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
 import { COLLECTIONS, auth, db } from '../config';
+import { runDomain } from '../shared/callable';
+import { isLastAdmin } from '../shared/lastAdmin';
 import { deleteUserAccount, isRecentSignIn } from './deleteAccount';
 
 /**
@@ -17,10 +19,13 @@ export const deleteAccount = onCall(async (request) => {
   }
 
   const { uid } = request.auth;
-  await deleteUserAccount(uid, {
-    deleteUserData: (id) => db().recursiveDelete(db().collection(COLLECTIONS.users).doc(id)),
-    deleteAuthUser: (id) => auth().deleteUser(id),
-  });
+  await runDomain(() =>
+    deleteUserAccount(uid, {
+      isLastAdmin,
+      deleteUserData: (id) => db().recursiveDelete(db().collection(COLLECTIONS.users).doc(id)),
+      deleteAuthUser: (id) => auth().deleteUser(id),
+    }),
+  );
 
   logger.info('Account deleted', { uid });
   return { deleted: true };

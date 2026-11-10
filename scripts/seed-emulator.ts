@@ -15,6 +15,8 @@ import { ALL_PERMISSIONS, SYSTEM_ROLES } from '../functions/src/roles/permission
 // Pure route domain: the seed computes lengths and the safety index exactly like the callables.
 import { pathLengthM } from '../functions/src/routes/domain/geo';
 import type { LatLng, RiskFactorInput, RoutePoint, TimeSlotInput } from '../functions/src/routes/domain/inputs';
+// Pure guard (unit-tested): the seed only runs against local emulators.
+import { checkSeedTarget } from '../functions/src/seed/seedGuard';
 import { computeRouteSafety, computeSegmentSafety, type RouteSafety } from '../functions/src/routes/domain/safety';
 
 const PROJECT_ID = 'demo-runcty';
@@ -22,10 +24,13 @@ const ADMIN_EMAIL = 'admin@runcty.dev';
 const ADMIN_PASSWORD = 'Admin123!';
 
 function assertEmulator(): void {
-  if (!process.env.FIRESTORE_EMULATOR_HOST || !process.env.FIREBASE_AUTH_EMULATOR_HOST) {
-    console.error(
-      'Refusing to seed: FIRESTORE_EMULATOR_HOST and FIREBASE_AUTH_EMULATOR_HOST must point to the emulators.',
-    );
+  const error = checkSeedTarget({
+    projectId: process.env.GCLOUD_PROJECT ?? PROJECT_ID,
+    firestoreHost: process.env.FIRESTORE_EMULATOR_HOST,
+    authHost: process.env.FIREBASE_AUTH_EMULATOR_HOST,
+  });
+  if (error) {
+    console.error(error);
     process.exit(1);
   }
 }
