@@ -16,7 +16,7 @@
 Reto académico de la **UTPL** (materias Fundamentos de Ingeniería de Software e Ingeniería Web). El club **Gacelas Running Team (Loja, Ecuador)** planteó un problema y varios grupos de estudiantes compiten por proponer y desarrollar la mejor solución. Nuestro grupo quiere ganar el reto.
 
 - Inicio: semana del 12 al 18 de octubre de 2026 (levantamiento de requisitos).
-- Fase actual (2026-11-02): Sprints 1 y 2 implementados en la rama `feat/design-system-sprint2`. La demo con Gacelas es esta semana, con Firebase real. El Sprint 1 cubre usuarios, autenticación, preferencias, roles, administración de usuarios, ciudades y zonas. El Sprint 2 cubre el catálogo de rutas y la evaluación de seguridad por franja. La app también tiene un sistema de diseño nuevo. Sigue el Sprint 3: puntos de apoyo, alertas de zona, incidentes y generación de rutas seguras.
+- Fase actual (2026-11-10): Sprints 1 y 2 implementados, integrados en `main` y verificados contra el código (sección 14). La demo con Gacelas con Firebase real sigue pendiente. El Sprint 1 cubre usuarios, autenticación, preferencias, roles, administración de usuarios, ciudades y zonas. El Sprint 2 cubre el catálogo de rutas y la evaluación de seguridad por franja. La app también tiene un sistema de diseño nuevo. Sigue el Sprint 3: puntos de apoyo, alertas de zona, incidentes y generación de rutas seguras.
 - Docentes tutores: Ing. Segundo Raymundo e Ing. Jorge Landacay.
 
 ## 2. Problema
@@ -253,12 +253,12 @@ Se mantiene el calendario del equipo: Sprint 1, semanas 4–5; Sprint 2, semana 
 - [x] Arquitectura y stack definidos (sección 9).
 - [x] Backlog corregido según el docente (sección 11).
 - [x] Estructura inicial del proyecto (app móvil, panel admin, Cloud Functions, reglas, emuladores).
-- [x] Sprint 1 implementado y con tests: EP-01, EP-25, EP-26, EP-02, EP-27 y EP-04. El detalle está en `odd/tasks/foundation-sprint1.md`.
+- [x] Sprint 1 implementado y con tests: EP-01 (incluye la administración de usuarios, antes EP-27), EP-25, EP-26, EP-02 y EP-04. El detalle está en `odd/tasks/foundation-sprint1.md`.
 - [x] Manual de instalación en Android por USB: `docs/manual-instalacion-android.md`.
 - [x] Sistema de diseño en la app (fuente Inter, íconos, componentes) y logo de RUNCTY como ícono de la app.
 - [x] Sprint 2: catálogo de rutas (EP-05) y evaluación de seguridad (EP-07, RF-07-1 a RF-07-11). Hay 5 rutas de ejemplo de Loja en el seed. El detalle está en `odd/tasks/design-system-sprint2.md`.
 - [x] App instalada en un Infinix X678B. Arreglos hechos en el dispositivo: la hora no se veía en la barra de estado (ahora sigue el tema de la app y no el del sistema), los textos de la barra de pestañas quedaban tapados (ahora la altura se adapta al tamaño de letra y a la barra de gestos de cada celular), y una sesión de un usuario borrado dejaba la app trabada (ahora se cierra sola).
-- [x] Limpieza de código zombie (2026-11-02) con `npx knip` en mobile, admin y functions, verificando cada caso con búsqueda en todo el repo. Se eliminaron código sin uso (`formatDistance`, tipos y constantes huérfanos), exports innecesarios de los barrels y el script `web` de mobile, que no podía funcionar. Quedó a propósito `contrast.ts`, que solo usa su test pero vigila el contraste AA de los temas.
+- [x] Limpieza de código zombie (2026-11-02) con `npx knip` en mobile, admin y functions, verificando cada caso con búsqueda en todo el repo. Se eliminaron código sin uso (`formatDistance`, tipos y constantes huérfanos), exports innecesarios de los barrels y el script `web` de mobile, que no podía funcionar. Quedó a propósito `contrast.ts`, que solo usa su test pero vigila el contraste AA de los temas. **Revisión del 2026-11-10:** `knip` todavía marca restos (ver 14.4) y no está instalado como dependencia de desarrollo; se ejecuta con `npx --yes knip`.
 - [x] Todo integrado en `main` y subido a GitHub (2026-11-02).
 - [ ] Probar en el navegador la gestión de rutas del panel. Falta `admin/.env.local` en el clon nuevo: copiarlo de `admin/.env.example`.
 - [x] Backlog final con la plantilla del docente y trazabilidad con el Excel (sección 11).
@@ -267,16 +267,23 @@ Se mantiene el calendario del equipo: Sprint 1, semanas 4–5; Sprint 2, semana 
 - [x] Especificación de los 155 casos de uso y PDF de los diagramas del requisito elegido, en `D:\Proyecto5to\Docs\Entregables` (sección 13). Reemplaza a `Especificaciones de casos de uso RUNCTY - Con diagramas.docx`, que describe el modelo viejo.
 - [ ] Importar el backlog a Jira.
 - [ ] Validar el diseño y la paleta con el cliente.
-- [ ] **Demo con Gacelas (semana del 2026-11-02):** pasar a Firebase real. Ver "Plan para la demo" abajo.
+- [ ] **Demo con Gacelas:** pasar a Firebase real. La fecha original (semana del 2026-11-02) ya pasó; confirmar la nueva. Ver "Plan para la demo" abajo.
 - [ ] Mapas: integrar un proveedor detrás del puerto `MapProvider` (pospuesto; hoy las coordenadas se cargan a mano).
 - [ ] Sprint 3: puntos de apoyo (EP-06), alertas de zona (EP-07), incidentes (EP-08) y generación de rutas seguras (EP-09).
+- [x] Backend local en Docker (2026-11-10): emuladores de Firebase, seed y panel con `docker compose up -d --build`, puertos solo en `127.0.0.1` y procesos sin root.
+- [x] Auditoría del 2026-11-10 (seguridad, UX/UI y verificación de sprints): hallazgos y plan en la sección 14.
+- [x] Correcciones de seguridad del servidor (T1; SEC-01, 02, 03, 05, 06 y 08): hechas en la rama `feat/hardening-and-polish`. El agente reportó los tests en verde; **no se volvieron a ejecutar** antes de subirlas (ver 14.2).
+- [ ] Pulido de la app móvil y del panel (T2 y T3 de `odd/tasks/auditoria-y-pulido.md`): **pausado a pedido del usuario**. El plan detallado está en 14.5.
+- [x] Guion y checklist para presentar el Sprint 1: sección 14.6.
 
 ### Cómo trabajar hoy (desarrollo local)
 
 - Repo en `D:\RUNCTY` (ruta corta obligatoria en Windows; ver sección "Reglas de trabajo").
-- Emuladores: `npm run functions:build`, luego `npm run emulators`, y en otra terminal `npm run seed`. El seed crea Loja, los roles, el admin (`admin@runcty.dev` / `Admin123!`) y 5 rutas de ejemplo.
-- Celular por USB: `adb reverse` de los puertos 8081, 9099, 8080, 5001 y 9199. Después, desde `mobile/`, `npm run android` (o `npm start` si la app ya está instalada). Detalle en `docs/manual-instalacion-android.md`.
-- Panel admin en Docker: `docker compose up -d --build admin`, en http://localhost:3100 (usa los emuladores del host). Sin Docker: `npm run admin:dev`, en http://localhost:3000.
+- **Backend con Docker (recomendado, 2026-11-10):** con Docker Desktop encendido, `docker compose up -d --build` levanta los emuladores de Firebase (`runcty-firebase`), el seed (`runcty-seed`, corre una vez y termina) y el panel admin (`runcty-admin`). El seed crea Loja, los roles, el admin (`admin@runcty.dev` / `Admin123!`) y 5 rutas de ejemplo. Los puertos se publican solo en `127.0.0.1`. La UI de los emuladores está en http://localhost:4000. Archivos: `docker-compose.yml`, `docker/firebase.Dockerfile`, `.dockerignore`. Si cambia el código de `functions/`, hay que reconstruir la imagen: `docker compose up -d --build firebase`.
+- Sin Docker: `npm run functions:build`, luego `npm run emulators`, y en otra terminal `npm run seed`.
+- Celular por USB: `adb reverse` de los puertos de Metro, 9099, 8080, 5001 y 9199. **Metro usa el 8082 en el Infinix:** la build instalada busca Metro en el 8082 (se compiló cuando el 8081 estaba ocupado; si no, el celular muestra "Unable to load script"). Desde `mobile/`: `EXPO_PUBLIC_USE_EMULATORS=true EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1 npx expo start --port 8082`. Esas dos variables pueden ir en `mobile/.env` (copiar de `.env.example`; el asistente no puede leer ni crear archivos `.env`). `npm run android` solo hace falta para reinstalar. Detalle y solución de problemas en `docs/manual-instalacion-android.md` (todavía dice 8081).
+- Si se reconstruye el contenedor de Firebase, los `adb reverse` siguen vigentes, pero al reiniciar Metro hay que volver a abrir **todos** los túneles (se perdieron una vez y la app mostró "Aún no hay rutas" y un error de red de Firebase).
+- Panel admin: lo levanta el mismo `docker compose` en http://localhost:3100. Sin Docker: `npm run admin:dev`, en http://localhost:3000.
 - Si se reinician los emuladores, los usuarios se borran. La app cierra sola una sesión vieja; hay que volver a iniciar sesión.
 
 ### Plan para la demo (Firebase real)
@@ -365,3 +372,166 @@ Tiene las 5 vistas del modelo 4+1 (imagen `Modelo4+1.png`): Desarrollo, Escenari
 - **Precondición distinta del código.** MODULOS pide, para RF-07-9, que existan factores o reportes validados. El código, en cambio, le da 100 puntos (nivel Alto) a un tramo sin factores. Se justifica como decisión de diseño, o se ajusta el código.
 - **Anunciante en el diagrama de contexto.** Aparece enviando datos de campañas, pero según RF-24 quien registra anunciantes y campañas es el Administrador.
 - **Avisos de EA Trial.** A veces abre avisos que bloquean la automatización, sobre todo al cambiar de día. Si un script de EA se queda colgado, hay que buscar la ventana del aviso y aceptarla.
+
+## 14. Auditoría y pendientes (2026-11-10)
+
+El 2026-11-10 tres agentes de solo lectura auditaron el repo: seguridad, UX/UI y verificación de los sprints contra el código. Esta sección guarda sus hallazgos completos para retomar el trabajo más tarde sin repetir la auditoría. El plan de trabajo está en `odd/tasks/auditoria-y-pulido.md` y la rama es `feat/hardening-and-polish`.
+
+### 14.1 Qué se hizo y qué quedó pausado
+
+- **Hecho:** Docker con emuladores, seed y panel (puertos solo en `127.0.0.1`, procesos sin root); correcciones de seguridad del servidor (T1); documentación (README y esta sección).
+- **Pausado a pedido del usuario:** pulido de la app móvil (T2) y del panel admin (T3). La app del celular y el panel quedan **como estaban**.
+- **Al retomar, primero:** reconstruir la imagen de Firebase para que los emuladores usen las functions nuevas (`docker compose up -d --build firebase`) y volver a correr los tests (`npm --prefix functions test`), porque los cambios de T1 se subieron sin que el asistente los re-ejecutara.
+
+### 14.2 Seguridad (SEC-01 a SEC-10)
+
+| ID | Sev. | Hallazgo | Estado |
+| --- | --- | --- | --- |
+| SEC-01 | Alta | App Check no se exige en ningún callable (`enforceAppCheck` no aparece en `functions/src`) ni los clientes llaman a `initializeAppCheck`. Con cualquier token válido se podía llamar a `setUserRole`, `deleteAccount` o `searchUsers` sin la app. | **Parcial.** Flag `ENFORCE_APP_CHECK=true` (apagada por defecto) en `functions/src/shared/appCheck.ts`, aplicada con `setGlobalOptions` en `functions/src/index.ts`. **Falta:** activar el proveedor Play Integrity en la consola de Firebase, agregar `initializeAppCheck` en `mobile/` y `admin/`, y prender la flag al desplegar. Apagada para no romper emuladores ni la demo. |
+| SEC-02 | Media | `roles.manage` equivale a admin: quien lo tenga puede crear un rol con todos los permisos y asignárselo. | **Corregido.** Solo un admin asigna o quita el rol `admin` o incluye `roles.manage` en un rol; nadie concede permisos que no tiene (errores `admin-only` y `permission-escalation`). En `updateRole`, un no-admin solo se valida en los permisos nuevos. Archivo: `functions/src/roles/roleService.ts`. |
+| SEC-03 | Media | Al cambiar un rol, el usuario conservaba los permisos viejos hasta 1 hora. | **Corregido en parte.** Se llama a `revokeRefreshTokens` tras cambiar los claims. Un ID token ya emitido sigue valiendo hasta 1 h (los callables no usan `checkRevoked`). |
+| SEC-04 | Media | Quien tenga `users.read` lee datos personales de todos (`idNumber`, `birthDate`) por reglas (`firestore.rules`, lectura de `users/{uid}`) y por `searchUsers`; sin bitácora ni límite de consultas. | **Pendiente (decisión).** Opciones: lectura directa solo del dueño, registrar cada búsqueda con el uid, exigir admin para buscar por identificación. Cambiar las reglas puede romper la búsqueda del panel. |
+| SEC-05 | Media | El admin de prueba (`admin@runcty.dev` / `Admin123!`) está en claro en el repo y la guarda del seed solo miraba dos variables. | **Corregido en la guarda:** `scripts/seed-emulator.ts` usa `functions/src/seed/seedGuard.ts` y exige proyecto `demo-*` y hosts `127.0.0.1`, `localhost`, `::1` o `firebase` (el servicio de Docker). La clave sigue fija y es solo para emulador. |
+| SEC-06 | Media | Docker publicaba los emuladores (sin autenticación) en todas las interfaces y corría como root. | **Corregido** (commit `774fb91`). |
+| SEC-07 | Baja | Las reglas no exigen `email_verified` al crear el perfil. | **Pendiente.** |
+| SEC-08 | Baja | `deleteAccount` no impedía que el último admin se borrara; `setUserRole` tampoco impedía degradarlo. | **Corregido.** Error `last-admin`, usando la consulta `users` con `role == 'admin'` y `limit(2)` (sin índice nuevo). Pendiente: limpiar datos por usuario cuando existan colecciones nuevas. |
+| SEC-09 | Informativo | El control de acceso del panel (`RequirePermission` en `AdminShell.tsx`) es solo del lado del cliente; no hay middleware. No es explotable, porque los datos los protegen reglas y callables. | Mantener la autorización en el servidor como única autoridad. |
+| SEC-10 | Baja (por confirmar) | `npm audit --omit=dev`: avisos altos en `firebase`, `@firebase/firestore` y `@grpc/grpc-js` (mobile 4 altas y 10 moderadas; admin 4 altas; functions 6 moderadas). El único arreglo que ofrece npm es bajar a `firebase@9.14.0`. | **No aplicar la bajada.** Revisar si los avisos aplican al uso cliente del SDK y si hay una versión nueva. |
+
+**Estado de las pruebas de T1:** el agente reportó `functions` con 16 archivos y 186 tests en verde (antes 167) y typecheck sin errores; mostró RED antes de implementar. No se tipó ni corrió `scripts/seed-emulator.ts`. El asistente no volvió a correr los tests.
+
+**Lo que ya estaba bien:** Storage niega todo por defecto y Firestore no tiene regla comodín; `onUserDocCreated` nunca confía en el campo `role` del documento; `deleteAccount` exige inicio de sesión reciente (5 min); `searchUsers` limita página (50) y escaneo (1000); `.gitignore` cubre `.env*`, keystores y archivos de Firebase; la imagen del panel usa usuario sin root.
+
+### 14.3 UX/UI
+
+La app móvil está bien construida: tokens usados de forma consistente, todos los botones respetan `MIN_TOUCH_TARGET`, hay etiquetas y roles de accesibilidad, y el texto de seguridad evita decir "segura" o "insegura". Lo que la hace ver incompleta son funciones prometidas que no están conectadas y algunos contrastes. Los contrastes salen de los valores de los tokens, no se midieron en pantalla; el panel no se ejecutó.
+
+**Lo que más resta calidad (en orden):**
+
+1. **Preferencias que no hacen nada.** Se guardan unidades, notificaciones, alertas de seguridad, eventos y privacidad de ubicación, pero ningún código las usa (`PreferencesScreen.tsx:170-207`; `formatKm` en `mobile/src/features/routes/domain/labels.ts:41` está fijo en km).
+2. **Sin botón de emergencia ni mapa.** No hay nada de pánico, SOS o emergencia en `mobile/src`; el detalle de ruta solo muestra "N puntos" por tramo (`RouteDetailScreen.tsx:183`).
+3. **El aviso de correo sin verificar es un callejón sin salida** (`HomeScreen.tsx:55-62`): el gateway ya tiene `sendEmailVerification` (`firebaseAuthGateway.ts:43`), pero no hay botón de reenviar ni de refrescar.
+4. **Registro largo y fecha escrita a mano** como `AAAA-MM-DD` (`PersonalDataFields.tsx:35-45`), difícil para adultos mayores y menores.
+5. **El panel no es responsive y cambia roles sin confirmar** (`AdminShell.tsx:43,77`; `UsersTable.tsx:84-88`).
+
+**App móvil**
+
+| ID | Sev. | Lugar | Problema | Arreglo |
+| --- | --- | --- | --- | --- |
+| UX-M-01 | Alta | `PreferencesScreen.tsx:170-207` | Unidades, notificaciones y privacidad se guardan pero no tienen efecto. | Aplicar la unidad en `formatKm`, `formatElevation` y `formatMeters`, o marcar los grupos "Próximamente" como la opción de idioma (`PreferencesScreen.tsx:33-36`). |
+| UX-M-02 | Alta | `HomeScreen.tsx:55-62` | No se puede reenviar el correo ni refrescar el estado verificado. El registro lo envía una vez y traga el error (`authUseCases.ts:43`). | Botón "Reenviar correo" con mensaje de éxito y re-chequeo de `emailVerified` al volver a la pantalla. |
+| UX-M-03 | Alta | `PersonalDataFields.tsx:35-45` | Fecha de nacimiento escrita a mano. | Selector de fecha **sin módulo nativo** (ver 14.5): tres campos numéricos o máscara. |
+| UX-M-04 | Media | `core/theme/themes.ts:64,91`; `TextField.tsx:37,111` | Bordes de campos y chips (`#D4D4D4` sobre blanco; `grey800` sobre `#111111`) rondan 1,5:1, bajo el 3:1 de contraste no textual. | Token `inputBorder` más oscuro (~`#8A8A8A` claro, ~`#6B6B6B` oscuro) para campos, casillas y chips sin seleccionar. |
+| UX-M-05 | Media | `RouteCard.tsx:34-38` | La tarjeta muestra "Seguridad alta" junto a "Iluminación deficiente en…", sin contexto; parece una contradicción. | Prefijo "Factor principal:" y la insignia de severidad, como en `FactorList`. |
+| UX-M-06 | Media | `SportProfileScreen.tsx:51-52,59-76` | Tras "Eliminar perfil deportivo" se pierde el aviso de éxito; un error de consulta sin perfil tampoco se muestra. | Pasar `notice` y `error` a `SportProfileForm`. |
+| UX-M-07 | Media | `HomeScreen.tsx:68-70` | Los accesos rápidos "Rutas" y "Perfil" repiten la barra de pestañas; la tarjeta "Próxima franja" no se puede tocar y sus franjas salen de `trainingSlots.ts:10-13` fijas. | Accesos reales (ver rutas de esta franja, última ruta vista); tarjeta que abre Rutas con la franja elegida. |
+| UX-M-08 | Media | `Button.tsx:54` | Botón deshabilitado o cargando usa `opacity: 0.6`; texto blanco sobre `#C9302C` queda bajo 4,5:1. | Par de colores propio para deshabilitado. |
+| UX-M-09 | Media | `RoutesListScreen.tsx:58-73` | Los 3 grupos de filtros (franja, distancia, dificultad) ocupan casi una pantalla antes de la primera ruta. | Fila de chips con desplazamiento horizontal o una hoja "Filtros". |
+| UX-M-10 | Baja | `Checkbox.tsx:41-45` | La marca es el carácter `✓`, que cambia según la fuente. | Usar `<Icon name="checkmark">`, como `ChoiceGroup`. |
+| UX-M-11 | Baja | `PreferencesScreen.tsx:35` | "English (próximamente)" mezcla idiomas. | "Inglés (próximamente)". |
+| UX-M-12 | Baja | `RouteDetailScreen.tsx:149` | Frase "No hay factores de riesgo registrados para esta franja" sin punto final ni aclaración. | Agregar el punto y reutilizar el aviso de que no es una garantía. |
+| UX-M-13 | Baja | `ProfileHomeScreen.tsx:49` | Sin nombre de ciudad muestra el `cityId` crudo o "—". | "Sin ciudad". |
+| UX-M-14 | Baja | `mobile/src/app` | No hay `ErrorBoundary`: un fallo de render deja pantalla en blanco o roja. | Límite de errores global con "Reiniciar". |
+
+**Panel de administración**
+
+| ID | Sev. | Lugar | Problema | Arreglo |
+| --- | --- | --- | --- | --- |
+| UX-A-01 | Alta | `AdminShell.tsx:43,77` | Barra lateral fija de 240 px, inutilizable bajo ~768 px. | Menú colapsable bajo `md:`. |
+| UX-A-02 | Alta | `UsersTable.tsx:84-88` | El cambio de rol se aplica con un clic en "Aplicar", sin confirmar. | `ConfirmDialog` antes de `mutation.mutate`. |
+| UX-A-03 | Media | `RoutesScreen.tsx:96-123,127-210` | Tabla de 9 columnas con desplazamiento horizontal; sin orden ni paginación. | Ocultar "Superficie" y "Tramos" bajo `xl`, u ordenar por columna. |
+| UX-A-04 | Media | `UsersScreen.tsx:81,88,93-99` | "N usuario(s) mostrados" es ambiguo junto a "Cargar más". | "N de M" o "N resultados (hay más)". |
+| UX-A-05 | Media | `RolesScreen.tsx:61-73`; `CitiesScreen.tsx:76-89`; `RoutesScreen.tsx:80-94` | El formulario de crear/editar aparece sobre la lista; "Editar" en una fila de abajo no mueve la vista ni el foco. | `scrollIntoView` y foco al primer campo. |
+| UX-A-06 | Media | `feedback.tsx:3-14` | Los avisos de éxito y error no se cierran; el de éxito es un contorno blanco poco evidente. | Botón de cerrar o cierre automático, y un tinte de éxito. |
+| UX-A-07 | Media | `ConfirmDialog.tsx:47` | Las confirmaciones destructivas usan el botón primario, igual que una acción normal. | Prop `variant="danger"`. |
+| UX-A-08 | Media | `TimeSlotsSection.tsx:81-111`; `RiskFactorsPanel.tsx:91-101` | Horas y fechas son texto libre ("HH:MM", "AAAA-MM-DD"); `UsersScreen.tsx:57` ya usa `type="date"`. | `type="time"` y `type="date"`. |
+| UX-A-09 | Media | `RouteForm.tsx:113-129`; `SegmentsSection.tsx:79-85` | Las coordenadas se escriben a mano, sin mapa ni vista previa. | Vista previa en mapa o "Pegar desde Google Maps" (el mapa llega con `MapProvider`). |
+| UX-A-10 | Baja | `app/layout.tsx:6-9` | Un solo título para todas las páginas. | `generateMetadata` por ruta ("Usuarios · RUNCTY"). |
+| UX-A-11 | Baja | `Button.tsx:27` | Al cargar, la etiqueta se reemplaza por "Procesando…" y se pierde el contexto. | Mantener la etiqueta y agregar un spinner. |
+| UX-A-12 | Baja | `LoginScreen.tsx:61-68` | Sin mostrar contraseña ni "¿Olvidaste tu contraseña?" (la app móvil sí los tiene). | Agregar el botón de mostrar. |
+| UX-A-13 | Baja | `AdminShell.tsx:45`; `globals.css:5,9` | El rojo de marca `#D9534F` (3,96:1) se usa como texto pequeño en negrita sobre blanco, bajo AA. | Usar `text-primary`. |
+
+### 14.4 Verificación de sprints (2026-11-10)
+
+**Comprobaciones (resultado observado):**
+
+- `mobile`: typecheck sin errores; 35 suites y 257 tests en verde; lint limpio.
+- `admin`: 9 archivos y 60 tests en verde; `tsc --noEmit` sin errores.
+- `functions`: typecheck sin errores; 14 archivos y 167 tests en verde (después de T1: 16 archivos y 186, reportado por el agente). Vite imprime un aviso inofensivo de CJS/ESM.
+- `test:rules`: **no se ejecutó** (levanta otro emulador sobre puertos ocupados). El archivo existe: `functions/test/rules/firestore.rules.test.ts`.
+- `npx --yes knip` (v6.44.2): `mobile` marca `expo-asset` sin uso (`package.json:15`) y `expo-updates` y `expo-system-ui` sin declarar (se usan en `app.config.ts`); `admin` limpio; `functions` marca `RoutePoint` (`src/routes/domain/inputs.ts:44`), que es un **falso positivo**: lo importa `scripts/seed-emulator.ts`, fuera del paquete. Antes de quitar `expo-asset`, verificar que no sea dependencia de `expo-font`.
+
+**Épicas:** EP-01, EP-25, EP-26, EP-02, administración de usuarios, EP-04, EP-05 y EP-07 (RF-07-1 a 11) están **completas** de punta a punta: pantalla, caso de uso, función o regla, y pruebas. Brechas menores:
+
+- Recuperar contraseña usa el SDK cliente directo, sin lógica de servidor.
+- No hay tests de pantalla para Preferencias, ni de componentes del panel.
+- La gestión de rutas del panel no se probó en el navegador (pendiente en la sección 12).
+- Existe y no estaba documentado: `mobile/src/features/training/domain/trainingSlots.ts`, `RecommendedRoutes.tsx`, el rol `club_rep`, `firestore.indexes.json` y `storage.rules`.
+
+**Punto de partida del Sprint 3:** no existe nada de EP-06, alertas de zona, EP-08 ni EP-09 (sin colecciones, reglas, callables ni pantallas), y `MapProvider` tampoco. Hay puntos de extensión:
+
+- `computeSegmentSafety(slots, factors, extraPenalties = [])` en `functions/src/routes/domain/safety.ts:99`: nadie pasa `extraPenalties` todavía; es el gancho para los reportes comunitarios (RF-17).
+- `routeCallables.ts` es una fábrica de callables reutilizable.
+- `RecommendedRoutes` en mobile es la base natural de EP-09.
+- Roles y permisos, con el rol `club_rep`, ya admiten permisos nuevos.
+
+**Inconsistencias de documentación:**
+
+- Corregidas hoy: EP-27 listado como épica del Sprint 1; falta de Docker; fecha de la demo; nota de `knip`.
+- Pendientes: `docs/manual-instalacion-android.md` (líneas 69, 78, 139, 155) y `README.md` aún nombran el puerto 8081 en el manual; `odd/tasks/design-system-sprint2.md:42` deja T6 sin marcar aunque el Sprint 2 está hecho; `odd/tasks/trazabilidad-casos-de-uso.md:23` deja T4 sin marcar aunque T8 y T13 lo reemplazan; marcar "Terminado" en el backlog las historias de los Sprints 1 y 2.
+
+### 14.5 Plan para retomar el desarrollo
+
+**Restricción importante:** el celular tiene una build de desarrollo instalada. **Todo cambio de la app debe ser solo JS/TS.** Un módulo nativo (por ejemplo `@react-native-community/datetimepicker` o `react-native-maps`) obliga a recompilar e instalar el APK (`npm run android`, varios minutos). Los textos de la interfaz van en español.
+
+**T2 — App móvil** (en este orden, un cambio coherente por commit):
+
+1. **Botón de emergencia** visible en Inicio, que abra una pantalla simple con "Llamar al 911" (`Linking.openURL('tel:911')`), con texto honesto: la integración con ECU 911 y los contactos de confianza están fuera del alcance del piloto o son del Sprint 4.
+2. **Preferencias que se aplican:** unidades (km/mi) en todos los formateadores; los grupos sin efecto, con la etiqueta "Próximamente" (siguen guardándose).
+3. **Reenviar correo de verificación** y refrescar el estado al volver a la pantalla.
+4. **Fecha de nacimiento sin teclado de guiones**, sin módulo nativo (tres campos numéricos o máscara), conservando la validación de dominio y el formato guardado.
+5. **Contraste y estados:** token `inputBorder`, colores de botón deshabilitado, ícono en `Checkbox`, aviso tras eliminar el perfil deportivo, `ErrorBoundary`, filtros de rutas compactos, tarjeta de franja que abre Rutas, prefijo "Factor principal:", y los textos de UX-M-11, 12 y 13.
+
+**T3 — Panel admin:** menú responsive; `ConfirmDialog` al cambiar rol y variante `danger`; `type="time"` y `type="date"`; avisos que se cierran; título por página; mostrar contraseña en el login; `text-primary` en lugar de `text-brand` para texto pequeño; scroll y foco al editar; "N de M" en la lista de usuarios.
+
+**T5 — Verificación final:** tests, typecheck y lint de los tres paquetes; reconstruir la imagen de Firebase (`docker compose up -d --build firebase`); probar la app en el celular y el panel en el navegador.
+
+**Decisiones abiertas (ya anotadas arriba):** activar App Check al desplegar (SEC-01); lectura de datos personales con `users.read` (SEC-04); `email_verified` en reglas (SEC-07); avisos de dependencias (SEC-10).
+
+### 14.6 Presentación del Sprint 1
+
+**Alcance del Sprint 1:** EP-01 Gestión de usuarios (con perfil deportivo y consulta de usuarios), EP-25 Autenticación y credenciales, EP-26 Preferencias de usuario, EP-02 Roles y permisos y EP-04 Ciudades y zonas. Las rutas y la evaluación de seguridad son del Sprint 2 y pueden mostrarse como adelanto.
+
+**Antes de presentar (checklist):**
+
+1. Docker Desktop encendido y `docker compose up -d --build` desde `D:\RUNCTY`. Esperar a que `runcty-seed` quede en `Exited (0)`.
+2. Celular con depuración USB y cable: `adb devices` debe listarlo.
+3. Túneles: `adb reverse tcp:P tcp:P` para `P` en 8082, 9099, 8080, 5001 y 9199.
+4. Metro, desde `mobile/`: `EXPO_PUBLIC_USE_EMULATORS=true EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1 npx expo start --port 8082`.
+5. Abrir la app en el celular (queda en el inicio de sesión) y el panel en http://localhost:3100.
+6. Tras reiniciar los emuladores se borran los usuarios: el corredor se crea en vivo (es parte de la demo).
+
+**Cuentas:** administrador `admin@runcty.dev` / `Admin123!` (lo crea el seed). El corredor se registra en la app durante la demo.
+
+**Guion por épica:**
+
+| Épica | Qué mostrar |
+| --- | --- |
+| EP-01 Usuarios | En la app: registro con ciudad (Loja) y consentimiento LOPDP; perfil deportivo (nivel y objetivos); editar datos personales. En el panel: **Usuarios**, búsqueda por nombre, correo, identificación y ciudad. Dejar para el final "Eliminar cuenta" (pide la contraseña actual) y hacerlo con una cuenta de prueba. |
+| EP-25 Autenticación | Iniciar sesión, cambiar contraseña y "¿Olvidaste tu contraseña?". En el emulador el correo no sale a ninguna bandeja: se muestra el flujo, y el envío real llega con Firebase real. |
+| EP-26 Preferencias | Tamaño de letra y modo oscuro (se aplican al guardar). |
+| EP-02 Roles | Panel, **Roles**: crear un rol con permisos y asignarlo desde **Usuarios**. Mostrar que un corredor no entra al panel (se le cierra la sesión con un aviso) y las protecciones: el rol `admin` conserva todos los permisos, un admin no puede quitarse su propio rol, ni degradarse ni borrarse al último admin, y solo un admin da `roles.manage` o el rol `admin`. |
+| EP-04 Ciudades y zonas | Panel, **Ciudades y zonas**: crear una ciudad y una zona. Intentar eliminar una ciudad con zonas o rutas y mostrar que lo rechaza. El registro de la app solo lista ciudades activas. |
+| Adelanto del Sprint 2 | Rutas de Loja con nivel de seguridad (Alto, Medio, Bajo) por franja y los factores que lo explican; en el panel, gestión de rutas, tramos, franjas y factores. |
+
+**Límites conocidos (decirlos antes de que pregunten):**
+
+- Las preferencias de unidades, notificaciones y privacidad se guardan pero todavía no cambian el comportamiento de la app.
+- El correo sin verificar solo muestra un aviso, sin botón de reenvío.
+- La fecha de nacimiento se escribe a mano (`AAAA-MM-DD`).
+- No hay botón de emergencia ni mapas: son de sprints posteriores.
+- El panel está pensado para pantalla de computador y no es responsive.
+- Los datos viven en emuladores y se borran al reiniciar; la demo con datos compartidos requiere Firebase real (sección "Plan para la demo").
+- App Check está apagado hasta pasar a Firebase real; el texto legal LOPDP del registro es provisional.
+
+**Pruebas como evidencia:** 257 tests en `mobile`, 60 en `admin` y 167 en `functions` (186 con T1, sin re-ejecutar por el asistente), con typecheck limpio en los tres paquetes. Cada historia tiene su fila en el backlog (`D:\Proyecto5to\Docs\BacklogRUNCTY_Final.xlsx`) y su caso de uso en `D:\Proyecto5to\Docs\Entregables`.

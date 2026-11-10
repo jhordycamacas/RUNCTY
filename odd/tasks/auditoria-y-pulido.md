@@ -26,12 +26,12 @@ Corregir lo que dejó la auditoría del 2026-11-10 y hacer que la app del celula
 | ID | Tarea | Ruta | Estado |
 | --- | --- | --- | --- |
 | T0 | Docker: emuladores y seed en compose; puertos solo en 127.0.0.1; procesos sin root | inline | [x] |
-| T1 | Functions y seed: App Check configurable, `roles.manage` sin escalar a admin, revocar tokens al cambiar rol, proteger al último admin, guarda del seed, restos de knip | delegada | [ ] |
-| T2 | App móvil: botón de emergencia, preferencias que se aplican, reenvío de correo, fecha sin teclado de guiones, contraste, estados y errores | delegada | [ ] |
-| T3 | Panel admin: menú responsive, confirmación al cambiar rol, botón de peligro, hora y fecha nativas, avisos que se cierran, títulos | delegada | [ ] |
-| T4 | Documentación: README, CONTEXTO.md (Docker, Metro 8082, auditoría) y manual de Android | inline | [ ] |
+| T1 | Functions y seed: App Check configurable, `roles.manage` sin escalar a admin, revocar tokens al cambiar rol, proteger al último admin, guarda del seed, restos de knip (`RoutePoint` es falso positivo) | delegada | [x] el agente reportó 186 tests en verde; el parent no los re-ejecutó |
+| T2 | App móvil: botón de emergencia, preferencias que se aplican, reenvío de correo, fecha sin teclado de guiones, contraste, estados y errores | delegada | [ ] pausada a pedido del usuario (plan en CONTEXTO.md 14.5) |
+| T3 | Panel admin: menú responsive, confirmación al cambiar rol, botón de peligro, hora y fecha nativas, avisos que se cierran, títulos | delegada | [ ] pausada a pedido del usuario (plan en CONTEXTO.md 14.5) |
+| T4 | Documentación: README, CONTEXTO.md (Docker, Metro 8082, auditoría) y manual de Android | inline | [x] README y CONTEXTO.md hechos; falta el manual de Android (puerto 8082) |
 | T5 | Verificación final: tests, typecheck, lint, app en el celular y panel en el navegador | delegada | [ ] |
-| T6 | Presentación del Sprint 1 (pedido del usuario, 2026-11-10): guion de demo por historia, cuentas de prueba, checklist previo y límites conocidos, todo en `CONTEXTO.md` | inline | [ ] |
+| T6 | Presentación del Sprint 1 (pedido del usuario, 2026-11-10): guion de demo por historia, cuentas de prueba, checklist previo y límites conocidos, todo en `CONTEXTO.md` (sección 14.6) | inline | [x] |
 
 ## Decisiones abiertas
 
@@ -42,3 +42,4 @@ Corregir lo que dejó la auditoría del 2026-11-10 y hacer que la app del celula
 ## Progreso
 
 - 2026-11-10: auditoría hecha y rama creada.
+- 2026-11-10: T0 (Docker) y T1 (seguridad del servidor) hechas. El usuario pausó T2 y T3 por falta de tiempo y pidió dejar todo documentado en `CONTEXTO.md` (sección 14) y la rama subida al repo. Próximo paso: reconstruir la imagen de Firebase, re-ejecutar los tests de `functions` y retomar T2.

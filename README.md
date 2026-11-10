@@ -173,7 +173,7 @@ Solo pueden entrar las cuentas con el permiso `admin.access`; a un corredor se l
 ### Cuentas y roles
 
 - El registro crea la cuenta en Firebase Auth y el documento `users/{uid}` **sin rol**. La función `onUserDocCreated` asigna los custom claims `{ role: 'runner', perms: [] }` (sin pisar un rol existente, por ejemplo `admin`) y luego copia el rol al documento; la app detecta ese cambio y refresca el token.
-- Roles y permisos (RF-02): cada rol (`roles/{id}`) tiene una lista de permisos del catálogo de `functions/src/roles/permissions.ts`. Al asignar un rol, la función `setUserRole` escribe los claims `{ role, perms }`; al editar un rol, `updateRole` vuelve a escribir los claims de todos sus usuarios. Los cambios se aplican cuando el usuario renueva su token (como máximo una hora o al volver a iniciar sesión). Las reglas de Firestore leen los permisos del token (`hasPerm`), sin consultar documentos. Un administrador no puede quitarse su propio rol.
+- Roles y permisos (RF-02): cada rol (`roles/{id}`) tiene una lista de permisos del catálogo de `functions/src/roles/permissions.ts`. Al asignar un rol, la función `setUserRole` escribe los claims `{ role, perms }`; al editar un rol, `updateRole` vuelve a escribir los claims de todos sus usuarios. Al cambiar un rol se revocan los refresh tokens del usuario y el cambio se aplica cuando renueva su token (un token ya emitido puede seguir valiendo hasta una hora). Las reglas de Firestore leen los permisos del token (`hasPerm`), sin consultar documentos. Reglas de seguridad de los roles: solo un administrador puede asignar o quitar el rol `admin` o dar `roles.manage` a un rol; nadie concede permisos que no tiene; no se puede degradar ni eliminar al último administrador, ni un administrador puede quitarse su propio rol. App Check se exige en las functions con la variable `ENFORCE_APP_CHECK=true`, apagada por defecto en local (ver CONTEXTO.md, sección 14.2).
 - Para probar el registro completo deben estar corriendo los emuladores de Auth, Firestore **y Functions** (`npm run emulators` después de `npm run functions:build`).
 - Eliminar la cuenta llama a la función `deleteAccount` (callable). La app pide la contraseña actual justo antes; la función rechaza tokens con más de 5 minutos desde el último inicio de sesión, borra `users/{uid}` con todas sus subcolecciones y luego la cuenta de Auth.
 - El catálogo `cities` es de lectura pública: el formulario de registro lista las ciudades activas (sin zonas) antes de que exista la cuenta.
@@ -194,7 +194,7 @@ npm run admin:build                   # build de producción del panel
 
 ## Estado del desarrollo
 
-Última actualización: 2026-11-02.
+Última actualización: 2026-11-10.
 
 | Sprint | Épicas | Estado |
 | --- | --- | --- |
@@ -231,6 +231,7 @@ npm run admin:build                   # build de producción del panel
 
 ### Pendiente
 
+- Pulido de la app y del panel que dejó la auditoría del 2026-11-10 (botón de emergencia, preferencias que se aplican, reenvío del correo de verificación, panel responsive y confirmación al cambiar roles). El detalle y el plan están en [CONTEXTO.md](CONTEXTO.md), sección 14.
 - Probar en el navegador la gestión de rutas del panel.
 - Mapas (hoy las coordenadas se cargan a mano).
 - Conectar el proyecto real de Firebase (plan Blaze) para desplegar.
