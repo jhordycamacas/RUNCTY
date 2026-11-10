@@ -1,0 +1,10 @@
+**/node_modules
+**/lib
+.git
+mobile
+admin
+docs
+odd
+emulator-data
+*.log
+.env*
