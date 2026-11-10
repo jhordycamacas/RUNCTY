@@ -223,46 +223,28 @@ Las Cloud Functions requieren el **plan Blaze** de Firebase (pago por uso, con t
 12. **Representante de club en el panel:** hoy tiene acceso, pero solo ve lo que sus permisos permiten.
 13. **Preferencias de apariencia:** hoy se aplican al guardar. Falta decidir si deben aplicarse al instante.
 
-## 11. Product Backlog (corregido — 2026-10-28)
+## 11. Product Backlog (versión final — 2026-11-10)
 
-Archivo final: `C:\Users\usuario\Downloads\Backlog_RUNCTY_Final.xlsx`. El original `Backlog_RUNCTY_MegaProPlusUltraSuperSayayin.xlsx` se conserva sin cambios. Destino: importar a Jira.
+**Archivo vigente:** `D:\Proyecto5to\Docs\BacklogRUNCTY_Final.xlsx`. Usa la plantilla del docente (`plantillaFINALBACKLOG.xlsx`): una sola hoja, `BKL-G1`, con las épicas e historias arriba y la tabla Sprint Backlog abajo. Las versiones anteriores (`BacklogDesarrolladoPorModificar.xlsx`, `BacklogRUNCTY_PlantillaFinal.xlsx` y el de `Downloads`) quedan como historial.
 
-**Totales:** 27 épicas y 151 historias. Cada subrequisito RF-XX-N es una historia, y los IDs de RF se mantienen por trazabilidad.
+**Fuente de verdad de los requisitos:** `D:\Proyecto5to\Docs\RequsitosExcelFInal.xlsx`. No se modifica. El backlog y los diagramas se alinean con él.
 
-**Hojas del archivo:** BKL-G1, Historias de usuario, Sprint Backlog, Épicas por sprint (nueva), Plan semanal y Notas y alcance.
+**Totales:** 26 épicas y 153 historias. **Una historia por sub-requisito (RF-XX-N)**, con el mismo ID y el mismo significado que en el Excel. El rol de cada historia es el actor de la hoja MODULOS.
 
-### Correcciones pedidas por el docente
+**Columna Comentarios (L):** prioridad · responsable · requisito de usuario (UR) · RNF · caso de uso · diagrama · dependencia · estado. Con esa columna se responde la revisión de trazabilidad.
 
-- Se eliminaron historias redundantes:
-  - RF-01-5 (establecer credenciales) se unificó en RF-01-1 (registrar cuenta).
-  - RF-01-8 (eliminar credenciales) se unificó en RF-01-4 (eliminar cuenta).
-  - Cambiar contraseña pasó a RF-01-3 (actualizar datos personales).
-  - RF-01-7 queda solo como *recuperar contraseña*, una funcionalidad aparte.
-- Las preferencias son una característica del usuario, pero no forman parte de la gestión de usuarios. Por eso tienen épica propia.
-- Se agregó una hoja que muestra qué épicas se trabajan en cada sprint.
+### Épicas
 
-### Épicas nuevas, separadas de RF-01
-
-- **EP-25 Autenticación:** RF-01-6 iniciar sesión y RF-01-7 recuperar contraseña.
-- **EP-26 Gestión de preferencias:** RF-01-13 a RF-01-16.
-- **EP-27 Administración de usuarios:** RF-01-2, consultar usuarios. El rol cambió de *corredor* a *administrador*.
+- EP-01 a EP-24 corresponden uno a uno a RF-01 a RF-24, salvo RF-01, que se divide en tres:
+  - **EP-01 Gestión de usuarios:** RF-01-1 a 01-4 (cuenta) y RF-01-9 a 01-12 (perfil deportivo). Incluye "Consultar usuarios", que hace el administrador.
+  - **EP-25 Autenticación y credenciales:** RF-01-5 a 01-8. **Recuperar contraseña es un flujo propio**, separado de la gestión de usuarios.
+  - **EP-26 Preferencias de usuario:** RF-01-13 a 01-16. Son las preferencias del propio usuario, no un catálogo del administrador.
+- La EP-27 (Administración de usuarios) del backlog anterior se integró en EP-01.
+- "Cerrar sesión" no existe en el Excel final, así que no está en el backlog.
 
 ### Plan de sprints
 
-La semana 8 no tiene actividad y la semana 11 queda fuera de los sprints.
-
-| Sprint | Semanas | Épicas |
-| --- | --- | --- |
-| 1 | 4–5 | EP-01 Usuarios (registro, actualizar datos, eliminar cuenta, perfil deportivo), EP-25 Autenticación, EP-26 Preferencias, EP-02 Roles y permisos, EP-27 Administración de usuarios, EP-04 Ciudades y zonas |
-| 2 | 6 | EP-05 Catálogo de rutas, EP-07 Evaluación de seguridad (franjas, factores, índice) |
-| 3 | 7 | EP-06 Puntos de apoyo, EP-07 Alertas de zona de riesgo, EP-08 Incidentes y fuentes, EP-09 Generación de rutas seguras |
-| 4 | 9 | EP-03 Contactos de confianza, EP-10 Favoritas y valoraciones, EP-11 Rutas de clubes, EP-12 Entrenamientos (parte), EP-15 Botón de pánico, EP-16 Ubicación compartida |
-| 5 | 10 | EP-12 Entrenamientos (resto), EP-13 a EP-14 y EP-17 a EP-24 (metas, retos, reportes, notificaciones, clubes, encuentros, salidas, compañeros, eventos, publicidad). Entrega final a Gacelas. |
-
-### Pendientes del archivo
-
-- El formato condicional de la hoja BKL-G1 ya venía roto en el original (`#REF!`) y no se modificó.
-- Los conteos de "Épicas por sprint" son fórmulas que Excel recalcula al abrir el archivo.
+Se mantiene el calendario del equipo: Sprint 1, semanas 4–5; Sprint 2, semana 6; Sprint 3, semana 7; Sprint 4, semana 9; Sprint 5, semana 10. La semana 8 no tiene actividad y la 11 queda fuera de los sprints.
 
 ## 12. Estado actual
 
@@ -279,6 +261,10 @@ La semana 8 no tiene actividad y la semana 11 queda fuera de los sprints.
 - [x] Limpieza de código zombie (2026-11-02) con `npx knip` en mobile, admin y functions, verificando cada caso con búsqueda en todo el repo. Se eliminaron código sin uso (`formatDistance`, tipos y constantes huérfanos), exports innecesarios de los barrels y el script `web` de mobile, que no podía funcionar. Quedó a propósito `contrast.ts`, que solo usa su test pero vigila el contraste AA de los temas.
 - [x] Todo integrado en `main` y subido a GitHub (2026-11-02).
 - [ ] Probar en el navegador la gestión de rutas del panel. Falta `admin/.env.local` en el clon nuevo: copiarlo de `admin/.env.example`.
+- [x] Backlog final con la plantilla del docente y trazabilidad con el Excel (sección 11).
+- [x] Proyecto de Enterprise Architect con el modelo 4+1, casos de uso y un diagrama de clases (sección 13).
+- [ ] Marcar como "Terminado" en el backlog las historias de los Sprints 1 y 2 que ya están implementadas (hoy figuran como "Pendiente").
+- [x] Especificación de los 155 casos de uso y PDF de los diagramas del requisito elegido, en `D:\Proyecto5to\Docs\Entregables` (sección 13). Reemplaza a `Especificaciones de casos de uso RUNCTY - Con diagramas.docx`, que describe el modelo viejo.
 - [ ] Importar el backlog a Jira.
 - [ ] Validar el diseño y la paleta con el cliente.
 - [ ] **Demo con Gacelas (semana del 2026-11-02):** pasar a Firebase real. Ver "Plan para la demo" abajo.
@@ -313,3 +299,69 @@ Objetivo: que la app funcione en cualquier celular sin la computadora, con datos
    - Cargar los datos iniciales en producción: Loja, roles, el admin y las rutas de ejemplo.
    - Generar un APK instalable para compartir.
 3. **Google Maps** queda para después de la demo: las rutas todavía no usan mapa.
+
+## 13. Documentación de análisis y diseño (Enterprise Architect — 2026-11-10)
+
+Todos los documentos están en `D:\Proyecto5to\Docs`. El proyecto de EA es `RunCty.eap`, hecho con EA Trial. Los respaldos de las versiones anteriores quedaron fuera del repo.
+
+### Estructura del proyecto `RunCty`
+
+Tiene las 5 vistas del modelo 4+1 (imagen `Modelo4+1.png`): Desarrollo, Escenarios, Lógica, Procesos y Física.
+
+- **Vista de Escenarios**
+  - **Diagrama de contexto:** el sistema RUNCTY con 7 entidades externas y sus flujos de datos.
+  - **Casos de uso:** paquete "Actores", 26 paquetes (uno por épica, sin códigos en el nombre) y el diagrama "Mapa de épicas".
+- **Vista Lógica:** diagrama de clases "Calcular índice de seguridad".
+- **Vistas de Desarrollo, Procesos y Física:** todavía vacías.
+
+### Reglas del modelo de casos de uso
+
+- **4 actores:** Corredor, Administrador, Representante de club y Sistema. El actor de cada caso sale de la hoja MODULOS. "Usuario" y "Persona que se registra" se modelan como Corredor; iniciar sesión, cambiar contraseña y recuperar contraseña los usan los tres roles humanos.
+- **Un caso de uso por requisito (RF-XX-N), con nombre en lenguaje natural:** 155 en total. RF-01-7 se divide en "Cambiar contraseña" y "Recuperar contraseña", y RF-02-3 en "Actualizar permisos de un rol" y "Asignar rol a un usuario".
+- **Un diagrama por cada objeto que gestiona la épica:** 40 diagramas, de 2 a 5 óvalos cada uno. Por ejemplo, la épica de seguridad tiene Franjas horarias, Factores de riesgo, Índice de seguridad y Alertas de zonas de riesgo.
+- **Sin códigos** (CU, EP o RF) en los nombres de casos de uso, diagramas ni paquetes. La trazabilidad va en la **nota** de cada caso de uso: RF con su descripción, reglas de MODULOS, épica, historia del backlog, UR y RNF.
+- **Relaciones respaldadas por requisitos o por el código:**
+  - "Crear cuenta" incluye "Crear credenciales de acceso".
+  - "Eliminar cuenta" incluye "Eliminar credenciales de acceso" y "Eliminar perfil deportivo".
+  - "Configurar perfil deportivo" extiende "Crear cuenta".
+  - "Solicitar ruta segura" incluye "Consultar índice de seguridad".
+  - "Registrar entrenamiento" incluye "Registrar recorrido GPS" y "Calcular métricas de entrenamiento".
+  - Registrar, actualizar y eliminar franjas y factores de riesgo incluyen "Recalcular índice de seguridad", porque así lo hace `withRecalc` en `routeService.ts`.
+- El archivo `corregido.eap` de un compañero se revisó y no se usó como base: conservaba los errores del modelo viejo. Solo se adoptó su estilo de nombres en lenguaje natural.
+
+### Diagrama de clases del requisito elegido
+
+- **Requisito:** RF-07-9 "Calcular índice de seguridad". Se eligió porque es el núcleo de la propuesta de valor y porque ya está implementado y probado en `functions/src/routes/domain/safety.ts`.
+- **Clases:** Ruta, Tramo, FranjaHoraria, FactorDeRiesgo, ReporteValidado (hereda de FactorDeRiesgo), IndiceSeguridad (de una ruta o de un tramo, por franja) y CalculadoraIndiceSeguridad (`«create»` IndiceSeguridad).
+- **Decisiones para que sea simple y UML válido:**
+  - Sin enumeraciones: el equipo todavía no las vio en clase, así que nivel, severidad y tipo quedan como String.
+  - Las clases de datos no llevan métodos inventados: UML no obliga a tener operaciones. Ruta tiene `obtenerTramosOrdenados()` y FactorDeRiesgo tiene `estaActivoEn(franja)`, que reflejan la lógica real.
+
+### Trazabilidad de RF-07-9 (para la revisión)
+
+- **UR:** UR-05 (visualización del nivel de seguridad) y UR-06 (rutas seguras por horarios).
+- **RNF:** RNF-14 (recálculo en 24 h como máximo) y los transversales RNF-10, 11, 21 y 23.
+- **Backlog:** fila 51, épica EP-07, Sprint 2.
+- **Caso de uso:** "Calcular índice de seguridad", en el diagrama "Índice de seguridad".
+- **Diagrama de clases:** Vista Lógica → "Calcular índice de seguridad".
+- **Código:** `safety.ts` y `safety.test.ts`.
+
+### Entregables (`D:\Proyecto5to\Docs\Entregables`, 2026-11-10)
+
+- **PDF en A4 horizontal**, exportados desde EA en formato vectorial (EMF) para que se lean nítidos:
+  - `Diagrama de casos de uso - Índice de seguridad.pdf`;
+  - `Diagrama de clases - Calcular índice de seguridad.pdf`;
+  - `Diagrama de contexto - RUNCTY.pdf`.
+- **`Especificación de casos de uso RUNCTY.docx`:** 182 páginas, con una especificación por cada uno de los 155 casos de uso.
+  - **Estructura:** portada, actores, índice por épica con enlaces, y luego cada épica con sus diagramas y sus casos.
+  - **Contenido de cada caso:** una tabla con descripción, actores, RF, historia de usuario, fila del backlog, UR, RNF, diagrama, relaciones, precondiciones, postcondición y reglas de negocio de MODULOS; flujo principal; y flujos alternativos.
+  - **Estilo:** el mismo del documento anterior del equipo (Calibri, azul marino `#192840`, acentos `#13796F`, etiquetas de tabla en `#EFF3F6`).
+  - **Origen de los flujos:** 40 casos con lógica propia tienen flujos escritos a mano (autenticación, perfil, índice de seguridad, solicitud de rutas, entrenamiento, pánico, ubicación compartida, reportes, notificaciones, clubes, salidas y eventos). Los demás siguen un patrón según la operación (registrar, consultar, actualizar o eliminar), con los datos y reglas propios de cada requisito.
+- **Para regenerarlos:** los scripts quedaron en la carpeta temporal de la sesión, no en el repo. Si el modelo cambia, hay que volver a exportar los diagramas desde EA y regenerar el documento.
+
+### Consideraciones abiertas
+
+- **El Excel no declara la relación UR → RF.** La asignación de requisitos de usuario en el backlog la hizo el equipo. Además, 11 RF no tienen ningún UR asociado: RF-10, 11, 13, 14, 16, 18, 19, 20, 21, 22 y 23. Conviene agregarlos al Excel antes de la revisión de trazabilidad.
+- **Precondición distinta del código.** MODULOS pide, para RF-07-9, que existan factores o reportes validados. El código, en cambio, le da 100 puntos (nivel Alto) a un tramo sin factores. Se justifica como decisión de diseño, o se ajusta el código.
+- **Anunciante en el diagrama de contexto.** Aparece enviando datos de campañas, pero según RF-24 quien registra anunciantes y campañas es el Administrador.
+- **Avisos de EA Trial.** A veces abre avisos que bloquean la automatización, sobre todo al cambiar de día. Si un script de EA se queda colgado, hay que buscar la ventana del aviso y aceptarla.

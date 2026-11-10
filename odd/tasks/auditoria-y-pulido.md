@@ -31,6 +31,7 @@ Corregir lo que dejó la auditoría del 2026-11-10 y hacer que la app del celula
 | T3 | Panel admin: menú responsive, confirmación al cambiar rol, botón de peligro, hora y fecha nativas, avisos que se cierran, títulos | delegada | [ ] |
 | T4 | Documentación: README, CONTEXTO.md (Docker, Metro 8082, auditoría) y manual de Android | inline | [ ] |
 | T5 | Verificación final: tests, typecheck, lint, app en el celular y panel en el navegador | delegada | [ ] |
+| T6 | Presentación del Sprint 1 (pedido del usuario, 2026-11-10): guion de demo por historia, cuentas de prueba, checklist previo y límites conocidos, todo en `CONTEXTO.md` | inline | [ ] |
 
 ## Decisiones abiertas
 

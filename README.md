@@ -104,15 +104,33 @@ npm --prefix admin install     # Panel de administración
 
 O todo junto: `npm run install:all`.
 
-### Emuladores y datos semilla
+### Backend local con Docker (recomendado)
+
+Con Docker Desktop encendido, un solo comando levanta los emuladores de Firebase, carga los datos semilla y arranca el panel de administración:
+
+```bash
+docker compose up -d --build
+```
+
+| Servicio | Qué hace | Dirección |
+| --- | --- | --- |
+| `firebase` | Emuladores de Auth (9099), Firestore (8080), Functions (5001) y Storage (9199) con las functions ya compiladas | UI en http://localhost:4000 |
+| `seed` | Corre una vez y termina: crea la ciudad Loja, los roles, el administrador de prueba y 5 rutas de ejemplo | — |
+| `admin` | Panel de administración | http://localhost:3100 |
+
+- Los puertos se publican **solo en `127.0.0.1`**: los emuladores no tienen autenticación y no deben verse desde la red. Los procesos corren sin root dentro de los contenedores.
+- Al reiniciar el contenedor `firebase` se pierden los datos (usuarios incluidos). Para cargar la semilla otra vez: `docker compose up seed`.
+- Apagar todo: `docker compose down`.
+
+### Emuladores y datos semilla sin Docker
 
 ```bash
 npm run functions:build # compila las functions antes de levantar el emulador
 npm run emulators       # Auth 9099 · Firestore 8080 · Functions 5001 · Storage 9199 · UI http://localhost:4000
-npm run seed            # en otra terminal: crea la ciudad Loja, los roles del sistema y el usuario administrador
+npm run seed            # en otra terminal: crea la ciudad Loja, los roles del sistema, el administrador y las rutas de ejemplo
 ```
 
-Usuario administrador de prueba (solo emulador): `admin@runcty.dev` / `Admin123!`.
+Usuario administrador de prueba (solo emulador): `admin@runcty.dev` / `Admin123!`. El seed se niega a correr si el proyecto no empieza con `demo-` o si los emuladores no están en la máquina local o en el servicio `firebase` de Docker.
 
 Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda en `emulator-data/`, ignorado por git).
 
@@ -121,13 +139,14 @@ Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda 
 La app usa módulos nativos, así que se instala como build de desarrollo y no con Expo Go. Para instalarla en un celular Android por USB, sigue el manual [docs/manual-instalacion-android.md](docs/manual-instalacion-android.md). El resumen es este:
 
 1. Copia `mobile/.env.example` a `mobile/.env` y pon `EXPO_PUBLIC_USE_EMULATORS=true` y `EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1`.
-2. Conecta el celular y redirige los puertos con `adb reverse` (8081, 9099, 8080, 5001 y 9199).
-3. Con los emuladores levantados:
+2. Conecta el celular y redirige los puertos con `adb reverse` (Metro, 9099, 8080, 5001 y 9199). Metro usa el **8081**, o el **8082** si la build instalada se hizo cuando el 8081 estaba ocupado: la app recuerda el puerto con el que se compiló. Si al abrirla ves "Unable to load script", revisa los logs con `adb logcat` y busca a qué puerto apunta.
+3. Con el backend levantado:
 
 ```bash
 cd mobile
-npm run android   # compila, instala y abre la app (la primera vez tarda varios minutos)
-npm start         # uso diario, cuando la app ya está instalada
+npm run android            # compila, instala y abre la app (la primera vez tarda varios minutos)
+npm start                  # uso diario, cuando la app ya está instalada
+npx expo start --port 8082 # si la build instalada busca Metro en el 8082
 ```
 
 > **Windows:** clona el repo en una ruta corta (por ejemplo `D:\RUNCTY`). Con rutas largas, la compilación nativa falla por el límite de 260 caracteres de Windows. Ver la sección 10 del manual.
