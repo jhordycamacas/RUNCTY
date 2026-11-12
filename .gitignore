@@ -6,6 +6,14 @@ node_modules/
 .env.*
 !.env.example
 
+# Python (backend)
+backend/.venv/
+backend/.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
 # Build outputs
 lib/
 dist/
@@ -24,6 +32,9 @@ database-debug.log
 pubsub-debug.log
 .firebase/
 emulator-data/
+
+# Google service-account keys (kept outside the repository)
+*service-account*.json
 
 # Native credentials and signing
 google-services.json
