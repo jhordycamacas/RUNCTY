@@ -1,6 +1,7 @@
 from typing import Protocol
 
 from apps.users.domain.models import PerfilDeportivo, PreferenciaUsuario, Usuario
+from apps.users.domain.search import EqualityFilter
 
 
 class UserRepository(Protocol):
@@ -19,6 +20,23 @@ class UserRepository(Protocol):
 
     def set_role(self, uid: str, role: str) -> None:
         """Mirrors the role claim on the profile. A missing profile is ignored."""
+        ...
+
+    def scan(
+        self, filters: list[EqualityFilter], start_after: str | None, batch_size: int
+    ) -> list[Usuario]:
+        """Up to `batch_size` profiles matching every filter, ordered by uid, after `start_after`.
+
+        Only the fields of the admin summary are read; `id_number` is always None.
+        """
+        ...
+
+    def delete_user_data(self, uid: str, *, keep_an_admin: bool) -> bool:
+        """Deletes the profile of `uid` and its private documents, atomically with its check.
+
+        With `keep_an_admin`, returns False, deleting nothing, unless the role mirror shows
+        an admin other than `uid`.
+        """
         ...
 
 

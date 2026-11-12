@@ -174,12 +174,18 @@ class TestFirebaseAuthGateway:
         client.set_custom_user_claims.assert_called_once_with("u1", {"role": "admin", "perms": []})
         client.revoke_refresh_tokens.assert_called_once_with("u1")
 
+    def test_deletes_the_account(self, client):
+        FirebaseAuthGateway().delete_user("u1")
+
+        client.delete_user.assert_called_once_with("u1")
+
     @pytest.mark.parametrize(
         ("sdk_method", "call"),
         [
             ("get_user", lambda gateway: gateway.get_custom_claims("ghost")),
             ("set_custom_user_claims", lambda gateway: gateway.set_custom_claims("ghost", {})),
             ("revoke_refresh_tokens", lambda gateway: gateway.revoke_refresh_tokens("ghost")),
+            ("delete_user", lambda gateway: gateway.delete_user("ghost")),
         ],
     )
     def test_an_unknown_uid_is_reported_through_the_port(self, client, sdk_method, call):

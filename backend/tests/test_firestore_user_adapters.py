@@ -1,7 +1,7 @@
 """The Firestore adapters of the users app against a mocked client (no emulator)."""
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 
 import pytest
 from google.api_core.exceptions import Conflict, NotFound
@@ -13,7 +13,10 @@ from apps.users.infrastructure.firestore_private_documents import (
     FirestorePreferencesRepository,
     FirestoreSportProfileRepository,
 )
-from apps.users.infrastructure.firestore_user_repository import FirestoreUserRepository
+from apps.users.infrastructure.firestore_user_repository import (
+    FirestoreUserRepository,
+    _delete_user_data,
+)
 
 ANA = Usuario("u1", "ana@example.com", "Ana", "Paz", "1990-01-01", "loja", "1104567890")
 
@@ -98,6 +101,97 @@ class TestFirestoreUserRepository:
         FirestoreUserRepository().set_role("u1", "runner")
 
         document.set.assert_not_called()
+
+
+class TestFirestoreUserScan:
+    @pytest.fixture
+    def users(self, monkeypatch) -> MagicMock:
+        client = MagicMock()
+        monkeypatch.setattr(firestore_user_repository, "firestore_client", lambda: client)
+        return client.collection.return_value
+
+    def test_reads_a_batch_of_summaries_ordered_by_document_id(self, users):
+        ordered = users.select.return_value.order_by.return_value
+        ordered.limit.return_value.stream.return_value = [
+            snapshot("u1", {"email": "ana@example.com", "firstName": "Ana", "role": "runner"}),
+            snapshot("u2", {"firstName": "Bruno"}),
+        ]
+
+        found = FirestoreUserRepository().scan([], None, 2)
+
+        assert [(user.uid, user.first_name, user.role) for user in found] == [
+            ("u1", "Ana", "runner"),
+            ("u2", "Bruno", None),
+        ]
+        # Data minimization: the id number and the consent record never leave Firestore.
+        users.select.assert_called_once_with(
+            ["email", "firstName", "lastName", "birthDate", "cityId", "role"]
+        )
+        users.select.return_value.order_by.assert_called_once_with("__name__")
+        ordered.limit.assert_called_once_with(2)
+        ordered.limit.return_value.start_after.assert_not_called()
+
+    def test_applies_the_equality_filters_and_resumes_after_the_cursor(self, users):
+        filtered = users.select.return_value.where.return_value.where.return_value
+        limited = filtered.order_by.return_value.limit.return_value
+        limited.start_after.return_value.stream.return_value = [snapshot("u4", {})]
+
+        found = FirestoreUserRepository().scan([("cityId", "loja"), ("email", "a@b.ec")], "u3", 5)
+
+        assert [user.uid for user in found] == ["u4"]
+        first = users.select.return_value.where.call_args.kwargs["filter"]
+        second = users.select.return_value.where.return_value.where.call_args.kwargs["filter"]
+        assert [(f.field_path, f.op_string, f.value) for f in (first, second)] == [
+            ("cityId", "==", "loja"),
+            ("email", "==", "a@b.ec"),
+        ]
+        users.document.assert_called_once_with("u3")
+        limited.start_after.assert_called_once_with({"__name__": users.document.return_value})
+
+
+class TestDeleteUserDataTransaction:
+    """NEW-03: the last-admin check and the deletion share one transaction."""
+
+    @staticmethod
+    def given(admins: list[str]) -> tuple[MagicMock, MagicMock]:
+        client = MagicMock()
+        users = client.collection.return_value
+        query = users.where.return_value.limit.return_value.select.return_value
+        query.stream.return_value = [snapshot(uid, {}) for uid in admins]
+        return client, users
+
+    def test_deletes_the_private_documents_and_the_profile(self):
+        client, users = self.given(admins=[])
+        user = users.document.return_value
+        private = [MagicMock(), MagicMock()]
+        user.collection.return_value.list_documents.return_value = private
+        transaction = MagicMock()
+
+        assert _delete_user_data(transaction, client, "target", keep_an_admin=False) is True
+
+        users.document.assert_called_once_with("target")
+        user.collection.assert_called_once_with("private")
+        assert transaction.delete.call_args_list == [call(private[0]), call(private[1]), call(user)]
+        users.where.assert_not_called()
+
+    def test_an_admin_is_deleted_when_the_mirror_shows_another_one(self):
+        client, users = self.given(admins=["target", "other"])
+        transaction = MagicMock()
+
+        assert _delete_user_data(transaction, client, "target", keep_an_admin=True) is True
+
+        query = users.where.return_value.limit.return_value.select.return_value
+        query.stream.assert_called_once_with(transaction=transaction)
+        transaction.delete.assert_called_with(users.document.return_value)
+
+    @pytest.mark.parametrize("admins", [["target"], []])
+    def test_refuses_to_delete_the_last_admin(self, admins):
+        client, _ = self.given(admins=admins)
+        transaction = MagicMock()
+
+        assert _delete_user_data(transaction, client, "target", keep_an_admin=True) is False
+
+        transaction.delete.assert_not_called()
 
 
 class TestFirestorePrivateDocuments:

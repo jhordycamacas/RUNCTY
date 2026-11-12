@@ -40,8 +40,10 @@ gunicorn as a non-root user and contains no configuration or credentials.
 | `GET /api/v1/health/services` | `admin` role | which Google services are configured (booleans) |
 | `GET /api/v1/me` | any signed-in user | `uid`, `email`, `emailVerified`, `role`, `perms` |
 | `POST /api/v1/users` | signed in, own uid | 201 with the caller's new profile. Body: `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber?`, `consent: {lopdp: true}` |
+| `GET /api/v1/users` | `users.read` | `{"users": [{uid, email, firstName, lastName, birthDate, cityId, role}], "nextCursor"}`. Query: `firstName`, `lastName`, `email`, `idNumber`, `birthDate`, `cityId`, `limit`, `cursor` |
 | `GET /api/v1/users/me` | owner | `uid`, `email`, `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber`, `role` |
 | `PATCH /api/v1/users/me` | owner | the updated profile. Body: any of `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber` |
+| `DELETE /api/v1/users/me` | owner, signed in within 5 minutes | 204 |
 | `GET`, `PUT`, `DELETE /api/v1/users/me/sport-profile` | owner | `level`, `goals`, `usualPaceSecPerKm`, `preferredDistanceKm` (204 on delete) |
 | `GET`, `PUT`, `DELETE /api/v1/users/me/preferences` | owner | `language`, `fontScale`, `appearance`, `units`, `notifications`, `locationPrivacy` (204 on delete) |
 | `GET /api/v1/roles` | `admin.access` | `{"roles": [{id, name, description, permissions, system}]}` |
@@ -90,6 +92,21 @@ Values that break a rule of a model are reported the same way, with these field 
   then use their defaults), and `DELETE` is idempotent. A stored sport profile that no
   longer matches the schema counts as missing; invalid stored preferences fall back to the
   default field by field.
+- **`DELETE /users/me`** needs a sign-in at most 300 seconds old (`auth_time` of the token),
+  so the client re-authenticates first; otherwise 400 `recent-sign-in-required`. One Firestore
+  transaction deletes `users/{uid}` and every document under `users/{uid}/private`; then the
+  Auth account is deleted. Data goes first: if the Auth deletion fails the user can still
+  sign in and retry, and an account already gone from Auth is not an error. An account whose
+  stored claims say `admin` is deleted only if the role mirror shows another admin, read in
+  the same transaction; otherwise 400 `last-admin` and nothing is deleted.
+- **`GET /users`** (admin search) matches `email`, `idNumber`, `birthDate` and `cityId`
+  exactly in Firestore, and `firstName` and `lastName` as case- and accent-insensitive
+  prefixes in memory. A page holds `limit` users (default 20, at most 50) and a request
+  scans at most 1000 profiles, so a page can come back short or empty with a `nextCursor`:
+  send it as `cursor` to continue, until it is `null`. Reasons: `invalid-filter`,
+  `invalid-limit`, `invalid-cursor` (400); an unknown parameter is `invalid-argument`. The
+  id number and the consent record are never returned. It uses the tighter
+  `THROTTLE_RATE_SENSITIVE` budget.
 
 ### Roles
 
@@ -176,7 +193,7 @@ apps/
   health/                    liveness and Google services status
   identity/                  GET /me
   users/                     Usuario, PerfilDeportivo, PreferenciaUsuario: sign-up, own
-                             profile, sport profile, preferences
+                             profile, sport profile, preferences, account deletion, search
   roles/                     Rol, role CRUD, role assignment
 tests/                       pytest suite with in-memory adapters
 ```

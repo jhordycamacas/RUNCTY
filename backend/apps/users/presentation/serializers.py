@@ -23,8 +23,8 @@ class RegistrationSerializer(PersonalDataSerializer):
     consent = ConsentSerializer()
 
 
-class UserSerializer(serializers.Serializer):
-    """A `Usuario` as its owner reads it."""
+class UserSummarySerializer(serializers.Serializer):
+    """A `Usuario` as the admin panel lists it (data minimization, LOPDP)."""
 
     uid = serializers.CharField()
     email = serializers.CharField()
@@ -32,8 +32,26 @@ class UserSerializer(serializers.Serializer):
     lastName = serializers.CharField(source="last_name")
     birthDate = serializers.CharField(source="birth_date")
     cityId = serializers.CharField(source="city_id")
-    idNumber = serializers.CharField(source="id_number", allow_null=True)
     role = serializers.CharField(allow_null=True)
+
+
+class UserSerializer(UserSummarySerializer):
+    """A `Usuario` as its owner reads it."""
+
+    idNumber = serializers.CharField(source="id_number", allow_null=True)
+
+
+class UserSearchSerializer(StrictSerializer):
+    """Query string of `GET /users`. `parse_search_query` validates the values."""
+
+    firstName = text_field(required=False)
+    lastName = text_field(required=False)
+    email = text_field(required=False)
+    idNumber = text_field(required=False)
+    birthDate = text_field(required=False)
+    cityId = text_field(required=False)
+    limit = text_field(required=False)
+    cursor = text_field(required=False)
 
 
 class SportProfileSerializer(StrictSerializer):

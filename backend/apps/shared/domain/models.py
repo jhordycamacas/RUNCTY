@@ -13,6 +13,8 @@ class Principal:
     email_verified: bool
     role: str | None
     perms: tuple[str, ...]
+    # When the user last signed in (`auth_time` claim, seconds since the epoch).
+    auth_time: float | None = None
 
     @classmethod
     def from_claims(cls, claims: Mapping[str, object]) -> "Principal":
@@ -20,12 +22,15 @@ class Principal:
         email = claims.get("email")
         role = claims.get("role")
         perms = claims.get("perms")
+        auth_time = claims.get("auth_time")
+        signed_in = isinstance(auth_time, (int, float)) and not isinstance(auth_time, bool)
         return cls(
             uid=str(claims["uid"]),
             email=email if isinstance(email, str) else None,
             email_verified=claims.get("email_verified") is True,
             role=role if isinstance(role, str) else None,
             perms=tuple(p for p in perms if isinstance(p, str)) if isinstance(perms, list) else (),
+            auth_time=float(auth_time) if signed_in else None,
         )
 
     @property

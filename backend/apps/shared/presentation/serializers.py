@@ -41,7 +41,16 @@ def text_field(**options) -> serializers.CharField:
     )
 
 
-def validated_body(serializer_class: type[StrictSerializer], request) -> dict:
-    serializer = serializer_class(data=request.data)
+def _validated(serializer_class: type[StrictSerializer], data) -> dict:
+    serializer = serializer_class(data=data)
     serializer.is_valid(raise_exception=True)
     return serializer.validated_data
+
+
+def validated_body(serializer_class: type[StrictSerializer], request) -> dict:
+    return _validated(serializer_class, request.data)
+
+
+def validated_query(serializer_class: type[StrictSerializer], request) -> dict:
+    """The query string, under the rules of a body. A repeated parameter keeps its last value."""
+    return _validated(serializer_class, request.query_params.dict())

@@ -1,9 +1,36 @@
 from google.api_core.exceptions import Conflict, NotFound
-from google.cloud.firestore import DELETE_FIELD, SERVER_TIMESTAMP, CollectionReference
+from google.cloud.firestore import (
+    DELETE_FIELD,
+    SERVER_TIMESTAMP,
+    Client,
+    CollectionReference,
+    FieldFilter,
+    Transaction,
+    transactional,
+)
+from google.cloud.firestore_v1.field_path import FieldPath
 
 from apps.shared.infrastructure.firebase.app import firestore_client
-from apps.shared.infrastructure.firebase.collections import USERS
+from apps.shared.infrastructure.firebase.collections import USER_PRIVATE, USERS
+from apps.shared.infrastructure.firebase.last_admin import another_admin_exists
 from apps.users.domain.models import Usuario
+from apps.users.domain.search import EqualityFilter
+
+# Only these fields leave Firestore in a search (data minimization, LOPDP).
+_SUMMARY_FIELDS = ["email", "firstName", "lastName", "birthDate", "cityId", "role"]
+
+
+def _delete_user_data(
+    transaction: Transaction, client: Client, uid: str, keep_an_admin: bool
+) -> bool:
+    if keep_an_admin and not another_admin_exists(client, transaction, uid):
+        return False
+    user = client.collection(USERS).document(uid)
+    # Firestore does not delete sub-collections with their parent document.
+    for private_document in user.collection(USER_PRIVATE).list_documents():
+        transaction.delete(private_document)
+    transaction.delete(user)
+    return True
 
 
 class FirestoreUserRepository:
@@ -48,3 +75,19 @@ class FirestoreUserRepository:
             self._users().document(uid).update({"role": role, "updatedAt": SERVER_TIMESTAMP})
         except NotFound:
             pass
+
+    def scan(
+        self, filters: list[EqualityFilter], start_after: str | None, batch_size: int
+    ) -> list[Usuario]:
+        users = self._users()
+        query = users.select(_SUMMARY_FIELDS)
+        for field, value in filters:
+            query = query.where(filter=FieldFilter(field, "==", value))
+        query = query.order_by(FieldPath.document_id()).limit(batch_size)
+        if start_after:
+            query = query.start_after({FieldPath.document_id(): users.document(start_after)})
+        return [Usuario.from_document(found.id, found.to_dict()) for found in query.stream()]
+
+    def delete_user_data(self, uid: str, *, keep_an_admin: bool) -> bool:
+        client = firestore_client()
+        return transactional(_delete_user_data)(client.transaction(), client, uid, keep_an_admin)

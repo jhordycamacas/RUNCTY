@@ -1,3 +1,5 @@
+import logging
+import time
 from datetime import date
 
 from rest_framework import status
@@ -5,26 +7,58 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.shared.presentation.adapters import adapter
-from apps.shared.presentation.serializers import validated_body
+from apps.shared.presentation.permissions import HasPermission, IsAuthenticated
+from apps.shared.presentation.serializers import validated_body, validated_query
+from apps.shared.presentation.throttles import SENSITIVE_THROTTLES
 from apps.users.application.use_cases import (
+    delete_account,
     get_preferences,
     get_profile,
     get_sport_profile,
     register_user,
     save_preferences,
     save_sport_profile,
+    search_users,
     update_personal_data,
 )
+from apps.users.domain.search import parse_search_query
 from apps.users.presentation.serializers import (
     PersonalDataSerializer,
     PreferencesSerializer,
     RegistrationSerializer,
     SportProfileSerializer,
+    UserSearchSerializer,
     UserSerializer,
+    UserSummarySerializer,
 )
+
+logger = logging.getLogger(__name__)
+
+CanReadUsers = HasPermission("users.read")
 
 
 class UsersView(APIView):
+    """`GET` is the admin search; `POST` is the sign-up of the caller's own profile."""
+
+    def get_permissions(self):
+        return [CanReadUsers() if self.request.method == "GET" else IsAuthenticated()]
+
+    def get_throttles(self):
+        if self.request.method != "GET":
+            return super().get_throttles()
+        # The search exposes personal data of other accounts.
+        return [throttle() for throttle in SENSITIVE_THROTTLES]
+
+    def get(self, request) -> Response:
+        query = parse_search_query(validated_query(UserSearchSerializer, request))
+        page = search_users(query, adapter("USER_REPOSITORY"))
+        return Response(
+            {
+                "users": UserSummarySerializer(page.users, many=True).data,
+                "nextCursor": page.next_cursor,
+            }
+        )
+
     def post(self, request) -> Response:
         user = register_user(
             request.user,
@@ -49,6 +83,13 @@ class OwnProfileView(APIView):
             adapter("USER_REPOSITORY"),
         )
         return Response(UserSerializer(user).data)
+
+    def delete(self, request) -> Response:
+        delete_account(
+            request.user, time.time(), adapter("USER_REPOSITORY"), adapter("AUTH_GATEWAY")
+        )
+        logger.info("Account %s deleted", request.user.uid)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class OwnSportProfileView(APIView):

@@ -1,5 +1,8 @@
 """In-memory adapters so the suite needs no network, emulators or credentials."""
 
+import time
+from dataclasses import replace
+
 from apps.roles.application.ports import RoleChange
 from apps.roles.domain.models import Rol
 from apps.shared.application.ports import AuthUserNotFound, TokenRejected
@@ -53,9 +56,12 @@ REJECTIONS = {
 
 
 class FakeTokenVerifier:
+    seconds_since_sign_in = 30
+
     def verify(self, token: str) -> Principal:
         if token in PRINCIPALS:
-            return PRINCIPALS[token]
+            signed_in_at = time.time() - self.seconds_since_sign_in
+            return replace(PRINCIPALS[token], auth_time=signed_in_at)
         reason = REJECTIONS.get(token, "invalid-token")
         raise TokenRejected(reason, f"Rejected: {reason}.")
 
@@ -135,6 +141,12 @@ class InMemoryAuthGateway:
         self._require(uid)
         self._firebase.calls.append(("revoke", uid))
 
+    def delete_user(self, uid: str) -> None:
+        self._require(uid)
+        self._firebase.fail_if_requested("delete_user")
+        del self._firebase.claims[uid]
+        self._firebase.calls.append(("auth", uid))
+
 
 class InMemoryRoleRepository:
     def __init__(self, firebase: FakeFirebase | None = None) -> None:
@@ -204,6 +216,31 @@ class InMemoryUserRepository:
         if uid in self._firebase.users:
             self._firebase.users[uid]["role"] = role
             self._firebase.calls.append(("mirror", uid, role))
+
+    def scan(
+        self, filters: list[tuple[str, str]], start_after: str | None, batch_size: int
+    ) -> list[Usuario]:
+        users = self._firebase.users
+        matching = [
+            Usuario.from_document(uid, users[uid])
+            for uid in sorted(users)
+            if uid > (start_after or "")
+            and all(users[uid].get(field) == value for field, value in filters)
+        ]
+        return matching[:batch_size]
+
+    def delete_user_data(self, uid: str, *, keep_an_admin: bool) -> bool:
+        users, private = self._firebase.users, self._firebase.private
+        if keep_an_admin and not any(
+            other != uid and users[other].get("role") == ADMIN_ROLE for other in users
+        ):
+            return False
+        self._firebase.fail_if_requested("delete_user_data")
+        users.pop(uid, None)
+        for key in [key for key in private if key[0] == uid]:
+            del private[key]
+        self._firebase.calls.append(("data", uid))
+        return True
 
 
 class _InMemoryPrivateDocuments:

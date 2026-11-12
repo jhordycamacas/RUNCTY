@@ -37,3 +37,7 @@ class AuthGateway(Protocol):
     def revoke_refresh_tokens(self, uid: str) -> None:
         """Ends the sessions of `uid`: tokens issued before this call stop being accepted."""
         ...
+
+    def delete_user(self, uid: str) -> None:
+        """Deletes the account and its credentials."""
+        ...

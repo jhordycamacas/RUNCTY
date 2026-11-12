@@ -29,3 +29,7 @@ class FirebaseAuthGateway:
     def revoke_refresh_tokens(self, uid: str) -> None:
         with _account(uid) as client:
             client.revoke_refresh_tokens(uid)
+
+    def delete_user(self, uid: str) -> None:
+        with _account(uid) as client:
+            client.delete_user(uid)
