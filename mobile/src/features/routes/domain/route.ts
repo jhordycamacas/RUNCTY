@@ -36,7 +36,7 @@ export interface RouteFactor extends SafetyFactor {
 }
 
 /** `routes/{id}.safety[slotId]`: the route takes its worst segment. */
-export interface RouteSlotSafety {
+export interface IndiceSeguridadRuta {
   slotId: string;
   level: SafetyLevel;
   score: number;
@@ -46,7 +46,7 @@ export interface RouteSlotSafety {
   factors: RouteFactor[];
 }
 
-export interface Route {
+export interface Ruta {
   id: string;
   name: string;
   cityId: string;
@@ -60,30 +60,30 @@ export interface Route {
   difficulty: Difficulty | null;
   segmentCount: number;
   /** Slot safety entries sorted by start time. */
-  safety: RouteSlotSafety[];
+  safety: IndiceSeguridadRuta[];
 }
 
 /** `routes/{id}/segments/{id}.safety[slotId]`. */
-export interface SegmentSlotSafety {
+export interface IndiceSeguridadTramo {
   level: SafetyLevel;
   score: number;
   factors: SafetyFactor[];
 }
 
-export interface Segment {
+export interface Tramo {
   id: string;
   name: string;
   order: number;
   coordinates: LatLng[];
   lengthM: number;
-  safety: Record<string, SegmentSlotSafety>;
+  safety: Record<string, IndiceSeguridadTramo>;
 }
 
 export interface RouteRepository {
   /** Active routes of a city (runners can only read active routes). */
-  listActiveByCity(cityId: string): Promise<Route[]>;
+  listActiveByCity(cityId: string): Promise<Ruta[]>;
   /** Null when the route does not exist. */
-  getById(routeId: string): Promise<Route | null>;
+  getById(routeId: string): Promise<Ruta | null>;
   /** Segments sorted by `order`. */
-  listSegments(routeId: string): Promise<Segment[]>;
+  listSegments(routeId: string): Promise<Tramo[]>;
 }

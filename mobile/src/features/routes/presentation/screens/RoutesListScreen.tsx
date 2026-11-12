@@ -16,7 +16,7 @@ import {
   type RouteFilters,
 } from '../../domain/catalog';
 import { DIFFICULTY_LABELS } from '../../domain/labels';
-import { DIFFICULTIES, type Route } from '../../domain/route';
+import { DIFFICULTIES, type Ruta } from '../../domain/route';
 import { ErrorState } from '../components/ErrorState';
 import { RouteCard } from '../components/RouteCard';
 import { SlotSelector } from '../components/SlotSelector';
@@ -39,7 +39,7 @@ const DIFFICULTY_OPTIONS = [
   ...DIFFICULTIES.map((value) => ({ value, label: DIFFICULTY_LABELS[value] })),
 ];
 
-const NO_ROUTES: Route[] = [];
+const NO_ROUTES: Ruta[] = [];
 
 /** Rutas tab: the active routes of the runner's city with their safety per time slot. */
 export function RoutesListScreen({ onOpenRoute, onCompleteProfile }: RoutesListScreenProps) {

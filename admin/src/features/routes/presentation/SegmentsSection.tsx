@@ -9,14 +9,14 @@ import { Alert, LoadingText } from '@/core/ui/feedback';
 import { TextAreaField, TextField } from '@/core/ui/fields';
 
 import { useDeleteSegment, useSaveSegment } from '../application/useRoutes';
-import { formatWindow, type TimeSlot } from '../domain/schedule';
+import { formatWindow, type FranjaHoraria } from '../domain/schedule';
 import {
   MAX_POINTS,
   MAX_SEGMENT_NAME,
   emptySegmentForm,
   parseSegmentForm,
   segmentToForm,
-  type Segment,
+  type Tramo,
   type SegmentFormErrors,
   type SegmentFormValues,
 } from '../domain/segment';
@@ -25,7 +25,7 @@ import { SafetyBadge, formatMeters } from './SafetyBadge';
 
 interface SegmentFormProps {
   routeId: string;
-  segment?: Segment;
+  segment?: Tramo;
   count: number;
   onDone(message: string): void;
   onCancel(): void;
@@ -100,12 +100,12 @@ function SegmentForm({ routeId, segment, count, onDone, onCancel }: SegmentFormP
   );
 }
 
-type Editing = { mode: 'create' } | { mode: 'edit'; segment: Segment } | null;
+type Editing = { mode: 'create' } | { mode: 'edit'; segment: Tramo } | null;
 
 interface SegmentsSectionProps {
   routeId: string;
-  segments: Segment[];
-  slots: TimeSlot[];
+  segments: Tramo[];
+  slots: FranjaHoraria[];
   loading: boolean;
   error: unknown;
 }
@@ -115,11 +115,11 @@ export function SegmentsSection({ routeId, segments, slots, loading, error }: Se
   const remove = useDeleteSegment();
   const move = useSaveSegment();
   const [editing, setEditing] = useState<Editing>(null);
-  const [toDelete, setToDelete] = useState<Segment | null>(null);
+  const [toDelete, setToDelete] = useState<Tramo | null>(null);
   const [openFactors, setOpenFactors] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  async function moveSegment(segment: Segment, to: number) {
+  async function moveSegment(segment: Tramo, to: number) {
     setNotice(null);
     try {
       await move.mutateAsync({

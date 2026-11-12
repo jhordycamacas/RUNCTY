@@ -2,7 +2,7 @@ import { deleteField, doc, getDoc, serverTimestamp, updateDoc, type Firestore } 
 
 import { collections } from '@/core/firebase';
 
-import type { ProfileRepository, UserProfile } from '../domain';
+import type { ProfileRepository, Usuario } from '../domain';
 
 const asString = (value: unknown): string => (typeof value === 'string' ? value : '');
 
@@ -12,7 +12,7 @@ export function createFirestoreProfileRepository(db: Firestore): ProfileReposito
       const snapshot = await getDoc(doc(db, collections.users, uid));
       if (!snapshot.exists()) return null;
       const data = snapshot.data();
-      const profile: UserProfile = {
+      const profile: Usuario = {
         uid,
         email: asString(data.email),
         firstName: asString(data.firstName),

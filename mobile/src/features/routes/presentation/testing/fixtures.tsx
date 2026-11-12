@@ -3,7 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ThemeProvider } from '@/core/theme';
 
-import type { Route, RouteSlotSafety, Segment } from '../../domain/route';
+import type { Ruta, IndiceSeguridadRuta, Tramo } from '../../domain/route';
 
 const METRICS = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -18,7 +18,7 @@ export function TestProviders({ children }: { children: ReactNode }) {
   );
 }
 
-export const morning = (overrides: Partial<RouteSlotSafety> = {}): RouteSlotSafety => ({
+export const morning = (overrides: Partial<IndiceSeguridadRuta> = {}): IndiceSeguridadRuta => ({
   slotId: 'morning',
   level: 'high',
   score: 90,
@@ -29,7 +29,7 @@ export const morning = (overrides: Partial<RouteSlotSafety> = {}): RouteSlotSafe
   ...overrides,
 });
 
-export const evening = (overrides: Partial<RouteSlotSafety> = {}): RouteSlotSafety => ({
+export const evening = (overrides: Partial<IndiceSeguridadRuta> = {}): IndiceSeguridadRuta => ({
   slotId: 'evening',
   level: 'low',
   score: 30,
@@ -48,7 +48,7 @@ export const evening = (overrides: Partial<RouteSlotSafety> = {}): RouteSlotSafe
   ...overrides,
 });
 
-export const makeRoute = (overrides: Partial<Route> = {}): Route => ({
+export const makeRoute = (overrides: Partial<Ruta> = {}): Ruta => ({
   id: 'jipiro',
   name: 'Parque Jipiro',
   cityId: 'loja',
@@ -64,7 +64,7 @@ export const makeRoute = (overrides: Partial<Route> = {}): Route => ({
   ...overrides,
 });
 
-export const makeSegment = (overrides: Partial<Segment> = {}): Segment => ({
+export const makeSegment = (overrides: Partial<Tramo> = {}): Tramo => ({
   id: 's1',
   name: 'Entrada al lago',
   order: 0,

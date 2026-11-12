@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { canBeParent, coverageLabel, emptyCityForm, parseCityForm, suggestCityId, type City, type CityFormValues } from './city';
+import { canBeParent, coverageLabel, emptyCityForm, parseCityForm, suggestCityId, type Ciudad, type CityFormValues } from './city';
 
 const cityForm: CityFormValues = {
   ...emptyCityForm(),
@@ -70,7 +70,7 @@ describe('suggestCityId', () => {
 });
 
 describe('helpers', () => {
-  const loja: City = {
+  const loja: Ciudad = {
     id: 'loja',
     name: 'Loja',
     province: 'Loja',

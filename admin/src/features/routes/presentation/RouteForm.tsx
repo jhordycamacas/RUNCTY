@@ -21,14 +21,14 @@ import {
   routeToForm,
   surfaceLabel,
   type Difficulty,
-  type Route,
+  type Ruta,
   type RouteFormErrors,
   type RouteFormValues,
   type Surface,
 } from '../domain/route';
 
 interface RouteFormProps {
-  route?: Route;
+  route?: Ruta;
   onDone(message: string, createdId?: string): void;
   onCancel(): void;
 }

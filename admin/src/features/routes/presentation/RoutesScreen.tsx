@@ -18,14 +18,14 @@ import {
   filterRoutes,
   safetyBySlot,
   surfaceLabel,
-  type Route,
+  type Ruta,
   type RouteFilters,
 } from '../domain/route';
 import { formatWindow } from '../domain/schedule';
 import { RouteForm } from './RouteForm';
 import { SafetyBadge, formatKm } from './SafetyBadge';
 
-type Editing = { mode: 'create' } | { mode: 'edit'; route: Route } | null;
+type Editing = { mode: 'create' } | { mode: 'edit'; route: Ruta } | null;
 
 /** RF-05-1..3 / RF-05-7: route catalog for admins (includes inactive routes). */
 export function RoutesScreen() {
@@ -35,7 +35,7 @@ export function RoutesScreen() {
   const remove = useDeleteRoute();
   const [filters, setFilters] = useState<RouteFilters>({ cityId: '', difficulty: '', text: '' });
   const [editing, setEditing] = useState<Editing>(null);
-  const [toDelete, setToDelete] = useState<Route | null>(null);
+  const [toDelete, setToDelete] = useState<Ruta | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   const cityNames = useMemo(() => new Map((cities.data ?? []).map((c) => [c.id, c.label])), [cities.data]);

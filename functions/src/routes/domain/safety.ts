@@ -48,20 +48,20 @@ interface SegmentFactor {
   source?: string;
 }
 
-interface SegmentSlotSafety {
+interface IndiceSeguridadTramo {
   level: SafetyLevel;
   score: number;
   factors: SegmentFactor[];
 }
 
-export type SegmentSafety = Record<string, SegmentSlotSafety>;
+export type SegmentSafety = Record<string, IndiceSeguridadTramo>;
 
 interface RouteFactor extends SegmentFactor {
   segmentId: string;
   segmentName: string;
 }
 
-interface RouteSlotSafety {
+interface IndiceSeguridadRuta {
   level: SafetyLevel;
   score: number;
   startTime: string;
@@ -70,7 +70,7 @@ interface RouteSlotSafety {
   factors: RouteFactor[];
 }
 
-export type RouteSafety = Record<string, RouteSlotSafety>;
+export type RouteSafety = Record<string, IndiceSeguridadRuta>;
 
 export interface SegmentWithSafety {
   id: string;
@@ -110,7 +110,7 @@ export function computeSegmentSafety(
   return result;
 }
 
-const FULL_SCORE: SegmentSlotSafety = { level: 'high', score: MAX_SCORE, factors: [] };
+const FULL_SCORE: IndiceSeguridadTramo = { level: 'high', score: MAX_SCORE, factors: [] };
 
 /** Route level per slot = worst segment (ties: first in route order). */
 export function computeRouteSafety(slots: readonly SafetySlot[], segments: readonly SegmentWithSafety[]): RouteSafety {

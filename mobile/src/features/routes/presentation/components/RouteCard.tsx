@@ -5,16 +5,16 @@ import { AppText, Badge, Icon, SAFETY_LEVELS, SafetyBadge } from '@/core/ui';
 
 import { routeSafetyForSlot } from '../../domain/catalog';
 import { DIFFICULTY_LABELS, SURFACE_LABELS, factorTypeLabel, formatElevation, formatKm } from '../../domain/labels';
-import type { Route } from '../../domain/route';
+import type { Ruta } from '../../domain/route';
 
 export interface RouteCardProps {
-  route: Route;
+  route: Ruta;
   slotKey: string | null;
   onPress: () => void;
 }
 
 /** "3,2 km · 15 m de desnivel · Principiante · Asfalto". */
-function routeMeta(route: Route): string {
+function routeMeta(route: Ruta): string {
   return [
     formatKm(route.distanceKm),
     `${formatElevation(route.elevationGainM)} de desnivel`,

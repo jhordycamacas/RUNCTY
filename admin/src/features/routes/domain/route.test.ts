@@ -9,7 +9,7 @@ import {
   routeToForm,
   safetyBySlot,
   surfaceLabel,
-  type Route,
+  type Ruta,
   type RouteFormValues,
 } from './route';
 
@@ -31,7 +31,7 @@ const form: RouteFormValues = {
   active: true,
 };
 
-const route: Route = {
+const route: Ruta = {
   id: 'r1',
   name: 'Circuito Jipiro',
   cityId: 'loja',
@@ -118,7 +118,7 @@ describe('parseRouteForm', () => {
 });
 
 describe('filterRoutes', () => {
-  const other: Route = { ...route, id: 'r2', name: 'Sendero Podocarpus', cityId: 'zamora', difficulty: 'advanced' };
+  const other: Ruta = { ...route, id: 'r2', name: 'Sendero Podocarpus', cityId: 'zamora', difficulty: 'advanced' };
 
   it('filters by city, difficulty and accent-insensitive text', () => {
     expect(filterRoutes([route, other], { cityId: 'loja', difficulty: '', text: '' })).toEqual([route]);

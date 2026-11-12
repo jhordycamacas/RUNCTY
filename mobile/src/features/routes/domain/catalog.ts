@@ -7,7 +7,7 @@
  */
 import { TRAINING_SLOTS, getNextTrainingSlot, type TrainingSlot } from '@/features/training/domain/trainingSlots';
 
-import type { Difficulty, Route, RouteSlotSafety, Segment, SegmentSlotSafety } from './route';
+import type { Difficulty, Ruta, IndiceSeguridadRuta, Tramo, IndiceSeguridadTramo } from './route';
 
 export type DistanceBucket = 'all' | 'upTo5' | 'from5to10' | 'over10';
 export type DifficultyFilter = Difficulty | 'all';
@@ -39,7 +39,7 @@ function inBucket(km: number, bucket: DistanceBucket): boolean {
   }
 }
 
-export function filterRoutes(routes: readonly Route[], filters: RouteFilters): Route[] {
+export function filterRoutes(routes: readonly Ruta[], filters: RouteFilters): Ruta[] {
   return routes.filter(
     (route) =>
       inBucket(route.distanceKm, filters.distance) &&
@@ -59,7 +59,7 @@ export interface TimeSlotOption {
 export const slotKey = (startTime: string, endTime: string) => `${startTime}-${endTime}`;
 
 /** Distinct time slot windows present in the routes' safety, by start time. */
-export function listTimeSlots(routes: readonly Route[]): TimeSlotOption[] {
+export function listTimeSlots(routes: readonly Ruta[]): TimeSlotOption[] {
   const byKey = new Map<string, TimeSlotOption>();
   for (const route of routes) {
     for (const { startTime, endTime } of route.safety) {
@@ -91,19 +91,19 @@ export function pickDefaultSlot(
   return slots.find((s) => minutes(s.startTime) < end && start < minutes(s.endTime)) ?? slots[0];
 }
 
-export function routeSafetyForSlot(route: Route, key: string | null): RouteSlotSafety | null {
+export function routeSafetyForSlot(route: Ruta, key: string | null): IndiceSeguridadRuta | null {
   if (!key) return null;
   return route.safety.find((s) => slotKey(s.startTime, s.endTime) === key) ?? null;
 }
 
 /** Segment safety is keyed by the route's own slot id. */
-export function segmentSafetyForSlot(segment: Segment, route: Route, key: string | null): SegmentSlotSafety | null {
+export function segmentSafetyForSlot(segment: Tramo, route: Ruta, key: string | null): IndiceSeguridadTramo | null {
   const routeSlot = routeSafetyForSlot(route, key);
   return routeSlot ? (segment.safety[routeSlot.slotId] ?? null) : null;
 }
 
 /** Best safety score first, then the shortest; routes without data for the slot go last. */
-export function sortRoutesForSlot(routes: readonly Route[], key: string | null): Route[] {
+export function sortRoutesForSlot(routes: readonly Ruta[], key: string | null): Ruta[] {
   return [...routes].sort((a, b) => {
     const sa = routeSafetyForSlot(a, key);
     const sb = routeSafetyForSlot(b, key);

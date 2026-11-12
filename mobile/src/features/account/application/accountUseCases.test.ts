@@ -2,7 +2,7 @@ import { authError, fakeAuthGateway } from '@/features/auth/application/testing/
 
 import type { PersonalData } from '@/features/auth/domain';
 
-import type { AccountGateway, ProfileRepository, UserProfile } from '../domain';
+import type { AccountGateway, ProfileRepository, Usuario } from '../domain';
 import { changePassword, deleteAccount, updatePersonalData } from './accountUseCases';
 
 function fakeAccountGateway(overrides: Partial<AccountGateway> = {}): jest.Mocked<AccountGateway> {
@@ -11,7 +11,7 @@ function fakeAccountGateway(overrides: Partial<AccountGateway> = {}): jest.Mocke
 
 function fakeProfileRepository(): jest.Mocked<ProfileRepository> {
   return {
-    get: jest.fn<Promise<UserProfile | null>, [string]>(async () => null),
+    get: jest.fn<Promise<Usuario | null>, [string]>(async () => null),
     updatePersonalData: jest.fn<Promise<void>, [string, PersonalData]>(async () => undefined),
   };
 }

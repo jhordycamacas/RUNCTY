@@ -20,18 +20,18 @@ import {
   parseRiskFactorForm,
   riskFactorToForm,
   severityLabel,
-  type RiskFactor,
+  type FactorDeRiesgo,
   type RiskFactorFormErrors,
   type RiskFactorFormValues,
   type RiskFactorType,
 } from '../domain/schedule';
-import type { Segment } from '../domain/segment';
+import type { Tramo } from '../domain/segment';
 import { SEVERITY_TONE } from './SafetyBadge';
 
 interface RiskFactorFormProps {
   routeId: string;
   segmentId: string;
-  factor?: RiskFactor;
+  factor?: FactorDeRiesgo;
   onDone(message: string): void;
   onCancel(): void;
 }
@@ -118,14 +118,14 @@ function RiskFactorForm({ routeId, segmentId, factor, onDone, onCancel }: RiskFa
   );
 }
 
-type Editing = { mode: 'create' } | { mode: 'edit'; factor: RiskFactor } | null;
+type Editing = { mode: 'create' } | { mode: 'edit'; factor: FactorDeRiesgo } | null;
 
 /** RF-07: risk factors of one segment ("tramo"). */
-export function RiskFactorsPanel({ routeId, segment }: { routeId: string; segment: Segment }) {
+export function RiskFactorsPanel({ routeId, segment }: { routeId: string; segment: Tramo }) {
   const factors = useRiskFactors(routeId, segment.id);
   const remove = useDeleteRiskFactor();
   const [editing, setEditing] = useState<Editing>(null);
-  const [toDelete, setToDelete] = useState<RiskFactor | null>(null);
+  const [toDelete, setToDelete] = useState<FactorDeRiesgo | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   async function confirmDelete() {

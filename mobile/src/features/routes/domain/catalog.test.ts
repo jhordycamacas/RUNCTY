@@ -8,17 +8,17 @@ import {
   sortRoutesForSlot,
 } from './catalog';
 import { factorTypeLabel, formatKm, formatMeters } from './labels';
-import type { Route, RouteSlotSafety, Segment } from './route';
+import type { Ruta, IndiceSeguridadRuta, Tramo } from './route';
 
 const slot = (
   slotId: string,
   startTime: string,
   endTime: string,
   score: number,
-  level: RouteSlotSafety['level'] = score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low',
-): RouteSlotSafety => ({ slotId, startTime, endTime, score, level, worstSegmentId: '', factors: [] });
+  level: IndiceSeguridadRuta['level'] = score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low',
+): IndiceSeguridadRuta => ({ slotId, startTime, endTime, score, level, worstSegmentId: '', factors: [] });
 
-const route = (id: string, overrides: Partial<Route> = {}): Route => ({
+const route = (id: string, overrides: Partial<Ruta> = {}): Ruta => ({
   id,
   name: id,
   cityId: 'loja',
@@ -42,7 +42,7 @@ describe('filterRoutes', () => {
     route('d', { distanceKm: 10, difficulty: 'advanced' }),
     route('e', { distanceKm: 12, difficulty: null }),
   ];
-  const ids = (list: Route[]) => list.map((r) => r.id);
+  const ids = (list: Ruta[]) => list.map((r) => r.id);
 
   it('keeps everything with no filters', () => {
     expect(ids(filterRoutes(routes, { distance: 'all', difficulty: 'all' }))).toEqual(['a', 'b', 'c', 'd', 'e']);
@@ -124,7 +124,7 @@ describe('sortRoutesForSlot', () => {
 
 describe('routeSafetyForSlot / segmentSafetyForSlot', () => {
   const r = route('a', { safety: [slot('evening', '18:00', '20:00', 45)] });
-  const segment: Segment = {
+  const segment: Tramo = {
     id: 's1',
     name: 'Tramo',
     order: 0,

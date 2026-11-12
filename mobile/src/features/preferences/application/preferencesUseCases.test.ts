@@ -1,27 +1,27 @@
-import { DEFAULT_PREFERENCES, type Preferences, type PreferencesCache, type PreferencesRepository } from '../domain';
+import { DEFAULT_PREFERENCES, type PreferenciaUsuario, type PreferencesCache, type PreferencesRepository } from '../domain';
 import { getPreferences, readCachedPreferences, resetPreferences, savePreferences } from './preferencesUseCases';
 
 const UID = 'uid-1';
 
-const custom: Preferences = {
+const custom: PreferenciaUsuario = {
   ...DEFAULT_PREFERENCES,
   fontScale: 'xlarge',
   appearance: 'dark',
   notifications: { enabled: false, safetyAlerts: true, events: false },
 };
 
-function fakeRepo(stored: Preferences | null = null): jest.Mocked<PreferencesRepository> {
+function fakeRepo(stored: PreferenciaUsuario | null = null): jest.Mocked<PreferencesRepository> {
   return {
-    get: jest.fn<Promise<Preferences | null>, [string]>(async () => stored),
-    save: jest.fn<Promise<void>, [string, Preferences]>(async () => undefined),
+    get: jest.fn<Promise<PreferenciaUsuario | null>, [string]>(async () => stored),
+    save: jest.fn<Promise<void>, [string, PreferenciaUsuario]>(async () => undefined),
     remove: jest.fn<Promise<void>, [string]>(async () => undefined),
   };
 }
 
-function fakeCache(cached: Preferences | null = null): jest.Mocked<PreferencesCache> {
+function fakeCache(cached: PreferenciaUsuario | null = null): jest.Mocked<PreferencesCache> {
   return {
-    read: jest.fn<Promise<Preferences | null>, [string]>(async () => cached),
-    write: jest.fn<Promise<void>, [string, Preferences]>(async () => undefined),
+    read: jest.fn<Promise<PreferenciaUsuario | null>, [string]>(async () => cached),
+    write: jest.fn<Promise<void>, [string, PreferenciaUsuario]>(async () => undefined),
     clear: jest.fn<Promise<void>, [string]>(async () => undefined),
   };
 }
@@ -72,7 +72,7 @@ describe('savePreferences (RF-01-13 / RF-01-15)', () => {
 
   it('rejects invalid preferences without saving', async () => {
     const repo = fakeRepo();
-    const invalid = { ...custom, fontScale: 'huge' } as unknown as Preferences;
+    const invalid = { ...custom, fontScale: 'huge' } as unknown as PreferenciaUsuario;
     await expect(savePreferences(UID, invalid, { repo, cache: fakeCache() })).rejects.toThrow();
     expect(repo.save).not.toHaveBeenCalled();
   });

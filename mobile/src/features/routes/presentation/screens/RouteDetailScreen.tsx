@@ -17,7 +17,7 @@ import {
 import { useRouteDetail, useRouteSegments } from '../../application/useRoutes';
 import { routeSafetyForSlot, segmentSafetyForSlot } from '../../domain/catalog';
 import { DIFFICULTY_LABELS, SURFACE_LABELS, formatElevation, formatKm, formatMeters } from '../../domain/labels';
-import type { Route, RouteSlotSafety, Segment } from '../../domain/route';
+import type { Ruta, IndiceSeguridadRuta, Tramo } from '../../domain/route';
 import { ErrorState } from '../components/ErrorState';
 import { FactorList } from '../components/FactorList';
 import { SlotSelector } from '../components/SlotSelector';
@@ -52,7 +52,7 @@ export function RouteDetailScreen({ routeId, initialSlotKey }: RouteDetailScreen
   return <RouteDetail route={route.data} initialSlotKey={initialSlotKey} />;
 }
 
-function RouteDetail({ route, initialSlotKey }: { route: Route; initialSlotKey?: string | null }) {
+function RouteDetail({ route, initialSlotKey }: { route: Ruta; initialSlotKey?: string | null }) {
   const { spacing } = useTheme();
   const segments = useRouteSegments(route.id);
   const { slots, slotKey, setSlotKey } = useSlotSelection([route], initialSlotKey);
@@ -116,7 +116,7 @@ function RouteDetail({ route, initialSlotKey }: { route: Route; initialSlotKey?:
   );
 }
 
-function SafetySummary({ safety, hasSlots }: { safety: RouteSlotSafety | null; hasSlots: boolean }) {
+function SafetySummary({ safety, hasSlots }: { safety: IndiceSeguridadRuta | null; hasSlots: boolean }) {
   const { spacing } = useTheme();
 
   if (!safety) {
@@ -153,9 +153,9 @@ function SafetySummary({ safety, hasSlots }: { safety: RouteSlotSafety | null; h
 }
 
 interface SegmentsSectionProps {
-  route: Route;
+  route: Ruta;
   slotKey: string | null;
-  segments: Segment[] | undefined;
+  segments: Tramo[] | undefined;
   isPending: boolean;
   isError: boolean;
   onRetry: () => void;

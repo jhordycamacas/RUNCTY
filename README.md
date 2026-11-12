@@ -104,15 +104,33 @@ npm --prefix admin install     # Panel de administración
 
 O todo junto: `npm run install:all`.
 
-### Emuladores y datos semilla
+### Backend local con Docker (recomendado)
+
+Con Docker Desktop encendido, un solo comando levanta los emuladores de Firebase, carga los datos semilla y arranca el panel de administración:
+
+```bash
+docker compose up -d --build
+```
+
+| Servicio | Qué hace | Dirección |
+| --- | --- | --- |
+| `firebase` | Emuladores de Auth (9099), Firestore (8080), Functions (5001) y Storage (9199) con las functions ya compiladas | UI en http://localhost:4000 |
+| `seed` | Corre una vez y termina: crea la ciudad Loja, los roles, el administrador de prueba y 5 rutas de ejemplo | — |
+| `admin` | Panel de administración | http://localhost:3100 |
+
+- Los puertos se publican **solo en `127.0.0.1`**: los emuladores no tienen autenticación y no deben verse desde la red. Los procesos corren sin root dentro de los contenedores.
+- Al reiniciar el contenedor `firebase` se pierden los datos (usuarios incluidos). Para cargar la semilla otra vez: `docker compose up seed`.
+- Apagar todo: `docker compose down`.
+
+### Emuladores y datos semilla sin Docker
 
 ```bash
 npm run functions:build # compila las functions antes de levantar el emulador
 npm run emulators       # Auth 9099 · Firestore 8080 · Functions 5001 · Storage 9199 · UI http://localhost:4000
-npm run seed            # en otra terminal: crea la ciudad Loja, los roles del sistema y el usuario administrador
+npm run seed            # en otra terminal: crea la ciudad Loja, los roles del sistema, el administrador y las rutas de ejemplo
 ```
 
-Usuario administrador de prueba (solo emulador): `admin@runcty.dev` / `Admin123!`.
+Usuario administrador de prueba (solo emulador): `admin@runcty.dev` / `Admin123!`. El seed se niega a correr si el proyecto no empieza con `demo-` o si los emuladores no están en la máquina local o en el servicio `firebase` de Docker.
 
 Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda en `emulator-data/`, ignorado por git).
 
@@ -121,13 +139,14 @@ Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda 
 La app usa módulos nativos, así que se instala como build de desarrollo y no con Expo Go. Para instalarla en un celular Android por USB, sigue el manual [docs/manual-instalacion-android.md](docs/manual-instalacion-android.md). El resumen es este:
 
 1. Copia `mobile/.env.example` a `mobile/.env` y pon `EXPO_PUBLIC_USE_EMULATORS=true` y `EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1`.
-2. Conecta el celular y redirige los puertos con `adb reverse` (8081, 9099, 8080, 5001 y 9199).
-3. Con los emuladores levantados:
+2. Conecta el celular y redirige los puertos con `adb reverse` (Metro, 9099, 8080, 5001 y 9199). Metro usa el **8081**, o el **8082** si la build instalada se hizo cuando el 8081 estaba ocupado: la app recuerda el puerto con el que se compiló. Si al abrirla ves "Unable to load script", revisa los logs con `adb logcat` y busca a qué puerto apunta.
+3. Con el backend levantado:
 
 ```bash
 cd mobile
-npm run android   # compila, instala y abre la app (la primera vez tarda varios minutos)
-npm start         # uso diario, cuando la app ya está instalada
+npm run android            # compila, instala y abre la app (la primera vez tarda varios minutos)
+npm start                  # uso diario, cuando la app ya está instalada
+npx expo start --port 8082 # si la build instalada busca Metro en el 8082
 ```
 
 > **Windows:** clona el repo en una ruta corta (por ejemplo `D:\RUNCTY`). Con rutas largas, la compilación nativa falla por el límite de 260 caracteres de Windows. Ver la sección 10 del manual.
@@ -154,7 +173,7 @@ Solo pueden entrar las cuentas con el permiso `admin.access`; a un corredor se l
 ### Cuentas y roles
 
 - El registro crea la cuenta en Firebase Auth y el documento `users/{uid}` **sin rol**. La función `onUserDocCreated` asigna los custom claims `{ role: 'runner', perms: [] }` (sin pisar un rol existente, por ejemplo `admin`) y luego copia el rol al documento; la app detecta ese cambio y refresca el token.
-- Roles y permisos (RF-02): cada rol (`roles/{id}`) tiene una lista de permisos del catálogo de `functions/src/roles/permissions.ts`. Al asignar un rol, la función `setUserRole` escribe los claims `{ role, perms }`; al editar un rol, `updateRole` vuelve a escribir los claims de todos sus usuarios. Los cambios se aplican cuando el usuario renueva su token (como máximo una hora o al volver a iniciar sesión). Las reglas de Firestore leen los permisos del token (`hasPerm`), sin consultar documentos. Un administrador no puede quitarse su propio rol.
+- Roles y permisos (RF-02): cada rol (`roles/{id}`) tiene una lista de permisos del catálogo de `functions/src/roles/permissions.ts`. Al asignar un rol, la función `setUserRole` escribe los claims `{ role, perms }`; al editar un rol, `updateRole` vuelve a escribir los claims de todos sus usuarios. Al cambiar un rol se revocan los refresh tokens del usuario y el cambio se aplica cuando renueva su token (un token ya emitido puede seguir valiendo hasta una hora). Las reglas de Firestore leen los permisos del token (`hasPerm`), sin consultar documentos. Reglas de seguridad de los roles: solo un administrador puede asignar o quitar el rol `admin` o dar `roles.manage` a un rol; nadie concede permisos que no tiene; no se puede degradar ni eliminar al último administrador, ni un administrador puede quitarse su propio rol. App Check se exige en las functions con la variable `ENFORCE_APP_CHECK=true`, apagada por defecto en local (ver CONTEXTO.md, sección 14.2).
 - Para probar el registro completo deben estar corriendo los emuladores de Auth, Firestore **y Functions** (`npm run emulators` después de `npm run functions:build`).
 - Eliminar la cuenta llama a la función `deleteAccount` (callable). La app pide la contraseña actual justo antes; la función rechaza tokens con más de 5 minutos desde el último inicio de sesión, borra `users/{uid}` con todas sus subcolecciones y luego la cuenta de Auth.
 - El catálogo `cities` es de lectura pública: el formulario de registro lista las ciudades activas (sin zonas) antes de que exista la cuenta.
@@ -175,7 +194,7 @@ npm run admin:build                   # build de producción del panel
 
 ## Estado del desarrollo
 
-Última actualización: 2026-11-02.
+Última actualización: 2026-11-10.
 
 | Sprint | Épicas | Estado |
 | --- | --- | --- |
@@ -212,6 +231,7 @@ npm run admin:build                   # build de producción del panel
 
 ### Pendiente
 
+- Pulido de la app y del panel que dejó la auditoría del 2026-11-10 (botón de emergencia, preferencias que se aplican, reenvío del correo de verificación, panel responsive y confirmación al cambiar roles). El detalle y el plan están en [CONTEXTO.md](CONTEXTO.md), sección 14.
 - Probar en el navegador la gestión de rutas del panel.
 - Mapas (hoy las coordenadas se cargan a mano).
 - Conectar el proyecto real de Firebase (plan Blaze) para desplegar.

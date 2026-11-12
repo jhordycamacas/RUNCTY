@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 
 import { listTimeSlots, pickDefaultSlot, type TimeSlotOption } from '../../domain/catalog';
-import type { Route } from '../../domain/route';
+import type { Ruta } from '../../domain/route';
 
 export interface SlotSelection {
   slots: TimeSlotOption[];
@@ -14,7 +14,7 @@ export interface SlotSelection {
  * Time slot shown by the catalog: the one the runner picked, else the one
  * matching the current or next recommended training slot.
  */
-export function useSlotSelection(routes: readonly Route[], initialKey?: string | null): SlotSelection {
+export function useSlotSelection(routes: readonly Ruta[], initialKey?: string | null): SlotSelection {
   const slots = useMemo(() => listTimeSlots(routes), [routes]);
   const [chosen, setChosen] = useState<string | null>(initialKey ?? null);
   const [now] = useState(() => new Date());

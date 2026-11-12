@@ -47,11 +47,11 @@ export const preferencesSchema = z
   })
   .strict();
 
-export type Preferences = z.output<typeof preferencesSchema>;
-export type NotificationPreferences = Preferences['notifications'];
+export type PreferenciaUsuario = z.output<typeof preferencesSchema>;
+export type PreferenciaNotificaciones = PreferenciaUsuario['notifications'];
 
 /** Single source of the defaults: used when the doc is missing or after a reset. */
-export const DEFAULT_PREFERENCES: Readonly<Preferences> = Object.freeze({
+export const DEFAULT_PREFERENCES: Readonly<PreferenciaUsuario> = Object.freeze({
   language: 'es',
   fontScale: 'normal',
   appearance: 'system',
@@ -73,7 +73,7 @@ function pick<T>(schema: z.ZodType<T>, value: unknown, fallback: T): T {
  * Tolerant read of a stored (or cached) document: every missing or invalid
  * field falls back to its default, unknown keys (e.g. `updatedAt`) are dropped.
  */
-export function parsePreferences(raw: unknown): Preferences {
+export function parsePreferences(raw: unknown): PreferenciaUsuario {
   const d = DEFAULT_PREFERENCES;
   const data = isRecord(raw) ? raw : {};
   const notifications = isRecord(data.notifications) ? data.notifications : {};
@@ -119,16 +119,16 @@ export const LOCATION_PRIVACY_LABELS: Record<LocationPrivacy, string> = {
 
 export interface PreferencesRepository {
   /** null when the user never saved preferences. */
-  get(uid: string): Promise<Preferences | null>;
+  get(uid: string): Promise<PreferenciaUsuario | null>;
   /** Creates or replaces the doc (RF-01-13, RF-01-15). */
-  save(uid: string, preferences: Preferences): Promise<void>;
+  save(uid: string, preferences: PreferenciaUsuario): Promise<void>;
   /** RF-01-16: deleting the doc restores the defaults. */
   remove(uid: string): Promise<void>;
 }
 
 /** Device-local copy so the theme applies before Firestore answers. Keyed by uid. */
 export interface PreferencesCache {
-  read(uid: string): Promise<Preferences | null>;
-  write(uid: string, preferences: Preferences): Promise<void>;
+  read(uid: string): Promise<PreferenciaUsuario | null>;
+  write(uid: string, preferences: PreferenciaUsuario): Promise<void>;
   clear(uid: string): Promise<void>;
 }
