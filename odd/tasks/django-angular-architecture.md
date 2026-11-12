@@ -137,7 +137,7 @@ Paths that break on the move: `firebase.json` (`source`, rules), `docker-compose
 
 ## Tasks
 
-- [ ] **T1 — Backend scaffold.** Django + DRF project in `backend/` with a feature-first hexagonal layout, Firebase integration (Auth, Firestore, Storage, FCM accessors), token authentication, permission classes, error handling, hardened settings, health and `me` endpoints, pytest suite, Dockerfile. Route: delegated writer (2+ non-trivial files).
+- [x] **T1 — Backend scaffold.** Django + DRF project in `backend/` with a feature-first hexagonal layout, Firebase integration (Auth, Firestore, Storage, FCM accessors), token authentication, permission classes, error handling, hardened settings, health and `me` endpoints, pytest suite, Dockerfile. Route: delegated writer (2+ non-trivial files).
 - [ ] **T2 — Port users, roles and account logic** to Django (profile, sport profile, preferences, roles CRUD, role assignment, user search, account deletion), with the audit fixes NEW-01 to NEW-04 and the Vitest specs ported to pytest.
 - [ ] **T3 — Port cities, routes and the safety index** to Django, with the specs ported to pytest.
 - [ ] **T4 — Python seed and infrastructure:** seed command in Django, Firebase config under `backend/`, deny-all Firestore rules, Docker Compose with the API service; remove `functions/` and the TypeScript seed.
@@ -169,3 +169,13 @@ Forecast: well above 400 authored changed lines (a full backend port and a panel
 | Task | Route | Commit | Checks observed |
 | --- | --- | --- | --- |
 | (baseline) | inline | `876f377`, `7d36585` | mobile 257 tests, admin 60, functions 186, typecheck clean in all three |
+| T1 | delegated writer (2+ non-trivial files) | `e367449` | pytest 80 passed (re-run by the parent), ruff clean, `manage.py check` clean with `DJANGO_DEBUG=true`, `check --deploy` 1 warning left on purpose (W021, HSTS preload). Not done: `backend/.env.example` (a permission rule blocks `.env*` writes; the user creates it from the README), Docker image not built (daemon off). |
+
+## Decisions taken by the parent after T1
+
+- Failed-authentication throttling: add a per-IP throttle that runs before authentication (T2).
+- Throttle counters stay in process memory for the pilot; a shared cache is a deployment concern.
+- HSTS preload stays off (it commits the whole domain).
+- Validation errors carry per-field details: `{"error": {"reason": "invalid-argument", "message", "fields": {name: reason}}}`.
+- Python stays at 3.10 (the version installed on the team machine); Google's libraries warn it is out of support, so moving to 3.12 is a follow-up for deployment.
+- Direct dependencies are pinned; no full lock file for now.
