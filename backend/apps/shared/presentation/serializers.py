@@ -32,3 +32,16 @@ class StrictSerializer(serializers.Serializer):
         if unknown:
             raise ValidationError(unknown)
         return value
+
+
+def text_field(**options) -> serializers.CharField:
+    """A string kept as sent (untrimmed, possibly blank): the domain normalizes it."""
+    return serializers.CharField(
+        allow_blank=True, trim_whitespace=False, max_length=MAX_TEXT, **options
+    )
+
+
+def validated_body(serializer_class: type[StrictSerializer], request) -> dict:
+    serializer = serializer_class(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    return serializer.validated_data

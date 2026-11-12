@@ -5,6 +5,7 @@ from apps.roles.domain.models import Rol
 from apps.shared.application.ports import AuthUserNotFound, TokenRejected
 from apps.shared.domain.models import Principal
 from apps.shared.domain.permissions import ADMIN_ROLE
+from apps.users.domain.models import PerfilDeportivo, PreferenciaUsuario, Usuario
 
 RUNNER = Principal(
     uid="runner-1", email="runner@example.com", email_verified=True, role="runner", perms=()
@@ -30,6 +31,10 @@ MANAGER = Principal(
     role="manager",
     perms=("admin.access", "roles.manage", "users.read"),
 )
+# Signed in with Firebase Auth, but has not completed sign-up: no profile and no role yet.
+NEW_USER = Principal(
+    uid="new-1", email="new@example.com", email_verified=False, role=None, perms=()
+)
 
 PRINCIPALS = {
     "runner-token": RUNNER,
@@ -37,6 +42,7 @@ PRINCIPALS = {
     "club-rep-token": CLUB_REP,
     "user-reader-token": USER_READER,
     "manager-token": MANAGER,
+    "new-user-token": NEW_USER,
 }
 
 REJECTIONS = {
@@ -68,6 +74,7 @@ class FakeFirebase:
     def reset(self) -> None:
         self.claims: dict[str, dict | None] = {}  # Auth accounts by uid
         self.users: dict[str, dict] = {}  # `users/{uid}` documents
+        self.private: dict[tuple[str, str], dict] = {}  # `users/{uid}/private/{id}` documents
         self.roles: dict[str, Rol] = {}
         self.calls: list[tuple] = []  # side effects, in order
         self.failing: set[str] = set()  # operation names that raise
@@ -75,12 +82,26 @@ class FakeFirebase:
     def add_user(self, uid: str, claims: dict | None = None, **profile) -> None:
         """An Auth account plus its profile, whose `role` mirrors the claim."""
         self.claims[uid] = claims
-        self.users[uid] = {"role": (claims or {}).get("role"), **profile}
+        self.users[uid] = {"uid": uid, "role": (claims or {}).get("role"), **profile}
 
     def add_principals(self) -> None:
-        """Accounts for every test token, with Auth claims equal to the token's."""
+        """An account for every test token, with Auth claims equal to the token's.
+
+        Principals that hold a role also have a profile, as after a completed sign-up.
+        """
         for principal in PRINCIPALS.values():
-            self.add_user(principal.uid, {"role": principal.role, "perms": list(principal.perms)})
+            if principal.role is None:
+                self.claims[principal.uid] = None
+                continue
+            self.add_user(
+                principal.uid,
+                {"role": principal.role, "perms": list(principal.perms)},
+                email=principal.email or "",
+                firstName="Test",
+                lastName="User",
+                birthDate="1990-01-01",
+                cityId="loja",
+            )
 
     def fail_if_requested(self, operation: str) -> None:
         if operation in self.failing:
@@ -157,3 +178,57 @@ class InMemoryRoleMembers:
         self._firebase.users[uid]["role"] = role_id
         self._firebase.calls.append(("mirror", uid, role_id))
         return RoleChange.APPLIED
+
+
+class InMemoryUserRepository:
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        self._firebase = firebase or FIREBASE
+
+    def get(self, uid: str) -> Usuario | None:
+        document = self._firebase.users.get(uid)
+        return None if document is None else Usuario.from_document(uid, document)
+
+    def create(self, user: Usuario) -> bool:
+        if user.uid in self._firebase.users:
+            return False
+        self._firebase.users[user.uid] = {**user.to_document(), "consent": {"lopdp": True}}
+        return True
+
+    def update_personal_data(self, user: Usuario) -> None:
+        document = self._firebase.users[user.uid]
+        document.update(user.to_document())
+        if user.id_number is None:
+            document.pop("idNumber", None)
+
+    def set_role(self, uid: str, role: str) -> None:
+        if uid in self._firebase.users:
+            self._firebase.users[uid]["role"] = role
+            self._firebase.calls.append(("mirror", uid, role))
+
+
+class _InMemoryPrivateDocuments:
+    document_id: str
+    model: type
+
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        self._private = (firebase or FIREBASE).private
+
+    def get(self, uid: str):
+        document = self._private.get((uid, self.document_id))
+        return None if document is None else self.model.from_document(document)
+
+    def save(self, uid: str, entity) -> None:
+        self._private[(uid, self.document_id)] = entity.to_document()
+
+    def delete(self, uid: str) -> None:
+        self._private.pop((uid, self.document_id), None)
+
+
+class InMemorySportProfileRepository(_InMemoryPrivateDocuments):
+    document_id = "sportProfile"
+    model = PerfilDeportivo
+
+
+class InMemoryPreferencesRepository(_InMemoryPrivateDocuments):
+    document_id = "preferences"
+    model = PreferenciaUsuario

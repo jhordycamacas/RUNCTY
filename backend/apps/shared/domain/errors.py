@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from enum import Enum
 
 
@@ -16,9 +17,24 @@ class DomainError(Exception):
 
     `reason` is a stable machine-readable code that clients translate into UI copy;
     the message is developer-facing and must be safe to return to the caller.
+    `fields` maps each rejected input field to its own reason code.
     """
 
-    def __init__(self, kind: ErrorKind, reason: str, message: str) -> None:
+    def __init__(
+        self,
+        kind: ErrorKind,
+        reason: str,
+        message: str,
+        fields: Mapping[str, str] | None = None,
+    ) -> None:
         super().__init__(message)
         self.kind = kind
         self.reason = reason
+        self.fields = dict(fields or {})
+
+
+def invalid_fields(fields: Mapping[str, str]) -> DomainError:
+    """Input whose values break the rules of a model, field by field."""
+    return DomainError(
+        ErrorKind.INVALID_ARGUMENT, "invalid-argument", "The request is invalid.", fields
+    )

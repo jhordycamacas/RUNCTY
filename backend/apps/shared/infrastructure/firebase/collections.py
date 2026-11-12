@@ -2,3 +2,5 @@
 
 USERS = "users"
 ROLES = "roles"
+# Sub-collection of `users/{uid}` readable only by its owner.
+USER_PRIVATE = "private"

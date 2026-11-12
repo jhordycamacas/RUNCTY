@@ -64,7 +64,7 @@ def _describe(exc: exceptions.APIException) -> tuple:
 def exception_handler(exc: Exception, context: dict) -> Response:
     """DRF `EXCEPTION_HANDLER`: every failure inside a view leaves through here."""
     if isinstance(exc, DomainError):
-        return Response(_body(exc.reason, str(exc)), status=_DOMAIN_STATUS[exc.kind])
+        return Response(_body(exc.reason, str(exc), exc.fields), status=_DOMAIN_STATUS[exc.kind])
 
     # Replace Django's exceptions with DRF's so their internal messages are not returned.
     if isinstance(exc, Http404):

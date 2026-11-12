@@ -39,6 +39,11 @@ gunicorn as a non-root user and contains no configuration or credentials.
 | `GET /api/v1/health` | public | `{"status": "ok"}` |
 | `GET /api/v1/health/services` | `admin` role | which Google services are configured (booleans) |
 | `GET /api/v1/me` | any signed-in user | `uid`, `email`, `emailVerified`, `role`, `perms` |
+| `POST /api/v1/users` | signed in, own uid | 201 with the caller's new profile. Body: `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber?`, `consent: {lopdp: true}` |
+| `GET /api/v1/users/me` | owner | `uid`, `email`, `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber`, `role` |
+| `PATCH /api/v1/users/me` | owner | the updated profile. Body: any of `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber` |
+| `GET`, `PUT`, `DELETE /api/v1/users/me/sport-profile` | owner | `level`, `goals`, `usualPaceSecPerKm`, `preferredDistanceKm` (204 on delete) |
+| `GET`, `PUT`, `DELETE /api/v1/users/me/preferences` | owner | `language`, `fontScale`, `appearance`, `units`, `notifications`, `locationPrivacy` (204 on delete) |
 | `GET /api/v1/roles` | `admin.access` | `{"roles": [{id, name, description, permissions, system}]}` |
 | `POST /api/v1/roles` | `roles.manage` | 201 with the role. Body: `id`, `name`, `description?`, `permissions` |
 | `PUT /api/v1/roles/{id}` | `roles.manage` | `{"syncedUsers": n}`. Body: `name`, `description?`, `permissions` |
@@ -59,6 +64,32 @@ A request body with the wrong shape (missing or unknown field, wrong type) is
 {"error": {"reason": "invalid-argument", "message": "The request is invalid.",
            "fields": {"name": "required", "system": "unknown"}}}
 ```
+
+Values that break a rule of a model are reported the same way, with these field reasons:
+`required`, `invalid`, `invalid-format`, `invalid-date`, `invalid-choice`, `max-length`,
+`out-of-range`, `not-accepted`.
+
+### Users
+
+"Owner" endpoints have no uid in the URL or the body: they act on the uid of the token.
+
+- **`POST /users`** takes `uid` and `email` from the token (`email-required` if it has
+  none) and never a role. It writes `users/{uid}` with the consent record and server
+  timestamps, then sets the `{role: "runner", perms: []}` claims and mirrors `role` on the
+  document; an account that already has a role claim keeps it. The client must refresh its
+  ID token afterwards to receive the claims.
+- **Repeated sign-up.** The profile is created only once: a second `POST` answers 409
+  `profile-exists` and changes nothing in it. It still completes the role step, which is
+  idempotent, so a sign-up that failed half-way heals on retry.
+- **`PATCH /users/me`** merges the given fields into the stored personal data and validates
+  the result. `idNumber: null` or `""` removes it. Email, role, consent and timestamps cannot
+  be changed. 404 `profile-not-found` before sign-up is completed.
+- **`birthDate`** must be `YYYY-MM-DD`, a day that exists, and give an age from 5 to 110.
+- **Sport profile and preferences** are replaced as a whole by `PUT`. `GET` answers 404
+  `sport-profile-not-found` or `preferences-not-found` when nothing was saved (the clients
+  then use their defaults), and `DELETE` is idempotent. A stored sport profile that no
+  longer matches the schema counts as missing; invalid stored preferences fall back to the
+  default field by field.
 
 ### Roles
 
@@ -144,6 +175,8 @@ apps/
                              StrictSerializer
   health/                    liveness and Google services status
   identity/                  GET /me
+  users/                     Usuario, PerfilDeportivo, PreferenciaUsuario: sign-up, own
+                             profile, sport profile, preferences
   roles/                     Rol, role CRUD, role assignment
 tests/                       pytest suite with in-memory adapters
 ```

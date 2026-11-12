@@ -51,6 +51,13 @@ GOOGLE_SERVICES_PROBE = (
 AUTH_GATEWAY = "apps.shared.infrastructure.firebase.auth_gateway.FirebaseAuthGateway"
 ROLE_REPOSITORY = "apps.roles.infrastructure.firestore_role_repository.FirestoreRoleRepository"
 ROLE_MEMBERS = "apps.roles.infrastructure.firestore_role_members.FirestoreRoleMembers"
+USER_REPOSITORY = "apps.users.infrastructure.firestore_user_repository.FirestoreUserRepository"
+SPORT_PROFILE_REPOSITORY = (
+    "apps.users.infrastructure.firestore_private_documents.FirestoreSportProfileRepository"
+)
+PREFERENCES_REPOSITORY = (
+    "apps.users.infrastructure.firestore_private_documents.FirestorePreferencesRepository"
+)
 
 # --- Django ----------------------------------------------------------------
 

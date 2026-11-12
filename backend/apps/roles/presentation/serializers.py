@@ -1,27 +1,20 @@
 from rest_framework import serializers
 
-from apps.shared.presentation.serializers import MAX_ITEMS, MAX_TEXT, StrictSerializer
-
-
-def _text(**options) -> serializers.CharField:
-    # Untrimmed and possibly blank: `Rol.parse` normalizes and validates the value.
-    return serializers.CharField(
-        allow_blank=True, trim_whitespace=False, max_length=MAX_TEXT, **options
-    )
+from apps.shared.presentation.serializers import MAX_ITEMS, StrictSerializer, text_field
 
 
 class RoleUpdateSerializer(StrictSerializer):
-    name = _text()
-    description = _text(required=False)
-    permissions = serializers.ListField(child=_text(), max_length=MAX_ITEMS)
+    name = text_field()
+    description = text_field(required=False)
+    permissions = serializers.ListField(child=text_field(), max_length=MAX_ITEMS)
 
 
 class RoleCreateSerializer(RoleUpdateSerializer):
-    id = _text()
+    id = text_field()
 
 
 class UserRoleSerializer(StrictSerializer):
-    roleId = _text()
+    roleId = text_field()
 
 
 class RoleSerializer(serializers.Serializer):

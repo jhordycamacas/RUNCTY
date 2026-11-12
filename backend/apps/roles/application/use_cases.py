@@ -51,10 +51,6 @@ def _precondition(reason: str, message: str) -> DomainError:
     return DomainError(ErrorKind.FAILED_PRECONDITION, reason, message)
 
 
-def list_roles(roles: RoleRepository) -> list[Rol]:
-    return roles.list()
-
-
 def create_role(raw: Mapping[str, object], caller_uid: str, deps: RolesDeps) -> Rol:
     caller = _role_manager(caller_uid, deps)
     role = Rol.parse(raw)

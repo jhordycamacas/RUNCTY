@@ -4,7 +4,7 @@ import pytest
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework.throttling import SimpleRateThrottle
 
-from apps.shared.domain.errors import DomainError, ErrorKind
+from apps.shared.domain.errors import DomainError, ErrorKind, invalid_fields
 from apps.shared.presentation.errors import exception_handler
 from tests.conftest import bearer
 
@@ -63,6 +63,17 @@ def test_domain_error_maps_to_http_status(kind, status):
 
     assert response.status_code == status
     assert response.data == {"error": {"reason": "some-reason", "message": "Some message."}}
+
+
+def test_domain_error_lists_the_reason_of_each_field():
+    response = exception_handler(invalid_fields({"birthDate": "invalid-date"}), {})
+
+    assert response.status_code == 400
+    assert response.data["error"] == {
+        "reason": "invalid-argument",
+        "message": "The request is invalid.",
+        "fields": {"birthDate": "invalid-date"},
+    }
 
 
 @pytest.mark.parametrize(

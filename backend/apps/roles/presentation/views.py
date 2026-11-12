@@ -9,7 +9,6 @@ from apps.roles.application.use_cases import (
     RolesDeps,
     create_role,
     delete_role,
-    list_roles,
     set_user_role,
     update_role,
 )
@@ -21,6 +20,7 @@ from apps.roles.presentation.serializers import (
 )
 from apps.shared.presentation.adapters import adapter
 from apps.shared.presentation.permissions import HasPermission
+from apps.shared.presentation.serializers import validated_body
 from apps.shared.presentation.throttles import SENSITIVE_THROTTLES
 
 logger = logging.getLogger(__name__)
@@ -38,12 +38,6 @@ def _deps() -> RolesDeps:
     )
 
 
-def _body(serializer_class, request) -> dict:
-    serializer = serializer_class(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    return serializer.validated_data
-
-
 class RolesView(APIView):
     throttle_classes = SENSITIVE_THROTTLES
 
@@ -51,11 +45,11 @@ class RolesView(APIView):
         return [CanEnterPanel() if self.request.method in SAFE_METHODS else CanManageRoles()]
 
     def get(self, request) -> Response:
-        roles = list_roles(adapter("ROLE_REPOSITORY"))
+        roles = adapter("ROLE_REPOSITORY").list()
         return Response({"roles": RoleSerializer(roles, many=True).data})
 
     def post(self, request) -> Response:
-        role = create_role(_body(RoleCreateSerializer, request), request.user.uid, _deps())
+        role = create_role(validated_body(RoleCreateSerializer, request), request.user.uid, _deps())
         logger.info("Role %s created by %s", role.id, request.user.uid)
         return Response(RoleSerializer(role).data, status=status.HTTP_201_CREATED)
 
@@ -65,7 +59,7 @@ class RoleView(APIView):
     throttle_classes = SENSITIVE_THROTTLES
 
     def put(self, request, role_id: str) -> Response:
-        body = {**_body(RoleUpdateSerializer, request), "id": role_id}
+        body = {**validated_body(RoleUpdateSerializer, request), "id": role_id}
         synced = update_role(body, request.user.uid, _deps())
         logger.info("Role %s updated by %s (%d users synced)", role_id, request.user.uid, synced)
         return Response({"syncedUsers": synced})
@@ -81,7 +75,7 @@ class UserRoleView(APIView):
     throttle_classes = SENSITIVE_THROTTLES
 
     def put(self, request, uid: str) -> Response:
-        body = _body(UserRoleSerializer, request)
+        body = validated_body(UserRoleSerializer, request)
         role = set_user_role(uid, body["roleId"], request.user.uid, _deps())
         logger.info("Role of %s set to %s by %s", uid, role.id, request.user.uid)
         return Response({"uid": uid, "role": role.id})
