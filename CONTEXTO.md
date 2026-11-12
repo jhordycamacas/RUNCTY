@@ -158,6 +158,8 @@ Los RF se organizan en 11 módulos: Usuarios y accesos, Catálogo de rutas, Eval
 
 ## 9. Arquitectura (decidida — 2026-10-28)
 
+> **Cambio en curso (decidido el 2026-11-11, ver sección 16):** la arquitectura pasa a ser **backend + frontend**. `backend/` es una API REST en Django que reemplaza a las Cloud Functions; `frontend/mobile` es la app en React Native y `frontend/web` es el panel de administración en Angular, que reemplaza al de Next.js. Se mantienen los servicios de Google (Firebase Auth, Firestore, Storage, FCM). Lo que sigue en esta sección describe la arquitectura anterior, que sigue vigente en el código de `mobile/`, `admin/` y `functions/` hasta que termine la migración; se reescribe al cerrar la tarea T9.
+
 Sin backend propio: se usan servicios de Google (Firebase) como BaaS, más Cloud Functions serverless para la lógica que no puede vivir en el cliente. Así se cumple el Documento de Visión (sin servidor propio) y también los RNF del Excel (datos centralizados, notificaciones, tiempo real, respaldos).
 
 La referencia es la arquitectura de la app **PilasOe** (Expo + Firebase + Cloud Functions + admin en Next.js), corrigiendo sus debilidades.
@@ -275,6 +277,7 @@ Se mantiene el calendario del equipo: Sprint 1, semanas 4–5; Sprint 2, semana 
 - [x] Correcciones de seguridad del servidor (T1; SEC-01, 02, 03, 05, 06 y 08): hechas en la rama `feat/hardening-and-polish`. El agente reportó los tests en verde; **no se volvieron a ejecutar** antes de subirlas (ver 14.2).
 - [ ] Pulido de la app móvil y del panel (T2 y T3 de `odd/tasks/auditoria-y-pulido.md`): **pausado a pedido del usuario**. El plan detallado está en 14.5.
 - [x] Guion y checklist para presentar el Sprint 1: sección 14.6.
+- [ ] **Migración a Django + Angular** (rama `feat/django-angular-architecture`, plan en `odd/tasks/django-angular-architecture.md`): T1 hecha, T2 en curso, T3 a T9 pendientes. El estado detallado está en la sección 16.
 
 ### Cómo trabajar hoy (desarrollo local)
 
@@ -612,3 +615,47 @@ Se renombraron **solo los nombres de tipo**, con un renombrado por símbolos de 
 3. Trazabilidad UR → RF: agregar la columna de UR a los RF y redactar los UR que faltan (prioridad 1 del coach).
 4. Cambios menores del coach: encabezado de los RNF (9126 → 25010) y contexto como caja negra.
 5. Lo ya pendiente de las secciones 12 y 14 (demo con Firebase real, pulido T2 y T3, marcar "Terminado" en el backlog los Sprints 1 y 2).
+
+## 16. Migración a backend Django + frontend React Native y Angular (2026-11-11 y 2026-11-12)
+
+**Leer primero** `odd/tasks/django-angular-architecture.md`: tiene el objetivo, las decisiones, el contrato de la API, los hallazgos de la auditoría del 2026-11-11 y la lista de tareas. Esta sección solo resume el estado.
+
+### 16.1 Decisiones del usuario
+
+- La arquitectura se presenta en la universidad como **backend + frontend**, en dos carpetas de la raíz:
+  - `backend/`: API REST en Django + Django REST Framework. Habla con los servicios de Google mediante `firebase-admin`. No usa base de datos SQL ni el ORM de Django: Firestore sigue siendo el almacén de datos.
+  - `frontend/mobile`: la app en React Native (Expo).
+  - `frontend/web`: el panel de administración en Angular, que reemplaza al de Next.js.
+- React Native y Angular nunca se mezclan en una misma aplicación.
+- Django **reemplaza** a las Cloud Functions. Las carpetas `functions/` y `admin/` se eliminan cuando su lógica y sus pruebas estén portadas (regla de no código zombie).
+- Firebase Auth queda en los clientes solo para iniciar sesión; el ID token viaja como `Bearer` y la API lo verifica en cada petición con `check_revoked=True`.
+- Los modelos del dominio son clases de Python en `domain/models.py` de cada app, con los nombres del diagrama de clases (`Usuario`, `Rol`, `Ciudad`, `Ruta`, `Tramo`...). Los atributos y los campos de Firestore siguen en inglés.
+- El backend usa la misma organización por capas que el resto del proyecto: `domain` / `application` / `infrastructure` / `presentation` en cada app (`health`, `identity`, `roles`, `users`, `shared`).
+
+### 16.2 Estado de las tareas
+
+| Tarea | Estado | Evidencia |
+| --- | --- | --- |
+| T1 Estructura del backend | Hecha | Commit `e367449`. `pytest` con 80 pruebas en verde, `ruff` limpio y `manage.py check` limpio (verificado el 2026-11-11). |
+| T2 Usuarios, roles y cuenta | **En curso** | Commiteado: límite de intentos con token rechazado (`002dbe4`), roles y asignación de rol (`df41091`), registro, perfil propio, perfil deportivo y preferencias (`488674c`). Las pruebas de estos tres commits no se volvieron a ejecutar en la sesión del 2026-11-12. **Sin commitear:** búsqueda de usuarios (`GET /users`) y eliminación de cuenta (`DELETE /users/me`); el trabajo estaba a medio hacer y sin verificar cuando se subió la rama. |
+| T3 Ciudades, rutas e índice de seguridad | Pendiente | |
+| T4 Seed en Python, Docker con la API, reglas de Firestore cerradas, eliminar `functions/` | Pendiente | |
+| T5 Mover la app a `frontend/mobile` y conectarla a la API | Pendiente | |
+| T6 Panel en Angular en `frontend/web`, eliminar `admin/` | Pendiente | |
+| T7 Pulido de la app móvil | Pendiente | |
+| T8 Sprint 3 sobre la arquitectura nueva | Pendiente | |
+| T9 Documentación y verificación final | Pendiente | |
+
+### 16.3 Cómo retomar
+
+1. Abrir la sesión en `D:\RUNCTY`, en la rama `feat/django-angular-architecture`.
+2. Revisar `git status`. Si hay cambios sin commitear en `backend/`, son el cierre de T2: ejecutar las comprobaciones del punto 3 y commitear solo si pasan.
+3. Comprobaciones del backend, desde `backend/`: `python -m pytest -q`, `ruff check .` y `python manage.py check` (con `DJANGO_DEBUG=true`). La instalación está explicada en `backend/README.md`.
+4. Seguir con T3. Mientras dure la migración, la app y el panel actuales (`mobile/`, `admin/`, `functions/`) siguen funcionando con los emuladores como describe la sección 12.
+
+### 16.4 Notas
+
+- `backend/.env.example` no existe: el asistente no puede crear archivos `.env*`. Se crea a mano siguiendo `backend/README.md`.
+- La imagen de Docker del backend todavía no se construyó.
+- Python 3.10 es la versión instalada en el equipo; las librerías de Google avisan que ya no tiene soporte. Pasar a 3.12 queda para el despliegue.
+- La ruta `D:\RUNCTY\frontend\mobile` tiene 25 caracteres, el límite documentado para compilar Android en Windows. Si la compilación nativa falla, usar `frontend\app`.

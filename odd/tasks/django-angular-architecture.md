@@ -170,6 +170,7 @@ Forecast: well above 400 authored changed lines (a full backend port and a panel
 | --- | --- | --- | --- |
 | (baseline) | inline | `876f377`, `7d36585` | mobile 257 tests, admin 60, functions 186, typecheck clean in all three |
 | T1 | delegated writer (2+ non-trivial files) | `e367449` | pytest 80 passed (re-run by the parent), ruff clean, `manage.py check` clean with `DJANGO_DEBUG=true`, `check --deploy` 1 warning left on purpose (W021, HSTS preload). Not done: `backend/.env.example` (a permission rule blocks `.env*` writes; the user creates it from the README), Docker image not built (daemon off). |
+| T2 (partial) | delegated writer | `002dbe4`, `df41091`, `488674c` | Not re-run in the 2026-11-12 session. Remaining: user search and account deletion, in progress and uncommitted when the branch was first pushed. |
 
 ## Decisions taken by the parent after T1
 
