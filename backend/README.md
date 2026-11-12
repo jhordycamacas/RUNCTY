@@ -65,6 +65,7 @@ translate it, `message` is for developers:
 | `DJANGO_NUM_PROXIES` | no (default `0`) | Reverse proxies in front of the app. Above 0, `X-Forwarded-For` and `X-Forwarded-Proto` are trusted, so the proxy must set both. |
 | `CORS_ALLOWED_ORIGINS` | for browser clients | Comma-separated origins. No wildcard; empty allows none. |
 | `THROTTLE_RATE_IP`, `THROTTLE_RATE_USER` | no (`120/min`, `240/min`) | DRF rates per address and per uid. |
+| `THROTTLE_RATE_AUTH_FAILED` | no (`20/min`) | Rejected bearer tokens allowed per address before it is blocked. |
 | `FIREBASE_PROJECT_ID` | when not debug | Firebase project. `demo-*` ids are emulator-only. |
 | `FIREBASE_STORAGE_BUCKET` | for Storage | Default bucket. |
 | `GOOGLE_APPLICATION_CREDENTIALS` | see below | Path to a service-account JSON outside the repository. |
@@ -131,8 +132,10 @@ only when it has something to put there. Domain models are plain Python classes 
   implemented in the API.
 - **Throttling** runs per address and per uid. Counters live in Django's per-process memory
   cache, so with several gunicorn workers or instances the effective limit is multiplied;
-  configure a shared cache before relying on exact limits. Requests rejected by
-  authentication are not counted, because DRF throttles after authenticating.
+  configure a shared cache before relying on exact limits. DRF throttles after
+  authenticating, so rejected tokens have their own counter per address, checked before the
+  token is verified: past `THROTTLE_RATE_AUTH_FAILED` the address gets 429 for any bearer
+  token, valid or not, until the window passes. Accepted tokens do not use that budget.
 - **Transport.** Outside debug: HTTPS redirect, HSTS for one year including subdomains,
   `nosniff`, `X-Frame-Options: DENY`. HSTS preload is not enabled (`security.W021`) because
   it is a hard-to-undo commitment for the whole domain. There is no CSRF middleware because

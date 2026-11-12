@@ -105,6 +105,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "ip": env.str("THROTTLE_RATE_IP", default="120/min"),
         "user": env.str("THROTTLE_RATE_USER", default="240/min"),
+        "auth-failed": env.str("THROTTLE_RATE_AUTH_FAILED", default="20/min"),
     },
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],

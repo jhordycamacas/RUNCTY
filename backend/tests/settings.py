@@ -20,6 +20,7 @@ os.environ.update(
         "GOOGLE_MAPS_API_KEY": "test-maps-key",
         "THROTTLE_RATE_IP": "1000/min",
         "THROTTLE_RATE_USER": "1000/min",
+        "THROTTLE_RATE_AUTH_FAILED": "1000/min",
     }
 )
 

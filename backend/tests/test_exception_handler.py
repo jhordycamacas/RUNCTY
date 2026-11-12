@@ -87,7 +87,8 @@ def test_method_not_allowed_uses_the_envelope(client):
 class TestThrottling:
     @pytest.fixture(autouse=True)
     def _tight_rates(self, monkeypatch):
-        monkeypatch.setattr(SimpleRateThrottle, "THROTTLE_RATES", {"ip": "2/min", "user": "1/min"})
+        monkeypatch.setitem(SimpleRateThrottle.THROTTLE_RATES, "ip", "2/min")
+        monkeypatch.setitem(SimpleRateThrottle.THROTTLE_RATES, "user", "1/min")
 
     def test_public_endpoint_is_throttled_per_ip(self, client):
         assert client.get("/api/v1/health").status_code == 200
