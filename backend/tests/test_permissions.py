@@ -37,21 +37,25 @@ def test_has_permission_rejects_permissions_outside_the_catalogue():
         HasPermission("users.write")
 
 
-@pytest.mark.urls("tests.urls")
 class TestPermissionResponses:
+    URL = "/api/v1/roles"
+
     def test_holder_is_allowed(self, client):
-        assert client.get("/probe/users-read", **bearer("user-reader-token")).status_code == 200
+        assert client.get(self.URL, **bearer("club-rep-token")).status_code == 200
 
     def test_missing_permission_is_403_with_reason(self, client):
-        response = client.get("/probe/users-read", **bearer("runner-token"))
+        response = client.get(self.URL, **bearer("runner-token"))
 
         assert response.status_code == 403
         assert response.json() == {
-            "error": {"reason": "missing-permission", "message": "Missing permission users.read."}
+            "error": {
+                "reason": "missing-permission",
+                "message": "Missing permission admin.access.",
+            }
         }
 
     def test_anonymous_caller_is_401_not_403(self, client):
-        response = client.get("/probe/users-read")
+        response = client.get(self.URL)
 
         assert response.status_code == 401
         assert response.json()["error"]["reason"] == "unauthenticated"

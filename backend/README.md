@@ -39,6 +39,11 @@ gunicorn as a non-root user and contains no configuration or credentials.
 | `GET /api/v1/health` | public | `{"status": "ok"}` |
 | `GET /api/v1/health/services` | `admin` role | which Google services are configured (booleans) |
 | `GET /api/v1/me` | any signed-in user | `uid`, `email`, `emailVerified`, `role`, `perms` |
+| `GET /api/v1/roles` | `admin.access` | `{"roles": [{id, name, description, permissions, system}]}` |
+| `POST /api/v1/roles` | `roles.manage` | 201 with the role. Body: `id`, `name`, `description?`, `permissions` |
+| `PUT /api/v1/roles/{id}` | `roles.manage` | `{"syncedUsers": n}`. Body: `name`, `description?`, `permissions` |
+| `DELETE /api/v1/roles/{id}` | `roles.manage` | 204 |
+| `PUT /api/v1/users/{uid}/role` | `roles.manage` | `{uid, role}`. Body: `roleId` |
 
 JSON only, camelCase keys. Every error has the same shape; clients branch on `reason` and
 translate it, `message` is for developers:
@@ -47,10 +52,40 @@ translate it, `message` is for developers:
 {"error": {"reason": "missing-permission", "message": "Missing permission users.read."}}
 ```
 
+A request body with the wrong shape (missing or unknown field, wrong type) is
+`invalid-argument` and names each field, with dotted names for nested ones:
+
+```json
+{"error": {"reason": "invalid-argument", "message": "The request is invalid.",
+           "fields": {"name": "required", "system": "unknown"}}}
+```
+
+### Roles
+
+Reason codes are the ones the role callables used: `invalid-role-id`, `invalid-role-name`,
+`invalid-role-description`, `invalid-permissions`, `role-exists` (409), `role-not-found` and
+`user-not-found` (404), `admin-only` and `permission-escalation` (403), `admin-permissions`,
+`system-role`, `role-has-users`, `self-lockout` and `last-admin` (400). New:
+`user-profile-missing` (404) when the account has no `users/{uid}` document.
+
+- **Fresh authority.** The permission class checks the token; the use case then re-reads
+  the caller's claims from Firebase Auth and answers `missing-permission` if they no longer
+  hold `roles.manage`. A token issued before a demotion cannot manage roles.
+- **Delegates** (non-admins with `roles.manage`) cannot grant `roles.manage`, a permission
+  they lack, or the admin role, and cannot edit a system role (`system: true`).
+- **Last admin.** `PUT /users/{uid}/role` writes the `users/{uid}.role` mirror in a Firestore
+  transaction that also reads the admins in the mirror (`role == "admin"`, limit 2). The
+  demotion of an admin commits only if that query shows another admin, so two admins
+  demoting each other conflict and one of them gets `last-admin`. A missing or stale mirror
+  counts as no admin (fail closed). The claims are written after the commit and the
+  target's sessions are revoked; if writing the claims fails, the mirror is put back.
+- Editing a role re-issues the claims of every user holding it and revokes their sessions,
+  one user at a time within the request.
+
 | Status | `reason` |
 | --- | --- |
 | 401 | `unauthenticated`, `invalid-token`, `token-expired`, `token-revoked`, `user-disabled` |
-| 403 | `missing-permission`, `admin-only`, `permission-denied` |
+| 403 | `missing-permission`, `admin-only`, `permission-denied`, or the reason of a domain error |
 | 400 / 404 / 409 | `invalid-argument`, `not-found`, or the reason of a domain error |
 | 429 | `rate-limited` (with `Retry-After`) |
 | 500 | `internal` (details go to the log only) |
@@ -66,6 +101,7 @@ translate it, `message` is for developers:
 | `CORS_ALLOWED_ORIGINS` | for browser clients | Comma-separated origins. No wildcard; empty allows none. |
 | `THROTTLE_RATE_IP`, `THROTTLE_RATE_USER` | no (`120/min`, `240/min`) | DRF rates per address and per uid. |
 | `THROTTLE_RATE_AUTH_FAILED` | no (`20/min`) | Rejected bearer tokens allowed per address before it is blocked. |
+| `THROTTLE_RATE_SENSITIVE` | no (`30/min`) | Extra per-uid rate for the role endpoints and the user search. |
 | `FIREBASE_PROJECT_ID` | when not debug | Firebase project. `demo-*` ids are emulator-only. |
 | `FIREBASE_STORAGE_BUCKET` | for Storage | Default bucket. |
 | `GOOGLE_APPLICATION_CREDENTIALS` | see below | Path to a service-account JSON outside the repository. |
@@ -101,12 +137,14 @@ config/                      settings (environment-driven), URL root, WSGI entry
 apps/
   shared/
     domain/                  Principal (models.py), permission catalogue, DomainError
-    application/             ports: TokenVerifier
+    application/             ports: TokenVerifier, AuthGateway
     infrastructure/firebase/ the single firebase-admin app, its accessors, the token
-                             verifier adapter, the production guard
-    presentation/            DRF authentication, permissions, throttles, error handling
+                             verifier and Auth adapters, the production guard
+    presentation/            DRF authentication, permissions, throttles, error handling,
+                             StrictSerializer
   health/                    liveness and Google services status
   identity/                  GET /me
+  roles/                     Rol, role CRUD, role assignment
 tests/                       pytest suite with in-memory adapters
 ```
 
@@ -115,7 +153,11 @@ only when it has something to put there. Domain models are plain Python classes 
 `domain/models.py`, persisted in Firestore through repositories.
 
 - **Ports and adapters.** Use cases depend on `Protocol` ports. The adapter for each port is
-  named by a setting (`TOKEN_VERIFIER`, `GOOGLE_SERVICES_PROBE`); the tests swap in fakes.
+  named by a setting (`TOKEN_VERIFIER`, `AUTH_GATEWAY`, `ROLE_REPOSITORY`...); the tests swap
+  in in-memory fakes.
+- **Validation in two steps.** Serializers extend `StrictSerializer` and check the shape of
+  the body (declared fields only, types, size bounds). The domain classes validate the values
+  and own the reason codes; domain and application code import no Django, DRF or Firebase.
 - **Firebase access.** Only `apps/shared/infrastructure/firebase/app.py` touches
   `firebase_admin`. Use its accessors: `auth_client()`, `firestore_client()`,
   `storage_bucket()`, `messaging_sender()`.

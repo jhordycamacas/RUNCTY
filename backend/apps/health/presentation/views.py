@@ -1,10 +1,9 @@
-from django.conf import settings
-from django.utils.module_loading import import_string
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.health.application.ports import GoogleServicesProbe
+from apps.shared.presentation.adapters import adapter
 from apps.shared.presentation.permissions import IsAdmin
 
 
@@ -24,5 +23,5 @@ class HealthServicesView(APIView):
     permission_classes = [IsAdmin]
 
     def get(self, request) -> Response:
-        probe: GoogleServicesProbe = import_string(settings.GOOGLE_SERVICES_PROBE)()
+        probe: GoogleServicesProbe = adapter("GOOGLE_SERVICES_PROBE")
         return Response({"services": probe.configured_services()})

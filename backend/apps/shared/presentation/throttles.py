@@ -43,3 +43,13 @@ class PrincipalRateThrottle(SimpleRateThrottle):
         if not isinstance(request.user, Principal):
             return None
         return self.cache_format % {"scope": self.scope, "ident": request.user.uid}
+
+
+class SensitiveRateThrottle(PrincipalRateThrottle):
+    """Tighter per-uid budget for endpoints that expose personal data or change authority."""
+
+    scope = "sensitive"
+
+
+# `throttle_classes` of a sensitive view: the default limits plus the tighter one.
+SENSITIVE_THROTTLES = (IpRateThrottle, PrincipalRateThrottle, SensitiveRateThrottle)

@@ -27,3 +27,14 @@ ALL_PERMISSIONS = (
 )
 
 ADMIN_ROLE = "admin"
+
+
+def is_permission(value: object) -> bool:
+    return isinstance(value, str) and value in ALL_PERMISSIONS
+
+
+def normalize_permissions(value: object) -> tuple[str, ...] | None:
+    """Sorted unique catalogue permissions, or None if anything is outside the catalogue."""
+    if not isinstance(value, (list, tuple)) or not all(map(is_permission, value)):
+        return None
+    return tuple(sorted(set(value)))

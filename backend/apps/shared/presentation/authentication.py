@@ -1,10 +1,9 @@
-from django.conf import settings
-from django.utils.module_loading import import_string
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.exceptions import AuthenticationFailed, Throttled
 
 from apps.shared.application.ports import TokenRejected, TokenVerifier
 from apps.shared.domain.models import Principal
+from apps.shared.presentation.adapters import adapter
 from apps.shared.presentation.throttles import FailedAuthenticationThrottle
 
 
@@ -34,7 +33,7 @@ class BearerTokenAuthentication(BaseAuthentication):
                 "Malformed Authorization header.", code="invalid-token"
             ) from error
 
-        verifier: TokenVerifier = import_string(settings.TOKEN_VERIFIER)()
+        verifier: TokenVerifier = adapter("TOKEN_VERIFIER")
         try:
             return verifier.verify(token), None
         except TokenRejected as rejected:

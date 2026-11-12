@@ -21,6 +21,7 @@ os.environ.update(
         "THROTTLE_RATE_IP": "1000/min",
         "THROTTLE_RATE_USER": "1000/min",
         "THROTTLE_RATE_AUTH_FAILED": "1000/min",
+        "THROTTLE_RATE_SENSITIVE": "1000/min",
     }
 )
 
@@ -28,3 +29,6 @@ from config.settings import *  # noqa: E402, F403
 
 TOKEN_VERIFIER = "tests.fakes.FakeTokenVerifier"
 GOOGLE_SERVICES_PROBE = "tests.fakes.FakeGoogleServicesProbe"
+AUTH_GATEWAY = "tests.fakes.InMemoryAuthGateway"
+ROLE_REPOSITORY = "tests.fakes.InMemoryRoleRepository"
+ROLE_MEMBERS = "tests.fakes.InMemoryRoleMembers"

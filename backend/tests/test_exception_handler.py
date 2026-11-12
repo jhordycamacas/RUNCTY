@@ -1,29 +1,16 @@
 import logging
 
 import pytest
+from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework.throttling import SimpleRateThrottle
 
+from apps.shared.domain.errors import DomainError, ErrorKind
+from apps.shared.presentation.errors import exception_handler
 from tests.conftest import bearer
 
 
 @pytest.mark.urls("tests.urls")
 class TestHandledErrors:
-    @pytest.mark.parametrize(
-        ("kind", "status"),
-        [
-            ("invalid-argument", 400),
-            ("failed-precondition", 400),
-            ("permission-denied", 403),
-            ("not-found", 404),
-            ("already-exists", 409),
-        ],
-    )
-    def test_domain_error_maps_to_http_status(self, client, kind, status):
-        response = client.get(f"/probe/domain-error/{kind}")
-
-        assert response.status_code == status
-        assert response.json() == {"error": {"reason": "probe-reason", "message": "Probe message."}}
-
     def test_unexpected_error_is_a_generic_500_and_is_logged(self, client, caplog):
         with caplog.at_level(logging.ERROR):
             response = client.get("/probe/crash")
@@ -50,14 +37,6 @@ class TestHandledErrors:
             "message": "You do not have permission to perform this action.",
         }
 
-    def test_validation_error_is_invalid_argument(self, client):
-        response = client.get("/probe/validation")
-
-        assert response.status_code == 400
-        assert response.json() == {
-            "error": {"reason": "invalid-argument", "message": "The request is invalid."}
-        }
-
     def test_only_json_bodies_are_parsed(self, client):
         accepted = client.post("/probe/echo", {"name": "x"}, format="json")
         rejected = client.post(
@@ -67,6 +46,49 @@ class TestHandledErrors:
         assert accepted.json() == {"name": "x"}
         assert rejected.status_code == 415
         assert rejected.json()["error"]["reason"] == "unsupported-media-type"
+
+
+@pytest.mark.parametrize(
+    ("kind", "status"),
+    [
+        (ErrorKind.INVALID_ARGUMENT, 400),
+        (ErrorKind.FAILED_PRECONDITION, 400),
+        (ErrorKind.PERMISSION_DENIED, 403),
+        (ErrorKind.NOT_FOUND, 404),
+        (ErrorKind.ALREADY_EXISTS, 409),
+    ],
+)
+def test_domain_error_maps_to_http_status(kind, status):
+    response = exception_handler(DomainError(kind, "some-reason", "Some message."), {})
+
+    assert response.status_code == status
+    assert response.data == {"error": {"reason": "some-reason", "message": "Some message."}}
+
+
+@pytest.mark.parametrize(
+    ("detail", "fields"),
+    [
+        ({"name": ["Required."]}, {"name": "invalid"}),
+        (
+            {"notifications": {"enabled": [ErrorDetail("x", code="required")]}},
+            {"notifications.enabled": "required"},
+        ),
+        ({"goals": {1: [ErrorDetail("x", code="max_length")]}}, {"goals.1": "max-length"}),
+        ({"non_field_errors": [ErrorDetail("x", code="invalid")]}, {"body": "invalid"}),
+        (["Not valid."], {"body": "invalid"}),
+    ],
+)
+def test_validation_error_lists_the_reason_of_each_field(detail, fields):
+    response = exception_handler(ValidationError(detail), {})
+
+    assert response.status_code == 400
+    assert response.data == {
+        "error": {
+            "reason": "invalid-argument",
+            "message": "The request is invalid.",
+            "fields": fields,
+        }
+    }
 
 
 def test_unknown_route_returns_the_json_envelope(client):

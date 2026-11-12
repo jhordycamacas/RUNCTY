@@ -48,6 +48,9 @@ TOKEN_VERIFIER = (
 GOOGLE_SERVICES_PROBE = (
     "apps.health.infrastructure.google_services_probe.FirebaseGoogleServicesProbe"
 )
+AUTH_GATEWAY = "apps.shared.infrastructure.firebase.auth_gateway.FirebaseAuthGateway"
+ROLE_REPOSITORY = "apps.roles.infrastructure.firestore_role_repository.FirestoreRoleRepository"
+ROLE_MEMBERS = "apps.roles.infrastructure.firestore_role_members.FirestoreRoleMembers"
 
 # --- Django ----------------------------------------------------------------
 
@@ -106,6 +109,7 @@ REST_FRAMEWORK = {
         "ip": env.str("THROTTLE_RATE_IP", default="120/min"),
         "user": env.str("THROTTLE_RATE_USER", default="240/min"),
         "auth-failed": env.str("THROTTLE_RATE_AUTH_FAILED", default="20/min"),
+        "sensitive": env.str("THROTTLE_RATE_SENSITIVE", default="30/min"),
     },
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
