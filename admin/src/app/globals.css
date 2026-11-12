@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* RUNCTY palette (same values as mobile/src/core/theme/tokens.ts). */
+/* RUNCTY palette (same values as frontend/mobile/src/core/theme/tokens.ts). */
 @theme {
   --color-ink: #111111;
   --color-muted: #5f5f5f;

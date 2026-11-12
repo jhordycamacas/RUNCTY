@@ -3,7 +3,7 @@
 # - firebase: emulators (Auth 9099, Firestore 8080, Functions 5001, Storage 9199, UI http://localhost:4000)
 # - seed: loads Loja, roles, the admin and sample routes once the emulators are ready
 # - admin: panel at http://localhost:3100
-# The mobile app (Metro) runs on the host: `adb reverse` the ports, then `npm start` in mobile/.
+# The mobile app (Metro) runs on the host: `adb reverse` the ports, then `npm start` in frontend/mobile/.
 services:
   firebase:
     build:

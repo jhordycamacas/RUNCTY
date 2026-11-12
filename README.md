@@ -88,7 +88,7 @@ Todo el desarrollo se hace contra los **emuladores de Firebase** con el proyecto
 | --- | --- |
 | raíz | Configuración de Firebase (`firebase.json`, reglas, índices), script de datos semilla |
 | `functions/` | Cloud Functions (Gen 2, TypeScript) y tests de reglas de Firestore |
-| `mobile/` | App móvil (Expo + React Native + TypeScript) |
+| `frontend/mobile/` | App móvil (Expo + React Native + TypeScript) |
 | `admin/` | Panel de administración web (Next.js + Tailwind) |
 
 Cada paquete se instala por separado (no se usan workspaces).
@@ -96,10 +96,10 @@ Cada paquete se instala por separado (no se usan workspaces).
 ### Instalación
 
 ```bash
-npm install                    # raíz: firebase-tools y script de semilla
-npm --prefix functions install # Cloud Functions
-npm --prefix mobile install    # App móvil
-npm --prefix admin install     # Panel de administración
+npm install                          # raíz: firebase-tools y script de semilla
+npm --prefix functions install       # Cloud Functions
+npm --prefix frontend/mobile install # App móvil
+npm --prefix admin install           # Panel de administración
 ```
 
 O todo junto: `npm run install:all`.
@@ -138,12 +138,12 @@ Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda 
 
 La app usa módulos nativos, así que se instala como build de desarrollo y no con Expo Go. Para instalarla en un celular Android por USB, sigue el manual [docs/manual-instalacion-android.md](docs/manual-instalacion-android.md). El resumen es este:
 
-1. Copia `mobile/.env.example` a `mobile/.env` y pon `EXPO_PUBLIC_USE_EMULATORS=true` y `EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1`.
+1. Copia `frontend/mobile/.env.example` a `frontend/mobile/.env` y pon `EXPO_PUBLIC_USE_EMULATORS=true` y `EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1`.
 2. Conecta el celular y redirige los puertos con `adb reverse` (Metro, 9099, 8080, 5001 y 9199). Metro usa el **8081**, o el **8082** si la build instalada se hizo cuando el 8081 estaba ocupado: la app recuerda el puerto con el que se compiló. Si al abrirla ves "Unable to load script", revisa los logs con `adb logcat` y busca a qué puerto apunta.
 3. Con el backend levantado:
 
 ```bash
-cd mobile
+cd frontend/mobile
 npm run android            # compila, instala y abre la app (la primera vez tarda varios minutos)
 npm start                  # uso diario, cuando la app ya está instalada
 npx expo start --port 8082 # si la build instalada busca Metro en el 8082
@@ -181,15 +181,15 @@ Solo pueden entrar las cuentas con el permiso `admin.access`; a un corredor se l
 ### Tests
 
 ```bash
-npm --prefix functions test           # tests unitarios de las functions
-npm --prefix functions run test:rules # tests de reglas de Firestore (levanta el emulador)
-npm --prefix mobile run typecheck     # tipos de la app móvil
-npm --prefix mobile test              # tests de la app móvil (Jest)
-npm --prefix mobile run lint          # ESLint (configuración de Expo)
-npm --prefix admin test               # tests del panel (Vitest)
-npm --prefix admin run typecheck      # tipos del panel
-npm --prefix admin run lint           # ESLint (configuración de Next.js)
-npm run admin:build                   # build de producción del panel
+npm --prefix functions test                # tests unitarios de las functions
+npm --prefix functions run test:rules      # tests de reglas de Firestore (levanta el emulador)
+npm --prefix frontend/mobile run typecheck # tipos de la app móvil
+npm --prefix frontend/mobile test          # tests de la app móvil (Jest)
+npm --prefix frontend/mobile run lint      # ESLint (configuración de Expo)
+npm --prefix admin test                    # tests del panel (Vitest)
+npm --prefix admin run typecheck           # tipos del panel
+npm --prefix admin run lint                # ESLint (configuración de Next.js)
+npm run admin:build                        # build de producción del panel
 ```
 
 ## Estado del desarrollo

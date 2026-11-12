@@ -172,6 +172,8 @@ Forecast: well above 400 authored changed lines (a full backend port and a panel
 | T1 | delegated writer (2+ non-trivial files) | `e367449` | pytest 80 passed (re-run by the parent), ruff clean, `manage.py check` clean with `DJANGO_DEBUG=true`, `check --deploy` 1 warning left on purpose (W021, HSTS preload). Not done: `backend/.env.example` (a permission rule blocks `.env*` writes; the user creates it from the README), Docker image not built (daemon off). |
 | T2 | delegated writer (2+ non-trivial files) | `002dbe4`, `df41091`, `488674c`, `04e66b3` | On `04e66b3`, re-run by the parent: pytest 382 passed, `ruff check` and `ruff format --check` clean, `manage.py check` clean with `DJANGO_DEBUG=true`. RED observed first (import errors for `search_users` and `delete_account`). All searchUsers (10) and deleteAccount (7) Vitest specs mapped. Review: skipped (user rule for this repository). |
 
+| T5 (move only) | delegated writer, finished inline after the user stopped it | see `feat/frontend-folder` | From `frontend/mobile`, run by the parent: `tsc --noEmit` clean, jest 35 suites / 257 tests passed, `expo lint` clean. Not run: Android native build from the new path, on-device check. Remaining in T5: switch the app's infrastructure layer to the Django API. |
+
 ## Decisions taken in T2 (clients must follow them in T5 and T6)
 
 - `recent-sign-in-required` (400) is a new reason code for account deletion with a sign-in older than 300 s; the callable threw a bare `failed-precondition`.
