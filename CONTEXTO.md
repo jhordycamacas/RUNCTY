@@ -535,3 +535,80 @@ La app móvil está bien construida: tokens usados de forma consistente, todos l
 - App Check está apagado hasta pasar a Firebase real; el texto legal LOPDP del registro es provisional.
 
 **Pruebas como evidencia:** 257 tests en `mobile`, 60 en `admin` y 167 en `functions` (186 con T1, sin re-ejecutar por el asistente), con typecheck limpio en los tres paquetes. Cada historia tiene su fila en el backlog (`D:\Proyecto5to\Docs\BacklogRUNCTY_Final.xlsx`) y su caso de uso en `D:\Proyecto5to\Docs\Entregables`.
+
+## 15. Bitácora del 2026-11-10 (tarde): entregables finales, diagramas y renombrado
+
+### 15.1 Carpeta de entregables finales
+
+`D:\Proyecto5to\Docs\Entregables\Final` (reemplaza a lo que había en `Entregables` para la entrega):
+
+- **CSV** (separador `;`, UTF-8 con BOM, generados desde `RequsitosExcelFInal.xlsx`, que no se modificó): `Requisitos de usuario - RUNCTY.csv` (17 UR), `Requisitos funcionales - RUNCTY.csv` y `Requisitos no funcionales - RUNCTY.csv` (26 RNF).
+- **Backlog:** por pedido del usuario no está en `Final`. El CSV queda en `Entregables\CSV\Backlog RUNCTY.csv`, junto con `Requisitos RUNCTY.csv`, una versión que unía UR, RF y RNF en un solo archivo y que se descartó.
+- **PDF:**
+  - `Diagrama de contexto - RUNCTY.pdf`: el de siempre.
+  - `Diagramas de casos de uso - RUNCTY.pdf`: 41 páginas, primero el diagrama general y luego los 40 específicos, en el orden de las épicas.
+  - `Diagrama de clases - RUNCTY.pdf`: la versión de **22 clases** (la presentada).
+- **Los PDF llevan los diagramas como imagen a 250 dpi, no en vectorial.** La conversión de EMF a PDF con Word se colgó sin dar error, así que se armaron con Python (`reportlab`).
+
+### 15.2 Modelo de Enterprise Architect (`RunCty.eap`)
+
+- **Casos de uso:** nuevo paquete "Casos de uso generales" con el diagrama "Diagrama de casos de uso general": 26 casos de uso (uno por épica) y solo los **4 actores** del modelo (Corredor, Administrador, Representante de club y Sistema). Se reutilizan los elementos del paquete "Actores"; no se creó ningún actor nuevo.
+- **Clases:** en Vista Lógica → "Modelo de dominio RUNCTY" → "Diagrama de clases RUNCTY". Quedó la versión de 22 clases. Se probaron otras tres y se descartaron; los respaldos están en `D:\Proyecto5to\Docs\Respaldos_EA`:
+  - **41 clases:** se veía recargada y con cajas solapadas (no se conservó).
+  - **13 clases según el código** (`RunCty_clases_segun_codigo_13.eap`): demasiado simple.
+  - **43 clases completo** (`RunCty_clases_completo_43.eap`): verde = programada y gris = pendiente. Con estilo de línea ortogonal (`TREE=OS` en los `DiagramLinks`), que es lo que hizo legibles las líneas. Se descartó porque el usuario prefirió la versión presentada.
+- **Scripts para regenerar:** `D:\Proyecto5to\Docs\Respaldos_EA\scripts` (`plan.py`, `cls2.py` a `cls4.py`, `build.ps1`, `pdf.ps1`, `exp.ps1`, `rename.js`). `cls2.py` genera el plan del diagrama de 22 clases, `build.ps1` lo crea en EA por COM y exporta EMF, y `pdf.ps1` quedó obsoleto (usar `reportlab`).
+- **Truco de EA:** abrir el modelo con `SQLQuery` es instantáneo. Recorrer colecciones COM (`Packages`, `Diagrams`) tarda minutos y a veces parece colgado.
+
+### 15.3 Informe del coach (`Resultados Grupo 8 - Evaluacion requisitos y UML.md`, en Descargas)
+
+Madurez global: "En progreso (alto)". Semáforo: verde en RF, RNF y casos de uso; amarillo en UR, contexto y clases.
+
+- **Prioridades que pide:**
+  1. Cerrar la trazabilidad UR → RF: hay 17 UR frente a 24 módulos y unos 12 RF sin UR de origen (RF-06, 08, 11, 13, 14, 16, 18 a 23). Los RF no traen columna de UR (el backlog sí la tiene en Comentarios).
+  2. Alinear el diagrama de clases con los requisitos: faltan unas 15 entidades como clase (Preferencia, Credencial, Valoración, Fuente, Reto, Membresía, Inscripción, Sesión, etc.) y casi no hay operaciones.
+  3. Corregir el actor "Sistema" en los casos de uso, los `«include»`/`«extend»` y pasar el contexto de círculo (DFD) a caja negra.
+- **Otros hallazgos:** varios UR describen la UI en vez de la necesidad; UR-16 es arquitectura; los sub-RF no tienen responsable ni prioridad y la columna Estimación está vacía; el encabezado de los RNF dice ISO 9126 pero los atributos son de 25010.
+- **Decisiones abiertas:**
+  - "Sistema" como actor: el Excel de requisitos (fuente de verdad) lo usa ("Actor: Sistema"), y el usuario pidió no agregar actores. Quitarlo cambia el modelo.
+  - El ingeniero pide que las clases del diagrama estén programadas. Ver 15.4.
+
+### 15.4 Diagrama de clases frente al código
+
+El código modela el dominio con `interface`/`type` y funciones puras, sin `class` (solo `DomainError` y dos repositorios de infraestructura). De las clases del diagrama, **13 existen en el código** (Sprints 1 y 2) y **30 faltan** (Sprints 3 a 5).
+
+- **Atributos que no coinciden del todo:** Usuario (el código tiene `uid`, `cityId` y `role`; los atributos están en inglés), Ciudad (la app móvil solo tiene `id`, `name` y `province`; el panel sí tiene `type` y `coverage`), IndiceSeguridad (en el código es un mapa por franja con `score` y `level`, sin `actualizadoEn`) y Rol (el código agrega `description` y `system`).
+- **Decisión del usuario:** dejar el diagrama presentado (22 clases) y no programar las clases faltantes todavía. Si el ingeniero insiste en el código, las opciones son (A) ajustar el diagrama a lo implementado o (B) programar las 30 pendientes, que sin pantallas ni lógica serían código zombie.
+
+### 15.5 Renombrado de tipos del dominio a español (sin commitear)
+
+Se renombraron **solo los nombres de tipo**, con un renombrado por símbolos de TypeScript (`ts-morph`), porque un buscar-y-reemplazar habría cambiado mensajes de error y logs que contienen palabras como "Route". No se tocaron campos de Firestore, nombres de funciones ni textos de la interfaz.
+
+| Antes | Ahora | Antes | Ahora |
+| --- | --- | --- | --- |
+| `UserProfile` | `Usuario` | `Segment` | `Tramo` |
+| `SportProfile` | `PerfilDeportivo` | `TimeSlot` (admin) | `FranjaHoraria` |
+| `Preferences` | `PreferenciaUsuario` | `RiskFactor` (admin) | `FactorDeRiesgo` |
+| `NotificationPreferences` | `PreferenciaNotificaciones` | `RouteSlotSafety` | `IndiceSeguridadRuta` |
+| `RoleRecord` (functions) | `Rol` | `SegmentSlotSafety` | `IndiceSeguridadTramo` |
+| `City` | `Ciudad` | `Route` | `Ruta` |
+
+- **Alcance:** 45 archivos en `mobile`, `admin` y `functions`, 201 líneas cambiadas y 201 quitadas.
+- **Verificación:** typecheck limpio en los tres paquetes; Jest en `mobile` con 257 tests y Vitest en `admin` con 60 y en `functions` con 186 (47 omitidos). Falla `functions/test/rules/firestore.rules.test.ts` porque necesita un emulador de Firestore aparte; falla igual sin el renombrado.
+- **Pendiente:** los cambios están **sin commitear** en la rama `feat/hardening-and-polish`. No se probó la app en el celular después del renombrado (son solo tipos, no debería notarse).
+
+### 15.6 Entorno y problemas del día
+
+- **"Unable to load script" en el celular:** los túneles `adb reverse` se pierden cuando se mueve o se reconecta el cable USB. Solución: `for P in 8082 9099 8080 5001 9199; do adb reverse tcp:$P tcp:$P; done` y relanzar la app (`adb shell monkey -p ec.utpl.runcty -c android.intent.category.LAUNCHER 1`).
+- **App sin backend:** Docker Desktop estaba apagado, así que `docker compose up` fallaba. Hay que encenderlo y esperar a que `runcty-seed` quede en `Exited (0)`.
+- **Sesión vieja en el celular:** tras reiniciar los emuladores salía `auth/invalid-refresh-token` en el log; la app lo maneja y vuelve al inicio de sesión. El corredor hay que crearlo de nuevo.
+- **Hook de revisión (`gentle-ai review`):** se omitió, según la regla del repo de no usar esos flujos. Para quitar el aviso: `gentle-ai review mode disable --scope clone --cwd D:\RUNCTY` (decisión del usuario).
+- **Al terminar la sesión** se apagaron Metro, los túneles `adb`, los contenedores de Docker y Docker Desktop.
+
+### 15.7 Pendientes que quedan
+
+1. Commitear (o descartar) el renombrado de tipos.
+2. Decidir con el ingeniero qué pide exactamente para el diagrama de clases (15.4) y cómo tratar el actor "Sistema" (15.3).
+3. Trazabilidad UR → RF: agregar la columna de UR a los RF y redactar los UR que faltan (prioridad 1 del coach).
+4. Cambios menores del coach: encabezado de los RNF (9126 → 25010) y contexto como caja negra.
+5. Lo ya pendiente de las secciones 12 y 14 (demo con Firebase real, pulido T2 y T3, marcar "Terminado" en el backlog los Sprints 1 y 2).
