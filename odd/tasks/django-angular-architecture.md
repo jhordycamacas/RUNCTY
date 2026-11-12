@@ -138,7 +138,7 @@ Paths that break on the move: `firebase.json` (`source`, rules), `docker-compose
 ## Tasks
 
 - [x] **T1 — Backend scaffold.** Django + DRF project in `backend/` with a feature-first hexagonal layout, Firebase integration (Auth, Firestore, Storage, FCM accessors), token authentication, permission classes, error handling, hardened settings, health and `me` endpoints, pytest suite, Dockerfile. Route: delegated writer (2+ non-trivial files).
-- [ ] **T2 — Port users, roles and account logic** to Django (profile, sport profile, preferences, roles CRUD, role assignment, user search, account deletion), with the audit fixes NEW-01 to NEW-04 and the Vitest specs ported to pytest.
+- [x] **T2 — Port users, roles and account logic** to Django (profile, sport profile, preferences, roles CRUD, role assignment, user search, account deletion), with the audit fixes NEW-01 to NEW-04 and the Vitest specs ported to pytest.
 - [ ] **T3 — Port cities, routes and the safety index** to Django, with the specs ported to pytest.
 - [ ] **T4 — Python seed and infrastructure:** seed command in Django, Firebase config under `backend/`, deny-all Firestore rules, Docker Compose with the API service; remove `functions/` and the TypeScript seed.
 - [ ] **T5 — Move the app to `frontend/mobile`** and switch its infrastructure layer from Firestore/callables to the Django API.
@@ -170,7 +170,15 @@ Forecast: well above 400 authored changed lines (a full backend port and a panel
 | --- | --- | --- | --- |
 | (baseline) | inline | `876f377`, `7d36585` | mobile 257 tests, admin 60, functions 186, typecheck clean in all three |
 | T1 | delegated writer (2+ non-trivial files) | `e367449` | pytest 80 passed (re-run by the parent), ruff clean, `manage.py check` clean with `DJANGO_DEBUG=true`, `check --deploy` 1 warning left on purpose (W021, HSTS preload). Not done: `backend/.env.example` (a permission rule blocks `.env*` writes; the user creates it from the README), Docker image not built (daemon off). |
-| T2 (partial) | delegated writer | `002dbe4`, `df41091`, `488674c` | Not re-run in the 2026-11-12 session. Remaining: user search and account deletion, in progress and uncommitted when the branch was first pushed. |
+| T2 | delegated writer (2+ non-trivial files) | `002dbe4`, `df41091`, `488674c`, `04e66b3` | On `04e66b3`, re-run by the parent: pytest 382 passed, `ruff check` and `ruff format --check` clean, `manage.py check` clean with `DJANGO_DEBUG=true`. RED observed first (import errors for `search_users` and `delete_account`). All searchUsers (10) and deleteAccount (7) Vitest specs mapped. Review: skipped (user rule for this repository). |
+
+## Decisions taken in T2 (clients must follow them in T5 and T6)
+
+- `recent-sign-in-required` (400) is a new reason code for account deletion with a sign-in older than 300 s; the callable threw a bare `failed-precondition`.
+- A search cursor containing `/` is rejected with `invalid-cursor` (it would address a document outside `users`).
+- Account deletion removes `users/{uid}` and every document under `users/{uid}/private` in one transaction that also checks another admin exists; the admin check reads the claims stored in Auth, not the token.
+- The sensitive throttle applies to `GET /users` only.
+- The search summary returns `role: null` for a profile without a role.
 
 ## Decisions taken by the parent after T1
 

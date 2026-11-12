@@ -277,7 +277,7 @@ Se mantiene el calendario del equipo: Sprint 1, semanas 4–5; Sprint 2, semana 
 - [x] Correcciones de seguridad del servidor (T1; SEC-01, 02, 03, 05, 06 y 08): hechas en la rama `feat/hardening-and-polish`. El agente reportó los tests en verde; **no se volvieron a ejecutar** antes de subirlas (ver 14.2).
 - [ ] Pulido de la app móvil y del panel (T2 y T3 de `odd/tasks/auditoria-y-pulido.md`): **pausado a pedido del usuario**. El plan detallado está en 14.5.
 - [x] Guion y checklist para presentar el Sprint 1: sección 14.6.
-- [ ] **Migración a Django + Angular** (rama `feat/django-angular-architecture`, plan en `odd/tasks/django-angular-architecture.md`): T1 hecha, T2 en curso, T3 a T9 pendientes. El estado detallado está en la sección 16.
+- [ ] **Migración a Django + Angular** (rama `feat/django-angular-architecture`, plan en `odd/tasks/django-angular-architecture.md`): T1 y T2 hechas, T3 a T9 pendientes. El estado detallado está en la sección 16.
 
 ### Cómo trabajar hoy (desarrollo local)
 
@@ -637,7 +637,7 @@ Se renombraron **solo los nombres de tipo**, con un renombrado por símbolos de 
 | Tarea | Estado | Evidencia |
 | --- | --- | --- |
 | T1 Estructura del backend | Hecha | Commit `e367449`. `pytest` con 80 pruebas en verde, `ruff` limpio y `manage.py check` limpio (verificado el 2026-11-11). |
-| T2 Usuarios, roles y cuenta | **En curso** | Commiteado: límite de intentos con token rechazado (`002dbe4`), roles y asignación de rol (`df41091`), registro, perfil propio, perfil deportivo y preferencias (`488674c`). Las pruebas de estos tres commits no se volvieron a ejecutar en la sesión del 2026-11-12. **Sin commitear:** búsqueda de usuarios (`GET /users`) y eliminación de cuenta (`DELETE /users/me`); el trabajo estaba a medio hacer y sin verificar cuando se subió la rama. |
+| T2 Usuarios, roles y cuenta | Hecha | Commits: límite de intentos con token rechazado (`002dbe4`), roles y asignación de rol (`df41091`), registro, perfil propio, perfil deportivo y preferencias (`488674c`), búsqueda de usuarios y eliminación de cuenta (`04e66b3`). Verificado el 2026-11-12 sobre `04e66b3`: `pytest` con 382 pruebas en verde, `ruff check` y `ruff format --check` limpios, y `manage.py check` sin avisos. |
 | T3 Ciudades, rutas e índice de seguridad | Pendiente | |
 | T4 Seed en Python, Docker con la API, reglas de Firestore cerradas, eliminar `functions/` | Pendiente | |
 | T5 Mover la app a `frontend/mobile` y conectarla a la API | Pendiente | |
@@ -649,12 +649,13 @@ Se renombraron **solo los nombres de tipo**, con un renombrado por símbolos de 
 ### 16.3 Cómo retomar
 
 1. Abrir la sesión en `D:\RUNCTY`, en la rama `feat/django-angular-architecture`.
-2. Revisar `git status`. Si hay cambios sin commitear en `backend/`, son el cierre de T2: ejecutar las comprobaciones del punto 3 y commitear solo si pasan.
-3. Comprobaciones del backend, desde `backend/`: `python -m pytest -q`, `ruff check .` y `python manage.py check` (con `DJANGO_DEBUG=true`). La instalación está explicada en `backend/README.md`.
+2. Revisar `git status`: el árbol debe estar limpio.
+3. Comprobaciones del backend, desde `backend/` y con el entorno `.venv`: `python -m pytest -q`, `ruff check .`, `ruff format --check .` y `python manage.py check` (con `DJANGO_DEBUG=true`). La instalación está explicada en `backend/README.md`.
 4. Seguir con T3. Mientras dure la migración, la app y el panel actuales (`mobile/`, `admin/`, `functions/`) siguen funcionando con los emuladores como describe la sección 12.
 
 ### 16.4 Notas
 
+- **Para los clientes (T5 y T6):** eliminar la cuenta con un inicio de sesión de más de 5 minutos devuelve el código nuevo `recent-sign-in-required` (400), que la app y el panel deben traducir. La búsqueda devuelve `role: null` cuando el usuario no tiene rol, y rechaza con `invalid-cursor` un cursor que contenga `/`.
 - `backend/.env.example` no existe: el asistente no puede crear archivos `.env*`. Se crea a mano siguiendo `backend/README.md`.
 - La imagen de Docker del backend todavía no se construyó.
 - Python 3.10 es la versión instalada en el equipo; las librerías de Google avisan que ya no tiene soporte. Pasar a 3.12 queda para el despliegue.
