@@ -85,13 +85,13 @@ adb reverse tcp:9199 tcp:9199
 
 ## 6. Configurar la app para usar los emuladores
 
-Creá el archivo `mobile/.env` a partir del ejemplo (git ya lo ignora):
+Creá el archivo `frontend/mobile/.env` a partir del ejemplo (git ya lo ignora):
 
 ```bash
-cp mobile/.env.example mobile/.env
+cp frontend/mobile/.env.example frontend/mobile/.env
 ```
 
-En `mobile/.env`, dejá estas dos líneas así:
+En `frontend/mobile/.env`, dejá estas dos líneas así:
 
 ```env
 EXPO_PUBLIC_USE_EMULATORS=true
@@ -102,10 +102,10 @@ EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1
 
 ## 7. Compilar e instalar la app
 
-Desde la carpeta `mobile/`:
+Desde la carpeta `frontend/mobile/`:
 
 ```bash
-cd mobile
+cd frontend/mobile
 npm run android
 ```
 
@@ -117,7 +117,7 @@ npm run android -- --device <ID_DEL_DISPOSITIVO>
 
 Este comando hace lo siguiente:
 
-1. Genera la carpeta nativa `mobile/android/` (git la ignora y se puede regenerar en cualquier momento).
+1. Genera la carpeta nativa `frontend/mobile/android/` (git la ignora y se puede regenerar en cualquier momento).
 2. Compila el APK con Gradle. **La primera vez tarda entre 5 y 15 minutos**; las siguientes son mucho más rápidas.
 3. Instala la app **RUNCTY** en el celular y la abre.
 4. Deja corriendo Metro. Los cambios en el código se ven en el celular al guardar.
@@ -137,7 +137,7 @@ npm run seed
 
 # Terminal 3
 adb reverse tcp:8081 tcp:8081   # y el resto de puertos del paso 5
-cd mobile
+cd frontend/mobile
 npm start
 ```
 
@@ -158,7 +158,7 @@ Solo hay que volver a ejecutar `npm run android` cuando se agrega una dependenci
 | Error de Gradle sobre la versión de Java | Usá JDK 17 o 21 y revisá que `JAVA_HOME` apunte a esa versión. |
 | `SDK location not found` | Definí `ANDROID_HOME` (ver sección 1) y abrí una terminal nueva. |
 | `Filename longer than 260 characters` (Windows) | Ver la sección 10. |
-| Quiero empezar de cero | Borrá `mobile/android/` y volvé a ejecutar `npm run android`. |
+| Quiero empezar de cero | Borrá `frontend/mobile/android/` y volvé a ejecutar `npm run android`. |
 
 ## 10. Windows: errores de ruta larga al compilar
 
@@ -171,13 +171,13 @@ ninja: error: mkdir(...): No such file or directory
 
 El repositorio ya trae dos medidas para evitarlo:
 
-1. **Plugin `mobile/plugins/with-short-cxx-dir.js`** (registrado en `app.config.ts`). En Windows, mueve la carpeta temporal de CMake de `mobile\android\app\.cxx` a `<unidad>:\.rcx` (por ejemplo `D:\.rcx`). Se aplica solo cada vez que se genera `android/`. La carpeta `.rcx` se puede borrar sin problema; se vuelve a crear al compilar.
-2. **Clonar el repositorio en una ruta corta.** La ruta usada es `D:\RUNCTY`. Como regla práctica, la carpeta `mobile/` no debería superar unos 25 caracteres de ruta (`D:\RUNCTY\mobile` tiene 16). Con `D:\Proyecto5to\RunCity\RUNCTY` falla incluso con el plugin.
+1. **Plugin `frontend/mobile/plugins/with-short-cxx-dir.js`** (registrado en `app.config.ts`). En Windows, mueve la carpeta temporal de CMake de `frontend\mobile\android\app\.cxx` a `<unidad>:\.rcx` (por ejemplo `D:\.rcx`). Se aplica solo cada vez que se genera `android/`. La carpeta `.rcx` se puede borrar sin problema; se vuelve a crear al compilar.
+2. **Clonar el repositorio en una ruta corta.** La ruta usada es `D:\RUNCTY`. Como regla práctica, la carpeta `frontend/mobile/` no debería superar unos 25 caracteres de ruta (`D:\RUNCTY\frontend\mobile` tiene 25, justo en el límite). Con `D:\Proyecto5to\RunCity\RUNCTY` falla incluso con el plugin.
 
 Si cambiaste de ruta o la compilación vieja quedó a medias, regenerá la carpeta nativa:
 
 ```bash
-cd mobile
+cd frontend/mobile
 npx expo prebuild -p android --clean
 npm run android
 ```

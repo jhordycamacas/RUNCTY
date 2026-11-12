@@ -9,7 +9,7 @@
 - **NO CÓDIGO ZOMBIE (regla obligatoria):** no se deja en el proyecto código que no se usa. Si una función, componente, archivo, export, dependencia, script o prueba ya no sirve para nada, se **elimina** en el mismo cambio que la deja sin uso. No se comenta "por si acaso" ni se deja desactivado. Git guarda el historial si hace falta recuperarlo. Antes de cerrar cada tarea, se revisa que no queden exports sin usar ni archivos huérfanos (por ejemplo con `npx knip` en cada paquete).
 - Commits con formato Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`...).
 - Repositorio: https://github.com/jhordycamacas/RUNCTY (clon local: `D:\RUNCTY`).
-- **Ruta del clon local (2026-11-02):** el repo se clonó de nuevo en `D:\RUNCTY` y reemplaza al anterior, `D:\Proyecto5to\RunCity\RUNCTY`. En Windows, la compilación nativa de Android falla si la ruta es larga (`Filename longer than 260 characters`), porque la versión de ninja del SDK (1.10.2) no admite rutas largas. La ruta de la carpeta `mobile/` no debe superar unos 25 caracteres, y ni `subst` ni `LongPathsEnabled` lo resuelven. Además, el plugin `mobile/plugins/with-short-cxx-dir.js` mueve la carpeta temporal de CMake a `<unidad>:\.rcx` en Windows. Con las dos medidas, la app compila e instala en un Infinix X678B con `npm run android`. La memoria y el historial del asistente se copiaron de la clave de proyecto `D--Proyecto5to-RunCity-RUNCTY` a `D--RUNCTY`, así que se trabaja abriendo la sesión en `D:\RUNCTY`. El detalle está en `docs/manual-instalacion-android.md`.
+- **Ruta del clon local (2026-11-02):** el repo se clonó de nuevo en `D:\RUNCTY` y reemplaza al anterior, `D:\Proyecto5to\RunCity\RUNCTY`. En Windows, la compilación nativa de Android falla si la ruta es larga (`Filename longer than 260 characters`), porque la versión de ninja del SDK (1.10.2) no admite rutas largas. La ruta de la carpeta de la app (`frontend/mobile/` desde el 2026-11-12; antes `mobile/`) no debe superar unos 25 caracteres, y ni `subst` ni `LongPathsEnabled` lo resuelven. Además, el plugin `frontend/mobile/plugins/with-short-cxx-dir.js` mueve la carpeta temporal de CMake a `<unidad>:\.rcx` en Windows. Con las dos medidas, la app compila e instala en un Infinix X678B con `npm run android`. La memoria y el historial del asistente se copiaron de la clave de proyecto `D--Proyecto5to-RunCity-RUNCTY` a `D--RUNCTY`, así que se trabaja abriendo la sesión en `D:\RUNCTY`. El detalle está en `docs/manual-instalacion-android.md`.
 
 ## 1. Qué es
 
@@ -284,7 +284,7 @@ Se mantiene el calendario del equipo: Sprint 1, semanas 4–5; Sprint 2, semana 
 - Repo en `D:\RUNCTY` (ruta corta obligatoria en Windows; ver sección "Reglas de trabajo").
 - **Backend con Docker (recomendado, 2026-11-10):** con Docker Desktop encendido, `docker compose up -d --build` levanta los emuladores de Firebase (`runcty-firebase`), el seed (`runcty-seed`, corre una vez y termina) y el panel admin (`runcty-admin`). El seed crea Loja, los roles, el admin (`admin@runcty.dev` / `Admin123!`) y 5 rutas de ejemplo. Los puertos se publican solo en `127.0.0.1`. La UI de los emuladores está en http://localhost:4000. Archivos: `docker-compose.yml`, `docker/firebase.Dockerfile`, `.dockerignore`. Si cambia el código de `functions/`, hay que reconstruir la imagen: `docker compose up -d --build firebase`.
 - Sin Docker: `npm run functions:build`, luego `npm run emulators`, y en otra terminal `npm run seed`.
-- Celular por USB: `adb reverse` de los puertos de Metro, 9099, 8080, 5001 y 9199. **Metro usa el 8082 en el Infinix:** la build instalada busca Metro en el 8082 (se compiló cuando el 8081 estaba ocupado; si no, el celular muestra "Unable to load script"). Desde `mobile/`: `EXPO_PUBLIC_USE_EMULATORS=true EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1 npx expo start --port 8082`. Esas dos variables pueden ir en `mobile/.env` (copiar de `.env.example`; el asistente no puede leer ni crear archivos `.env`). `npm run android` solo hace falta para reinstalar. Detalle y solución de problemas en `docs/manual-instalacion-android.md` (todavía dice 8081).
+- Celular por USB: `adb reverse` de los puertos de Metro, 9099, 8080, 5001 y 9199. **Metro usa el 8082 en el Infinix:** la build instalada busca Metro en el 8082 (se compiló cuando el 8081 estaba ocupado; si no, el celular muestra "Unable to load script"). Desde `frontend/mobile/`: `EXPO_PUBLIC_USE_EMULATORS=true EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1 npx expo start --port 8082`. Esas dos variables pueden ir en `frontend/mobile/.env` (copiar de `.env.example`; el asistente no puede leer ni crear archivos `.env`). `npm run android` solo hace falta para reinstalar. Detalle y solución de problemas en `docs/manual-instalacion-android.md` (todavía dice 8081).
 - Si se reconstruye el contenedor de Firebase, los `adb reverse` siguen vigentes, pero al reiniciar Metro hay que volver a abrir **todos** los túneles (se perdieron una vez y la app mostró "Aún no hay rutas" y un error de red de Firebase).
 - Panel admin: lo levanta el mismo `docker compose` en http://localhost:3100. Sin Docker: `npm run admin:dev`, en http://localhost:3000.
 - Si se reinician los emuladores, los usuarios se borran. La app cierra sola una sesión vieja; hay que volver a iniciar sesión.
@@ -510,7 +510,7 @@ La app móvil está bien construida: tokens usados de forma consistente, todos l
 1. Docker Desktop encendido y `docker compose up -d --build` desde `D:\RUNCTY`. Esperar a que `runcty-seed` quede en `Exited (0)`.
 2. Celular con depuración USB y cable: `adb devices` debe listarlo.
 3. Túneles: `adb reverse tcp:P tcp:P` para `P` en 8082, 9099, 8080, 5001 y 9199.
-4. Metro, desde `mobile/`: `EXPO_PUBLIC_USE_EMULATORS=true EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1 npx expo start --port 8082`.
+4. Metro, desde `frontend/mobile/`: `EXPO_PUBLIC_USE_EMULATORS=true EXPO_PUBLIC_EMULATOR_HOST=127.0.0.1 npx expo start --port 8082`.
 5. Abrir la app en el celular (queda en el inicio de sesión) y el panel en http://localhost:3100.
 6. Tras reiniciar los emuladores se borran los usuarios: el corredor se crea en vivo (es parte de la demo).
 
@@ -640,7 +640,7 @@ Se renombraron **solo los nombres de tipo**, con un renombrado por símbolos de 
 | T2 Usuarios, roles y cuenta | Hecha | Commits: límite de intentos con token rechazado (`002dbe4`), roles y asignación de rol (`df41091`), registro, perfil propio, perfil deportivo y preferencias (`488674c`), búsqueda de usuarios y eliminación de cuenta (`04e66b3`). Verificado el 2026-11-12 sobre `04e66b3`: `pytest` con 382 pruebas en verde, `ruff check` y `ruff format --check` limpios, y `manage.py check` sin avisos. |
 | T3 Ciudades, rutas e índice de seguridad | Pendiente | |
 | T4 Seed en Python, Docker con la API, reglas de Firestore cerradas, eliminar `functions/` | Pendiente | |
-| T5 Mover la app a `frontend/mobile` y conectarla a la API | Pendiente | |
+| T5 Mover la app a `frontend/mobile` y conectarla a la API | **En curso** | Traslado hecho el 2026-11-12 en la rama `feat/frontend-folder` (ver 16.5). Falta conectar la app a la API de Django: hoy sigue usando Firestore y las Cloud Functions. |
 | T6 Panel en Angular en `frontend/web`, eliminar `admin/` | Pendiente | |
 | T7 Pulido de la app móvil | Pendiente | |
 | T8 Sprint 3 sobre la arquitectura nueva | Pendiente | |
@@ -648,7 +648,7 @@ Se renombraron **solo los nombres de tipo**, con un renombrado por símbolos de 
 
 ### 16.3 Cómo retomar
 
-1. Abrir la sesión en `D:\RUNCTY`, en la rama `feat/django-angular-architecture`.
+1. Abrir la sesión en `D:\RUNCTY`. La rama `feat/django-angular-architecture` ya está integrada en `main` (16.5); el trabajo nuevo sale de `main` en una rama propia.
 2. Revisar `git status`: el árbol debe estar limpio.
 3. Comprobaciones del backend, desde `backend/` y con el entorno `.venv`: `python -m pytest -q`, `ruff check .`, `ruff format --check .` y `python manage.py check` (con `DJANGO_DEBUG=true`). La instalación está explicada en `backend/README.md`.
 4. Seguir con T3. Mientras dure la migración, la app y el panel actuales (`mobile/`, `admin/`, `functions/`) siguen funcionando con los emuladores como describe la sección 12.
@@ -660,3 +660,36 @@ Se renombraron **solo los nombres de tipo**, con un renombrado por símbolos de 
 - La imagen de Docker del backend todavía no se construyó.
 - Python 3.10 es la versión instalada en el equipo; las librerías de Google avisan que ya no tiene soporte. Pasar a 3.12 queda para el despliegue.
 - La ruta `D:\RUNCTY\frontend\mobile` tiene 25 caracteres, el límite documentado para compilar Android en Windows. Si la compilación nativa falla, usar `frontend\app`.
+
+### 16.5 Bitácora del 2026-11-12
+
+**Pull request #1, integrado en `main`**
+
+- Enlace: https://github.com/jhordycamacas/RUNCTY/pull/1 (commit de integración `f467fba`).
+- Contenido: 14 commits de las ramas `feat/hardening-and-polish` y `feat/django-angular-architecture`: Docker con emuladores, correcciones de seguridad de las Cloud Functions, renombrado de tipos a español, backend de Django (T1 y T2) y documentación.
+- Fue un solo PR de unas 7.900 líneas en 169 archivos, por pedido del usuario (excepción de tamaño aceptada por el dueño del repositorio).
+- **Dónde verlo como evidencia:** en GitHub, pestaña "Pull requests" → **"Closed"**. La lista muestra por defecto solo los abiertos, y un PR integrado aparece entre los cerrados, con la etiqueta "Merged".
+- Para ese PR solo se volvieron a ejecutar las pruebas del backend (382 en verde). Las de `mobile`, `admin` y `functions` no se volvieron a correr en ese momento.
+
+**Estructura de carpetas: `backend/` y `frontend/`**
+
+- El usuario pidió que las dos aplicaciones cliente vivan dentro de `frontend/`, para que se entienda que ambas son el frontend:
+  - `frontend/mobile`: la app en React Native. **Trasladada el 2026-11-12** desde `mobile/`, que ya no existe.
+  - `frontend/web`: el panel en Angular. Todavía no existe; se crea ahí directamente (T6).
+- El panel actual en Next.js sigue en `admin/` y **no se mueve**: se elimina cuando Angular lo reemplace. `functions/` también sigue en la raíz hasta que termine T4.
+- El traslado movió la carpeta completa (incluye `node_modules`, `android/` y los `.env`) y corrigió las rutas en `package.json` de la raíz, `docker-compose.yml`, `.dockerignore`, `README.md`, `docs/manual-instalacion-android.md` y un comentario de `admin/src/app/globals.css`. El código de la app no cambió.
+- **Verificado desde `frontend/mobile`:** typecheck sin errores, 35 suites y 257 pruebas en verde, lint limpio.
+- **No verificado:** la compilación nativa de Android desde la ruta nueva y la app en el celular. La carpeta `android/` conserva cachés generadas con la ruta vieja; si `npm run android` falla, borrar `frontend/mobile/android/app/.cxx`, `frontend/mobile/android/.gradle` y `D:\.rcx` y volver a compilar.
+- **Cambio para el día a día:** Metro se arranca ahora desde `frontend/mobile` (ya no desde `mobile`). La app instalada en el celular no hay que reinstalarla solo por el traslado.
+- **Rutas en este documento:** las secciones 9 a 15 son bitácoras anteriores y nombran archivos como `mobile/src/...`; hoy están en `frontend/mobile/src/...`.
+
+**Eliminar la cuenta en la API de Django**
+
+- `DELETE /users/me` exige haber iniciado sesión hace menos de 5 minutos. Si la sesión es más vieja, responde con el código `recent-sign-in-required`.
+- No es un comportamiento nuevo para el usuario: la app ya pide la contraseña actual antes de eliminar la cuenta, y eso renueva la sesión. Solo cambió el nombre del código de error (antes era un error genérico).
+- Pendiente (T5 y T6): que la app y el panel muestren un mensaje en español al recibir ese código.
+
+**Aviso del hook de `gentle-ai review`**
+
+- El hook pide una revisión al terminar cada turno. No se ejecuta, por la regla del usuario de no usar ese flujo en este repositorio.
+- Para que el aviso deje de aparecer (decisión del usuario): `gentle-ai review mode disable --scope clone --cwd D:\RUNCTY`.
