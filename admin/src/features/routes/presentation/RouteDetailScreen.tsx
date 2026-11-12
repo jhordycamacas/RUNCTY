@@ -9,14 +9,14 @@ import { Alert, Badge, LoadingText, PageHeader } from '@/core/ui/feedback';
 import { useCityOptions } from '@/features/cities/application/useCities';
 
 import { useRoute, useSegments, useTimeSlots } from '../application/useRoutes';
-import { difficultyLabel, surfaceLabel, type Route } from '../domain/route';
+import { difficultyLabel, surfaceLabel, type Ruta } from '../domain/route';
 import { RouteForm } from './RouteForm';
 import { formatKm } from './SafetyBadge';
 import { SafetySummary } from './SafetySummary';
 import { SegmentsSection } from './SegmentsSection';
 import { TimeSlotsSection } from './TimeSlotsSection';
 
-function RouteFacts({ route, cityName }: { route: Route; cityName: string }) {
+function RouteFacts({ route, cityName }: { route: Ruta; cityName: string }) {
   const facts: [string, string][] = [
     ['Ciudad', cityName],
     ['Distancia', formatKm(route.distanceKm)],

@@ -16,20 +16,20 @@ import {
   formatWindow,
   parseTimeSlotForm,
   timeSlotToForm,
-  type TimeSlot,
+  type FranjaHoraria,
   type TimeSlotFormErrors,
   type TimeSlotFormValues,
 } from '../domain/schedule';
 
 interface TimeSlotFormProps {
   routeId: string;
-  slot?: TimeSlot;
-  slots: TimeSlot[];
+  slot?: FranjaHoraria;
+  slots: FranjaHoraria[];
   onDone(message: string): void;
   onCancel(): void;
 }
 
-const slotName = (slot: TimeSlot) => slot.label ?? formatWindow(slot.startTime, slot.endTime);
+const slotName = (slot: FranjaHoraria) => slot.label ?? formatWindow(slot.startTime, slot.endTime);
 
 function TimeSlotForm({ routeId, slot, slots, onDone, onCancel }: TimeSlotFormProps) {
   const [values, setValues] = useState<TimeSlotFormValues>(slot ? timeSlotToForm(slot) : emptyTimeSlotForm());
@@ -124,13 +124,13 @@ function TimeSlotForm({ routeId, slot, slots, onDone, onCancel }: TimeSlotFormPr
   );
 }
 
-type Editing = { mode: 'create' } | { mode: 'edit'; slot: TimeSlot } | null;
+type Editing = { mode: 'create' } | { mode: 'edit'; slot: FranjaHoraria } | null;
 
 /** RF-07: time slots of a route; every change recalculates the safety index. */
-export function TimeSlotsSection({ routeId, slots, loading, error }: { routeId: string; slots: TimeSlot[]; loading: boolean; error: unknown }) {
+export function TimeSlotsSection({ routeId, slots, loading, error }: { routeId: string; slots: FranjaHoraria[]; loading: boolean; error: unknown }) {
   const remove = useDeleteTimeSlot();
   const [editing, setEditing] = useState<Editing>(null);
-  const [toDelete, setToDelete] = useState<TimeSlot | null>(null);
+  const [toDelete, setToDelete] = useState<FranjaHoraria | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   async function confirmDelete() {

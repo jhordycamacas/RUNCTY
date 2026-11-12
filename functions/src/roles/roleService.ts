@@ -20,7 +20,7 @@ interface RoleData {
   permissions: Permission[];
 }
 
-export interface RoleRecord extends RoleData {
+export interface Rol extends RoleData {
   system: boolean;
 }
 
@@ -29,9 +29,9 @@ export interface RoleInput extends RoleData {
 }
 
 export interface RolesDeps {
-  getRole(id: string): Promise<RoleRecord | null>;
+  getRole(id: string): Promise<Rol | null>;
   /** Persists a new role (the adapter adds the timestamps). */
-  createRole(id: string, role: RoleRecord): Promise<void>;
+  createRole(id: string, role: Rol): Promise<void>;
   updateRole(id: string, role: RoleData): Promise<void>;
   deleteRole(id: string): Promise<void>;
   /** uids whose user doc mirrors `role == id`. */

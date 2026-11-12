@@ -18,7 +18,7 @@ import {
   formatPace,
   sportProfileFormSchema,
   toSportProfileForm,
-  type SportProfile,
+  type PerfilDeportivo,
   type SportProfileFormValues,
 } from '../../domain/sportProfile';
 import { useDeleteSportProfile, useSaveSportProfile, useSportProfile } from '../hooks/useSportProfile';
@@ -91,7 +91,7 @@ export function SportProfileScreen() {
 }
 
 interface SummaryProps {
-  profile: SportProfile;
+  profile: PerfilDeportivo;
   notice: string | null;
   error: string | null;
   deleting: boolean;
@@ -151,16 +151,16 @@ function SportProfileSummary({ profile, notice, error, deleting, onEdit, onDelet
 }
 
 interface FormProps {
-  initial: SportProfile | null;
+  initial: PerfilDeportivo | null;
   saving: boolean;
   error: string | null;
-  onSubmit: (profile: SportProfile) => void;
+  onSubmit: (profile: PerfilDeportivo) => void;
   onCancel?: () => void;
 }
 
 function SportProfileForm({ initial, saving, error, onSubmit, onCancel }: FormProps) {
   const { spacing } = useTheme();
-  const { control, handleSubmit } = useForm<SportProfileFormValues, unknown, SportProfile>({
+  const { control, handleSubmit } = useForm<SportProfileFormValues, unknown, PerfilDeportivo>({
     resolver: zodResolver(sportProfileFormSchema),
     defaultValues: initial ? toSportProfileForm(initial) : EMPTY_SPORT_PROFILE_FORM,
   });

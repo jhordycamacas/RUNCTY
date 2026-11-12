@@ -25,8 +25,8 @@ import {
   UNIT_SYSTEMS,
   UNIT_SYSTEM_LABELS,
   fontScaleMultiplier,
-  type NotificationPreferences,
-  type Preferences,
+  type PreferenciaNotificaciones,
+  type PreferenciaUsuario,
 } from '../../domain';
 import { usePreferences, useResetPreferences, useSavePreferences } from '../hooks/usePreferences';
 
@@ -101,13 +101,13 @@ export function PreferencesScreen() {
 }
 
 interface FormProps {
-  initial: Preferences;
+  initial: PreferenciaUsuario;
   notice: string | null;
   error: string | null;
   saving: boolean;
   resetting: boolean;
   onChange: () => void;
-  onSave: (preferences: Preferences) => void;
+  onSave: (preferences: PreferenciaUsuario) => void;
   onReset: () => void;
 }
 
@@ -122,13 +122,13 @@ function PreferencesForm({
   onReset,
 }: FormProps) {
   const { colors, spacing, typography } = useTheme();
-  const [draft, setDraft] = useState<Preferences>(initial);
+  const [draft, setDraft] = useState<PreferenciaUsuario>(initial);
 
-  const update = (patch: Partial<Preferences>) => {
+  const update = (patch: Partial<PreferenciaUsuario>) => {
     onChange();
     setDraft((current) => ({ ...current, ...patch }));
   };
-  const updateNotifications = (patch: Partial<NotificationPreferences>) =>
+  const updateNotifications = (patch: Partial<PreferenciaNotificaciones>) =>
     update({ notifications: { ...draft.notifications, ...patch } });
 
   const previewSize = typography.sizes.body * fontScaleMultiplier(draft.fontScale);

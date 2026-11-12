@@ -9,13 +9,13 @@ import {
   SEVERITIES,
   SURFACES,
   type LatLng,
-  type Route,
+  type Ruta,
   type RouteFactor,
   type RoutePoint,
-  type RouteSlotSafety,
+  type IndiceSeguridadRuta,
   type SafetyFactor,
-  type Segment,
-  type SegmentSlotSafety,
+  type Tramo,
+  type IndiceSeguridadTramo,
 } from './route';
 
 type Data = Record<string, unknown>;
@@ -65,7 +65,7 @@ function toRouteFactor(value: unknown): RouteFactor | null {
   return { segmentId: asString(data.segmentId), segmentName: asString(data.segmentName), ...factor };
 }
 
-function toRouteSlotSafety(slotId: string, value: unknown): RouteSlotSafety | null {
+function toRouteSlotSafety(slotId: string, value: unknown): IndiceSeguridadRuta | null {
   const data = asRecord(value);
   const level = oneOf(SAFETY_LEVELS, data.level);
   const startTime = asTime(data.startTime);
@@ -82,18 +82,18 @@ function toRouteSlotSafety(slotId: string, value: unknown): RouteSlotSafety | nu
   };
 }
 
-function toSegmentSlotSafety(value: unknown): SegmentSlotSafety | null {
+function toSegmentSlotSafety(value: unknown): IndiceSeguridadTramo | null {
   const data = asRecord(value);
   const level = oneOf(SAFETY_LEVELS, data.level);
   if (!level) return null;
   return { level, score: asNumber(data.score), factors: toFactors(data.factors, toFactor) };
 }
 
-export function toRoute(id: string, raw: unknown): Route {
+export function toRoute(id: string, raw: unknown): Ruta {
   const data = asRecord(raw);
   const safety = Object.entries(asRecord(data.safety))
     .map(([slotId, value]) => toRouteSlotSafety(slotId, value))
-    .filter((entry): entry is RouteSlotSafety => entry !== null)
+    .filter((entry): entry is IndiceSeguridadRuta => entry !== null)
     .sort((a, b) => a.startTime.localeCompare(b.startTime) || a.endTime.localeCompare(b.endTime));
 
   return {
@@ -112,9 +112,9 @@ export function toRoute(id: string, raw: unknown): Route {
   };
 }
 
-export function toSegment(id: string, raw: unknown): Segment {
+export function toSegment(id: string, raw: unknown): Tramo {
   const data = asRecord(raw);
-  const safety: Record<string, SegmentSlotSafety> = {};
+  const safety: Record<string, IndiceSeguridadTramo> = {};
   for (const [slotId, value] of Object.entries(asRecord(data.safety))) {
     const entry = toSegmentSlotSafety(value);
     if (entry) safety[slotId] = entry;

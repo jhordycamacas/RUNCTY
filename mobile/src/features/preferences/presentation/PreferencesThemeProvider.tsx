@@ -6,12 +6,12 @@ import { useSession } from '@/features/auth';
 
 import { readCachedPreferences } from '../application/preferencesUseCases';
 import { preferencesDeps } from '../composition';
-import { fontScaleMultiplier, type Preferences } from '../domain';
+import { fontScaleMultiplier, type PreferenciaUsuario } from '../domain';
 import { usePreferences } from './hooks/usePreferences';
 
 interface CachedEntry {
   uid: string;
-  preferences: Preferences | null;
+  preferences: PreferenciaUsuario | null;
 }
 
 /**

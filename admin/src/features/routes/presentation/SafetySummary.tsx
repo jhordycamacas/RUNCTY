@@ -1,14 +1,14 @@
 import { Badge } from '@/core/ui/feedback';
 
 import { safetyBySlot, type RouteSafety } from '../domain/route';
-import { factorTypeLabel, formatWindow, severityLabel, type TimeSlot } from '../domain/schedule';
-import type { Segment } from '../domain/segment';
+import { factorTypeLabel, formatWindow, severityLabel, type FranjaHoraria } from '../domain/schedule';
+import type { Tramo } from '../domain/segment';
 import { SEVERITY_TONE, SafetyBadge } from './SafetyBadge';
 
 interface SafetySummaryProps {
   safety: RouteSafety;
-  slots: TimeSlot[];
-  segments: Segment[];
+  slots: FranjaHoraria[];
+  segments: Tramo[];
 }
 
 /** RF-07-10: route level per slot (worst segment) with the factors that explain it. */

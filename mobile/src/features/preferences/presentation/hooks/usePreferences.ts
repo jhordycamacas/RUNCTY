@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getPreferences, resetPreferences, savePreferences } from '../../application/preferencesUseCases';
 import { preferencesDeps } from '../../composition';
-import type { Preferences } from '../../domain';
+import type { PreferenciaUsuario } from '../../domain';
 
 const preferencesQueryKey = (uid: string) => ['preferences', uid] as const;
 
@@ -19,7 +19,7 @@ export function usePreferences(uid: string | null) {
 export function useSavePreferences(uid: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (preferences: Preferences) => savePreferences(uid, preferences, preferencesDeps),
+    mutationFn: (preferences: PreferenciaUsuario) => savePreferences(uid, preferences, preferencesDeps),
     onSuccess: (_result, preferences) => queryClient.setQueryData(preferencesQueryKey(uid), preferences),
   });
 }

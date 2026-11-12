@@ -4,7 +4,7 @@ import { z } from 'zod';
 export type CityType = 'city' | 'zone';
 export type CityCoverage = 'active' | 'planned' | 'suspended';
 
-export interface City {
+export interface Ciudad {
   id: string;
   name: string;
   province: string;
@@ -17,7 +17,7 @@ export interface City {
 }
 
 /** Firestore fields written by the panel (timestamps are added by the repository). */
-export type CityData = Omit<City, 'id'>;
+export type CityData = Omit<Ciudad, 'id'>;
 
 export const COVERAGES: CityCoverage[] = ['active', 'planned', 'suspended'];
 
@@ -51,7 +51,7 @@ export const emptyCityForm = (): CityFormValues => ({
   coverage: 'planned',
 });
 
-export function cityToForm(city: City): CityFormValues {
+export function cityToForm(city: Ciudad): CityFormValues {
   return {
     id: city.id,
     name: city.name,
@@ -146,5 +146,5 @@ export function suggestCityId(name: string, type: CityType, parentCityId: string
 }
 
 /** Zones hang from cities only (one level), never from themselves. */
-export const canBeParent = (candidate: City, zoneId: string): boolean =>
+export const canBeParent = (candidate: Ciudad, zoneId: string): boolean =>
   candidate.type === 'city' && candidate.id !== zoneId;

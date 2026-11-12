@@ -12,7 +12,7 @@ import {
   type PersonalDataInput,
 } from '@/features/auth';
 
-import type { UserProfile } from '../../domain';
+import type { Usuario } from '../../domain';
 import { useProfile, useUpdatePersonalData } from '../hooks/useAccount';
 
 /** RF-01-3: edit personal data. The email cannot be changed. */
@@ -31,7 +31,7 @@ export function EditPersonalDataScreen({ onDone }: { onDone: () => void }) {
   return <EditPersonalDataForm profile={profile.data} onDone={onDone} />;
 }
 
-function EditPersonalDataForm({ profile, onDone }: { profile: UserProfile; onDone: () => void }) {
+function EditPersonalDataForm({ profile, onDone }: { profile: Usuario; onDone: () => void }) {
   const { spacing } = useTheme();
   const update = useUpdatePersonalData(profile.uid);
   const { control, handleSubmit } = useForm<PersonalDataInput, unknown, PersonalData>({

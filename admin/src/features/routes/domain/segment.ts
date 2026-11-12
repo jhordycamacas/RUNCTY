@@ -5,20 +5,20 @@ const MIN_POINTS = 2;
 export const MAX_POINTS = 500;
 export const MAX_SEGMENT_NAME = 80;
 
-interface SegmentSlotSafety {
+interface IndiceSeguridadTramo {
   level: SafetyLevel;
   score: number;
   factors: { type: string; severity: Severity; description: string }[];
 }
 
 /** `routes/{routeId}/segments/{id}`; `lengthM` and `safety` are computed by the backend. */
-export interface Segment {
+export interface Tramo {
   id: string;
   name: string;
   order: number;
   coordinates: LatLng[];
   lengthM: number;
-  safety: Record<string, SegmentSlotSafety>;
+  safety: Record<string, IndiceSeguridadTramo>;
 }
 
 /** Payload of createSegment / updateSegment (plus routeId and segmentId). */
@@ -41,7 +41,7 @@ export type SegmentFormErrors = Partial<Record<keyof SegmentFormValues, string>>
 
 export const emptySegmentForm = (): SegmentFormValues => ({ name: '', coordinates: '', position: '' });
 
-export function segmentToForm(segment: Pick<Segment, 'name' | 'order' | 'coordinates'>): SegmentFormValues {
+export function segmentToForm(segment: Pick<Tramo, 'name' | 'order' | 'coordinates'>): SegmentFormValues {
   return {
     name: segment.name,
     coordinates: coordinatesToText(segment.coordinates),

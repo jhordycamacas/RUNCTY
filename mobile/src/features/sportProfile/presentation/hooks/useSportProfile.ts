@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { sportProfileRepository } from '../../composition';
-import type { SportProfile } from '../../domain/sportProfile';
+import type { PerfilDeportivo } from '../../domain/sportProfile';
 
 const sportProfileQueryKey = (uid: string) => ['sportProfile', uid] as const;
 
@@ -17,7 +17,7 @@ export function useSportProfile(uid: string) {
 export function useSaveSportProfile(uid: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (profile: SportProfile) => sportProfileRepository.save(uid, profile),
+    mutationFn: (profile: PerfilDeportivo) => sportProfileRepository.save(uid, profile),
     onSuccess: (_result, profile) => queryClient.setQueryData(sportProfileQueryKey(uid), profile),
   });
 }

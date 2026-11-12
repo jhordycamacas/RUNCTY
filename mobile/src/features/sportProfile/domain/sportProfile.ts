@@ -31,7 +31,7 @@ export const sportProfileSchema = z.object({
   preferredDistanceKm: z.number().min(DISTANCE_RANGE_KM.min).max(DISTANCE_RANGE_KM.max),
 });
 
-export type SportProfile = z.output<typeof sportProfileSchema>;
+export type PerfilDeportivo = z.output<typeof sportProfileSchema>;
 
 const PACE_PATTERN = /^(\d{1,2}):([0-5]\d)$/;
 
@@ -83,7 +83,7 @@ export const sportProfileFormSchema = z
       }, `La distancia debe estar entre ${DISTANCE_RANGE_KM.min} y ${DISTANCE_RANGE_KM.max} km.`),
   })
   .transform(
-    (v): SportProfile => ({
+    (v): PerfilDeportivo => ({
       level: v.level as SportLevel,
       goals: v.goals.filter(isGoal),
       usualPaceSecPerKm: parsePace(v.pace) ?? 0,
@@ -95,7 +95,7 @@ export type SportProfileFormValues = z.input<typeof sportProfileFormSchema>;
 
 export const EMPTY_SPORT_PROFILE_FORM: SportProfileFormValues = { level: '', goals: [], pace: '', distance: '' };
 
-export function toSportProfileForm(profile: SportProfile): SportProfileFormValues {
+export function toSportProfileForm(profile: PerfilDeportivo): SportProfileFormValues {
   return {
     level: profile.level,
     goals: [...profile.goals],
@@ -105,9 +105,9 @@ export function toSportProfileForm(profile: SportProfile): SportProfileFormValue
 }
 
 export interface SportProfileRepository {
-  get(uid: string): Promise<SportProfile | null>;
+  get(uid: string): Promise<PerfilDeportivo | null>;
   /** Creates or replaces the profile (RF-01-9, RF-01-11). */
-  save(uid: string, profile: SportProfile): Promise<void>;
+  save(uid: string, profile: PerfilDeportivo): Promise<void>;
   /** RF-01-12. Does not affect the account. */
   remove(uid: string): Promise<void>;
 }

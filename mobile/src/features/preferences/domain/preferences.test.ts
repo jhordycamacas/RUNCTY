@@ -3,10 +3,10 @@ import {
   fontScaleMultiplier,
   parsePreferences,
   preferencesSchema,
-  type Preferences,
+  type PreferenciaUsuario,
 } from './preferences';
 
-const custom: Preferences = {
+const custom: PreferenciaUsuario = {
   language: 'es',
   fontScale: 'large',
   appearance: 'dark',

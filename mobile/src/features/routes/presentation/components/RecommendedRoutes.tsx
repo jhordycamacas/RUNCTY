@@ -6,7 +6,7 @@ import { AppText, Card, EmptyState, LoadingView } from '@/core/ui';
 
 import { useCityRoutes } from '../../application/useRoutes';
 import { sortRoutesForSlot } from '../../domain/catalog';
-import type { Route } from '../../domain/route';
+import type { Ruta } from '../../domain/route';
 import { useRunnerCity } from '../hooks/useRunnerCity';
 import { useSlotSelection } from '../hooks/useSlotSelection';
 import { RouteCard } from './RouteCard';
@@ -17,7 +17,7 @@ export interface RecommendedRoutesProps {
   limit?: number;
 }
 
-const NO_ROUTES: Route[] = [];
+const NO_ROUTES: Ruta[] = [];
 
 /** Home section: the safest routes of the runner's city for the current or next slot. */
 export function RecommendedRoutes({ onOpenRoute, limit = 3 }: RecommendedRoutesProps) {

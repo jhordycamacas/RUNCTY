@@ -1,4 +1,4 @@
-export interface City {
+export interface Ciudad {
   id: string;
   name: string;
   province?: string;
@@ -6,7 +6,7 @@ export interface City {
 
 export interface CityRepository {
   /** Active cities (zones excluded), sorted by name. */
-  listActive(): Promise<City[]>;
+  listActive(): Promise<Ciudad[]>;
 }
 
 export interface CityDocData {
@@ -20,7 +20,7 @@ export interface CityDocData {
  * Sign-up and profile pickers list cities only: zones are subdivisions used
  * by routes. Docs without `type` predate zones and are cities.
  */
-export function toPickerCities(docs: { id: string; data: CityDocData }[]): City[] {
+export function toPickerCities(docs: { id: string; data: CityDocData }[]): Ciudad[] {
   return docs
     .filter(({ data }) => data.type !== 'zone')
     .map(({ id, data }) => ({

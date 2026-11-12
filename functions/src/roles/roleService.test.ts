@@ -9,7 +9,7 @@ import {
   setUserRole,
   updateRole,
   type RoleCaller,
-  type RoleRecord,
+  type Rol,
   type RolesDeps,
 } from './roleService';
 
@@ -17,7 +17,7 @@ const ADMIN: RoleCaller = { uid: 'admin-1', isAdmin: true, permissions: [...ALL_
 /** A delegate: holds roles.manage without being an admin. */
 const MANAGER: RoleCaller = { uid: 'mgr-1', isAdmin: false, permissions: ['roles.manage', 'users.read'] };
 
-function fakeDeps(roles: Record<string, RoleRecord> = {}, overrides: Partial<RolesDeps> = {}): RolesDeps {
+function fakeDeps(roles: Record<string, Rol> = {}, overrides: Partial<RolesDeps> = {}): RolesDeps {
   return {
     getRole: vi.fn(async (id: string) => roles[id] ?? null),
     createRole: vi.fn(async () => undefined),
@@ -34,7 +34,7 @@ function fakeDeps(roles: Record<string, RoleRecord> = {}, overrides: Partial<Rol
   };
 }
 
-const SYSTEM: Record<string, RoleRecord> = {
+const SYSTEM: Record<string, Rol> = {
   runner: { name: 'Corredor', description: '', permissions: [], system: true },
   admin: { name: 'Administrador', description: '', permissions: [...ALL_PERMISSIONS], system: true },
 };
@@ -161,7 +161,7 @@ describe('setUserRole', () => {
   const roles = {
     ...SYSTEM,
     support: { name: 'Soporte', description: '', permissions: ['admin.access', 'users.read'], system: false },
-  } satisfies Record<string, RoleRecord>;
+  } satisfies Record<string, Rol>;
 
   it('sets the claims first and then mirrors the role on the user doc', async () => {
     const order: string[] = [];
@@ -214,7 +214,7 @@ describe('privilege escalation guards (SEC-02)', () => {
     ...SYSTEM,
     support: { name: 'Soporte', description: '', permissions: ['users.read'], system: false },
     ops: { name: 'Ops', description: '', permissions: ['roles.manage', 'users.read'], system: false },
-  } satisfies Record<string, RoleRecord>;
+  } satisfies Record<string, Rol>;
 
   it('only an admin can create a role that includes roles.manage', async () => {
     const deps = fakeDeps(roles);

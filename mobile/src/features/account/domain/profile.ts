@@ -1,7 +1,7 @@
 import type { PersonalData } from '@/features/auth/domain';
 
 /** `users/{uid}` as the account screens need it. */
-export interface UserProfile {
+export interface Usuario {
   uid: string;
   email: string;
   firstName: string;
@@ -13,7 +13,7 @@ export interface UserProfile {
 }
 
 export interface ProfileRepository {
-  get(uid: string): Promise<UserProfile | null>;
+  get(uid: string): Promise<Usuario | null>;
   /** An empty `idNumber` removes it from the profile. */
   updatePersonalData(uid: string, data: PersonalData): Promise<void>;
 }

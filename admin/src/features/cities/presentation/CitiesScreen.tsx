@@ -8,7 +8,7 @@ import { ConfirmDialog } from '@/core/ui/ConfirmDialog';
 import { Alert, Badge, LoadingText, PageHeader } from '@/core/ui/feedback';
 
 import { useCities, useDeleteCity } from '../application/useCities';
-import { coverageLabel, type City, type CityCoverage } from '../domain/city';
+import { coverageLabel, type Ciudad, type CityCoverage } from '../domain/city';
 import { CityForm } from './CityForm';
 
 const COVERAGE_TONE: Record<CityCoverage, 'success' | 'warning' | 'neutral'> = {
@@ -17,14 +17,14 @@ const COVERAGE_TONE: Record<CityCoverage, 'success' | 'warning' | 'neutral'> = {
   suspended: 'warning',
 };
 
-type Editing = { mode: 'create' } | { mode: 'edit'; city: City } | null;
+type Editing = { mode: 'create' } | { mode: 'edit'; city: Ciudad } | null;
 
 /** RF-04-1..4: cities and zones of operation. */
 export function CitiesScreen() {
   const cities = useCities();
   const remove = useDeleteCity();
   const [editing, setEditing] = useState<Editing>(null);
-  const [toDelete, setToDelete] = useState<City | null>(null);
+  const [toDelete, setToDelete] = useState<Ciudad | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   // Cities first, each followed by its zones.

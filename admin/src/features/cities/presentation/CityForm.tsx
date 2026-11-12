@@ -16,15 +16,15 @@ import {
   emptyCityForm,
   parseCityForm,
   suggestCityId,
-  type City,
+  type Ciudad,
   type CityFormErrors,
   type CityFormValues,
 } from '../domain/city';
 import { CityExistsError } from '../infrastructure/citiesRepository';
 
 interface CityFormProps {
-  city?: City;
-  cities: City[];
+  city?: Ciudad;
+  cities: Ciudad[];
   onDone(message: string): void;
   onCancel(): void;
 }

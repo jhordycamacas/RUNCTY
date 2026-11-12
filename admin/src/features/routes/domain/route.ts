@@ -30,7 +30,7 @@ interface RouteFactor {
 }
 
 /** Computed by the backend per time slot id. */
-interface RouteSlotSafety {
+interface IndiceSeguridadRuta {
   level: SafetyLevel;
   score: number;
   startTime: string;
@@ -39,7 +39,7 @@ interface RouteSlotSafety {
   factors: RouteFactor[];
 }
 
-export type RouteSafety = Record<string, RouteSlotSafety>;
+export type RouteSafety = Record<string, IndiceSeguridadRuta>;
 
 /** Payload of createRoute / updateRoute (updateRoute also sends `id`). */
 export interface RouteInput {
@@ -55,7 +55,7 @@ export interface RouteInput {
   active: boolean;
 }
 
-export interface Route extends RouteInput {
+export interface Ruta extends RouteInput {
   id: string;
   segmentCount: number;
   safety: RouteSafety;
@@ -121,7 +121,7 @@ export const emptyRouteForm = (): RouteFormValues => ({
   active: true,
 });
 
-export function routeToForm(route: Route): RouteFormValues {
+export function routeToForm(route: Ruta): RouteFormValues {
   return {
     name: route.name,
     cityId: route.cityId,
@@ -244,7 +244,7 @@ const normalize = (text: string) =>
     .trim();
 
 /** RF-05-7: list filter by city, difficulty and name/description text. */
-export function filterRoutes(routes: readonly Route[], filters: RouteFilters): Route[] {
+export function filterRoutes(routes: readonly Ruta[], filters: RouteFilters): Ruta[] {
   const text = normalize(filters.text);
   return routes.filter(
     (r) =>
@@ -254,7 +254,7 @@ export function filterRoutes(routes: readonly Route[], filters: RouteFilters): R
   );
 }
 
-export interface SlotSafetyEntry extends RouteSlotSafety {
+export interface SlotSafetyEntry extends IndiceSeguridadRuta {
   slotId: string;
 }
 

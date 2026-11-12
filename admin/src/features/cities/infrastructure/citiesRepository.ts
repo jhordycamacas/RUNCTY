@@ -4,7 +4,7 @@ import { collection, doc, getDoc, getDocs, serverTimestamp, setDoc, updateDoc, t
 
 import { COLLECTIONS, callFunction, firestore } from '@/core/firebase/client';
 
-import { COVERAGES, type City, type CityCoverage, type CityData } from '../domain/city';
+import { COVERAGES, type Ciudad, type CityCoverage, type CityData } from '../domain/city';
 
 export interface CityOption {
   id: string;
@@ -14,7 +14,7 @@ export interface CityOption {
 const num = (value: unknown): number => (typeof value === 'number' ? value : 0);
 
 /** Tolerant read: docs created before zones existed have no `type`. */
-function toCity(id: string, data: DocumentData): City {
+function toCity(id: string, data: DocumentData): Ciudad {
   const location = (data.location ?? {}) as Record<string, unknown>;
   const coverage = COVERAGES.includes(data.coverage) ? (data.coverage as CityCoverage) : 'planned';
   return {
@@ -30,7 +30,7 @@ function toCity(id: string, data: DocumentData): City {
 }
 
 /** Public catalog: every city and zone, sorted by name. */
-export async function listCities(): Promise<City[]> {
+export async function listCities(): Promise<Ciudad[]> {
   const snapshot = await getDocs(collection(firestore(), COLLECTIONS.cities));
   return snapshot.docs.map((d) => toCity(d.id, d.data())).sort((a, b) => a.name.localeCompare(b.name, 'es'));
 }

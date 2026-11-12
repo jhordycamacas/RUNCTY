@@ -9,14 +9,14 @@ import {
   SURFACES,
   type Difficulty,
   type LatLng,
-  type Route,
+  type Ruta,
   type RouteInput,
   type RouteSafety,
   type Severity,
   type Surface,
 } from '../domain/route';
-import type { RiskFactor, RiskFactorInput, TimeSlot, TimeSlotInput } from '../domain/schedule';
-import type { Segment, SegmentInput } from '../domain/segment';
+import type { FactorDeRiesgo, RiskFactorInput, FranjaHoraria, TimeSlotInput } from '../domain/schedule';
+import type { Tramo, SegmentInput } from '../domain/segment';
 
 /**
  * Reads are direct Firestore reads (admins with `routes.manage` also see
@@ -39,7 +39,7 @@ function toLatLngs(value: unknown): LatLng[] {
   return Array.isArray(value) ? value.map((p) => ({ lat: num(record(p).lat), lng: num(record(p).lng) })) : [];
 }
 
-function toRoute(id: string, data: DocumentData): Route {
+function toRoute(id: string, data: DocumentData): Ruta {
   return {
     id,
     name: str(data.name, id),
@@ -58,38 +58,38 @@ function toRoute(id: string, data: DocumentData): Route {
   };
 }
 
-function toSegment(id: string, data: DocumentData): Segment {
+function toSegment(id: string, data: DocumentData): Tramo {
   return {
     id,
     name: str(data.name, id),
     order: num(data.order, Number.MAX_SAFE_INTEGER),
     coordinates: toLatLngs(data.coordinates),
     lengthM: num(data.lengthM),
-    safety: record(data.safety) as Segment['safety'],
+    safety: record(data.safety) as Tramo['safety'],
   };
 }
 
 const routeRef = (routeId: string) => doc(firestore(), COLLECTIONS.routes, routeId);
 
-export async function listRoutes(): Promise<Route[]> {
+export async function listRoutes(): Promise<Ruta[]> {
   const snapshot = await getDocs(collection(firestore(), COLLECTIONS.routes));
   return snapshot.docs.map((d) => toRoute(d.id, d.data())).sort((a, b) => a.name.localeCompare(b.name, 'es'));
 }
 
-export async function getRoute(routeId: string): Promise<Route | null> {
+export async function getRoute(routeId: string): Promise<Ruta | null> {
   const snap = await getDoc(routeRef(routeId));
   return snap.exists() ? toRoute(snap.id, snap.data()) : null;
 }
 
-export async function listSegments(routeId: string): Promise<Segment[]> {
+export async function listSegments(routeId: string): Promise<Tramo[]> {
   const snapshot = await getDocs(collection(routeRef(routeId), ROUTE_SUBCOLLECTIONS.segments));
   return snapshot.docs.map((d) => toSegment(d.id, d.data())).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
 }
 
-export async function listTimeSlots(routeId: string): Promise<TimeSlot[]> {
+export async function listTimeSlots(routeId: string): Promise<FranjaHoraria[]> {
   const snapshot = await getDocs(collection(routeRef(routeId), ROUTE_SUBCOLLECTIONS.timeSlots));
   return snapshot.docs
-    .map((d): TimeSlot => {
+    .map((d): FranjaHoraria => {
       const data = d.data();
       return {
         id: d.id,
@@ -103,11 +103,11 @@ export async function listTimeSlots(routeId: string): Promise<TimeSlot[]> {
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 }
 
-export async function listRiskFactors(routeId: string, segmentId: string): Promise<RiskFactor[]> {
+export async function listRiskFactors(routeId: string, segmentId: string): Promise<FactorDeRiesgo[]> {
   const snapshot = await getDocs(
     collection(routeRef(routeId), ROUTE_SUBCOLLECTIONS.segments, segmentId, ROUTE_SUBCOLLECTIONS.riskFactors),
   );
-  return snapshot.docs.map((d): RiskFactor => {
+  return snapshot.docs.map((d): FactorDeRiesgo => {
     const data = d.data();
     return {
       id: d.id,

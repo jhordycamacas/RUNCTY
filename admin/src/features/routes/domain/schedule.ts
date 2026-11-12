@@ -83,7 +83,7 @@ function checkWindow(startTime: string, endTime: string): WindowErrors {
 // ---------- Time slots ----------
 
 /** `routes/{routeId}/timeSlots/{id}`. */
-export interface TimeSlot {
+export interface FranjaHoraria {
   id: string;
   label?: string;
   startTime: string;
@@ -92,7 +92,7 @@ export interface TimeSlot {
   validTo?: string;
 }
 
-export type TimeSlotInput = Omit<TimeSlot, 'id'>;
+export type TimeSlotInput = Omit<FranjaHoraria, 'id'>;
 
 export interface TimeSlotFormValues {
   label: string;
@@ -106,7 +106,7 @@ export type TimeSlotFormErrors = Partial<Record<keyof TimeSlotFormValues, string
 
 export const emptyTimeSlotForm = (): TimeSlotFormValues => ({ label: '', startTime: '', endTime: '', validFrom: '', validTo: '' });
 
-export const timeSlotToForm = (slot: TimeSlot): TimeSlotFormValues => ({
+export const timeSlotToForm = (slot: FranjaHoraria): TimeSlotFormValues => ({
   label: slot.label ?? '',
   startTime: slot.startTime,
   endTime: slot.endTime,
@@ -151,9 +151,9 @@ const toWindow = (startTime: string, endTime: string) => ({
 });
 
 /** Client-side copy of the `time-slot-overlap` check, to name the clashing slot. */
-export function findOverlappingSlot<T extends Pick<TimeSlot, 'id' | 'startTime' | 'endTime'>>(
+export function findOverlappingSlot<T extends Pick<FranjaHoraria, 'id' | 'startTime' | 'endTime'>>(
   slots: readonly T[],
-  candidate: Pick<TimeSlot, 'startTime' | 'endTime'>,
+  candidate: Pick<FranjaHoraria, 'startTime' | 'endTime'>,
   ignoreId?: string,
 ): T | undefined {
   const window = toWindow(candidate.startTime, candidate.endTime);
@@ -167,7 +167,7 @@ export function findOverlappingSlot<T extends Pick<TimeSlot, 'id' | 'startTime' 
 // ---------- Risk factors ----------
 
 /** `routes/{routeId}/segments/{segmentId}/riskFactors/{id}`. */
-export interface RiskFactor {
+export interface FactorDeRiesgo {
   id: string;
   type: string;
   severity: Severity;
@@ -202,7 +202,7 @@ export const emptyRiskFactorForm = (): RiskFactorFormValues => ({
   endTime: '',
 });
 
-export const riskFactorToForm = (factor: RiskFactor): RiskFactorFormValues => ({
+export const riskFactorToForm = (factor: FactorDeRiesgo): RiskFactorFormValues => ({
   type: (RISK_FACTOR_TYPES as readonly string[]).includes(factor.type) ? (factor.type as RiskFactorType) : 'other',
   severity: factor.severity,
   description: factor.description,
