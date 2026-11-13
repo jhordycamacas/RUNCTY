@@ -45,9 +45,28 @@ FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:909
 
 The command refuses to run unless the project id starts with `demo-` and both emulator hosts are
 `127.0.0.1`, `localhost`, `::1` or the Docker service `firebase`. The password is public: never
-create this account in a real project. From the repo root, `npm run seed` does the same.
+create this account in a real project. From the repo root (with `backend/.venv` active),
+`npm run seed` does the same, and `npm run api` starts the API against the local emulators.
 
-Container: `docker build -t runcty-api backend` then
+## Docker
+
+From the repo root, `docker compose up -d --build` starts the Firebase emulators, the API and
+the old admin panel; `docker compose run --rm seed` (or `docker compose up seed`) loads the demo
+data once the emulators are healthy.
+
+| Service | Purpose | Address (127.0.0.1 only) |
+| --- | --- | --- |
+| `firebase` | Auth, Firestore, Functions, Storage emulators and UI | `:4000` (UI), `:9099`, `:8080`, `:9199` |
+| `api` | this API against the emulators | `http://localhost:8000/api/v1` |
+| `seed` | one-shot `python manage.py seed` in the `api` image | none |
+
+Compose passes the environment of `api` and `seed` itself: `DJANGO_DEBUG=true`, the project
+`demo-runcty` and the emulator hosts `firebase:*`. Debug mode is what allows emulator hosts, so
+that block is for local development only. The services run with every Linux capability dropped,
+`no-new-privileges` and memory, CPU and process limits; `api` and `seed` also have a read-only
+root filesystem. Base images are pinned by tag and digest.
+
+Standalone image: `docker build -t runcty-api backend` then
 `docker run --env-file <file outside the repo> -p 8000:8000 runcty-api`. The image runs
 gunicorn as a non-root user and contains no configuration or credentials.
 

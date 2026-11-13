@@ -1,5 +1,6 @@
 # Build context: this directory (`docker build backend`).
-FROM python:3.10.19-slim-bookworm
+# Pinned by tag and by digest (the multi-arch index); bump both together.
+FROM python:3.10.19-slim-bookworm@sha256:23f63358922e79a794f71be8f3723c84e5ccca9638af3f74456dc73d6184499e
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

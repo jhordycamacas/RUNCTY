@@ -2,7 +2,8 @@
 # Functions built in. The same image runs the seed script. Build context: repo root.
 
 # firebase-tools requires Java 21+ (Debian trixie ships it).
-FROM node:22-trixie-slim
+# Pinned by tag and by digest (the multi-arch index); bump both together.
+FROM node:22-trixie-slim@sha256:68c76cfad89921b927eae28ba21407475e29d0ce450afcdbe70c1532db042b64
 RUN apt-get update \
   && apt-get install -y --no-install-recommends openjdk-21-jre-headless \
   && rm -rf /var/lib/apt/lists/*
