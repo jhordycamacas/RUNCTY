@@ -3,6 +3,7 @@ import { ApiError } from '../../core/errors/api-error';
 import { RoutesListPage } from './routes-list.page';
 import {
   FakeBackend,
+  RUNNER,
   catalogRoutes,
   fakeBackend,
   provideFakeBackend,
@@ -40,7 +41,7 @@ describe('RoutesListPage', () => {
   });
 
   it('asks the runner to complete the profile when there is no city', async () => {
-    backend.profile = { ...(backend.profile as object), cityId: null } as never;
+    backend.profile = { ...RUNNER, cityId: '' };
 
     await create();
 

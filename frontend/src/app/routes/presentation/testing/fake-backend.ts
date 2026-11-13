@@ -3,6 +3,8 @@ import { provideRouter } from '@angular/router';
 import { Profile, ProfileRepository } from '../../../account/domain/profile';
 import { CityRecord, CityRepository } from '../../../cities/domain/city';
 import { AuthService } from '../../../core/auth/auth.service';
+import { FirebaseAuthGateway } from '../../../core/auth/firebase-auth.gateway';
+import { FakeFirebaseAuthGateway } from '../../../core/auth/testing/fake-firebase-auth.gateway';
 import { PreferencesStore } from '../../../preferences/application/preferences.store';
 import { Preferences, defaultPreferences } from '../../../preferences/domain/preferences';
 import { Route, RouteDetail, RouteRepository } from '../../domain/route';
@@ -51,7 +53,19 @@ const answer = async <T>(value: T | Error | Promise<T>): Promise<T> => {
 export function provideFakeBackend(backend: FakeBackend): (Provider | EnvironmentProviders)[] {
   return [
     provideRouter([]),
-    { provide: AuthService, useValue: { session: signal({ uid: 'u1' }) } },
+    {
+      provide: AuthService,
+      useValue: {
+        session: signal({
+          uid: 'u1',
+          email: RUNNER.email,
+          emailVerified: true,
+          role: 'runner',
+          perms: [],
+        }),
+      },
+    },
+    { provide: FirebaseAuthGateway, useValue: new FakeFirebaseAuthGateway() },
     { provide: ProfileRepository, useValue: { get: () => answer(backend.profile) } },
     { provide: CityRepository, useValue: { list: () => answer(backend.cities) } },
     {
