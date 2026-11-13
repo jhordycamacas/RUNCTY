@@ -38,7 +38,7 @@ The course engineer asked for a single Angular + Ionic frontend for web and mobi
 
 - [x] **S1 — Backend: cities, routes and safety index (old T3).** Port `functions/src/{cities,routes}` and their specs to Django (pytest), following the API contract in the previous task file. Branch `feat/backend-cities-routes`.
 - [x] **S2 — Backend infrastructure (old T4, first half).** Python seed (Django management command) replacing `scripts/seed-emulator.ts`, Docker Compose with the API service, Firebase emulator config. `functions/`, `admin/`, `frontend/mobile` and the current Firestore rules stay untouched until S6, because the old clients still use them.
-- [ ] **S3 — Frontend scaffold.** `frontend/` with Angular 22 + Ionic + Capacitor; design tokens and themes; `/app` and `/admin` areas; API client with Bearer token and error-reason mapping; Firebase Auth sign-in; guards; test setup.
+- [x] **S3 — Frontend scaffold.** `frontend/` with Angular 22 + Ionic + Capacitor; design tokens and themes; `/app` and `/admin` areas; API client with Bearer token and error-reason mapping; Firebase Auth sign-in; guards; test setup.
 - [ ] **S4 — Runner area.** Port auth, account, preferences, sport profile, cities and routes from `frontend/mobile` to Angular + Ionic.
 - [ ] **S5 — Admin area.** Users, roles, cities, routes (segments, time slots, risk factors) with the pending panel UX fixes.
 - [ ] **S6 — Cleanup, Android and docs.** Delete `frontend/mobile`, `admin/` and `functions/` (with the TypeScript seed); switch Firestore rules to deny-all; verify web build and APK; update `CONTEXTO.md` (section 9 and 16), `README.md`, `docs/manual-instalacion-android.md`, root scripts and Docker; push.
@@ -65,6 +65,16 @@ Forecast far above 400 authored changed lines. One work-unit commit per task on 
 | --- | --- | --- | --- |
 | S1 | delegated writer (2+ non-trivial files) | `1caa6bd`, `6d5a2e2`, `57b92b4`, `48c79d6` | Re-run by the parent: pytest 720 passed (baseline 382), `ruff check` clean. Writer also reported `ruff format --check` clean and `manage.py check` clean. RED observed first in each step. All specs mapped (safety 13, time 9, geo 2, reorder 5, inputs 13, routeService 30, deleteCity 5). |
 | S2 | delegated writer (2+ non-trivial files) | `5da6a1f`, `630a903` | pytest 748 passed (baseline 720), `ruff check` and `ruff format --check` clean, `manage.py check` clean, `docker compose config` valid. RED observed first (collection error, module missing). Real run against the Auth and Firestore emulators: the Python seed twice (idempotent) and the TypeScript seed on a wiped emulator produce an identical dump of 52 documents (timestamps and the admin uid masked). Docker daemon was off: images were NOT built and the `api` and `seed` containers were NOT run. |
+| S3 | delegated writer (2+ non-trivial files) | `4488be5`, `2b9d074`, `c690d1f`, `0d3a951`, Android platform commit | `ng test` 51 passed (6 files), `ng lint` clean, `ng build` OK (initial 907 kB raw, 210 kB transfer), `cap sync android` OK, `gradlew assembleDebug` BUILD SUCCESSFUL with JDK 21, `app-debug.apk` 5.1 MB. Backend: pytest 753 passed (baseline 748, +5 CORS tests), `ruff check` and `ruff format --check` clean. `ng serve` served index.html (HTTP 200). RED observed first only for the API error mapper; the other specs were written together with their code. Not done: no browser/e2e run of login against the emulators (browser tool unavailable). |
+
+## Decisions taken in S3
+
+- Angular 22 zoneless (CLI default), Ionic 9 (`@ionic/angular` 9.0.11: components import from `@ionic/angular`, there is no `/standalone` subpath), Vitest through `ng test`, ESLint via `angular-eslint`. Angular project name `runcty-frontend`; build output `dist/runcty-frontend/browser` (Capacitor `webDir`).
+- `npm audit` reports 4 high advisories in `@grpc/grpc-js` through `firebase` (Firestore, unused on the client). `@ionic/cli` is not a dependency (it brought critical advisories); use the global `ionic`.
+- Environments: development derives hosts from `location.hostname` (works with live reload on a phone); `environment.prod.ts` is placeholders.
+- CORS: Capacitor origins are always allowed in `settings.py`; `localhost:8100` and `:4200` only with `DJANGO_DEBUG=true`.
+- Guards take no arguments so they serve as `canMatch` (lazy area bundles are not downloaded without access) and `canActivate`. Admin sections `usuarios`, `roles`, `ciudades`, `rutas` are placeholders; `/admin` redirects to the first permitted one (UXN-12).
+- Fonts are TTF (only format available locally), about 1.3 MB in the APK; convert to WOFF2 later if size matters.
 
 ## Decisions taken in S2
 
