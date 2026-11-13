@@ -1,3 +1,4 @@
+import pytest
 from django.db import connection
 from rest_framework.test import APIClient
 
@@ -28,6 +29,22 @@ def test_cors_allows_only_listed_origins(client):
 
     assert allowed["Access-Control-Allow-Origin"] == "https://panel.example.com"
     assert "Access-Control-Allow-Origin" not in other
+
+
+@pytest.mark.parametrize(
+    "origin", ["https://localhost", "http://localhost", "capacitor://localhost"]
+)
+def test_cors_allows_the_capacitor_app_origins(client, origin):
+    response = client.get("/api/v1/health", HTTP_ORIGIN=origin)
+
+    assert response["Access-Control-Allow-Origin"] == origin
+
+
+@pytest.mark.parametrize("origin", ["http://localhost:8100", "http://localhost:4200"])
+def test_cors_rejects_the_dev_servers_outside_debug(client, origin):
+    response = client.get("/api/v1/health", HTTP_ORIGIN=origin)
+
+    assert "Access-Control-Allow-Origin" not in response
 
 
 def test_cors_preflight_allows_the_authorization_header(client):

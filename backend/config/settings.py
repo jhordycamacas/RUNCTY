@@ -102,8 +102,15 @@ if NUM_PROXIES:
 # Bearer tokens only: there are no cookies, so no CSRF middleware (security.W003).
 SILENCED_SYSTEM_CHECKS = ["security.W003"]
 
-# Explicit allowlist; an empty list allows no cross-origin browser client.
-CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+# Explicit allowlist from the environment, plus the origins of the Capacitor Android app (its
+# WebView serves the frontend from them) and, in debug only, the Ionic and Angular dev servers.
+CAPACITOR_ORIGINS = ["https://localhost", "http://localhost", "capacitor://localhost"]
+DEV_SERVER_ORIGINS = ["http://localhost:8100", "http://localhost:4200"] if DEBUG else []
+CORS_ALLOWED_ORIGINS = [
+    *env.list("CORS_ALLOWED_ORIGINS", default=[]),
+    *CAPACITOR_ORIGINS,
+    *DEV_SERVER_ORIGINS,
+]
 
 # --- REST framework --------------------------------------------------------
 
