@@ -53,6 +53,7 @@ ROLE_REPOSITORY = "apps.roles.infrastructure.firestore_role_repository.Firestore
 ROLE_MEMBERS = "apps.roles.infrastructure.firestore_role_members.FirestoreRoleMembers"
 CITY_REPOSITORY = "apps.cities.infrastructure.firestore_city_repository.FirestoreCityRepository"
 CITY_USAGE = "apps.cities.infrastructure.firestore_city_usage.FirestoreCityUsage"
+ROUTE_REPOSITORY = "apps.routes.infrastructure.firestore_route_repository.FirestoreRouteRepository"
 USER_REPOSITORY = "apps.users.infrastructure.firestore_user_repository.FirestoreUserRepository"
 SPORT_PROFILE_REPOSITORY = (
     "apps.users.infrastructure.firestore_private_documents.FirestoreSportProfileRepository"

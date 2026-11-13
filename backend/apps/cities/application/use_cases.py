@@ -4,13 +4,13 @@ Authority is the `cities.manage` permission of the verified token, checked by th
 presentation layer before any of the mutations below.
 """
 
-import unicodedata
 from collections.abc import Mapping
 from dataclasses import dataclass
 
 from apps.cities.application.ports import CityRepository, CityUsage
 from apps.cities.domain.models import Ciudad, parse_city_id, parse_coverage
 from apps.shared.domain.errors import DomainError, ErrorKind
+from apps.shared.domain.text import sort_key
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,16 +41,10 @@ def _assert_valid_parent(city: Ciudad, cities: CityRepository) -> None:
         )
 
 
-def _sort_key(city: Ciudad) -> tuple[str, str]:
-    """Name without case or accents, like the clients sorted it (`localeCompare` in Spanish)."""
-    plain = unicodedata.normalize("NFD", city.name.casefold())
-    return "".join(ch for ch in plain if not unicodedata.combining(ch)), city.id
-
-
 def list_cities(coverage: object, cities: CityRepository) -> list[Ciudad]:
     """The public catalogue, sorted by name; `coverage=None` lists every city and zone."""
     found = cities.list(None if coverage is None else parse_coverage(coverage))
-    return sorted(found, key=_sort_key)
+    return sorted(found, key=lambda city: (sort_key(city.name), city.id))
 
 
 def create_city(raw: Mapping[str, object], deps: CitiesDeps) -> Ciudad:

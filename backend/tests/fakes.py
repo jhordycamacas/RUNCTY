@@ -1,11 +1,14 @@
 """In-memory adapters so the suite needs no network, emulators or credentials."""
 
+import copy
 import time
 from dataclasses import replace
 
 from apps.cities.domain.models import Ciudad
 from apps.roles.application.ports import RoleChange
 from apps.roles.domain.models import Rol
+from apps.routes.application.ports import Marker, WriteOp
+from apps.routes.domain.models import FactorDeRiesgo, FranjaHoraria, RouteState, Ruta, Tramo
 from apps.shared.application.ports import AuthUserNotFound, TokenRejected
 from apps.shared.domain.models import Principal
 from apps.shared.domain.permissions import ADMIN_ROLE
@@ -93,7 +96,8 @@ class FakeFirebase:
         self.private: dict[tuple[str, str], dict] = {}  # `users/{uid}/private/{id}` documents
         self.roles: dict[str, Rol] = {}
         self.cities: dict[str, Ciudad] = {}
-        self.docs: dict[str, dict] = {}  # other Firestore documents by path (`routes/...`)
+        self.docs: dict[str, dict] = {}  # the `routes/...` documents by path
+        self.id_counter = 0
         self.calls: list[tuple] = []  # side effects, in order
         self.failing: set[str] = set()  # operation names that raise
 
@@ -243,6 +247,96 @@ class InMemoryCityUsage:
 
     def has_zones(self, city_id: str) -> bool:
         return any(city.parent_city_id == city_id for city in self._firebase.cities.values())
+
+
+class InMemoryRouteRepository:
+    """The route aggregate over `FakeFirebase.docs`, keyed by Firestore path."""
+
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        self._firebase = firebase or FIREBASE
+        self._docs = self._firebase.docs
+
+    def new_id(self) -> str:
+        self._firebase.id_counter += 1
+        return f"gen-{self._firebase.id_counter}"
+
+    def get(self, route_id: str) -> Ruta | None:
+        document = self._docs.get(f"routes/{route_id}")
+        return None if document is None else Ruta.from_document(route_id, document)
+
+    def _children(self, prefix: str) -> list[tuple[str, dict]]:
+        """The documents directly under a collection path, as (id, document)."""
+        depth = prefix.count("/") + 1
+        return [
+            (path.rsplit("/", 1)[1], document)
+            for path, document in sorted(self._docs.items())
+            if path.startswith(prefix + "/") and path.count("/") == depth
+        ]
+
+    def state(self, route_id: str) -> RouteState | None:
+        if f"routes/{route_id}" not in self._docs:
+            return None
+        base = f"routes/{route_id}"
+        segments = self._children(f"{base}/segments")
+        factors = {}
+        for segment_id, _ in segments:
+            parsed = (
+                FactorDeRiesgo.from_document(factor_id, document)
+                for factor_id, document in self._children(
+                    f"{base}/segments/{segment_id}/riskFactors"
+                )
+            )
+            factors[segment_id] = [factor for factor in parsed if factor is not None]
+        return RouteState(
+            segments=[Tramo.from_document(i, document) for i, document in segments],
+            slots=[
+                FranjaHoraria.from_document(i, document)
+                for i, document in self._children(f"{base}/timeSlots")
+            ],
+            factors=factors,
+        )
+
+    def commit(self, ops: list[WriteOp]) -> None:
+        self._apply(ops)
+
+    def mutate(self, route_id: str, plan) -> None:
+        self._apply(plan(self.state(route_id)))
+
+    def delete_tree(self, route_id: str) -> None:
+        base = f"routes/{route_id}"
+        for path in [p for p in self._docs if p == base or p.startswith(base + "/")]:
+            del self._docs[path]
+
+    def _apply(self, ops: list[WriteOp]) -> None:
+        """All or nothing, like a Firestore batch or transaction."""
+        documents = copy.deepcopy(self._docs)
+        for op in ops:
+            if op.op == "delete":
+                documents.pop(op.path, None)
+                continue
+            data = {k: v for k, v in op.data.items() if v is not Marker.DELETE_FIELD}
+            data = {
+                k: "SERVER_TIMESTAMP" if v is Marker.SERVER_TIMESTAMP else v
+                for k, v in data.items()
+            }
+            if op.op == "set":
+                documents[op.path] = data
+            else:
+                documents[op.path].update(data)  # KeyError for a missing document, like NotFound
+                for key, value in op.data.items():
+                    if value is Marker.DELETE_FIELD:
+                        documents[op.path].pop(key, None)
+        self._docs.clear()
+        self._docs.update(documents)
+
+    # Last: the name shadows the builtin `list` for the annotations that follow it.
+    def list(self, city_id: str | None = None) -> list[Ruta]:
+        routes = [
+            Ruta.from_document(path.split("/")[1], document)
+            for path, document in sorted(self._docs.items())
+            if path.startswith("routes/") and path.count("/") == 1
+        ]
+        return [route for route in routes if city_id is None or route.city_id == city_id]
 
 
 class InMemoryUserRepository:
