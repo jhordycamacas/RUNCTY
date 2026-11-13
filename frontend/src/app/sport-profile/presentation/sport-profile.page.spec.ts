@@ -5,6 +5,8 @@ import { provideRouter } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { TextField } from '../../shared/ui/text-field';
+import { PreferencesStore } from '../../preferences/application/preferences.store';
+import { Preferences, defaultPreferences } from '../../preferences/domain/preferences';
 import { SportProfile, SportProfileRepository } from '../domain/sport-profile';
 import { SportProfilePage } from './sport-profile.page';
 
@@ -22,6 +24,7 @@ describe('SportProfilePage', () => {
   let removed: number;
   let confirm: ReturnType<typeof vi.fn<ConfirmDialog['confirm']>>;
   let saveFailure: unknown;
+  let preferences: ReturnType<typeof signal<Preferences>>;
 
   const text = () => fixture.nativeElement.textContent as string;
   const page = () => fixture.componentInstance;
@@ -45,6 +48,7 @@ describe('SportProfilePage', () => {
     saved = [];
     removed = 0;
     saveFailure = null;
+    preferences = signal(defaultPreferences());
     confirm = vi.fn<ConfirmDialog['confirm']>().mockResolvedValue(true);
     const repository: SportProfileRepository = {
       get: async () => remote,
@@ -63,6 +67,7 @@ describe('SportProfilePage', () => {
         { provide: SportProfileRepository, useValue: repository },
         { provide: AuthService, useValue: { session: signal({ uid: 'u1' }) } },
         { provide: ConfirmDialog, useValue: { confirm } },
+        { provide: PreferencesStore, useValue: { preferences } },
       ],
     });
   });
@@ -104,7 +109,7 @@ describe('SportProfilePage', () => {
     expect(saved).toEqual([STORED]);
     expect(text()).toContain('Perfil deportivo guardado.');
     expect(text()).toContain('5:45 min/km');
-    expect(text()).toContain('10.5 km');
+    expect(text()).toContain('10,5 km');
     expect(text()).toContain('Intermedio');
   });
 
@@ -136,6 +141,14 @@ describe('SportProfilePage', () => {
 
     page()['form'].controls.pace.setValue('6:00');
     expect(page().hasUnsavedChanges()).toBe(true);
+  });
+
+  it('shows the distance in the unit of the preferences', async () => {
+    preferences.set({ ...defaultPreferences(), units: 'imperial' });
+
+    await create(STORED);
+
+    expect(text()).toContain('6,5 mi');
   });
 
   it('asks before deleting and goes back to the empty state', async () => {

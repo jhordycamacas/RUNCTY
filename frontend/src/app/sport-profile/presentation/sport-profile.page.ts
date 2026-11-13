@@ -15,6 +15,8 @@ import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { Notice } from '../../shared/ui/notice';
 import { SubpageHeader } from '../../shared/ui/subpage-header';
 import { TextField } from '../../shared/ui/text-field';
+import { PreferencesStore } from '../../preferences/application/preferences.store';
+import { formatDistance } from '../../preferences/domain/units';
 import { SportProfileStore } from '../application/sport-profile.store';
 import {
   EMPTY_SPORT_PROFILE_FORM,
@@ -138,7 +140,7 @@ import {
               </div>
               <div>
                 <dt>Distancia preferida</dt>
-                <dd>{{ profile.preferredDistanceKm }} km</dd>
+                <dd>{{ distance(profile.preferredDistanceKm) }}</dd>
               </div>
               <div>
                 <dt>Nivel</dt>
@@ -261,6 +263,7 @@ import {
 export class SportProfilePage implements HasUnsavedChanges {
   protected readonly store = inject(SportProfileStore);
   private readonly dialog = inject(ConfirmDialog);
+  private readonly preferences = inject(PreferencesStore).preferences;
 
   protected readonly levels = SPORT_LEVELS.map((value) => ({
     value,
@@ -273,6 +276,8 @@ export class SportProfilePage implements HasUnsavedChanges {
   protected readonly levelLabels = SPORT_LEVEL_LABELS;
   protected readonly goalLabels = SPORT_GOAL_LABELS;
   protected readonly pace = formatPace;
+  /** Distances follow the unit preference (RF-01-13). */
+  protected readonly distance = (km: number) => formatDistance(km, this.preferences().units);
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
     level: '',

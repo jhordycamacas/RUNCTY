@@ -32,6 +32,19 @@ export const RUNNER_ROUTES: Routes = [
               ),
           },
           {
+            path: 'preferencias',
+            canDeactivate: [unsavedChangesGuard],
+            loadComponent: () =>
+              import('../preferences/presentation/preferences.page').then((m) => m.PreferencesPage),
+          },
+          {
+            path: 'eliminar',
+            loadComponent: () =>
+              import('../account/presentation/delete-account.page').then(
+                (m) => m.DeleteAccountPage,
+              ),
+          },
+          {
             path: 'contrasena',
             loadComponent: () =>
               import('../account/presentation/change-password.page').then(

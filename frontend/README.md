@@ -1,6 +1,6 @@
 # RUNCTY frontend
 
-One Angular 22 + Ionic 9 + Capacitor 8 app for the web (browser) and Android (APK). It talks only to the Django API in `../backend`; Firebase Auth is used on the client only to sign in, and the ID token goes to the API as `Authorization: Bearer`.
+One Angular 22 + Ionic 9 + Capacitor 8 app for the web (browser) and Android (APK). It talks only to the Django API in `../backend`; Firebase Auth is used on the client only for sign-up, sign-in, re-authentication and the reset/verification emails, and the ID token goes to the API as `Authorization: Bearer`.
 
 > `frontend/mobile` is the old React Native app. It is removed in task S6 and is excluded from every config here (Angular, TypeScript and ESLint only look at `src/`).
 
@@ -8,16 +8,26 @@ One Angular 22 + Ionic 9 + Capacitor 8 app for the web (browser) and Android (AP
 
 ```
 src/app/
-  core/      API client, interceptors, error mapping, auth service, permissions, guards
-  shared/    base components and pages (403, 404)
-  auth/      login
-  runner/    /app    runner area, mobile-first, bottom tabs
-  admin/     /admin  admin area, desktop-first, side menu (ion-split-pane)
+  core/          API client, interceptors, error mapping, auth service (+ Firebase gateway port), permissions, guards
+  shared/        base UI (text field, birth date, notice, confirm dialog), form helpers, pages (403, 404)
+  auth/          sign in, sign up, password reset, email verification banner
+  account/       profile, personal data, password change, account deletion
+  sport-profile/ sport profile (create, edit, delete)
+  preferences/   appearance, font size, units, notifications, location privacy
+  cities/        city catalogue and the city picker
+  runner/        /app    runner area shell, Home, routes (mobile-first, bottom tabs)
+  admin/         /admin  admin area, desktop-first, side menu (ion-split-pane)
 src/theme/   design tokens (CSS variables), Ionic mapping, per-area overrides, Inter font
 src/environments/  development (emulators) and production (placeholders)
 ```
 
 The two areas are lazy-loaded bundles. Guards read the role and permissions from `GET /me` (never from the client alone): `admin.access`, `users.read`, `roles.manage`, `cities.manage`, `routes.manage`. `/admin` opens the first section the user may use.
+
+Each feature folder is layered: `domain` (types, rules, ports as abstract classes), `application` (use cases and signal stores), `infrastructure` (HTTP repositories over `ApiClient`, local storage, DOM) and `presentation` (Angular + Ionic pages). The ports are bound to their adapters in `app.config.ts`; specs swap them for fakes. Firebase Auth is used only to sign up/in/out, re-authenticate, reset the password and verify the email; the profile, sport profile, preferences and account deletion go through the API.
+
+### Preferences and themes
+
+The appearance preference sets `data-theme` on `<html>` (none means "follow the system") and the font-size preference sets `--rc-font-scale`, which multiplies the root font size, so everything sized in `rem` follows it. They are applied at start-up (`PreferencesStore`, from the device copy first, then from the API) and reset on sign-out. Distances go through `formatDistance` (`preferences/domain/units.ts`) so they follow the unit preference. Controls use `--rc-control-border` (3:1 against the page in both themes; `src/theme/tokens.spec.ts` checks the contrast).
 
 ## Commands
 
