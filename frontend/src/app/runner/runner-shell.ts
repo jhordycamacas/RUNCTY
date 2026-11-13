@@ -2,15 +2,20 @@ import { Component } from '@angular/core';
 import { IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { homeOutline, personCircleOutline, trailSignOutline } from 'ionicons/icons';
+import { EmergencyButton } from '../emergency/emergency-button';
 
 addIcons({ homeOutline, personCircleOutline, trailSignOutline });
 
-/** Runner area layout: mobile-first, navigation in a bottom tab bar. */
+/**
+ * Runner area layout: mobile-first, navigation in a bottom tab bar. The emergency button lives
+ * here, so it is on every tab and every screen reached from them.
+ */
 @Component({
   selector: 'app-runner-shell',
-  imports: [IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs],
+  imports: [EmergencyButton, IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs],
   host: { class: 'area-runner' },
   template: `
+    <app-emergency-button />
     <ion-tabs>
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="inicio">
