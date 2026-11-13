@@ -28,6 +28,8 @@ import {
 import { DocumentPreferencesDisplay } from './preferences/infrastructure/document-preferences-display';
 import { HttpPreferencesRepository } from './preferences/infrastructure/http-preferences.repository';
 import { LocalStoragePreferencesCache } from './preferences/infrastructure/local-storage-preferences.cache';
+import { RouteRepository } from './routes/domain/route';
+import { HttpRouteRepository } from './routes/infrastructure/http-route.repository';
 import { SportProfileRepository } from './sport-profile/domain/sport-profile';
 import { HttpSportProfileRepository } from './sport-profile/infrastructure/http-sport-profile.repository';
 
@@ -44,6 +46,7 @@ export const appConfig: ApplicationConfig = {
     { provide: ProfileRepository, useClass: HttpProfileRepository },
     { provide: AccountRepository, useClass: HttpAccountRepository },
     { provide: SportProfileRepository, useClass: HttpSportProfileRepository },
+    { provide: RouteRepository, useClass: HttpRouteRepository },
     { provide: PreferencesRepository, useClass: HttpPreferencesRepository },
     { provide: PreferencesCache, useClass: LocalStoragePreferencesCache },
     { provide: PreferencesDisplay, useClass: DocumentPreferencesDisplay },

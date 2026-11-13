@@ -8,6 +8,21 @@ export const RUNNER_ROUTES: Routes = [
     children: [
       { path: 'inicio', loadComponent: () => import('./home.page').then((m) => m.RunnerHomePage) },
       {
+        path: 'rutas',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('../routes/presentation/routes-list.page').then((m) => m.RoutesListPage),
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('../routes/presentation/route-detail.page').then((m) => m.RouteDetailPage),
+          },
+        ],
+      },
+      {
         path: 'cuenta',
         children: [
           {
