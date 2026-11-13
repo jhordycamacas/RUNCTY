@@ -158,7 +158,7 @@ Los RF se organizan en 11 módulos: Usuarios y accesos, Catálogo de rutas, Eval
 
 ## 9. Arquitectura (decidida — 2026-10-28)
 
-> **Cambio en curso (decidido el 2026-11-11, ver sección 16):** la arquitectura pasa a ser **backend + frontend**. `backend/` es una API REST en Django que reemplaza a las Cloud Functions; `frontend/mobile` es la app en React Native y `frontend/web` es el panel de administración en Angular, que reemplaza al de Next.js. Se mantienen los servicios de Google (Firebase Auth, Firestore, Storage, FCM). Lo que sigue en esta sección describe la arquitectura anterior, que sigue vigente en el código de `mobile/`, `admin/` y `functions/` hasta que termine la migración; se reescribe al cerrar la tarea T9.
+> **Cambio en curso (arquitectura vigente desde el 2026-11-13, ver secciones 16 y 17):** la arquitectura es **backend Django + un solo frontend**. `backend/` es una API REST en Django que reemplaza a las Cloud Functions y se conecta a los servicios de Google (Firebase Auth, Firestore, Storage, FCM). `frontend/` es **una sola aplicación Angular + Ionic + Capacitor** que sirve la web y Android (APK); reemplaza a la app React Native (`frontend/mobile`) y al panel Next.js (`admin/`). Lo que sigue en esta sección describe la arquitectura anterior, que sigue vigente en el código de `frontend/mobile/`, `admin/` y `functions/` hasta que termine la migración (tarea S6); se reescribe entonces.
 
 Sin backend propio: se usan servicios de Google (Firebase) como BaaS, más Cloud Functions serverless para la lógica que no puede vivir en el cliente. Así se cumple el Documento de Visión (sin servidor propio) y también los RNF del Excel (datos centralizados, notificaciones, tiempo real, respaldos).
 
@@ -277,7 +277,7 @@ Se mantiene el calendario del equipo: Sprint 1, semanas 4–5; Sprint 2, semana 
 - [x] Correcciones de seguridad del servidor (T1; SEC-01, 02, 03, 05, 06 y 08): hechas en la rama `feat/hardening-and-polish`. El agente reportó los tests en verde; **no se volvieron a ejecutar** antes de subirlas (ver 14.2).
 - [ ] Pulido de la app móvil y del panel (T2 y T3 de `odd/tasks/auditoria-y-pulido.md`): **pausado a pedido del usuario**. El plan detallado está en 14.5.
 - [x] Guion y checklist para presentar el Sprint 1: sección 14.6.
-- [ ] **Migración a Django + Angular** (rama `feat/django-angular-architecture`, plan en `odd/tasks/django-angular-architecture.md`): T1 y T2 hechas, T3 a T9 pendientes. El estado detallado está en la sección 16.
+- [ ] **Migración a Django + un solo frontend Angular/Ionic** (plan vigente en `odd/tasks/single-frontend-ionic.md`; el plan anterior, `django-angular-architecture.md`, queda para el contrato de la API y la auditoría): backend de usuarios, roles, ciudades, rutas y seguridad hecho; frontend nuevo con el área del corredor completa; faltan el área de admin (S5) y la limpieza final (S6). El estado detallado está en la sección 17.
 
 ### Cómo trabajar hoy (desarrollo local)
 
@@ -618,6 +618,8 @@ Se renombraron **solo los nombres de tipo**, con un renombrado por símbolos de 
 
 ## 16. Migración a backend Django + frontend React Native y Angular (2026-11-11 y 2026-11-12)
 
+> **Reemplazada en parte el 2026-11-13 (sección 17):** el frontend ya no son dos aplicaciones (React Native + Angular), sino **una sola en Angular + Ionic + Capacitor**. Las decisiones del backend, el contrato de la API y la bitácora de esta sección siguen vigentes; las tareas T5 a T7 de la tabla 16.2 se sustituyen por S3 a S6 de la sección 17.
+
 **Leer primero** `odd/tasks/django-angular-architecture.md`: tiene el objetivo, las decisiones, el contrato de la API, los hallazgos de la auditoría del 2026-11-11 y la lista de tareas. Esta sección solo resume el estado.
 
 ### 16.1 Decisiones del usuario
@@ -693,3 +695,83 @@ Se renombraron **solo los nombres de tipo**, con un renombrado por símbolos de 
 
 - El hook pide una revisión al terminar cada turno. No se ejecuta, por la regla del usuario de no usar ese flujo en este repositorio.
 - Para que el aviso deje de aparecer (decisión del usuario): `gentle-ai review mode disable --scope clone --cwd D:\RUNCTY`.
+
+## 17. Un solo frontend: Angular + Ionic + Capacitor (2026-11-13)
+
+**Leer primero** `odd/tasks/single-frontend-ionic.md`: tiene las decisiones, las formas de respuesta de la API, las notas de cada tarea y la evidencia. Esta sección resume el estado.
+
+### 17.1 Qué se decidió y por qué
+
+El ingeniero pidió que la solución sea **un solo frontend en Angular + Ionic, que sirva web y móvil**, como el proyecto de referencia `C:\xampp\htdocs\seguimiento_retos` (Django + Angular 22 + Ionic + Capacitor + MySQL). Ese proyecto no mezcla React: lo "mixto" es Angular + Ionic + Capacitor, donde un solo código produce la web y la APK de Android (Capacitor empaqueta el build en un WebView).
+
+**Arquitectura vigente (no cambiarla sin decisión del usuario):**
+
+```
+RUNCTY/
+├── backend/     Django + DRF. Única pieza de servidor. Se conecta a los servicios de
+│                Google (Firebase Auth, Firestore, Storage, FCM) con firebase-admin.
+│                Sin base de datos SQL y sin ORM: Firestore es el almacén.
+└── frontend/    UNA app Angular 22 + Ionic 9 + Capacitor 8 (web y Android).
+    ├── /app     Área del corredor: mobile-first, pestañas abajo.
+    └── /admin   Área del administrador: desktop-first, menú lateral (ion-split-pane).
+```
+
+- Las dos áreas son **lazy** y pueden tener diseño propio (variables `.area-runner` y `.area-admin` sobre los tokens compartidos). Lo compartido es el cliente de la API, la autenticación, los componentes base y los tokens.
+- Firebase Auth se usa en el cliente **solo** para iniciar sesión, cerrar sesión, reautenticar, recuperar contraseña y verificar correo. El ID token viaja a Django como `Bearer`; el rol y los permisos salen de `GET /me`, nunca solo del cliente.
+- React Native, Expo y Metro **dejan de existir**. Flujo nuevo: `npm start` (navegador), `ionic cap run android -l --external` (celular con recarga en vivo), `npx cap sync android` y Gradle para reinstalar.
+- Se elimina al final (S6), solo cuando haya paridad: `frontend/mobile/`, `admin/` y `functions/`.
+
+### 17.2 Estado de las tareas
+
+| Tarea | Estado | Evidencia (commits en `feat/backend-cities-routes`) |
+| --- | --- | --- |
+| S1 Backend: ciudades, rutas e índice de seguridad | **Hecha** | `1caa6bd`, `6d5a2e2`, `57b92b4`, `48c79d6`. Apps `cities` y `routes` con todos los endpoints del contrato, el índice recalculado en una transacción y las pruebas portadas de Vitest. |
+| S2 Backend: seed en Python y Docker con la API | **Hecha** | `5da6a1f`, `630a903`, `816fe36`. `manage.py seed` genera los mismos 52 documentos que el seed de TypeScript (comparado contra los emuladores reales); compose con servicios `api` y `seed`, `cap_drop ALL`, `no-new-privileges` y límites. Las imágenes **no se construyeron** (Docker apagado). |
+| S3 Frontend: base | **Hecha** | `4488be5`, `2b9d074`, `c690d1f`, `0d3a951`, `1dd08fa`. Angular + Ionic + Capacitor, cliente de la API con interceptor, mapa de errores a español, login con Firebase, guards (`canMatch`), layouts de las dos áreas, tokens claro/oscuro con Inter local, CORS del backend para Ionic y Capacitor, plataforma Android y APK de depuración. |
+| S4a Área del corredor: cuenta | **Hecha** | `add05a1`, `439b6fa`, `f5f3f83`. Registro con consentimiento, login, recuperar contraseña, correo sin verificar con "Reenviar correo", perfil, perfil deportivo, preferencias, cambiar contraseña, eliminar cuenta (reautenticación y `recent-sign-in-required`), selector de ciudad con búsqueda y fecha en tres campos. |
+| S4b Área del corredor: rutas | **Hecha** | `21f094c`, `00920a1`, `518e0be`, `464c06a`. Pestaña Rutas con filtros, tarjeta con "Factor principal", detalle con segmentos y factores, "Abrir en Google Maps", rutas recomendadas en Inicio y botón SOS (confirma y abre `tel:911`). |
+| S5a Área de admin: usuarios, roles y ciudades | **En curso (pausada)** | Solo está confirmado `8f69aac` (avisos globales y confirmación). El resto quedó a medias y se guardó en un `git stash` ("wip S5a admin users roles"); **no está en `main`**. |
+| S5b Área de admin: rutas, segmentos, franjas y factores | Pendiente | |
+| S6 Limpieza, Android y documentación | Pendiente | Borrar `frontend/mobile`, `admin/`, `functions/` y `scripts/seed-emulator.ts`; reglas de Firestore cerradas (deny-all); verificar web y APK; reescribir la sección 9, el README y el manual de Android. |
+
+**Pruebas observadas el 2026-11-13 (las ejecuté yo sobre el último commit):** backend 753 pruebas en verde y `ruff check` limpio; frontend 347 pruebas en verde (49 archivos), `ng build` correcto (paquete inicial de 1,12 MB, 238 kB transferidos). La APK de depuración compiló al cerrar S4b (5,4 MB).
+
+### 17.3 Decisiones que los clientes ya siguen
+
+- La API devuelve 201 `{"id"}` al crear; 204 en PUT/DELETE de rutas, tramos, franjas y factores; la ciudad se devuelve completa en POST (201) y PATCH (200). Los campos opcionales llegan como `null`.
+- Códigos nuevos de ciudades: `invalid-city-name`, `invalid-city-province`, `invalid-city-type`, `invalid-city-location`, `invalid-coverage`, `invalid-parent-city` y `city-exists` (409). Una zona solo puede colgar de una ciudad, no de otra zona.
+- Una ruta inactiva responde 404 `route-not-found` a quien no tiene `routes.manage`. El nivel de seguridad lo ve todo usuario con sesión; las franjas y los factores solo con `routes.manage`.
+- `GET /cities` es público, pero un token enviado y malo recibe 401.
+- Un repositorio cubre todo el agregado de la ruta (ruta, tramos, franjas, factores), porque cada cambio necesita una sola transacción de Firestore.
+- Eliminar la cuenta exige un inicio de sesión reciente: el cliente reautentica y renueva el token antes de `DELETE /users/me`.
+- Las preferencias de apariencia y tamaño de letra sí se aplican (`data-theme` y `--rc-font-scale`); notificaciones y privacidad de ubicación se guardan pero están marcadas "Próximamente". La unidad (km/millas) se aplica en distancias y elevaciones; el ritmo sigue en min/km.
+- Los controles de formulario tienen un borde de contraste 3:1 y el tema oscuro tiene superficies distinguibles (hay una prueba que lo verifica).
+
+### 17.4 Qué NO está verificado
+
+- **Nadie ha abierto el frontend nuevo en un navegador real** ni lo ha probado contra los emuladores y Django. La extensión de Chrome falló en todas las sesiones, así que todo está validado con pruebas unitarias y compilación. Es lo primero que hay que hacer al retomar.
+- **No se probó en el celular:** que `tel:911` abra el marcador de Android, que el enlace de Maps salga del WebView ni cómo se ve el botón SOS con títulos largos.
+- Angular 22 trabaja sin zone.js (zoneless); la interacción con Ionic en ejecución real no se ejercitó.
+- Docker: solo se validó `docker compose config`; las imágenes `api` y `seed` no se construyeron ni se ejecutaron.
+- Casi todas las pruebas del frontend se escribieron junto con el código, sin ver antes el fallo (RED); solo se vio RED en el backend de S1 y S2 y en el mapa de errores.
+
+### 17.5 Pendientes y avisos
+
+- **Aviso de npm:** `npm audit` marca 4 avisos altos en `@grpc/grpc-js`, que entra con el paquete `firebase` (parte de Firestore, que el cliente no usa). No se bajó la versión.
+- **Java:** el `JAVA_HOME` del equipo apunta a JDK 17, pero Capacitor 8 exige JDK 21. Para compilar la APK hay que apuntarlo a `C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot`. El detalle está en `frontend/README.md`.
+- `backend/README.md` dice `cp .env.example .env`, pero `backend/.env.example` no existe en git (el asistente no puede crear archivos `.env*`). Hay que crearlo a mano o corregir esa línea en S6.
+- El primer commit del frontend (`4488be5`) no compila solo, porque `src/app` llega en `c690d1f`; los commits se dividieron por capa.
+- Las fuentes Inter en TTF suman unos 1,3 MB a la APK; se pueden pasar a WOFF2.
+- Siguen abiertos los puntos de 14.2 (SEC-01 App Check, SEC-04, SEC-07, SEC-10) y la auditoría de UX del panel, que S5 aplica en el área de admin.
+- Las secciones 9 a 15 describen la arquitectura anterior y nombran archivos como `functions/src/...` o `admin/src/...`; se reescriben en S6.
+- El aviso del hook de `gentle-ai review` sigue apareciendo al terminar cada turno y se ignora por la regla de este repositorio.
+
+### 17.6 Cómo retomar
+
+1. Abrir la sesión en `D:\RUNCTY` y leer `odd/tasks/single-frontend-ionic.md`.
+2. Recuperar el trabajo pausado de S5a, si sirve: `git stash list` muestra "wip S5a admin users roles". Se puede aplicar con `git stash apply` (o rehacerlo). Está incompleto: no se sabe si compila ni si sus pruebas pasan.
+3. Comprobaciones del backend (desde `backend/` con `.venv`): `python -m pytest -q`, `ruff check .`, `ruff format --check .`, `DJANGO_DEBUG=true python manage.py check`.
+4. Comprobaciones del frontend (desde `frontend/`): `npx.cmd ng test --watch=false`, `npx.cmd ng lint`, `npx.cmd ng build`.
+5. Levantar todo en local: emuladores y API con `docker compose up -d --build` (Docker Desktop encendido) o sin Docker con `npm run emulators`, `npm run seed` y `npm run api`; el frontend con `npm start` desde `frontend/`. Usuario de prueba del emulador: `admin@runcty.dev` / `Admin123!`.
+6. Seguir con S5a (usuarios, roles y ciudades del admin), luego S5b (rutas) y S6 (limpieza).
+7. **Antes de borrar `frontend/mobile`, `admin/` y `functions/`:** abrir el frontend nuevo en un navegador y recorrer el registro, el login, las rutas y el admin.

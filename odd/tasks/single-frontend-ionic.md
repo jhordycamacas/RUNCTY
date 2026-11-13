@@ -118,3 +118,7 @@ Forecast far above 400 authored changed lines. One work-unit commit per task on 
 - `GET /cities` is public, but a bad token that is sent still gets 401.
 - One repository covers the whole route aggregate (route, segments, slots, factors) because a mutation needs a single Firestore transaction; this bends "one repository per model".
 - S2/S6 notes: `scripts/seed-emulator.ts` imports `functions/src/routes/domain/*` and `firestore.rules` still holds the city rules.
+
+## Pause note (2026-11-13)
+
+S5a was stopped by the user mid-task. Only `8f69aac` (admin shared feedback and confirmation) is committed; the unfinished users and roles screens were saved in a git stash (`wip S5a admin users roles`) and are not on `main`. S5a, S5b and S6 remain open. CONTEXTO.md section 17 holds the current state.
