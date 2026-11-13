@@ -92,6 +92,7 @@ class FakeFirebase:
 
     def reset(self) -> None:
         self.claims: dict[str, dict | None] = {}  # Auth accounts by uid
+        self.emails: dict[str, str] = {}  # uid of the accounts created by email (the seed)
         self.users: dict[str, dict] = {}  # `users/{uid}` documents
         self.private: dict[tuple[str, str], dict] = {}  # `users/{uid}/private/{id}` documents
         self.roles: dict[str, Rol] = {}
@@ -162,6 +163,21 @@ class InMemoryAuthGateway:
         self._firebase.fail_if_requested("delete_user")
         del self._firebase.claims[uid]
         self._firebase.calls.append(("auth", uid))
+
+
+class InMemorySeedAccounts:
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        self._firebase = firebase or FIREBASE
+
+    def ensure_admin_account(self, email: str, password: str, display_name: str) -> str:
+        emails = self._firebase.emails
+        if email not in emails:
+            emails[email] = f"seed-uid-{len(emails) + 1}"
+            self._firebase.claims[emails[email]] = None
+        return emails[email]
+
+    def save_admin_profile(self, uid: str, profile: dict) -> None:
+        self._firebase.users.setdefault(uid, {}).update(profile)
 
 
 class InMemoryRoleRepository:

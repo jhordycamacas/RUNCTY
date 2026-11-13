@@ -28,6 +28,25 @@ Firebase project.
 | Django checks | `.venv/Scripts/python manage.py check` |
 | Production checks | `manage.py check --deploy` with production variables |
 
+## Seed the emulators
+
+`manage.py seed` loads the demo data into the Firebase emulators: the city Loja, the system
+roles (`runner`, `admin`, `club_rep`), the admin account `admin@runcty.dev` / `Admin123!` with
+its claims, and five sample routes in Loja with segments, time slots, risk factors and the
+computed safety index. It is idempotent: a re-run updates the same documents and rewrites each
+sample route from scratch.
+
+```bash
+# Emulators running (repo root: `npm run emulators`), then from backend/:
+DJANGO_DEBUG=true FIREBASE_PROJECT_ID=demo-runcty \
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 \
+.venv/Scripts/python manage.py seed
+```
+
+The command refuses to run unless the project id starts with `demo-` and both emulator hosts are
+`127.0.0.1`, `localhost`, `::1` or the Docker service `firebase`. The password is public: never
+create this account in a real project. From the repo root, `npm run seed` does the same.
+
 Container: `docker build -t runcty-api backend` then
 `docker run --env-file <file outside the repo> -p 8000:8000 runcty-api`. The image runs
 gunicorn as a non-root user and contains no configuration or credentials.
@@ -254,6 +273,7 @@ apps/
   routes/                    Ruta, Tramo, FranjaHoraria, FactorDeRiesgo, IndiceSeguridad and
                              CalculadoraIndiceSeguridad: routes, segments, time slots, risk
                              factors and the safety index
+  seed/                      `manage.py seed`: demo data for the Firebase emulators
 tests/                       pytest suite with in-memory adapters
 ```
 

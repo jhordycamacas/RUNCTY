@@ -54,6 +54,7 @@ ROLE_MEMBERS = "apps.roles.infrastructure.firestore_role_members.FirestoreRoleMe
 CITY_REPOSITORY = "apps.cities.infrastructure.firestore_city_repository.FirestoreCityRepository"
 CITY_USAGE = "apps.cities.infrastructure.firestore_city_usage.FirestoreCityUsage"
 ROUTE_REPOSITORY = "apps.routes.infrastructure.firestore_route_repository.FirestoreRouteRepository"
+SEED_ACCOUNTS = "apps.seed.infrastructure.firebase_seed_accounts.FirebaseSeedAccounts"
 USER_REPOSITORY = "apps.users.infrastructure.firestore_user_repository.FirestoreUserRepository"
 SPORT_PROFILE_REPOSITORY = (
     "apps.users.infrastructure.firestore_private_documents.FirestoreSportProfileRepository"
@@ -66,7 +67,8 @@ PREFERENCES_REPOSITORY = (
 
 # Firestore is the data store: no SQL database and none of the contrib apps that need one.
 DATABASES = {}
-INSTALLED_APPS = ["corsheaders"]
+# `apps.seed` only provides the `seed` management command.
+INSTALLED_APPS = ["corsheaders", "apps.seed"]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
