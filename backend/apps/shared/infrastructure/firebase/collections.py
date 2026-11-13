@@ -2,5 +2,7 @@
 
 USERS = "users"
 ROLES = "roles"
+CITIES = "cities"
+ROUTES = "routes"
 # Sub-collection of `users/{uid}` readable only by its owner.
 USER_PRIVATE = "private"

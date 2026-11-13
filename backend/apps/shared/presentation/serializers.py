@@ -41,6 +41,11 @@ def text_field(**options) -> serializers.CharField:
     )
 
 
+def raw_field(**options) -> serializers.JSONField:
+    """Any JSON value, kept as sent: the domain checks its type and owns the reason code."""
+    return serializers.JSONField(required=False, allow_null=True, **options)
+
+
 def _validated(serializer_class: type[StrictSerializer], data) -> dict:
     serializer = serializer_class(data=data)
     serializer.is_valid(raise_exception=True)

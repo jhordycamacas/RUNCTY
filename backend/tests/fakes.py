@@ -3,6 +3,7 @@
 import time
 from dataclasses import replace
 
+from apps.cities.domain.models import Ciudad
 from apps.roles.application.ports import RoleChange
 from apps.roles.domain.models import Rol
 from apps.shared.application.ports import AuthUserNotFound, TokenRejected
@@ -34,6 +35,14 @@ MANAGER = Principal(
     role="manager",
     perms=("admin.access", "roles.manage", "users.read"),
 )
+# A delegate that manages the catalogue of cities but not routes.
+CATALOGUER = Principal(
+    uid="cat-1",
+    email="cataloguer@example.com",
+    email_verified=True,
+    role="cataloguer",
+    perms=("admin.access", "cities.manage"),
+)
 # Signed in with Firebase Auth, but has not completed sign-up: no profile and no role yet.
 NEW_USER = Principal(
     uid="new-1", email="new@example.com", email_verified=False, role=None, perms=()
@@ -45,6 +54,7 @@ PRINCIPALS = {
     "club-rep-token": CLUB_REP,
     "user-reader-token": USER_READER,
     "manager-token": MANAGER,
+    "cataloguer-token": CATALOGUER,
     "new-user-token": NEW_USER,
 }
 
@@ -82,6 +92,8 @@ class FakeFirebase:
         self.users: dict[str, dict] = {}  # `users/{uid}` documents
         self.private: dict[tuple[str, str], dict] = {}  # `users/{uid}/private/{id}` documents
         self.roles: dict[str, Rol] = {}
+        self.cities: dict[str, Ciudad] = {}
+        self.docs: dict[str, dict] = {}  # other Firestore documents by path (`routes/...`)
         self.calls: list[tuple] = []  # side effects, in order
         self.failing: set[str] = set()  # operation names that raise
 
@@ -190,6 +202,47 @@ class InMemoryRoleMembers:
         self._firebase.users[uid]["role"] = role_id
         self._firebase.calls.append(("mirror", uid, role_id))
         return RoleChange.APPLIED
+
+
+class InMemoryCityRepository:
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        self._cities = (firebase or FIREBASE).cities
+
+    def get(self, city_id: str) -> Ciudad | None:
+        return self._cities.get(city_id)
+
+    def list(self, coverage: str | None = None) -> list[Ciudad]:
+        return [
+            self._cities[city_id]
+            for city_id in sorted(self._cities)
+            if coverage is None or self._cities[city_id].coverage == coverage
+        ]
+
+    def create(self, city: Ciudad) -> bool:
+        if city.id in self._cities:
+            return False
+        self._cities[city.id] = city
+        return True
+
+    def update(self, city: Ciudad) -> None:
+        self._cities[city.id] = city
+
+    def delete(self, city_id: str) -> None:
+        del self._cities[city_id]
+
+
+class InMemoryCityUsage:
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        self._firebase = firebase or FIREBASE
+
+    def has_routes(self, city_id: str) -> bool:
+        return any(
+            path.count("/") == 1 and document.get("cityId") == city_id
+            for path, document in self._firebase.docs.items()
+        )
+
+    def has_zones(self, city_id: str) -> bool:
+        return any(city.parent_city_id == city_id for city in self._firebase.cities.values())
 
 
 class InMemoryUserRepository:

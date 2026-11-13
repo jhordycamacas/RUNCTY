@@ -51,6 +51,10 @@ gunicorn as a non-root user and contains no configuration or credentials.
 | `PUT /api/v1/roles/{id}` | `roles.manage` | `{"syncedUsers": n}`. Body: `name`, `description?`, `permissions` |
 | `DELETE /api/v1/roles/{id}` | `roles.manage` | 204 |
 | `PUT /api/v1/users/{uid}/role` | `roles.manage` | `{uid, role}`. Body: `roleId` |
+| `GET /api/v1/cities` | public | `{"cities": [{id, name, province, country, type, parentCityId, location: {lat, lng}, coverage}]}` sorted by name. Query: `coverage` |
+| `POST /api/v1/cities` | `cities.manage` | 201 with the city. Body: `id`, `name`, `province`, `type`, `location`, `coverage`, `parentCityId` (zones) |
+| `PATCH /api/v1/cities/{id}` | `cities.manage` | the updated city. Body: any of `name`, `province`, `location`, `coverage`, `parentCityId` |
+| `DELETE /api/v1/cities/{id}` | `cities.manage` | 204 |
 
 JSON only, camelCase keys. Every error has the same shape; clients branch on `reason` and
 translate it, `message` is for developers:
@@ -129,6 +133,17 @@ Reason codes are the ones the role callables used: `invalid-role-id`, `invalid-r
   target's sessions are revoked; if writing the claims fails, the mirror is put back.
 - Editing a role re-issues the claims of every user holding it and revokes their sessions,
   one user at a time within the request.
+
+### Cities
+
+`cities/{id}` holds cities and their zones (`type: "zone"` with a `parentCityId`). The id is a
+slug (`loja`, `loja-centro`), `country` is always `EC`, and `type` and the id never change.
+Reason codes: `invalid-city-id` (also the callable's), `invalid-city-name`,
+`invalid-city-province`, `invalid-city-type`, `invalid-city-location`, `invalid-coverage`,
+`invalid-parent-city` (400), `city-exists` (409), `city-not-found` (404). Deleting is refused
+with `city-has-routes` while a route references the city and `city-has-zones` while it
+has zones. A zone's parent must be an existing city, not another zone. `GET` needs no token
+(the sign-up form lists the cities), but a token that is sent and bad is still a 401.
 
 | Status | `reason` |
 | --- | --- |
