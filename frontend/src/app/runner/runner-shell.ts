@@ -1,0 +1,37 @@
+import { Component } from '@angular/core';
+import { IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { homeOutline, personCircleOutline } from 'ionicons/icons';
+
+addIcons({ homeOutline, personCircleOutline });
+
+/** Runner area layout: mobile-first, navigation in a bottom tab bar. */
+@Component({
+  selector: 'app-runner-shell',
+  imports: [IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs],
+  host: { class: 'area-runner' },
+  template: `
+    <ion-tabs>
+      <ion-tab-bar slot="bottom">
+        <ion-tab-button tab="inicio">
+          <ion-icon name="home-outline" aria-hidden="true" />
+          <ion-label>Inicio</ion-label>
+        </ion-tab-button>
+        <ion-tab-button tab="cuenta">
+          <ion-icon name="person-circle-outline" aria-hidden="true" />
+          <ion-label>Cuenta</ion-label>
+        </ion-tab-button>
+      </ion-tab-bar>
+    </ion-tabs>
+  `,
+  styles: `
+    :host {
+      display: contents;
+    }
+
+    ion-tab-button {
+      min-height: var(--rc-min-touch-target);
+    }
+  `,
+})
+export class RunnerShell {}
