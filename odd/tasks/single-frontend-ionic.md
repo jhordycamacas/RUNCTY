@@ -37,7 +37,7 @@ The course engineer asked for a single Angular + Ionic frontend for web and mobi
 ## Tasks
 
 - [x] **S1 — Backend: cities, routes and safety index (old T3).** Port `functions/src/{cities,routes}` and their specs to Django (pytest), following the API contract in the previous task file. Branch `feat/backend-cities-routes`.
-- [ ] **S2 — Backend infrastructure (old T4, first half).** Python seed (Django management command) replacing `scripts/seed-emulator.ts`, Docker Compose with the API service, Firebase emulator config. `functions/`, `admin/`, `frontend/mobile` and the current Firestore rules stay untouched until S6, because the old clients still use them.
+- [x] **S2 — Backend infrastructure (old T4, first half).** Python seed (Django management command) replacing `scripts/seed-emulator.ts`, Docker Compose with the API service, Firebase emulator config. `functions/`, `admin/`, `frontend/mobile` and the current Firestore rules stay untouched until S6, because the old clients still use them.
 - [ ] **S3 — Frontend scaffold.** `frontend/` with Angular 22 + Ionic + Capacitor; design tokens and themes; `/app` and `/admin` areas; API client with Bearer token and error-reason mapping; Firebase Auth sign-in; guards; test setup.
 - [ ] **S4 — Runner area.** Port auth, account, preferences, sport profile, cities and routes from `frontend/mobile` to Angular + Ionic.
 - [ ] **S5 — Admin area.** Users, roles, cities, routes (segments, time slots, risk factors) with the pending panel UX fixes.
@@ -64,6 +64,14 @@ Forecast far above 400 authored changed lines. One work-unit commit per task on 
 | Task | Route | Commit | Checks observed |
 | --- | --- | --- | --- |
 | S1 | delegated writer (2+ non-trivial files) | `1caa6bd`, `6d5a2e2`, `57b92b4`, `48c79d6` | Re-run by the parent: pytest 720 passed (baseline 382), `ruff check` clean. Writer also reported `ruff format --check` clean and `manage.py check` clean. RED observed first in each step. All specs mapped (safety 13, time 9, geo 2, reorder 5, inputs 13, routeService 30, deleteCity 5). |
+| S2 | delegated writer (2+ non-trivial files) | `5da6a1f`, `630a903` | pytest 748 passed (baseline 720), `ruff check` and `ruff format --check` clean, `manage.py check` clean, `docker compose config` valid. RED observed first (collection error, module missing). Real run against the Auth and Firestore emulators: the Python seed twice (idempotent) and the TypeScript seed on a wiped emulator produce an identical dump of 52 documents (timestamps and the admin uid masked). Docker daemon was off: images were NOT built and the `api` and `seed` containers were NOT run. |
+
+## Decisions taken in S2
+
+- `manage.py seed` lives in the new app `apps/seed` (domain: guard and data; application: use case and port; infrastructure: Firebase account adapter). It needs `DJANGO_DEBUG=true` (settings refuse emulator hosts otherwise) and a `demo-*` project id; unlike the TypeScript seed it does not default the project id.
+- System roles moved to `apps/roles/domain/system_roles.py`; the admin profile `createdAt` is written once instead of on every run.
+- Compose: `api` (127.0.0.1:8000, debug mode, CORS for `localhost:4200` and `localhost:8100`) and a one-shot `seed` that reuses the `runcty-api` image. All services drop capabilities, set `no-new-privileges` and have memory, CPU and pid limits; `api` and `seed` are read-only. Python and Node base images are pinned by digest. `admin/Dockerfile` is outside this task, so `admin` got only the compose-level hardening.
+- Root scripts: `npm run seed` and `npm run api` run Django from `backend/` and need the venv active. `scripts/seed-emulator.ts` stays until S6.
 
 ## Decisions taken in S1 (clients must follow them in S3 to S5)
 
