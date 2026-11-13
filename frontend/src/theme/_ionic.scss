@@ -1,0 +1,45 @@
+// Maps the design tokens onto Ionic's theme variables. Every value is a token reference, so a
+// token override in an area (or a dark theme) reaches Ionic components with no extra code.
+
+:root {
+  --ion-font-family: var(--rc-font-family);
+  --ion-background-color: var(--rc-background);
+  --ion-text-color: var(--rc-text);
+  --ion-border-color: var(--rc-border);
+  --ion-item-background: var(--rc-background);
+  --ion-card-background: var(--rc-surface-elevated);
+  --ion-toolbar-background: var(--rc-background);
+  --ion-toolbar-color: var(--rc-text);
+  --ion-tab-bar-background: var(--rc-background);
+  --ion-tab-bar-color: var(--rc-text-muted);
+  --ion-tab-bar-color-selected: var(--rc-primary-text);
+
+  --ion-color-primary: var(--rc-primary);
+  --ion-color-primary-contrast: var(--rc-on-primary);
+  --ion-color-primary-shade: var(--rc-primary-pressed);
+  --ion-color-primary-tint: var(--rc-primary);
+
+  --ion-color-danger: var(--rc-danger);
+  --ion-color-danger-contrast: var(--rc-on-primary);
+  --ion-color-success: var(--rc-success);
+  --ion-color-warning: var(--rc-warning);
+}
+
+// Ionic computes some translucent surfaces from the RGB triplets, so they are set per scheme.
+:root {
+  --ion-color-primary-rgb: 201, 48, 44;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+}
+
+ion-button {
+  --border-radius: var(--rc-radius-md);
+  min-height: var(--rc-min-touch-target);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+ion-input,
+ion-select {
+  min-height: var(--rc-min-touch-target);
+}

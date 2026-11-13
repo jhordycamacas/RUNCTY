@@ -1,0 +1,81 @@
+@use 'palette' as p;
+
+// Design tokens as CSS variables. Light is the default; dark follows the system, and
+// `data-theme` on <html> forces either one. Each area (`.area-runner`, `.area-admin`) may
+// override any token, see _areas.scss.
+
+@mixin light-colors {
+  --rc-background: #{p.$white};
+  --rc-surface: #{p.$grey50};
+  --rc-surface-elevated: #{p.$white};
+  --rc-border: #{p.$grey300};
+  --rc-text: #{p.$black};
+  --rc-text-muted: #{p.$grey600};
+  --rc-primary: #{p.$red600};
+  --rc-primary-pressed: #{p.$red700};
+  --rc-primary-tint: #{p.$red100};
+  --rc-on-primary: #{p.$white};
+  --rc-primary-text: #{p.$red600};
+  --rc-success: #{p.$green600};
+  --rc-warning: #{p.$amber700};
+  --rc-danger: #{p.$red600};
+  --rc-success-tint: #{p.$green50};
+  --rc-warning-tint: #{p.$amber50};
+  --rc-danger-tint: #{p.$red50};
+}
+
+@mixin dark-colors {
+  --rc-background: #{p.$black};
+  --rc-surface: #{p.$grey900};
+  --rc-surface-elevated: #{p.$grey900};
+  --rc-border: #{p.$grey800};
+  --rc-text: #{p.$white};
+  --rc-text-muted: #{p.$grey400};
+  --rc-primary: #{p.$red600};
+  --rc-primary-pressed: #{p.$red700};
+  --rc-primary-tint: #{p.$grey800};
+  --rc-on-primary: #{p.$white};
+  --rc-primary-text: #{p.$red300};
+  --rc-success: #{p.$green300};
+  --rc-warning: #{p.$amber300};
+  --rc-danger: #{p.$red400};
+  --rc-success-tint: #{p.$green900};
+  --rc-warning-tint: #{p.$amber900};
+  --rc-danger-tint: #{p.$red900};
+}
+
+:root {
+  @include light-colors;
+
+  --rc-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --rc-font-size-caption: 0.75rem;
+  --rc-font-size-label: 0.875rem;
+  --rc-font-size-body: 1rem;
+  --rc-font-size-subtitle: 1.125rem;
+  --rc-font-size-title: 1.5rem;
+  --rc-font-size-display: 2rem;
+
+  --rc-space-xs: 4px;
+  --rc-space-sm: 8px;
+  --rc-space-md: 12px;
+  --rc-space-lg: 16px;
+  --rc-space-xl: 24px;
+  --rc-space-xxl: 32px;
+
+  --rc-radius-sm: 6px;
+  --rc-radius-md: 10px;
+  --rc-radius-lg: 16px;
+
+  // Minimum touch target (accessibility: controls >= 48px).
+  --rc-min-touch-target: 48px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include dark-colors;
+  }
+}
+
+:root[data-theme='dark'] {
+  @include dark-colors;
+}

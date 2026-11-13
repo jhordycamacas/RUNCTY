@@ -1,0 +1,14 @@
+// Per-area token overrides. The shell of each area sets its class, so nothing outside the area
+// changes. The runner is mobile-first and roomy; the admin is desktop-first and compact.
+
+.area-runner {
+  --rc-radius-md: 14px;
+}
+
+.area-admin {
+  --rc-font-size-body: 0.9375rem;
+  --rc-space-lg: 14px;
+  --rc-radius-md: 8px;
+  --rc-min-touch-target: 40px;
+  --rc-sidebar-background: var(--rc-surface);
+}
