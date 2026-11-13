@@ -17,6 +17,23 @@ describe('mapAuthError', () => {
     expect(mapAuthError({ code: 'auth/network-request-failed' })).toContain('conexión');
   });
 
+  it('translates the sign-up and session failures', () => {
+    expect(mapAuthError({ code: 'auth/email-already-in-use' })).toBe(
+      'Ya existe una cuenta con este correo.',
+    );
+    expect(mapAuthError({ code: 'auth/weak-password' })).toContain('demasiado débil');
+    expect(mapAuthError({ code: 'auth/requires-recent-login' })).toContain('cierra sesión');
+  });
+
+  it('speaks about the current password when re-authenticating', () => {
+    const wrong = 'La contraseña actual no es correcta.';
+    expect(mapAuthError({ code: 'auth/invalid-credential' }, 'reauthenticate')).toBe(wrong);
+    expect(mapAuthError({ code: 'auth/wrong-password' }, 'reauthenticate')).toBe(wrong);
+    expect(mapAuthError({ code: 'auth/too-many-requests' }, 'reauthenticate')).toContain(
+      'Demasiados intentos',
+    );
+  });
+
   it('falls back to the generic text for unknown codes and non-error values', () => {
     expect(mapAuthError({ code: 'auth/other' })).toBe(UNEXPECTED_ERROR_MESSAGE);
     expect(mapAuthError({ code: 5 })).toBe(UNEXPECTED_ERROR_MESSAGE);

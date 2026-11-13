@@ -7,6 +7,10 @@ import { bearerTokenInterceptor } from './core/api/bearer-token.interceptor';
 import { FirebaseAuthGateway } from './core/auth/firebase-auth.gateway';
 import { SdkFirebaseAuthGateway } from './core/auth/sdk-firebase-auth.gateway';
 import { routes } from './app.routes';
+import { UsersRepository } from './auth/domain/ports';
+import { HttpUsersRepository } from './auth/infrastructure/http-users.repository';
+import { CityRepository } from './cities/domain/city';
+import { HttpCityRepository } from './cities/infrastructure/http-city.repository';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,5 +20,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([bearerTokenInterceptor, apiErrorInterceptor])),
     { provide: FirebaseAuthGateway, useClass: SdkFirebaseAuthGateway },
+    { provide: UsersRepository, useClass: HttpUsersRepository },
+    { provide: CityRepository, useClass: HttpCityRepository },
   ],
 };

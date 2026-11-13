@@ -42,9 +42,23 @@ export class AuthService {
     }
   }
 
+  /** Always clears the session, even if Firebase fails (for example after the account is gone). */
   async signOut(): Promise<void> {
-    await this.gateway.signOut();
-    this.current.set(null);
+    try {
+      await this.gateway.signOut();
+    } finally {
+      this.current.set(null);
+    }
+  }
+
+  /**
+   * Re-reads the user and the session from the server with a fresh token: after sign-up (the API
+   * has just assigned the role) and after the user verifies the email.
+   */
+  async refreshSession(): Promise<void> {
+    await this.gateway.reloadUser();
+    await this.gateway.getIdToken(true);
+    await this.loadSession();
   }
 
   can(permission: Permission): boolean {

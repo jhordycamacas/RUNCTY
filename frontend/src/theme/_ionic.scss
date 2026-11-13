@@ -42,4 +42,43 @@ ion-button {
 ion-input,
 ion-select {
   min-height: var(--rc-min-touch-target);
+  font-size: var(--rc-font-size-body);
+}
+
+// Controls keep a 3:1 contrast against the page in both themes (WCAG 1.4.11).
+ion-input {
+  --border-color: var(--rc-control-border);
+}
+
+ion-checkbox {
+  --border-color: var(--rc-control-border);
+  --border-color-checked: var(--rc-primary);
+  min-height: var(--rc-min-touch-target);
+}
+
+ion-toggle {
+  --track-background: var(--rc-control-border);
+  --track-background-checked: var(--rc-primary);
+  --handle-background: var(--rc-background);
+  --handle-background-checked: var(--rc-on-primary);
+  min-height: var(--rc-min-touch-target);
+}
+
+ion-radio {
+  --color: var(--rc-control-border);
+  --color-checked: var(--rc-primary);
+  min-height: var(--rc-min-touch-target);
+}
+
+ion-item {
+  --border-color: var(--rc-border);
+  --min-height: var(--rc-min-touch-target);
+}
+
+ion-segment {
+  --background: var(--rc-surface);
+}
+
+ion-segment-button {
+  min-height: var(--rc-min-touch-target);
 }

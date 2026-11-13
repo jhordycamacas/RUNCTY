@@ -5,38 +5,23 @@ import { ApiError } from '../errors/api-error';
 import { Session } from '../permissions/permissions';
 import { AuthService } from './auth.service';
 import { FirebaseAuthGateway } from './firebase-auth.gateway';
+import { FakeFirebaseAuthGateway } from './testing/fake-firebase-auth.gateway';
 
-const ME = { uid: 'u1', email: 'ana@example.com', emailVerified: true, role: 'runner', perms: ['users.read'] };
-
-class FakeGateway extends FirebaseAuthGateway {
-  user = false;
-  signInError: unknown = null;
-  readonly calls: string[] = [];
-
-  async signIn(email: string, password: string): Promise<void> {
-    this.calls.push(`signIn:${email}:${password}`);
-    if (this.signInError) throw this.signInError;
-    this.user = true;
-  }
-  async signOut(): Promise<void> {
-    this.calls.push('signOut');
-    this.user = false;
-  }
-  async hasUser(): Promise<boolean> {
-    return this.user;
-  }
-  async getIdToken(): Promise<string | null> {
-    return this.user ? 'token' : null;
-  }
-}
+const ME = {
+  uid: 'u1',
+  email: 'ana@example.com',
+  emailVerified: true,
+  role: 'runner',
+  perms: ['users.read'],
+};
 
 describe('AuthService', () => {
-  let gateway: FakeGateway;
+  let gateway: FakeFirebaseAuthGateway;
   let api: { get: ReturnType<typeof vi.fn> };
   let service: AuthService;
 
   beforeEach(() => {
-    gateway = new FakeGateway();
+    gateway = new FakeFirebaseAuthGateway();
     api = { get: vi.fn().mockReturnValue(of(ME)) };
     TestBed.configureTestingModule({
       providers: [
@@ -102,9 +87,11 @@ describe('AuthService', () => {
     });
 
     it('does not call the API when Firebase rejects the credentials', async () => {
-      gateway.signInError = { code: 'auth/invalid-credential' };
+      gateway.failures.signIn = { code: 'auth/invalid-credential' };
 
-      await expect(service.signIn('ana@example.com', 'bad')).rejects.toEqual({ code: 'auth/invalid-credential' });
+      await expect(service.signIn('ana@example.com', 'bad')).rejects.toEqual({
+        code: 'auth/invalid-credential',
+      });
       expect(api.get).not.toHaveBeenCalled();
       expect(service.session()).toBeNull();
     });
@@ -116,6 +103,37 @@ describe('AuthService', () => {
       expect(gateway.calls).toContain('signOut');
       expect(service.session()).toBeNull();
     });
+  });
+
+  describe('refreshSession', () => {
+    it('reloads the user, forces a fresh token, then reads /me again', async () => {
+      await service.signIn('ana@example.com', 'secret');
+      api.get.mockReturnValue(of({ ...ME, emailVerified: false }));
+
+      await service.refreshSession();
+
+      expect(gateway.calls.slice(-2)).toEqual(['reloadUser', 'getIdToken:forced']);
+      expect(api.get).toHaveBeenCalledTimes(2);
+      expect(service.session()?.emailVerified).toBe(false);
+    });
+
+    it('keeps the current session when the reload fails', async () => {
+      await service.signIn('ana@example.com', 'secret');
+      gateway.failures.reloadUser = { code: 'auth/network-request-failed' };
+
+      await expect(service.refreshSession()).rejects.toEqual({
+        code: 'auth/network-request-failed',
+      });
+      expect(service.session()?.uid).toBe('u1');
+    });
+  });
+
+  it('signOut clears the session even when Firebase fails', async () => {
+    await service.signIn('ana@example.com', 'secret');
+    gateway.failures.signOut = { code: 'auth/network-request-failed' };
+
+    await expect(service.signOut()).rejects.toBeDefined();
+    expect(service.session()).toBeNull();
   });
 
   it('signOut clears the session', async () => {

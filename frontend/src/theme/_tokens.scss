@@ -9,6 +9,7 @@
   --rc-surface: #{p.$grey50};
   --rc-surface-elevated: #{p.$white};
   --rc-border: #{p.$grey300};
+  --rc-control-border: #{p.$grey500};
   --rc-text: #{p.$black};
   --rc-text-muted: #{p.$grey600};
   --rc-primary: #{p.$red600};
@@ -27,8 +28,9 @@
 @mixin dark-colors {
   --rc-background: #{p.$black};
   --rc-surface: #{p.$grey900};
-  --rc-surface-elevated: #{p.$grey900};
-  --rc-border: #{p.$grey800};
+  --rc-surface-elevated: #{p.$grey800};
+  --rc-border: #{p.$grey700};
+  --rc-control-border: #{p.$grey500};
   --rc-text: #{p.$white};
   --rc-text-muted: #{p.$grey400};
   --rc-primary: #{p.$red600};
@@ -68,6 +70,13 @@
 
   // Minimum touch target (accessibility: controls >= 48px).
   --rc-min-touch-target: 48px;
+
+  // Multiplies the root font size; the font-size preference sets it (small .9 ... xlarge 1.3).
+  --rc-font-scale: 1;
+}
+
+html {
+  font-size: calc(100% * var(--rc-font-scale));
 }
 
 @media (prefers-color-scheme: dark) {

@@ -4,25 +4,14 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { FirebaseAuthGateway } from '../auth/firebase-auth.gateway';
+import { FakeFirebaseAuthGateway } from '../auth/testing/fake-firebase-auth.gateway';
 import { ApiError } from '../errors/api-error';
 import { ApiClient } from './api-client';
 import { apiErrorInterceptor } from './api-error.interceptor';
 import { bearerTokenInterceptor } from './bearer-token.interceptor';
 
-class FakeGateway extends FirebaseAuthGateway {
-  token: string | null = 'id-token';
-  signIn = () => Promise.resolve();
-  signOut = () => Promise.resolve();
-  async hasUser(): Promise<boolean> {
-    return this.token !== null;
-  }
-  async getIdToken(): Promise<string | null> {
-    return this.token;
-  }
-}
-
 describe('API interceptors', () => {
-  let gateway: FakeGateway;
+  let gateway: FakeFirebaseAuthGateway;
   let http: HttpTestingController;
 
   /** The token is read asynchronously, so the request reaches the backend a tick later. */
@@ -34,7 +23,8 @@ describe('API interceptors', () => {
     });
 
   beforeEach(() => {
-    gateway = new FakeGateway();
+    gateway = new FakeFirebaseAuthGateway();
+    gateway.user = true;
     TestBed.configureTestingModule({
       providers: [
         { provide: FirebaseAuthGateway, useValue: gateway },
@@ -51,13 +41,13 @@ describe('API interceptors', () => {
     const pending = firstValueFrom(TestBed.inject(ApiClient).get('/me'));
     const request = await sentRequest(`${environment.apiBaseUrl}/me`);
 
-    expect(request.request.headers.get('Authorization')).toBe('Bearer id-token');
+    expect(request.request.headers.get('Authorization')).toBe('Bearer token');
     request.flush({});
     await pending;
   });
 
   it('sends no header when nobody is signed in (public endpoints)', async () => {
-    gateway.token = null;
+    gateway.user = false;
     const pending = firstValueFrom(TestBed.inject(ApiClient).get('/cities'));
     const request = await sentRequest(`${environment.apiBaseUrl}/cities`);
 
@@ -78,7 +68,10 @@ describe('API interceptors', () => {
   it('turns an API failure into an ApiError with the Spanish message', async () => {
     const pending = firstValueFrom(TestBed.inject(ApiClient).post('/roles', {}));
     const request = await sentRequest(`${environment.apiBaseUrl}/roles`);
-    request.flush({ error: { reason: 'role-exists', message: 'x' } }, { status: 409, statusText: 'Conflict' });
+    request.flush(
+      { error: { reason: 'role-exists', message: 'x' } },
+      { status: 409, statusText: 'Conflict' },
+    );
 
     const error = await pending.catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ApiError);
@@ -86,7 +79,9 @@ describe('API interceptors', () => {
   });
 
   it('sends query parameters', async () => {
-    const pending = firstValueFrom(TestBed.inject(ApiClient).get('/users', { limit: 20, q: 'ana' }));
+    const pending = firstValueFrom(
+      TestBed.inject(ApiClient).get('/users', { limit: 20, q: 'ana' }),
+    );
     const request = await sentRequest(`${environment.apiBaseUrl}/users?limit=20&q=ana`);
 
     request.flush({});
