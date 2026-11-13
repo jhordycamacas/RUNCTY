@@ -6,8 +6,6 @@ import { AuthService } from '../../core/auth/auth.service';
 import { FirebaseAuthGateway } from '../../core/auth/firebase-auth.gateway';
 import { homeUrl } from '../../core/auth/home-route';
 import { userMessage } from '../../core/errors/user-message';
-import { CityPickerField } from '../../cities/presentation/city-picker-field';
-import { BirthDateField } from '../../shared/ui/birth-date-field';
 import { formValues } from '../../shared/forms/form-values';
 import { Notice } from '../../shared/ui/notice';
 import { TextField } from '../../shared/ui/text-field';
@@ -16,6 +14,7 @@ import { UsersRepository } from '../domain/ports';
 import { PASSWORD_HINT } from '../domain/password-policy';
 import { RegisterField, RegisterInput, validateRegistration } from '../domain/registration';
 import { AuthLayout } from './auth-layout';
+import { PersonalDataFields } from './personal-data-fields';
 
 const LOPDP_TEXT =
   'RUNCTY usará tus datos (nombre, correo, fecha de nacimiento, ciudad y, si lo indicas, tu cédula) solo para ' +
@@ -32,9 +31,8 @@ const LOPDP_TEXT =
     IonCheckbox,
     IonSpinner,
     AuthLayout,
-    BirthDateField,
-    CityPickerField,
     Notice,
+    PersonalDataFields,
     TextField,
   ],
   template: `
@@ -42,31 +40,7 @@ const LOPDP_TEXT =
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <fieldset>
           <legend>Tus datos</legend>
-          <app-text-field
-            formControlName="firstName"
-            label="Nombres"
-            autocomplete="given-name"
-            enterkeyhint="next"
-            [error]="fieldError('firstName')"
-          />
-          <app-text-field
-            formControlName="lastName"
-            label="Apellidos"
-            autocomplete="family-name"
-            enterkeyhint="next"
-            [error]="fieldError('lastName')"
-          />
-          <app-birth-date-field formControlName="birthDate" [error]="fieldError('birthDate')" />
-          <app-city-picker-field formControlName="cityId" [error]="fieldError('cityId')" />
-          <app-text-field
-            formControlName="idNumber"
-            label="Cédula (opcional)"
-            inputmode="numeric"
-            hint="10 dígitos. Puedes dejarlo vacío."
-            enterkeyhint="next"
-            [maxlength]="10"
-            [error]="fieldError('idNumber')"
-          />
+          <app-personal-data-fields [form]="form" [errorFor]="errorFor" />
         </fieldset>
 
         <fieldset>
@@ -191,6 +165,8 @@ export class RegisterPage {
   private readonly submitted = signal(false);
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
+
+  protected readonly errorFor = (name: RegisterField) => this.fieldError(name);
 
   /** A message shows once the field was visited or a submit was attempted. */
   protected fieldError(name: RegisterField): string | null {
