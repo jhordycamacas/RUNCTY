@@ -1,5 +1,7 @@
 # Feature: Django backend + Angular web panel (frontend/backend split)
 
+> **Frontend decisions superseded on 2026-11-13** by `single-frontend-ionic.md` (one Angular + Ionic + Capacitor app instead of React Native + Angular). Backend decisions, API contract and audit findings below remain valid.
+
 - **Branch:** `feat/django-angular-architecture` (from `feat/hardening-and-polish` at `7d36585`)
 - **Started:** 2026-11-11
 - **Engram mirror:** `odd/django-angular-architecture/tasks` — **pending** (Engram tools were unavailable in this session)
@@ -139,7 +141,7 @@ Paths that break on the move: `firebase.json` (`source`, rules), `docker-compose
 
 - [x] **T1 — Backend scaffold.** Django + DRF project in `backend/` with a feature-first hexagonal layout, Firebase integration (Auth, Firestore, Storage, FCM accessors), token authentication, permission classes, error handling, hardened settings, health and `me` endpoints, pytest suite, Dockerfile. Route: delegated writer (2+ non-trivial files).
 - [x] **T2 — Port users, roles and account logic** to Django (profile, sport profile, preferences, roles CRUD, role assignment, user search, account deletion), with the audit fixes NEW-01 to NEW-04 and the Vitest specs ported to pytest.
-- [ ] **T3 — Port cities, routes and the safety index** to Django, with the specs ported to pytest.
+- [x] **T3 — Port cities, routes and the safety index** to Django, with the specs ported to pytest.
 - [ ] **T4 — Python seed and infrastructure:** seed command in Django, Firebase config under `backend/`, deny-all Firestore rules, Docker Compose with the API service; remove `functions/` and the TypeScript seed.
 - [ ] **T5 — Move the app to `frontend/mobile`** and switch its infrastructure layer from Firestore/callables to the Django API.
 - [ ] **T6 — Angular admin panel** in `frontend/web` with feature parity (login, users, roles, cities and zones, routes with segments, time slots and risk factors), including the pending panel UX fixes; remove `admin/`.
