@@ -6,6 +6,7 @@ urlpatterns = [
     path("api/v1/", include("apps.users.presentation.urls")),
     path("api/v1/", include("apps.roles.presentation.urls")),
     path("api/v1/", include("apps.cities.presentation.urls")),
+    path("api/v1/", include("apps.routes.presentation.urls")),
 ]
 
 handler404 = "apps.shared.presentation.errors.not_found"

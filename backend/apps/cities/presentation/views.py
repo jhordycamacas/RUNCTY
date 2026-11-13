@@ -21,7 +21,7 @@ from apps.cities.presentation.serializers import (
 from apps.shared.presentation.adapters import adapter
 from apps.shared.presentation.permissions import HasPermission
 from apps.shared.presentation.serializers import validated_body, validated_query
-from apps.shared.presentation.throttles import SENSITIVE_THROTTLES
+from apps.shared.presentation.throttles import SENSITIVE_THROTTLES, SensitiveWritesMixin
 
 logger = logging.getLogger(__name__)
 
@@ -32,16 +32,11 @@ def _deps() -> CitiesDeps:
     return CitiesDeps(cities=adapter("CITY_REPOSITORY"), usage=adapter("CITY_USAGE"))
 
 
-class CitiesView(APIView):
+class CitiesView(SensitiveWritesMixin, APIView):
     """`GET` is the public catalogue (the sign-up form lists it); `POST` needs `cities.manage`."""
 
     def get_permissions(self):
         return [AllowAny() if self.request.method in SAFE_METHODS else CanManageCities()]
-
-    def get_throttles(self):
-        if self.request.method in SAFE_METHODS:
-            return super().get_throttles()
-        return [throttle() for throttle in SENSITIVE_THROTTLES]
 
     def get(self, request) -> Response:
         query = validated_query(CityQuerySerializer, request)

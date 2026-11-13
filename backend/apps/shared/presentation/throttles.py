@@ -1,3 +1,4 @@
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.throttling import SimpleRateThrottle
 
 from apps.shared.domain.models import Principal
@@ -53,3 +54,12 @@ class SensitiveRateThrottle(PrincipalRateThrottle):
 
 # `throttle_classes` of a sensitive view: the default limits plus the tighter one.
 SENSITIVE_THROTTLES = (IpRateThrottle, PrincipalRateThrottle, SensitiveRateThrottle)
+
+
+class SensitiveWritesMixin:
+    """A view whose reads use the default limits and whose changes use the tighter one."""
+
+    def get_throttles(self):
+        if self.request.method in SAFE_METHODS:
+            return super().get_throttles()
+        return [throttle() for throttle in SENSITIVE_THROTTLES]

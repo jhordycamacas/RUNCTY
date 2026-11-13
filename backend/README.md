@@ -55,6 +55,12 @@ gunicorn as a non-root user and contains no configuration or credentials.
 | `POST /api/v1/cities` | `cities.manage` | 201 with the city. Body: `id`, `name`, `province`, `type`, `location`, `coverage`, `parentCityId` (zones) |
 | `PATCH /api/v1/cities/{id}` | `cities.manage` | the updated city. Body: any of `name`, `province`, `location`, `coverage`, `parentCityId` |
 | `DELETE /api/v1/cities/{id}` | `cities.manage` | 204 |
+| `GET /api/v1/routes` | signed in | `{"routes": [...]}` sorted by name; inactive routes only with `routes.manage`. Query: `cityId` |
+| `GET /api/v1/routes/{id}` | signed in | the route with `segments` (in route order, each with its `safety`); `timeSlots` and each segment's `riskFactors` only with `routes.manage`, which also reads inactive routes |
+| `POST /api/v1/routes`, `PUT`, `DELETE /api/v1/routes/{id}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `name`, `cityId`, `description?`, `start`, `end` (`{lat, lng, label}`), `distanceKm`, `elevationGainM`, `surface`, `difficulty`, `active?` |
+| `POST /api/v1/routes/{id}/segments`, `PUT`, `DELETE .../segments/{sid}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `name`, `coordinates` (`[{lat, lng}]`), `order?` |
+| `POST /api/v1/routes/{id}/time-slots`, `PUT`, `DELETE .../time-slots/{slotId}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `startTime`, `endTime`, `label?`, `validFrom?`, `validTo?` |
+| `POST /api/v1/routes/{id}/segments/{sid}/risk-factors`, `PUT`, `DELETE .../risk-factors/{fid}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `type`, `severity`, `description`, `startTime?`, `endTime?` |
 
 JSON only, camelCase keys. Every error has the same shape; clients branch on `reason` and
 translate it, `message` is for developers:
@@ -145,6 +151,40 @@ with `city-has-routes` while a route references the city and `city-has-zones` wh
 has zones. A zone's parent must be an existing city, not another zone. `GET` needs no token
 (the sign-up form lists the cities), but a token that is sent and bad is still a 401.
 
+### Routes and the safety index
+
+Reason codes are the ones the route callables used: `invalid-route-id`, `invalid-segment-id`,
+`invalid-time-slot-id`, `invalid-risk-factor-id`, `invalid-city-id`, `invalid-route-name`,
+`invalid-route-description`, `invalid-route-start`, `invalid-route-end`, `invalid-distance`,
+`invalid-elevation-gain`, `invalid-surface`, `invalid-difficulty`, `invalid-active`,
+`invalid-segment-name`, `invalid-coordinates`, `invalid-segment-order`, `invalid-slot-label`,
+`invalid-start-time`, `invalid-end-time`, `invalid-time-range`, `invalid-valid-from`,
+`invalid-valid-to`, `invalid-date-range`, `invalid-factor-type`, `invalid-severity`,
+`invalid-factor-description` (400); `time-slot-overlap`, `too-many-segments` (50),
+`too-many-time-slots` (12), `too-many-risk-factors` (20 per segment) (400); `route-not-found`,
+`segment-not-found`, `time-slot-not-found`, `risk-factor-not-found`, `city-not-found` (404).
+
+- **Validation.** The serializers only reject unknown fields; the domain checks every type and
+  value so each failure keeps the reason of the callable (`distanceKm: "5"` is
+  `invalid-distance`, not a generic shape error). Ids in the path must match
+  `[A-Za-z0-9_-]{1,64}`. Optional fields that a `PUT` leaves out are removed from the document.
+- **Visibility.** A route that is not `active` does not exist (404) for a user without
+  `routes.manage`, and the list leaves it out. Time slots and risk factors are served only to
+  `routes.manage`; the computed `safety` of the route and of each segment is public to signed-in
+  users because the app shows it.
+- **Safety index (RF-07).** Each segment starts at 100 points per time slot; every risk factor
+  whose window overlaps the slot (no window means all day) subtracts 10 (`low`), 20 (`medium`)
+  or 35 (`high`), down to 0. Levels: `high` from 70, `medium` 40-69, `low` below 40. A route takes
+  the level of its worst segment per slot (ties: the first in route order) and keeps the factors
+  that explain it. `CalculadoraIndiceSeguridad` accepts `extra_penalties` for later sources such
+  as community reports. Slot windows are half-open (`06:00-09:00` and `09:00-12:00` do not
+  overlap) and the slots of a route never overlap.
+- **Consistency.** Every slot, factor or segment mutation recalculates the `safety` of every
+  segment and of the route, `segmentCount` and `safetyUpdatedAt` in the same Firestore
+  transaction (the planner can run again on a retry). Segment `order` stays contiguous 0..n-1:
+  creating or moving a segment shifts the others and deleting one closes the gap. Deleting a
+  route or a segment also deletes everything under it. The Firestore data model is unchanged.
+
 | Status | `reason` |
 | --- | --- |
 | 401 | `unauthenticated`, `invalid-token`, `token-expired`, `token-revoked`, `user-disabled` |
@@ -164,7 +204,7 @@ has zones. A zone's parent must be an existing city, not another zone. `GET` nee
 | `CORS_ALLOWED_ORIGINS` | for browser clients | Comma-separated origins. No wildcard; empty allows none. |
 | `THROTTLE_RATE_IP`, `THROTTLE_RATE_USER` | no (`120/min`, `240/min`) | DRF rates per address and per uid. |
 | `THROTTLE_RATE_AUTH_FAILED` | no (`20/min`) | Rejected bearer tokens allowed per address before it is blocked. |
-| `THROTTLE_RATE_SENSITIVE` | no (`30/min`) | Extra per-uid rate for the role endpoints and the user search. |
+| `THROTTLE_RATE_SENSITIVE` | no (`30/min`) | Extra per-uid rate for the role endpoints, the user search and every change to cities and routes. |
 | `FIREBASE_PROJECT_ID` | when not debug | Firebase project. `demo-*` ids are emulator-only. |
 | `FIREBASE_STORAGE_BUCKET` | for Storage | Default bucket. |
 | `GOOGLE_APPLICATION_CREDENTIALS` | see below | Path to a service-account JSON outside the repository. |
@@ -210,6 +250,10 @@ apps/
   users/                     Usuario, PerfilDeportivo, PreferenciaUsuario: sign-up, own
                              profile, sport profile, preferences, account deletion, search
   roles/                     Rol, role CRUD, role assignment
+  cities/                    Ciudad: public catalogue of cities and zones, CRUD
+  routes/                    Ruta, Tramo, FranjaHoraria, FactorDeRiesgo, IndiceSeguridad and
+                             CalculadoraIndiceSeguridad: routes, segments, time slots, risk
+                             factors and the safety index
 tests/                       pytest suite with in-memory adapters
 ```
 
