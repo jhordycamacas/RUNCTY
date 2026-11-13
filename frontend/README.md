@@ -9,12 +9,15 @@ One Angular 22 + Ionic 9 + Capacitor 8 app for the web (browser) and Android (AP
 ```
 src/app/
   core/          API client, interceptors, error mapping, auth service (+ Firebase gateway port), permissions, guards
-  shared/        base UI (text field, birth date, notice, confirm dialog), form helpers, pages (403, 404)
+  shared/        base UI (text field, birth date, notice, confirm dialog, choice chips), form helpers, pages (403, 404)
   auth/          sign in, sign up, password reset, email verification banner
   account/       profile, personal data, password change, account deletion
   sport-profile/ sport profile (create, edit, delete)
   preferences/   appearance, font size, units, notifications, location privacy
   cities/        city catalogue and the city picker
+  routes/        route catalog: list with filter chips, detail, safety level per time slot, recommended routes
+  training/      the fixed recommended training slots (05:00-07:00, 18:00-20:00)
+  emergency/     SOS button of the runner shell: confirmation, then the phone dialer for 911 (`tel:911`)
   runner/        /app    runner area shell, Home, routes (mobile-first, bottom tabs)
   admin/         /admin  admin area, desktop-first, side menu (ion-split-pane)
 src/theme/   design tokens (CSS variables), Ionic mapping, per-area overrides, Inter font
@@ -24,6 +27,10 @@ src/environments/  development (emulators) and production (placeholders)
 The two areas are lazy-loaded bundles. Guards read the role and permissions from `GET /me` (never from the client alone): `admin.access`, `users.read`, `roles.manage`, `cities.manage`, `routes.manage`. `/admin` opens the first section the user may use.
 
 Each feature folder is layered: `domain` (types, rules, ports as abstract classes), `application` (use cases and signal stores), `infrastructure` (HTTP repositories over `ApiClient`, local storage, DOM) and `presentation` (Angular + Ionic pages). The ports are bound to their adapters in `app.config.ts`; specs swap them for fakes. Firebase Auth is used only to sign up/in/out, re-authenticate, reset the password and verify the email; the profile, sport profile, preferences and account deletion go through the API.
+
+### Routes and safety wording
+
+`GET /routes?cityId=` and `GET /routes/{id}` feed the Rutas tab and the Home section. The safety level of a route is shown per time slot as Alto, Medio or Bajo with the risk factors that explain it, and always with the notice that it is an estimate; the UI never calls a route "segura" or "insegura". "Abrir en Google Maps" is a plain `https://www.google.com/maps/search/?api=1&query=lat,lng` link (`target="_blank"`), so no map SDK or native plugin is needed. The emergency button never calls the API: it asks, then navigates to `tel:911`, which opens the dialer.
 
 ### Preferences and themes
 
