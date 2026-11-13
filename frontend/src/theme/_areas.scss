@@ -7,8 +7,16 @@
 
 .area-admin {
   --rc-font-size-body: 0.9375rem;
+  --rc-font-size-title: 1.25rem;
   --rc-space-lg: 14px;
   --rc-radius-md: 8px;
   --rc-min-touch-target: 40px;
   --rc-sidebar-background: var(--rc-surface);
+}
+
+// Touch screens (a tablet, or the admin on a phone) keep the full 48px target.
+@media (pointer: coarse) {
+  .area-admin {
+    --rc-min-touch-target: 48px;
+  }
 }

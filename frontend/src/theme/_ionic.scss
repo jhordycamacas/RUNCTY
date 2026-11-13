@@ -82,3 +82,9 @@ ion-segment {
 ion-segment-button {
   min-height: var(--rc-min-touch-target);
 }
+
+// Confirm buttons of destructive actions (see ConfirmDialog) read as danger, not as a normal action.
+.alert-destructive {
+  color: var(--rc-danger);
+  font-weight: 700;
+}
