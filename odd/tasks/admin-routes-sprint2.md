@@ -60,7 +60,7 @@ Cross-cutting criteria:
 ## Tasks
 
 - [x] T1 Domain, validation and HTTP repository for route management (inputs, mappers, all endpoints). Route: delegated writer.
-- [ ] T2 Routes list and route form (RF-05-1 to 05-4). Route: delegated writer.
+- [x] T2 Routes list and route form (RF-05-1 to 05-4). Route: delegated writer.
 - [ ] T3 Route detail with segments (RF-05-5 to 05-8). Route: delegated writer.
 - [ ] T4 Time slots (RF-07-1 to 07-4). Route: delegated writer.
 - [ ] T5 Risk factors and safety summary (RF-07-5 to 07-11). Route: delegated writer.
@@ -86,6 +86,8 @@ Forecast: well above 400 authored lines (five screens with tests). Strategy: `as
 - 2026-11-16 T1 done (delegated writer). RED: `ng test` failed to compile (missing `admin/routes` modules, `Route.active`). GREEN: `ng test` 55 files / 396 tests passed; `ng lint` clean; `ng build` OK. Added `Route.active` to the runner domain, `admin/routes/domain` (managed-route types, inputs and `RouteAdminRepository` port; route, segment, time-slot and risk-factor form parsing with the API limits and client overlap check; `toManagedRouteDetail`) and `HttpRouteAdminRepository` (all route, segment, time-slot and risk-factor endpoints; the safety index comes inside `GET /routes/{id}`, there is no separate endpoint). Every route reason code was already mapped in `error-messages.ts`. Commit: `feat(frontend): add the admin route management domain and repository`.
 - Contract note for T5: a risk factor has an optional daily window (`startTime`/`endTime`), not a list of slots or validity dates; validity dates (`validFrom`/`validTo`) belong to time slots. The RF-07-5 row above follows the old wording; the screens must follow the contract.
 
+- 2026-11-16 T2 done (delegated writer). RED: `ng test` failed to compile (missing `admin-routes.store`, `route-places`, `slot-safety`, `routes-admin.page`, `route-form.page`). GREEN: `ng test` 62 files / 432 tests passed; `ng lint` clean; `ng build` OK with no budget warning. The `rutas` section now lazy-loads `admin/routes/routes-admin.routes.ts`, which provides `HttpRouteAdminRepository` and `AdminRoutesStore`; users, roles and cities still use the placeholder. List (`/admin/rutas`): city or zone picker ("Todas las ciudades" by default), text filter, loading, empty, error with retry, name, distance, difficulty, Activa/Inactiva and the level per slot (Alto/Medio/Bajo), delete with a destructive `confirmAction` and a toast. Form (`/nueva`, `/:id/editar`): field messages in Spanish, preload on edit, unsaved-changes guard, focus on the form heading, toast and back to the list; saving a route of another city switches the list to it. Decision: `ion-select` and `ion-textarea` added about 108 kB to the initial bundle (Ionic ships one module, so any component used anywhere lands in `main`) and broke the 1.2 MB budget; the admin uses new native `shared/ui/select-field.ts` and `textarea-field.ts` instead. Commit: `feat(frontend): add the admin routes list and route form`.
+
 ## Next step
 
-T2.
+T3.
