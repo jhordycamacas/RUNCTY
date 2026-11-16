@@ -21,6 +21,11 @@ addIcons({ lockClosedOutline, mapOutline, shieldOutline });
     </ion-content>
   `,
   styles: `
+    /* A wrapper inside the routed page: let ion-content fill the ion-page flex column. */
+    :host {
+      display: contents;
+    }
+
     .status {
       display: flex;
       flex-direction: column;
