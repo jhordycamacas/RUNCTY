@@ -34,8 +34,8 @@ All screens require the `routes.manage` permission, show Spanish UI copy, and ne
 | RF-07-2 | Consult time slots | The route detail lists its slots ordered by start time. |
 | RF-07-3 | Modify time slot | A slot can be edited; the overlap rule also applies. |
 | RF-07-4 | Delete time slot | Deleting asks for confirmation. |
-| RF-07-5 | Register risk factor | From a segment, a form adds a factor (type, severity low/medium/high, the slots where it applies, optional validity dates with date inputs, description as the contract defines). |
-| RF-07-6 | Consult risk factors | Each segment lists its factors with severity and slots. |
+| RF-07-5 | Register risk factor | From a segment, a form adds a factor (type, severity low/medium/high, description, and an optional daily window with time inputs: both times or none for all day). Validity dates belong to time slots, not factors. |
+| RF-07-6 | Consult risk factors | Each segment lists its factors with type, severity, description and daily window ("Todo el día" without one). |
 | RF-07-7 | Modify risk factor | A factor can be edited with its values preloaded. |
 | RF-07-8 | Delete risk factor | Deleting asks for confirmation. |
 | RF-07-9 | Calculate safety index | After any change to slots or factors, the detail shows the index returned by the API (score and level per slot, route and segment). The client never computes the index itself. |
@@ -64,8 +64,8 @@ Cross-cutting criteria:
 - [x] T3 Route detail with segments (RF-05-5 to 05-8). Route: delegated writer.
 - [x] T4 Time slots (RF-07-1 to 07-4). Route: delegated writer.
 - [x] T5 Risk factors and safety summary (RF-07-5 to 07-11). Route: delegated writer.
-- [ ] T6 Verification: unit tests, lint, build, and a live check against the Docker stack (API + emulators + frontend). Route: delegated verifier plus parent spot check.
-- [ ] T7 Docs: CONTEXTO.md section 17 and this document. Route: inline.
+- [x] T6 Verification: unit tests, lint, build, and a live check against the Docker stack (API + emulators + frontend). Route: delegated verifier plus parent spot check.
+- [x] T7 Docs: CONTEXTO.md section 17 and this document. Route: inline.
 
 Route declaration: delegated direct. Trigger evidence: many non-trivial new files across four layers, and the reading that prepares the write (API contract, existing patterns) exceeds the inline budget.
 
@@ -95,6 +95,9 @@ Forecast: well above 400 authored lines (five screens with tests). Strategy: `as
 
 - 2026-11-16 T5 done (delegated writer). RED: `ng test` failed to compile (missing `risk-factors-section`, `safety-summary-section`, `safetySummary`, `saveRiskFactor`/`deleteRiskFactor`). GREEN: `ng test` 68 files / 474 tests passed; `ng lint` clean; `ng build` OK, initial total 1.15 MB, no budget warning. `RouteDetailStore` gained `saveRiskFactor`/`deleteRiskFactor` on `mutate`. New `app-risk-factors` inside each `li.segment` (counted by `SegmentsSection.hasUnsavedChanges`): factors with type, "Severidad Baja/Media/Alta" and daily window ("Todo el día" without one), add and edit in an inline form (native selects for type and severity, description, optional native time inputs; preloaded, focus on the form heading, Spanish field and API messages), delete through a destructive `confirmAction`. New `app-safety-summary-section` (after the route summary): per rated slot the route level (Alto/Medio/Bajo), "Puntaje N de 100", "Tramo más expuesto" (the API `worstSegmentId` resolved to its name) and the factors that explain it, built by the pure `safetySummary(detail)`; it follows the detail the store reloads after every change. The client computes no score. The RF-07-5/07-6 rows mention slots and validity dates for factors; the screens follow the contract (optional daily window).
 
+- 2026-11-16 T6 done (delegated verifier, no source changes). `ng test --watch=false`: 68 files / 474 tests passed; `ng lint`: all files pass; `ng build`: OK, initial total 1.15 MB, no budget warning. The RUNCTY stack was down; `docker compose up -d` brought `runcty-firebase` and `runcty-api` up healthy (seed ran). Live walkthrough as `admin@runcty.dev` (Auth emulator token, API on `127.0.0.1:8000`, the repository's exact paths and bodies): 28/28 steps passed. Create route 201 → get 200 → update to inactive 204 → create segment 201 → two slots 201 (one without label, with validity and `24:00`) → overlapping slot 400 `time-slot-overlap` → factor with window and factor all day 201 → route and segment `safety` recalculated (morning 100 → 80 high, night 100 → 45 medium) → update factor 204 (night 70) → delete factor 204 (morning back to 100) → update slot without label 204 (label cleared to `null`) → delete slot 204 (slot and its safety entry gone) → update and delete segment 204 → `GET /routes?cityId=loja` and `GET /routes` include the inactive route → delete route 204, then 404 `route-not-found`. All test data removed. Real JSON field names match the mappers (route, segment with `riskFactors`, slot, factor with `null` times, route and segment slot safety). Browser check skipped: no Playwright or Puppeteer package in the repo or global npm (only cached browser binaries), and no new dependencies were installed, so `/admin/rutas` has not been opened in a browser yet.
+- 2026-11-16 T7 done. CONTEXTO.md section 17 records S5b and its decisions; RF-07-5/07-6 rows reworded to the contract.
+
 ## Next step
 
-T6: live verification against the Docker stack.
+Open `/admin/rutas` in a browser (desktop and about 360 px) against the Docker stack. Push and the PR of `feat/admin-routes-sprint2` are the user's decision.

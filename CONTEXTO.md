@@ -731,7 +731,7 @@ RUNCTY/
 | S4a Área del corredor: cuenta | **Hecha** | `add05a1`, `439b6fa`, `f5f3f83`. Registro con consentimiento, login, recuperar contraseña, correo sin verificar con "Reenviar correo", perfil, perfil deportivo, preferencias, cambiar contraseña, eliminar cuenta (reautenticación y `recent-sign-in-required`), selector de ciudad con búsqueda y fecha en tres campos. |
 | S4b Área del corredor: rutas | **Hecha** | `21f094c`, `00920a1`, `518e0be`, `464c06a`. Pestaña Rutas con filtros, tarjeta con "Factor principal", detalle con segmentos y factores, "Abrir en Google Maps", rutas recomendadas en Inicio y botón SOS (confirma y abre `tel:911`). |
 | S5a Área de admin: usuarios, roles y ciudades | **En curso (pausada)** | Solo está confirmado `8f69aac` (avisos globales y confirmación). El resto quedó a medias y se guardó en un `git stash` ("wip S5a admin users roles"); **no está en `main`**. |
-| S5b Área de admin: rutas, segmentos, franjas y factores | Pendiente | |
+| S5b Área de admin: rutas, segmentos, franjas y factores | **Hecha** (2026-11-16) | En la rama `feat/admin-routes-sprint2`: `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`. La gestión de rutas del Sprint 2 (RF-05-1 a RF-05-8 y RF-07-1 a RF-07-11; Jira RUN-14, RUN-28, RUN-73 a RUN-79 y RUN-87 a RUN-96) vive en `/admin/rutas` del frontend único: lista con rutas inactivas, formulario de ruta, detalle con tramos, franjas, factores de riesgo y resumen de seguridad. Detalle y evidencia en `odd/tasks/admin-routes-sprint2.md`. |
 | S6 Limpieza, Android y documentación | Pendiente | Borrar `frontend/mobile`, `admin/`, `functions/` y `scripts/seed-emulator.ts`; reglas de Firestore cerradas (deny-all); verificar web y APK; reescribir la sección 9, el README y el manual de Android. |
 
 **Pruebas observadas el 2026-11-13 (las ejecuté yo sobre el último commit):** backend 753 pruebas en verde y `ruff check` limpio; frontend 347 pruebas en verde (49 archivos), `ng build` correcto (paquete inicial de 1,12 MB, 238 kB transferidos). La APK de depuración compiló al cerrar S4b (5,4 MB).
@@ -746,13 +746,17 @@ RUNCTY/
 - Eliminar la cuenta exige un inicio de sesión reciente: el cliente reautentica y renueva el token antes de `DELETE /users/me`.
 - Las preferencias de apariencia y tamaño de letra sí se aplican (`data-theme` y `--rc-font-scale`); notificaciones y privacidad de ubicación se guardan pero están marcadas "Próximamente". La unidad (km/millas) se aplica en distancias y elevaciones; el ritmo sigue en min/km.
 - Los controles de formulario tienen un borde de contraste 3:1 y el tema oscuro tiene superficies distinguibles (hay una prueba que lo verifica).
+- Rutas en el admin (S5b): **no hay endpoint del índice de seguridad**. El backend lo recalcula en cada cambio de tramos, franjas o factores, y el admin lo lee siempre de `GET /routes/{id}` (recarga el detalle tras cada cambio). El cliente nunca calcula el puntaje.
+- Un factor de riesgo tiene tipo, severidad, descripción y una **ventana diaria opcional** (`startTime`/`endTime`, ambas o ninguna = todo el día). Las fechas de vigencia (`validFrom`/`validTo`) son de las **franjas**, no de los factores.
+- El admin usa campos nativos (`select`, `textarea`, `input type="time"` y `type="date"` en `shared/ui`) en lugar de `ion-select`, `ion-textarea` y los selectores de Ionic: Ionic entra entero al paquete inicial y rompía el presupuesto de 1,2 MB.
+- Los campos opcionales vacíos **se omiten** del cuerpo de la petición; nunca se envían como `null` (un PUT sin el campo lo borra).
 
 ### 17.4 Qué NO está verificado
 
 - **Nadie ha abierto el frontend nuevo en un navegador real** ni lo ha probado contra los emuladores y Django. La extensión de Chrome falló en todas las sesiones, así que todo está validado con pruebas unitarias y compilación. Es lo primero que hay que hacer al retomar.
 - **No se probó en el celular:** que `tel:911` abra el marcador de Android, que el enlace de Maps salga del WebView ni cómo se ve el botón SOS con títulos largos.
 - Angular 22 trabaja sin zone.js (zoneless); la interacción con Ionic en ejecución real no se ejercitó.
-- Docker: solo se validó `docker compose config`; las imágenes `api` y `seed` no se construyeron ni se ejecutaron.
+- Docker: solo se validó `docker compose config`; las imágenes `api` y `seed` no se construyeron ni se ejecutaron. **Actualización 2026-11-16:** el stack levantó sano y la API de rutas del admin se recorrió entera con `curl`/`fetch` (ruta, tramo, franjas, solape, factores, recálculo y borrados); las pantallas de `/admin/rutas` siguen sin abrirse en un navegador.
 - Casi todas las pruebas del frontend se escribieron junto con el código, sin ver antes el fallo (RED); solo se vio RED en el backend de S1 y S2 y en el mapa de errores.
 
 ### 17.5 Pendientes y avisos
@@ -773,5 +777,5 @@ RUNCTY/
 3. Comprobaciones del backend (desde `backend/` con `.venv`): `python -m pytest -q`, `ruff check .`, `ruff format --check .`, `DJANGO_DEBUG=true python manage.py check`.
 4. Comprobaciones del frontend (desde `frontend/`): `npx.cmd ng test --watch=false`, `npx.cmd ng lint`, `npx.cmd ng build`.
 5. Levantar todo en local: emuladores y API con `docker compose up -d --build` (Docker Desktop encendido) o sin Docker con `npm run emulators`, `npm run seed` y `npm run api`; el frontend con `npm start` desde `frontend/`. Usuario de prueba del emulador: `admin@runcty.dev` / `Admin123!`.
-6. Seguir con S5a (usuarios, roles y ciudades del admin), luego S5b (rutas) y S6 (limpieza).
+6. Seguir con S5a (usuarios, roles y ciudades del admin) y S6 (limpieza). S5b (rutas) está hecha en `feat/admin-routes-sprint2`; subirla y abrir el PR lo decide el usuario.
 7. **Antes de borrar `frontend/mobile`, `admin/` y `functions/`:** abrir el frontend nuevo en un navegador y recorrer el registro, el login, las rutas y el admin.
