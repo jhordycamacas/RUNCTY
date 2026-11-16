@@ -8,6 +8,7 @@ import { Notice } from '../../../shared/ui/notice';
 import { SubpageHeader } from '../../../shared/ui/subpage-header';
 import { RouteDetailStore } from '../application/route-detail.store';
 import { routeSlotLevels } from '../domain/slot-safety';
+import { SafetySummarySection } from './safety-summary-section';
 import { SegmentsSection } from './segments-section';
 import { SlotSafetyList } from './slot-safety-list';
 import { TimeSlotsSection } from './time-slots-section';
@@ -25,6 +26,7 @@ import { TimeSlotsSection } from './time-slots-section';
     IonContent,
     IonSpinner,
     Notice,
+    SafetySummarySection,
     SegmentsSection,
     SlotSafetyList,
     SubpageHeader,
@@ -64,6 +66,7 @@ import { TimeSlotsSection } from './time-slots-section';
           />
         </section>
 
+        <app-safety-summary-section class="block" />
         <app-time-slots-section class="block" />
         <app-segments-section class="block" />
       } @else if (store.error(); as failure) {

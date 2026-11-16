@@ -1,7 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { ApiError } from '../../../core/errors/api-error';
 import { route, segment } from '../../../routes/domain/testing/fixtures';
-import { RouteAdminRepository, SegmentInput, TimeSlotInput } from '../domain/managed-route';
+import {
+  RiskFactorInput,
+  RouteAdminRepository,
+  SegmentInput,
+  TimeSlotInput,
+} from '../domain/managed-route';
 import {
   FakeRouteAdminRepository,
   fakeRouteAdminRepository,
@@ -96,6 +101,24 @@ describe('RouteDetailStore', () => {
     expect(repository.createTimeSlot).toHaveBeenCalledWith('r1', slotInput);
     expect(repository.updateTimeSlot).toHaveBeenCalledWith('r1', 't1', slotInput);
     expect(repository.deleteTimeSlot).toHaveBeenCalledWith('r1', 't1');
+    expect(repository.get).toHaveBeenCalledTimes(4);
+  });
+
+  it('creates, updates and deletes a risk factor of a segment, reloading each time', async () => {
+    const factorInput: RiskFactorInput = {
+      type: 'traffic',
+      severity: 'medium',
+      description: 'Cruce sin semáforo',
+    };
+    await store.load('r1');
+
+    await store.saveRiskFactor('s1', null, factorInput);
+    await store.saveRiskFactor('s1', 'f1', factorInput);
+    await store.deleteRiskFactor('s1', 'f1');
+
+    expect(repository.createRiskFactor).toHaveBeenCalledWith('r1', 's1', factorInput);
+    expect(repository.updateRiskFactor).toHaveBeenCalledWith('r1', 's1', 'f1', factorInput);
+    expect(repository.deleteRiskFactor).toHaveBeenCalledWith('r1', 's1', 'f1');
     expect(repository.get).toHaveBeenCalledTimes(4);
   });
 

@@ -1,6 +1,7 @@
 import { route, segment, slot } from '../../../routes/domain/testing/fixtures';
 import { TimeSlot } from './managed-route';
-import { routeSlotLevels, segmentSlotLevels } from './slot-safety';
+import { managedDetail } from '../testing/fake-route-admin.repository';
+import { routeSlotLevels, safetySummary, segmentSlotLevels } from './slot-safety';
 
 describe('routeSlotLevels', () => {
   it('gives the level of the route for every time slot, in the API order', () => {
@@ -35,5 +36,64 @@ describe('segmentSlotLevels', () => {
       { key: 'morning', label: 'Mañana (05:00 – 07:00)', level: 'medium' },
       { key: 'night', label: '18:00 – 24:00', level: null },
     ]);
+  });
+});
+
+describe('safetySummary', () => {
+  const factor = {
+    type: 'poor_lighting',
+    severity: 'high' as const,
+    description: 'Sin postes de luz',
+    segmentId: 's2',
+    segmentName: 'Orilla',
+  };
+  const detail = managedDetail(
+    route('jipiro', {
+      safety: [
+        { ...slot('night', '18:00', '24:00', 25), worstSegmentId: 's2', factors: [factor] },
+        slot('morning', '05:00', '07:00', 90),
+      ],
+    }),
+    {
+      timeSlots: [
+        {
+          id: 'night',
+          label: 'Noche',
+          startTime: '18:00',
+          endTime: '24:00',
+          validFrom: null,
+          validTo: null,
+        },
+      ],
+      segments: [
+        { ...segment('s1', { name: 'Entrada' }), riskFactors: [] },
+        { ...segment('s2', { name: 'Orilla' }), riskFactors: [] },
+      ],
+    },
+  );
+
+  it('gives per slot the API level and score, the worst segment and the factors behind it', () => {
+    expect(safetySummary(detail)).toEqual([
+      {
+        key: 'night',
+        label: 'Noche (18:00 – 24:00)',
+        level: 'low',
+        score: 25,
+        worstSegment: 'Orilla',
+        factors: [factor],
+      },
+      {
+        key: 'morning',
+        label: '05:00 – 07:00',
+        level: 'high',
+        score: 90,
+        worstSegment: null,
+        factors: [],
+      },
+    ]);
+  });
+
+  it('is empty while the route has no rated slot', () => {
+    expect(safetySummary(managedDetail(route('nueva')))).toEqual([]);
   });
 });

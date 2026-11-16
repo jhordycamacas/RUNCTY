@@ -7,6 +7,7 @@ import {
   inject,
   signal,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { IonButton, IonSpinner } from '@ionic/angular';
@@ -28,14 +29,15 @@ import {
   toSegmentForm,
 } from '../domain/segment-form';
 import { segmentSlotLevels } from '../domain/slot-safety';
+import { RiskFactorsSection } from './risk-factors-section';
 import { SlotSafetyList } from './slot-safety-list';
 
 /** What the form edits: a new segment or an existing one. */
 type Editing = { kind: 'new' } | { kind: 'edit'; segment: ManagedSegment };
 
 /**
- * RF-05-5 to RF-05-8: the segments of the route in order, each with its level per time slot,
- * and one form at a time to add or edit them. Lives inside the detail page, which provides the
+ * RF-05-5 to RF-05-8: the segments of the route in order, each with its level per time slot
+ * and its risk factors, and one form at a time to add or edit them. Lives inside the detail page, which provides the
  * `RouteDetailStore`.
  */
 @Component({
@@ -45,6 +47,7 @@ type Editing = { kind: 'new' } | { kind: 'edit'; segment: ManagedSegment };
     IonButton,
     IonSpinner,
     Notice,
+    RiskFactorsSection,
     SlotSafetyList,
     TextField,
     TextareaField,
@@ -138,6 +141,7 @@ type Editing = { kind: 'new' } | { kind: 'edit'; segment: ManagedSegment };
                   >Eliminar</ion-button
                 >
               </div>
+              <app-risk-factors class="risk-factors" [segment]="segment" />
             </li>
           }
         </ol>
@@ -217,6 +221,11 @@ type Editing = { kind: 'new' } | { kind: 'edit'; segment: ManagedSegment };
       min-width: 0;
     }
 
+    .risk-factors {
+      flex: 1 1 100%;
+      min-width: 0;
+    }
+
     .meta,
     .muted {
       margin: 0;
@@ -231,6 +240,7 @@ export class SegmentsSection implements HasUnsavedChanges {
   private readonly toast = inject(ToastService);
   private readonly injector = inject(Injector);
   private readonly formHeading = viewChild<ElementRef<HTMLElement>>('formHeading');
+  private readonly riskFactors = viewChildren(RiskFactorsSection);
 
   protected readonly segments = computed(() => this.store.detail()?.segments ?? []);
   private readonly timeSlots = computed(() => this.store.detail()?.timeSlots ?? []);
@@ -250,11 +260,12 @@ export class SegmentsSection implements HasUnsavedChanges {
     return parseSegmentForm(this.form.getRawValue()).errors?.[name] ?? null;
   }
 
+  /** The segment draft or a risk factor draft of any segment. */
   hasUnsavedChanges(): boolean {
-    return (
+    const segmentDraft =
       this.editing() !== null &&
-      JSON.stringify(this.baseline()) !== JSON.stringify(this.form.getRawValue())
-    );
+      JSON.stringify(this.baseline()) !== JSON.stringify(this.form.getRawValue());
+    return segmentDraft || this.riskFactors().some((factors) => factors.hasUnsavedChanges());
   }
 
   protected length(segment: ManagedSegment): string {

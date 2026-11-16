@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { userMessage } from '../../../core/errors/user-message';
 import {
   ManagedRouteDetail,
+  RiskFactorInput,
   RouteAdminRepository,
   SegmentInput,
   TimeSlotInput,
@@ -73,6 +74,23 @@ export class RouteDetailStore {
 
   deleteTimeSlot(slotId: string): Promise<void> {
     return this.mutate((routeId) => this.repository.deleteTimeSlot(routeId, slotId));
+  }
+
+  /** Creates (`factorId` null) or updates a risk factor of a segment. */
+  saveRiskFactor(
+    segmentId: string,
+    factorId: string | null,
+    input: RiskFactorInput,
+  ): Promise<void> {
+    return this.mutate((routeId) =>
+      factorId === null
+        ? this.repository.createRiskFactor(routeId, segmentId, input)
+        : this.repository.updateRiskFactor(routeId, segmentId, factorId, input),
+    );
+  }
+
+  deleteRiskFactor(segmentId: string, factorId: string): Promise<void> {
+    return this.mutate((routeId) => this.repository.deleteRiskFactor(routeId, segmentId, factorId));
   }
 
   /**

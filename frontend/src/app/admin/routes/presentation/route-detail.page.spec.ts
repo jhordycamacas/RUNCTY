@@ -13,6 +13,7 @@ import {
   settle,
 } from '../testing/fake-route-admin.repository';
 import { RouteDetailPage } from './route-detail.page';
+import { RiskFactorsSection } from './risk-factors-section';
 import { SegmentsSection } from './segments-section';
 import { TimeSlotsSection } from './time-slots-section';
 
@@ -153,6 +154,18 @@ describe('RouteDetailPage', () => {
     const slots = fixture.debugElement.query(By.directive(TimeSlotsSection))
       .componentInstance as TimeSlotsSection;
     slots['form'].patchValue({ startTime: '21:00' });
+
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
+  });
+
+  it('shows the safety summary and counts a risk factor draft as unsaved changes', async () => {
+    await create();
+
+    expect(text()).toContain('Resumen de seguridad');
+    await press(segmentButton('Entrada', 'Agregar factor'));
+    const factors = fixture.debugElement.query(By.directive(RiskFactorsSection))
+      .componentInstance as RiskFactorsSection;
+    factors['form'].patchValue({ description: 'Bache' });
 
     expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
   });
