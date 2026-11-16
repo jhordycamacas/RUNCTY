@@ -190,9 +190,7 @@ describe('RoutesAdminPage', () => {
   it('labels every control', async () => {
     await create();
 
-    expect(root().querySelector('app-select-field label')?.textContent).toContain(
-      'Ciudad o zona',
-    );
+    expect(root().querySelector('app-select-field label')?.textContent).toContain('Ciudad o zona');
     expect(root().querySelector('ion-input')?.getAttribute('label')).toBe('Buscar ruta');
     expect(routeButton('Parque Jipiro', 'Editar')).toBeDefined();
     expect(button('Nueva ruta')).toBeDefined();

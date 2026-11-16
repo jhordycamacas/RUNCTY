@@ -21,17 +21,15 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [adminLandingGuard],
         loadComponent: () => import('./no-sections.page').then((m) => m.NoSectionsPage),
       },
-      ...ADMIN_SECTIONS.map(
-        (section): Route => ({
-          path: section.path,
-          canActivate: [permissionGuard(section.permission)],
-          data: { title: section.label },
-          ...(SECTION_SCREENS[section.path] ?? {
-            loadComponent: () =>
-              import('./section-placeholder.page').then((m) => m.SectionPlaceholderPage),
-          }),
+      ...ADMIN_SECTIONS.map((section): Route => ({
+        path: section.path,
+        canActivate: [permissionGuard(section.permission)],
+        data: { title: section.label },
+        ...(SECTION_SCREENS[section.path] ?? {
+          loadComponent: () =>
+            import('./section-placeholder.page').then((m) => m.SectionPlaceholderPage),
         }),
-      ),
+      })),
     ],
   },
 ];

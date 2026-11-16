@@ -24,6 +24,12 @@ export const ROUTES_ADMIN_ROUTES: Routes = [
         loadComponent: () => import('./presentation/route-form.page').then((m) => m.RouteFormPage),
       },
       {
+        path: ':id',
+        canDeactivate: [unsavedChangesGuard],
+        loadComponent: () =>
+          import('./presentation/route-detail.page').then((m) => m.RouteDetailPage),
+      },
+      {
         path: ':id/editar',
         canDeactivate: [unsavedChangesGuard],
         loadComponent: () => import('./presentation/route-form.page').then((m) => m.RouteFormPage),

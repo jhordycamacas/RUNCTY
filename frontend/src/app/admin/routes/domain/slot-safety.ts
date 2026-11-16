@@ -1,4 +1,5 @@
-import { Route, SafetyLevel } from '../../../routes/domain/route';
+import { Route, SafetyLevel, Segment } from '../../../routes/domain/route';
+import { TimeSlot } from './managed-route';
 
 /**
  * The safety level of a route or segment in one time slot, as the API computed it. A route is
@@ -20,4 +21,16 @@ export function routeSlotLevels(route: Route): SlotLevel[] {
     label: slotRangeLabel(entry.startTime, entry.endTime),
     level: entry.level,
   }));
+}
+
+/** The segment level for every slot of the route, by start time; a slot it lacks is unrated. */
+export function segmentSlotLevels(segment: Segment, slots: readonly TimeSlot[]): SlotLevel[] {
+  return slots.map((slot) => {
+    const range = slotRangeLabel(slot.startTime, slot.endTime);
+    return {
+      key: slot.id,
+      label: slot.label ? `${slot.label} (${range})` : range,
+      level: segment.safety[slot.id]?.level ?? null,
+    };
+  });
 }

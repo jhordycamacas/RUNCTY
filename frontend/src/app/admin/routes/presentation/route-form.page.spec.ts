@@ -150,15 +150,15 @@ describe('RouteFormPage', () => {
   });
 
   it('offers a retry when the route cannot be loaded', async () => {
-    repository.get.mockRejectedValueOnce(new ApiError(404, 'route-not-found', 'La ruta ya no existe.'));
+    repository.get.mockRejectedValueOnce(
+      new ApiError(404, 'route-not-found', 'La ruta ya no existe.'),
+    );
     await create('jipiro');
 
     expect(text()).toContain('La ruta ya no existe.');
     expect(root().querySelector('form')).toBeNull();
 
-    root()
-      .querySelector('ion-button')
-      ?.dispatchEvent(new Event('click'));
+    root().querySelector('ion-button')?.dispatchEvent(new Event('click'));
     await settle(fixture);
 
     expect(root().querySelector('form')).not.toBeNull();

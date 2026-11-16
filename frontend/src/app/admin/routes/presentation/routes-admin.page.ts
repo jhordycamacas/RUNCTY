@@ -55,11 +55,7 @@ import { SlotSafetyList } from './slot-safety-list';
     </ion-header>
     <ion-content class="ion-padding">
       <div class="filters">
-        <app-select-field
-          label="Ciudad o zona"
-          [options]="placeOptions()"
-          [formControl]="city"
-        />
+        <app-select-field label="Ciudad o zona" [options]="placeOptions()" [formControl]="city" />
         <ion-input
           label="Buscar ruta"
           labelPlacement="floating"
