@@ -179,6 +179,7 @@ import { SlotSafetyList } from './slot-safety-list';
       border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
       background: var(--rc-surface-elevated);
+      box-shadow: var(--rc-shadow-sm);
     }
 
     .summary {
@@ -199,7 +200,11 @@ import { SlotSafetyList } from './slot-safety-list';
       display: inline-flex;
       align-items: center;
       min-height: var(--rc-min-touch-target);
-      color: var(--rc-primary-text);
+      color: var(--rc-text);
+      font-size: var(--rc-font-size-subtitle);
+      font-weight: 600;
+      text-decoration-color: var(--rc-primary-text);
+      text-underline-offset: 4px;
     }
 
     .meta {

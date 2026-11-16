@@ -36,6 +36,10 @@ import { AuthLayout } from './auth-layout';
           [error]="fieldError('password')"
         />
 
+        <ion-button type="button" class="forgot" fill="clear" routerLink="/recuperar">
+          ¿Olvidaste tu contraseña?
+        </ion-button>
+
         <app-notice [message]="error()" />
 
         <ion-button type="submit" expand="block" [disabled]="loading()">
@@ -47,9 +51,9 @@ import { AuthLayout } from './auth-layout';
         </ion-button>
       </form>
 
-      <nav class="links" aria-label="Más opciones">
-        <ion-button fill="clear" routerLink="/recuperar">¿Olvidaste tu contraseña?</ion-button>
-        <ion-button fill="clear" routerLink="/registro">Crear cuenta</ion-button>
+      <nav class="signup" aria-label="Más opciones">
+        <p class="divider">¿No tienes cuenta?</p>
+        <ion-button expand="block" fill="outline" routerLink="/registro">Crear cuenta</ion-button>
       </nav>
     </app-auth-layout>
   `,
@@ -60,11 +64,34 @@ import { AuthLayout } from './auth-layout';
       gap: var(--rc-space-lg);
     }
 
-    .links {
+    .forgot {
+      align-self: flex-end;
+      margin: calc(-1 * var(--rc-space-sm)) 0 0;
+      --padding-start: var(--rc-space-sm);
+      --padding-end: var(--rc-space-sm);
+    }
+
+    .signup {
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      margin-top: var(--rc-space-lg);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: var(--rc-space-md);
+      margin: var(--rc-space-xl) 0;
+      color: var(--rc-text-muted);
+      font-size: var(--rc-font-size-label);
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--rc-border);
     }
   `,
 })

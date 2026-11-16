@@ -109,6 +109,13 @@
 - mobile: 260/260, typecheck y lint OK. El usuario confirmó que la app abre y se ve.
 - Emuladores reiniciados desde `D:\RUNCTY` (con permiso del usuario) y seed recargado.
 
+### Diseño original en la app Ionic
+
+- Ruta delegada. Causa raíz: `styles.scss` cargaba `core.css` de Ionic después del tema, y su paleta por defecto (primario azul, danger #c5000f) pisaba los tokens. Ahora Ionic va primero.
+- Portado del diseño de la app móvil: botones de 48px con sombra suave, secundarios y fantasma en el rojo legible del esquema, campos rellenos con el tono de superficie y borde de 1.5px, encabezado plano con línea fina, barra de pestañas con línea superior, logo y "Corre más seguro" en las pantallas de acceso, separador "¿No tienes cuenta?" en el login y la acción de borrar cuenta contorneada (nunca un bloque rojo).
+- El modo claro u oscuro sigue al sistema, igual que la app vieja.
+- frontend: tests 474/474, lint OK, build OK (1.15 MB inicial).
+
 ## Siguiente paso
 
 Demo con Gacelas esta semana: pasar a Firebase real (plan en CONTEXTO.md, sección 12). Después, abrir los PRs hacia `main` (dividir la rama, que tiene más de 400 líneas).

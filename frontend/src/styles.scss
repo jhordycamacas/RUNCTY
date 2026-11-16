@@ -1,11 +1,13 @@
-@use 'theme/fonts';
-@use 'theme/tokens';
-@use 'theme/ionic';
-@use 'theme/areas';
-
+// Ionic's base CSS goes first: core.css declares its default palette (blue primary) on :root, so
+// the theme below must come after it to win with the same specificity.
 @use '@ionic/angular/css/core.css';
 @use '@ionic/angular/css/normalize.css';
 @use '@ionic/angular/css/structure.css';
 @use '@ionic/angular/css/typography.css';
 @use '@ionic/angular/css/padding.css';
 @use '@ionic/angular/css/display.css';
+
+@use 'theme/fonts';
+@use 'theme/tokens';
+@use 'theme/ionic';
+@use 'theme/areas';

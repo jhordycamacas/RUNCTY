@@ -67,6 +67,7 @@ addIcons({ chevronForward, helpCircleOutline });
       border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
       background: var(--rc-surface-elevated);
+      box-shadow: var(--rc-shadow-sm);
       color: var(--rc-text);
       text-decoration: none;
     }

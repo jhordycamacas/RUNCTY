@@ -8,8 +8,12 @@ import { IonContent } from '@ionic/angular';
   template: `
     <ion-content>
       <main class="auth">
-        <h1>RUNCTY</h1>
-        <p class="tagline">{{ tagline() }}</p>
+        <header class="brand">
+          <img class="logo" src="brand/logo.png" alt="" width="104" height="104" />
+          <h1>RUNCTY</h1>
+          <p class="slogan">Corre más seguro</p>
+          <p class="tagline">{{ tagline() }}</p>
+        </header>
         <ng-content />
       </main>
     </ion-content>
@@ -30,14 +34,37 @@ import { IonContent } from '@ionic/angular';
       justify-content: center;
     }
 
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: var(--rc-space-xxl) 0 var(--rc-space-xl);
+      text-align: center;
+    }
+
+    .logo {
+      width: 104px;
+      height: 104px;
+      border-radius: var(--rc-radius-lg);
+      object-fit: contain;
+    }
+
     h1 {
+      margin: var(--rc-space-md) 0 0;
+      color: var(--rc-text);
+      font-size: var(--rc-font-size-display);
+      font-weight: 700;
+    }
+
+    .slogan {
       margin: 0;
       color: var(--rc-primary-text);
-      font-size: var(--rc-font-size-display);
+      font-size: var(--rc-font-size-subtitle);
+      font-weight: 600;
     }
 
     .tagline {
-      margin: var(--rc-space-xs) 0 var(--rc-space-xl);
+      margin: var(--rc-space-sm) 0 0;
       color: var(--rc-text-muted);
     }
   `,

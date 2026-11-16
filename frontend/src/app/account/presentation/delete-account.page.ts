@@ -60,7 +60,7 @@ const RECENT_SIGN_IN_MESSAGE =
 
         <app-notice [message]="error()" />
 
-        <ion-button type="submit" expand="block" color="danger" [disabled]="deleting()">
+        <ion-button type="submit" expand="block" fill="outline" color="danger" [disabled]="deleting()">
           @if (deleting()) {
             <ion-spinner name="crescent" aria-label="Eliminando" />
           } @else {
