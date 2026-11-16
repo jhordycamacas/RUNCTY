@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ApiError } from '../../../core/errors/api-error';
 import { route, segment } from '../../../routes/domain/testing/fixtures';
-import { RouteAdminRepository, SegmentInput } from '../domain/managed-route';
+import { RouteAdminRepository, SegmentInput, TimeSlotInput } from '../domain/managed-route';
 import {
   FakeRouteAdminRepository,
   fakeRouteAdminRepository,
@@ -83,6 +83,20 @@ describe('RouteDetailStore', () => {
 
     await expect(store.deleteSegment('s1')).rejects.toThrow('El tramo ya no existe.');
     expect(repository.get).toHaveBeenCalledOnce();
+  });
+
+  it('creates, updates and deletes a time slot, reloading the recalculated safety each time', async () => {
+    const slotInput: TimeSlotInput = { startTime: '05:00', endTime: '07:00' };
+    await store.load('r1');
+
+    await store.saveTimeSlot(null, slotInput);
+    await store.saveTimeSlot('t1', slotInput);
+    await store.deleteTimeSlot('t1');
+
+    expect(repository.createTimeSlot).toHaveBeenCalledWith('r1', slotInput);
+    expect(repository.updateTimeSlot).toHaveBeenCalledWith('r1', 't1', slotInput);
+    expect(repository.deleteTimeSlot).toHaveBeenCalledWith('r1', 't1');
+    expect(repository.get).toHaveBeenCalledTimes(4);
   });
 
   it('keeps the shown detail when the reload after a change fails', async () => {

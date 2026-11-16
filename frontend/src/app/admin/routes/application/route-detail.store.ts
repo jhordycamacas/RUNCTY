@@ -1,6 +1,11 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { userMessage } from '../../../core/errors/user-message';
-import { ManagedRouteDetail, RouteAdminRepository, SegmentInput } from '../domain/managed-route';
+import {
+  ManagedRouteDetail,
+  RouteAdminRepository,
+  SegmentInput,
+  TimeSlotInput,
+} from '../domain/managed-route';
 
 /**
  * One route as the admin manages it (RF-05-5 to RF-05-8, RF-07): segments, time slots, risk
@@ -57,10 +62,23 @@ export class RouteDetailStore {
     return this.mutate((routeId) => this.repository.deleteSegment(routeId, segmentId));
   }
 
+  /** Creates (`slotId` null) or updates a time slot; the API rejects an overlap. */
+  saveTimeSlot(slotId: string | null, input: TimeSlotInput): Promise<void> {
+    return this.mutate((routeId) =>
+      slotId === null
+        ? this.repository.createTimeSlot(routeId, input)
+        : this.repository.updateTimeSlot(routeId, slotId, input),
+    );
+  }
+
+  deleteTimeSlot(slotId: string): Promise<void> {
+    return this.mutate((routeId) => this.repository.deleteTimeSlot(routeId, slotId));
+  }
+
   /**
    * Runs a change of the route aggregate and then shows the recalculated detail. A rejected
    * change rejects with the API error (in Spanish) and reloads nothing; a failed reload keeps the
-   * previous detail and sets `error`. Time slot and risk factor changes go through here too.
+   * previous detail and sets `error`.
    */
   private async mutate(change: (routeId: string) => Promise<unknown>): Promise<void> {
     const routeId = this.routeId;

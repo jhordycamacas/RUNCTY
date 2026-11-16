@@ -62,7 +62,7 @@ Cross-cutting criteria:
 - [x] T1 Domain, validation and HTTP repository for route management (inputs, mappers, all endpoints). Route: delegated writer.
 - [x] T2 Routes list and route form (RF-05-1 to 05-4). Route: delegated writer.
 - [x] T3 Route detail with segments (RF-05-5 to 05-8). Route: delegated writer.
-- [ ] T4 Time slots (RF-07-1 to 07-4). Route: delegated writer.
+- [x] T4 Time slots (RF-07-1 to 07-4). Route: delegated writer.
 - [ ] T5 Risk factors and safety summary (RF-07-5 to 07-11). Route: delegated writer.
 - [ ] T6 Verification: unit tests, lint, build, and a live check against the Docker stack (API + emulators + frontend). Route: delegated verifier plus parent spot check.
 - [ ] T7 Docs: CONTEXTO.md section 17 and this document. Route: inline.
@@ -91,6 +91,8 @@ Forecast: well above 400 authored lines (five screens with tests). Strategy: `as
 - 2026-11-16 T3 done (delegated writer). RED: `ng test` failed to compile (missing `route-detail.store`, `route-detail.page`, `segments-section`, `segmentSlotLevels`). GREEN: `ng test` 64 files / 448 tests passed; `ng lint` clean; `ng build` OK, no budget warning. `/admin/rutas/:id` (unsaved-changes guard) shows the route summary with its level per slot and `app-segments-section`: segments in order with their level per slot (slot label and range, "Sin evaluar" when the API has no entry), add and edit in one inline form (preloaded, focus on the form heading, Spanish field and API messages, discard confirmation on cancel), delete through `confirmAction` (destructive; the dialog shows the API refusal in Spanish). `RouteDetailStore` (provided by the page) runs every change through a private `mutate` that reloads `GET /routes/{id}`, the only source of the recalculated index.
 - Extension points for T4/T5: add `saveTimeSlot`/`deleteTimeSlot` and `saveRiskFactor`/`deleteRiskFactor` to `admin/routes/application/route-detail.store.ts` on top of `mutate`; add `app-time-slots-section` and the safety summary as siblings of `<app-segments-section />` in `admin/routes/presentation/route-detail.page.ts` (and include their drafts in `hasUnsavedChanges`); risk factors per segment go inside each `li.segment` of `segments-section.ts`. `segmentSlotLevels` already takes the route time slots, so new slots show up without changes.
 
+- 2026-11-16 T4 done (delegated writer). RED: `ng test` failed to compile (missing `time-slots-section`, `date-time-field`, `saveTimeSlot`/`deleteTimeSlot`). GREEN: `ng test` 66 files / 460 tests passed; `ng lint` clean; `ng build` OK, initial total 1.15 MB, no budget warning. `RouteDetailStore` gained `saveTimeSlot`/`deleteTimeSlot` on `mutate`. New `app-time-slots-section` (before the segments in the detail page, counted in `hasUnsavedChanges`): slots sorted by start time with name, window and validity ("Todos los días" when unbounded), add and edit in one inline form (preloaded, focus on the form heading, client overlap check that leaves out the edited slot, API `time-slot-overlap` shown in Spanish, discard confirmation on cancel), delete through a destructive `confirmAction`. New native `shared/ui/date-time-field.ts` (`<input type="time|date">`, label, hint and error linked with `aria-describedby`) keeps Ionic pickers out of the bundle. Commit: `feat(frontend): add admin time slot management`.
+
 ## Next step
 
-T4.
+T5.

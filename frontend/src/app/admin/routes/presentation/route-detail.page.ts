@@ -10,12 +10,12 @@ import { RouteDetailStore } from '../application/route-detail.store';
 import { routeSlotLevels } from '../domain/slot-safety';
 import { SegmentsSection } from './segments-section';
 import { SlotSafetyList } from './slot-safety-list';
+import { TimeSlotsSection } from './time-slots-section';
 
 /**
  * The admin detail of one route (`/admin/rutas/:id`): its summary with the level per time slot
- * and one section per part of the aggregate, each reading the page's `RouteDetailStore`. Time
- * slots (T4) and the safety summary (T5) plug in as sibling sections of `app-segments-section`;
- * a section holding a draft is added to `hasUnsavedChanges`.
+ * and one section per part of the aggregate, each reading the page's `RouteDetailStore`. A
+ * section holding a draft is added to `hasUnsavedChanges`.
  */
 @Component({
   selector: 'app-route-detail-admin-page',
@@ -28,6 +28,7 @@ import { SlotSafetyList } from './slot-safety-list';
     SegmentsSection,
     SlotSafetyList,
     SubpageHeader,
+    TimeSlotsSection,
   ],
   providers: [RouteDetailStore],
   template: `
@@ -63,7 +64,8 @@ import { SlotSafetyList } from './slot-safety-list';
           />
         </section>
 
-        <app-segments-section />
+        <app-time-slots-section class="block" />
+        <app-segments-section class="block" />
       } @else if (store.error(); as failure) {
         <div class="state">
           <app-notice [message]="failure" />
@@ -75,6 +77,11 @@ import { SlotSafetyList } from './slot-safety-list';
     </ion-content>
   `,
   styles: `
+    .block {
+      display: block;
+      margin-bottom: var(--rc-space-xl);
+    }
+
     .summary {
       display: flex;
       flex-direction: column;
@@ -136,6 +143,7 @@ export class RouteDetailPage implements ViewWillEnter, HasUnsavedChanges {
   protected readonly store = inject(RouteDetailStore);
   private readonly routeId = inject(ActivatedRoute).snapshot.paramMap.get('id') ?? '';
   private readonly segments = viewChild(SegmentsSection);
+  private readonly timeSlots = viewChild(TimeSlotsSection);
 
   protected readonly title = computed(() => this.store.detail()?.route.name ?? 'Ruta');
   protected readonly routeLevels = computed(() => {
@@ -161,6 +169,6 @@ export class RouteDetailPage implements ViewWillEnter, HasUnsavedChanges {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.segments()?.hasUnsavedChanges() ?? false;
+    return [this.timeSlots(), this.segments()].some((section) => section?.hasUnsavedChanges());
   }
 }
