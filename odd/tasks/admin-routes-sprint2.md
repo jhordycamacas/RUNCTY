@@ -59,7 +59,7 @@ Cross-cutting criteria:
 
 ## Tasks
 
-- [ ] T1 Domain, validation and HTTP repository for route management (inputs, mappers, all endpoints). Route: delegated writer.
+- [x] T1 Domain, validation and HTTP repository for route management (inputs, mappers, all endpoints). Route: delegated writer.
 - [ ] T2 Routes list and route form (RF-05-1 to 05-4). Route: delegated writer.
 - [ ] T3 Route detail with segments (RF-05-5 to 05-8). Route: delegated writer.
 - [ ] T4 Time slots (RF-07-1 to 07-4). Route: delegated writer.
@@ -83,7 +83,9 @@ Forecast: well above 400 authored lines (five screens with tests). Strategy: `as
 
 - 2026-11-16: spec written, branch created from `main` at `75d18d5`. Docker stack running.
 - Engram mirror: pending (the Engram tools are not available in this session).
+- 2026-11-16 T1 done (delegated writer). RED: `ng test` failed to compile (missing `admin/routes` modules, `Route.active`). GREEN: `ng test` 55 files / 396 tests passed; `ng lint` clean; `ng build` OK. Added `Route.active` to the runner domain, `admin/routes/domain` (managed-route types, inputs and `RouteAdminRepository` port; route, segment, time-slot and risk-factor form parsing with the API limits and client overlap check; `toManagedRouteDetail`) and `HttpRouteAdminRepository` (all route, segment, time-slot and risk-factor endpoints; the safety index comes inside `GET /routes/{id}`, there is no separate endpoint). Every route reason code was already mapped in `error-messages.ts`. Commit: `feat(frontend): add the admin route management domain and repository`.
+- Contract note for T5: a risk factor has an optional daily window (`startTime`/`endTime`), not a list of slots or validity dates; validity dates (`validFrom`/`validTo`) belong to time slots. The RF-07-5 row above follows the old wording; the screens must follow the contract.
 
 ## Next step
 
-T1.
+T2.

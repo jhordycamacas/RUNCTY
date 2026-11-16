@@ -28,6 +28,7 @@ export const route = (id: string, overrides: Partial<Route> = {}): Route => ({
   elevationGainM: 0,
   surface: 'asphalt',
   difficulty: 'beginner',
+  active: true,
   segmentCount: 1,
   safety: [],
   ...overrides,

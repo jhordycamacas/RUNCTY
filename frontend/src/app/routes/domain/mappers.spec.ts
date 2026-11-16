@@ -122,6 +122,12 @@ describe('toRoute', () => {
   it('tolerates a missing document', () => {
     expect(toRoute(undefined).safety).toEqual([]);
   });
+
+  it('reads the active flag, treating anything but true as inactive', () => {
+    expect(toRoute(fullRoute).active).toBe(true);
+    expect(toRoute({ ...fullRoute, active: false }).active).toBe(false);
+    expect(toRoute({ id: 'x' }).active).toBe(false);
+  });
 });
 
 describe('toSegment', () => {

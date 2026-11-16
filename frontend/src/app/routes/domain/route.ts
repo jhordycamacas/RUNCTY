@@ -57,6 +57,8 @@ export interface Route {
   elevationGainM: number;
   surface: Surface | null;
   difficulty: Difficulty | null;
+  /** Inactive routes are only listed to who can manage routes. */
+  active: boolean;
   segmentCount: number;
   /** Slot safety entries sorted by start time. */
   safety: RouteSlotSafety[];

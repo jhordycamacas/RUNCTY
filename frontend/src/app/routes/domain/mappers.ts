@@ -23,16 +23,16 @@ type Data = Record<string, unknown>;
 
 const TIME_PATTERN = /^([01]\d|2[0-4]):[0-5]\d$/;
 
-const asRecord = (value: unknown): Data =>
+export const asRecord = (value: unknown): Data =>
   typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Data) : {};
-const asString = (value: unknown, fallback = ''): string =>
+export const asString = (value: unknown, fallback = ''): string =>
   typeof value === 'string' ? value : fallback;
 const asNumber = (value: unknown, fallback = 0): number =>
   typeof value === 'number' && Number.isFinite(value) ? value : fallback;
-const asTime = (value: unknown): string | null =>
+export const asTime = (value: unknown): string | null =>
   typeof value === 'string' && TIME_PATTERN.test(value) ? value : null;
 
-function oneOf<T extends string>(options: readonly T[], value: unknown): T | null {
+export function oneOf<T extends string>(options: readonly T[], value: unknown): T | null {
   return typeof value === 'string' && (options as readonly string[]).includes(value)
     ? (value as T)
     : null;
@@ -61,7 +61,7 @@ function toFactor(value: unknown): SafetyFactor | null {
   };
 }
 
-function toList<T>(value: unknown, map: (item: unknown) => T | null): T[] {
+export function toList<T>(value: unknown, map: (item: unknown) => T | null): T[] {
   if (!Array.isArray(value)) return [];
   return value.map(map).filter((item): item is T => item !== null);
 }
@@ -120,6 +120,7 @@ export function toRoute(raw: unknown): Route {
     elevationGainM: asNumber(data['elevationGainM']),
     surface: oneOf(SURFACES, data['surface']),
     difficulty: oneOf(DIFFICULTIES, data['difficulty']),
+    active: data['active'] === true,
     segmentCount: asNumber(data['segmentCount']),
     safety,
   };
