@@ -16,7 +16,7 @@
 Reto académico de la **UTPL** (materias Fundamentos de Ingeniería de Software e Ingeniería Web). El club **Gacelas Running Team (Loja, Ecuador)** planteó un problema y varios grupos de estudiantes compiten por proponer y desarrollar la mejor solución. Nuestro grupo quiere ganar el reto.
 
 - Inicio: semana del 12 al 18 de octubre de 2026 (levantamiento de requisitos).
-- Fase actual (2026-11-10): Sprints 1 y 2 implementados, integrados en `main` y verificados contra el código (sección 14). La demo con Gacelas con Firebase real sigue pendiente. El Sprint 1 cubre usuarios, autenticación, preferencias, roles, administración de usuarios, ciudades y zonas. El Sprint 2 cubre el catálogo de rutas y la evaluación de seguridad por franja. La app también tiene un sistema de diseño nuevo. Sigue el Sprint 3: puntos de apoyo, alertas de zona, incidentes y generación de rutas seguras.
+- Fase actual (2026-11-17): el frontend único (Angular + Ionic + Capacitor) y el backend Django cubren los Sprints 1 y 2, incluido el admin completo (Resumen, Usuarios, Roles, Ciudades y Rutas), y el Sprint 2 se recorrió en Chrome contra el stack de Docker (sección 17). Los specs (SDD) de las 153 historias están en `specs/` (17.7). Antes (2026-11-10): Sprints 1 y 2 verificados contra el código de la arquitectura anterior (sección 14). La demo con Gacelas con Firebase real sigue pendiente. El Sprint 1 cubre usuarios, autenticación, preferencias, roles, administración de usuarios, ciudades y zonas. El Sprint 2 cubre el catálogo de rutas y la evaluación de seguridad por franja. La app también tiene un sistema de diseño nuevo. Sigue el Sprint 3: puntos de apoyo, alertas de zona, incidentes y generación de rutas seguras.
 - Docentes tutores: Ing. Segundo Raymundo e Ing. Jorge Landacay.
 
 ## 2. Problema
@@ -758,7 +758,7 @@ RUNCTY/
 
 ### 17.4 Qué NO está verificado
 
-- **Nadie ha abierto el frontend nuevo en un navegador real** ni lo ha probado contra los emuladores y Django. La extensión de Chrome falló en todas las sesiones, así que todo está validado con pruebas unitarias y compilación. Es lo primero que hay que hacer al retomar.
+- **Navegador (actualización 2026-11-17):** el admin (Resumen, Usuarios, Roles, Ciudades y Rutas) se recorrió en Chrome headless contra Docker y Django, en 1280 y 360 px, claro y oscuro (con Playwright desde una carpeta temporal fuera del repo). **Sigue sin abrirse en un navegador real el área del corredor** (registro, login, rutas, perfil); solo se miró la pantalla de inicio y el login. Faltan por medir en pantalla el contraste y el tamaño táctil (criterio abierto que deja 35 historias en `Parcial`).
 - **No se probó en el celular:** que `tel:911` abra el marcador de Android, que el enlace de Maps salga del WebView ni cómo se ve el botón SOS con títulos largos.
 - Angular 22 trabaja sin zone.js (zoneless); la interacción con Ionic en ejecución real no se ejercitó.
 - Docker: solo se validó `docker compose config`; las imágenes `api` y `seed` no se construyeron ni se ejecutaron. **Actualización 2026-11-16:** el stack levantó sano y la API de rutas del admin se recorrió entera con `curl`/`fetch` (ruta, tramo, franjas, solape, factores, recálculo y borrados); **Actualización 2026-11-17:** las pantallas de `/admin/rutas` se recorrieron en Chrome (22 de 22 pasos) y se corrigió el error del toast (`646deb8`); el tema por defecto pasó a claro (`5ce08cd`).
@@ -770,7 +770,7 @@ RUNCTY/
 - **Java:** el `JAVA_HOME` del equipo apunta a JDK 17, pero Capacitor 8 exige JDK 21. Para compilar la APK hay que apuntarlo a `C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot`. El detalle está en `frontend/README.md`.
 - `backend/README.md` dice `cp .env.example .env`, pero `backend/.env.example` no existe en git (el asistente no puede crear archivos `.env*`). Hay que crearlo a mano o corregir esa línea en S6.
 - El primer commit del frontend (`4488be5`) no compila solo, porque `src/app` llega en `c690d1f`; los commits se dividieron por capa.
-- Las fuentes Inter en TTF suman unos 1,3 MB a la APK; se pueden pasar a WOFF2.
+- Las fuentes Plus Jakarta Sans (4 pesos en TTF, unos 250 kB) están en `frontend/public/fonts`; Inter ya no se usa.
 - Siguen abiertos los puntos de 14.2 (SEC-01 App Check, SEC-04, SEC-07, SEC-10) y la auditoría de UX del panel, que S5 aplica en el área de admin.
 - Las secciones 9 a 15 describen la arquitectura anterior y nombran archivos como `functions/src/...` o `admin/src/...`; se reescriben en S6.
 - El aviso del hook de `gentle-ai review` sigue apareciendo al terminar cada turno y se ignora por la regla de este repositorio.
@@ -780,7 +780,8 @@ RUNCTY/
 - **Resumen** es la primera sección de `/admin` (permiso `admin.access`) y la pantalla de aterrizaje. Muestra analíticas reales de la app móvil: usuarios, altas por semana, rutas por dificultad, superficie y ciudad, nivel de seguridad por ruta (peor nivel de sus franjas, nunca «segura» o «insegura»), perfil deportivo y preferencias. Specs: `specs/transversal/panel-de-administracion.md` y `specs/transversal/sistema-de-diseno.md`.
 - **Endpoint** `GET /api/v1/admin/summary` (app `backend/apps/summary`): solo agregados, sin datos personales; cada bloque (`users`, `routes`, `cities`) llega solo si el usuario tiene `users.read`, `routes.manage` o `cities.manage`, si no es `null`. Lecturas acotadas (5000 documentos; 2000 rutas) y `truncated` avisa si se alcanzó el tope.
 - **No inventar cifras:** entrenamientos, alertas SOS y eventos no existen todavía; la pantalla muestra fichas «Próximamente» sin números. El correo verificado no se cuenta porque vive en Auth, no en Firestore.
-- **Diseño:** lienzo rosado suave, barra lateral flotante con marca y tarjeta de cuenta, fichas y columnas en pasteles (rosa, durazno, cielo, lavanda, menta) con tokens claro y oscuro en `frontend/src/theme/` (la tinta sobre cada pastel cumple 4,5:1 en `tokens.spec.ts`). Gráficos propios sin librería (barras, barra apilada, barras semanales, progreso) con alternativa de texto.
+- **Diseño (vigente):** paleta solo **blanco, gris y fucsia** `#D6006F` de Gacelas (verde, ámbar y rojo únicamente para los niveles de seguridad), fuente Plus Jakarta Sans, menú lateral gris de borde a borde que sigue el tema (gris oscuro en oscuro), barra superior blanca con tema y cuenta, contenido sobre gris muy claro (`--rc-backdrop`, un solo token; si se prefiere blanco puro se cambia ahí), tarjetas blancas con borde fino. El tema por defecto es **claro** (`data-theme` siempre es `light`, `dark` o `system`; el selector del admin lo guarda en las preferencias). Gráficos propios sin librería: donas y barras con total, leyenda con número y porcentaje y alternativa de texto. Detalle en `specs/transversal/sistema-de-diseno.md`.
+- **Falta para un admin más "de tabla":** las listas no tienen encabezado ni columnas alineadas, ni cabecera de página uniforme (título, descripción y botón principal) ni migas de pan.
 - **Ojo en desarrollo:** recrear el contenedor `firebase` pierde los datos de los emuladores; se vuelven a cargar con `python manage.py seed` apuntando a `127.0.0.1:8080` y `:9099`.
 
 ### 17.7 Specs (SDD)
@@ -789,12 +790,12 @@ RUNCTY/
 - Flujo: **spec primero** -> prueba que falla (RED) -> implementación (GREEN) -> marcar el criterio con evidencia -> anotar en `odd/tasks/<feature>.md`. Si cambia el comportamiento, primero se cambia la spec.
 - Estados honestos: `Hecha` (todos los criterios con evidencia), `Parcial` (implementada con criterios abiertos o sin verificar en navegador o celular) y `Pendiente`. Al 2026-11-17: 9 Hecha, 35 Parcial y 109 Pendiente.
 
-### 17.6 Cómo retomar
+### 17.6 Cómo retomar (estado al 2026-11-17)
 
 1. Abrir la sesión en `D:\RUNCTY` y leer `odd/tasks/single-frontend-ionic.md`.
-2. Recuperar el trabajo pausado de S5a, si sirve: `git stash list` muestra "wip S5a admin users roles". Se puede aplicar con `git stash apply` (o rehacerlo). Está incompleto: no se sabe si compila ni si sus pruebas pasan.
+2. S5a ya está hecha y mezclada en `main` (el stash antiguo "wip S5a" quedó obsoleto: solo tenía dos retoques de estilo; se puede descartar con `git stash drop`).
 3. Comprobaciones del backend (desde `backend/` con `.venv`): `python -m pytest -q`, `ruff check .`, `ruff format --check .`, `DJANGO_DEBUG=true python manage.py check`.
 4. Comprobaciones del frontend (desde `frontend/`): `npx.cmd ng test --watch=false`, `npx.cmd ng lint`, `npx.cmd ng build`.
 5. Levantar todo en local: emuladores y API con `docker compose up -d --build` (Docker Desktop encendido) o sin Docker con `npm run emulators`, `npm run seed` y `npm run api`; el frontend con `npm start` desde `frontend/`. Usuario de prueba del emulador: `admin@runcty.dev` / `Admin123!`.
-6. Seguir con S5a (usuarios, roles y ciudades del admin) y S6 (limpieza). S5b (rutas) está hecha en `feat/admin-routes-sprint2`; subirla y abrir el PR lo decide el usuario.
+6. Siguiente: validar los "Supuestos por validar" de los specs (política de contraseña, rangos del perfil deportivo, contratos propuestos, proveedor de mapas), decidir si el admin pasa a tablas con encabezado y cabecera de página, y luego S6 (limpieza) y el Sprint 3 (puntos de apoyo, alertas de zona, incidentes y rutas seguras). Para ver el admin: Docker Desktop encendido, `docker compose up -d --build`, `npm start` en `frontend/` y abrir http://localhost:4200 (`admin@runcty.dev` / `Admin123!`); si se reconstruye el contenedor `firebase`, hay que volver a cargar los datos con `python manage.py seed` apuntando a los emuladores.
 7. **Antes de borrar `frontend/mobile`, `admin/` y `functions/`:** abrir el frontend nuevo en un navegador y recorrer el registro, el login, las rutas y el admin.
