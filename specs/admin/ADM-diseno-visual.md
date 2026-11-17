@@ -20,7 +20,7 @@ Referencia: tablero con lienzo suave tintado, barra lateral flotante redondeada,
 ## Criterios de aceptación
 
 - [x] Todo par texto/superficie del tema cumple 4,5:1 en claro y oscuro (`frontend/src/theme/tokens.spec.ts`), incluida la tinta sobre cada pastel.
-- [x] Barra lateral flotante, barra superior con título, buscador discreto y perfil; chips en forma de píldora.
+- [x] Barra lateral flotante con marca y tarjeta de cuenta, barra superior transparente con título; chips y botones en forma de píldora (sin buscador: no tendría función).
 - [x] Resumen, Usuarios, Roles, Ciudades, Rutas y el inicio del corredor (`/app`, 390 px) se ven coherentes en claro y oscuro.
 - [x] El tema por defecto es Claro y el selector «Tema» sigue funcionando.
 - [x] El paquete inicial sigue por debajo de 1,2 MB (`ng build` sin avisos de presupuesto).
