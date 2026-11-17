@@ -761,7 +761,7 @@ RUNCTY/
 - **Nadie ha abierto el frontend nuevo en un navegador real** ni lo ha probado contra los emuladores y Django. La extensión de Chrome falló en todas las sesiones, así que todo está validado con pruebas unitarias y compilación. Es lo primero que hay que hacer al retomar.
 - **No se probó en el celular:** que `tel:911` abra el marcador de Android, que el enlace de Maps salga del WebView ni cómo se ve el botón SOS con títulos largos.
 - Angular 22 trabaja sin zone.js (zoneless); la interacción con Ionic en ejecución real no se ejercitó.
-- Docker: solo se validó `docker compose config`; las imágenes `api` y `seed` no se construyeron ni se ejecutaron. **Actualización 2026-11-16:** el stack levantó sano y la API de rutas del admin se recorrió entera con `curl`/`fetch` (ruta, tramo, franjas, solape, factores, recálculo y borrados); las pantallas de `/admin/rutas` siguen sin abrirse en un navegador.
+- Docker: solo se validó `docker compose config`; las imágenes `api` y `seed` no se construyeron ni se ejecutaron. **Actualización 2026-11-16:** el stack levantó sano y la API de rutas del admin se recorrió entera con `curl`/`fetch` (ruta, tramo, franjas, solape, factores, recálculo y borrados); **Actualización 2026-11-17:** las pantallas de `/admin/rutas` se recorrieron en Chrome (22 de 22 pasos) y se corrigió el error del toast (`646deb8`); el tema por defecto pasó a claro (`5ce08cd`).
 - Casi todas las pruebas del frontend se escribieron junto con el código, sin ver antes el fallo (RED); solo se vio RED en el backend de S1 y S2 y en el mapa de errores.
 
 ### 17.5 Pendientes y avisos

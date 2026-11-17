@@ -1,6 +1,6 @@
 # RF-05-5 — Registrar tramo de ruta
 
-> Spec de Sprint 2 · Épica EP-05 · Debe tener · Estado: **Implementada** (verificación en navegador pendiente de registrar)
+> Spec de Sprint 2 · Épica EP-05 · Debe tener · Estado: **Verificada en navegador (2026-11-17)**
 
 ## Historia de usuario
 
@@ -12,12 +12,12 @@ El sistema deberá permitir crear un tramo de una ruta con sus coordenadas, long
 
 ## Criterios de aceptación
 
-- [ ] Desde el detalle de la ruta (`/admin/rutas/:id`), un formulario en línea agrega un tramo con nombre, orden y puntos/longitud según el contrato.
-- [ ] Los errores de campo y de la API salen en español.
-- [ ] Cancelar con cambios pide confirmación de descarte.
-- [ ] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
-- [ ] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] Desde el detalle de la ruta (`/admin/rutas/:id`), un formulario en línea agrega un tramo con nombre, orden y puntos/longitud según el contrato.
+- [x] Los errores de campo y de la API salen en español.
+- [x] Cancelar con cambios pide confirmación de descarte.
+- [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
+- [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
 - [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 ## Trazabilidad

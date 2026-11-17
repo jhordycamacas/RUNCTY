@@ -1,6 +1,6 @@
 # RF-07-1 — Registrar franja horaria
 
-> Spec de Sprint 2 · Épica EP-07 · Debe tener · Estado: **Implementada** (verificación en navegador pendiente de registrar)
+> Spec de Sprint 2 · Épica EP-07 · Debe tener · Estado: **Verificada en navegador (2026-11-17)**
 
 ## Historia de usuario
 
@@ -12,11 +12,11 @@ El sistema deberá permitir crear franjas horarias de entrenamiento, indicando l
 
 ## Criterios de aceptación
 
-- [ ] El detalle de la ruta permite agregar una franja con hora de inicio y fin mediante campos de hora (no texto libre), etiqueta opcional y fechas de vigencia opcionales.
-- [ ] Una franja que se solapa con otra se rechaza con un mensaje en español, tanto en el cliente como con el código `time-slot-overlap` de la API.
-- [ ] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
-- [ ] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] El detalle de la ruta permite agregar una franja con hora de inicio y fin mediante campos de hora (no texto libre), etiqueta opcional y fechas de vigencia opcionales.
+- [x] Una franja que se solapa con otra se rechaza con un mensaje en español, tanto en el cliente como con el código `time-slot-overlap` de la API.
+- [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
+- [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
 - [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 ## Trazabilidad

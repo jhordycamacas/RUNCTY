@@ -1,6 +1,6 @@
 # RF-07-9 — Calcular el índice de seguridad de cada tramo por franja horaria
 
-> Spec de Sprint 2 · Épica EP-07 · Debe tener · Estado: **Implementada** (verificación en navegador pendiente de registrar)
+> Spec de Sprint 2 · Épica EP-07 · Debe tener · Estado: **Verificada en navegador (2026-11-17)**
 
 ## Historia de usuario
 
@@ -12,12 +12,12 @@ El sistema deberá permitir crear (calcular) el índice de seguridad de una ruta
 
 ## Criterios de aceptación
 
-- [ ] El servidor calcula el índice por tramo y franja: parte de 100 puntos y cada factor activo en la franja resta 10 (severidad baja), 20 (media) o 35 (alta).
-- [ ] Niveles: Alto ≥ 70, Medio 40–69, Bajo < 40. La ruta toma el nivel de su peor tramo.
-- [ ] El cliente nunca calcula el índice: lo lee de `GET /routes/{id}`.
-- [ ] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
-- [ ] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] El servidor calcula el índice por tramo y franja: parte de 100 puntos y cada factor activo en la franja resta 10 (severidad baja), 20 (media) o 35 (alta).
+- [x] Niveles: Alto ≥ 70, Medio 40–69, Bajo < 40. La ruta toma el nivel de su peor tramo.
+- [x] El cliente nunca calcula el índice: lo lee de `GET /routes/{id}`.
+- [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
+- [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
 - [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 ## Trazabilidad

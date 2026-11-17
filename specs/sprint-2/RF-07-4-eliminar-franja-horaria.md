@@ -1,6 +1,6 @@
 # RF-07-4 — Eliminar franja horaria
 
-> Spec de Sprint 2 · Épica EP-07 · Debe tener · Estado: **Implementada** (verificación en navegador pendiente de registrar)
+> Spec de Sprint 2 · Épica EP-07 · Debe tener · Estado: **Verificada en navegador (2026-11-17)**
 
 ## Historia de usuario
 
@@ -12,11 +12,11 @@ El sistema deberá permitir eliminar una franja horaria que deje de utilizarse e
 
 ## Criterios de aceptación
 
-- [ ] Eliminar una franja pide confirmación (botón destructivo).
-- [ ] Al eliminarse, la franja y su entrada de seguridad desaparecen del detalle.
-- [ ] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
-- [ ] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] Eliminar una franja pide confirmación (botón destructivo).
+- [x] Al eliminarse, la franja y su entrada de seguridad desaparecen del detalle.
+- [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
+- [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
 - [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 ## Trazabilidad

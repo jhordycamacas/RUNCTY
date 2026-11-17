@@ -1,6 +1,6 @@
 # RF-07-2 — Consultar franjas horarias
 
-> Spec de Sprint 2 · Épica EP-07 · Debe tener · Estado: **Implementada** (verificación en navegador pendiente de registrar)
+> Spec de Sprint 2 · Épica EP-07 · Debe tener · Estado: **Verificada en navegador (2026-11-17)**
 
 ## Historia de usuario
 
@@ -12,10 +12,10 @@ El sistema deberá permitir leer las franjas horarias disponibles y sus fechas d
 
 ## Criterios de aceptación
 
-- [ ] El detalle lista las franjas de la ruta ordenadas por hora de inicio, con su ventana y su vigencia ("Todos los días" si no tiene límites).
-- [ ] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
-- [ ] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] El detalle lista las franjas de la ruta ordenadas por hora de inicio, con su ventana y su vigencia ("Todos los días" si no tiene límites).
+- [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
+- [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
 - [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 ## Trazabilidad

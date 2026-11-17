@@ -1,6 +1,6 @@
 # RF-07-7 — Modificar factor de riesgo
 
-> Spec de Sprint 2 · Épica EP-07 · Debe tener · Estado: **Implementada** (verificación en navegador pendiente de registrar)
+> Spec de Sprint 2 · Épica EP-07 · Debe tener · Estado: **Verificada en navegador (2026-11-17)**
 
 ## Historia de usuario
 
@@ -12,11 +12,11 @@ El sistema deberá permitir actualizar la información y los horarios de los fac
 
 ## Criterios de aceptación
 
-- [ ] Un factor se edita en el formulario en línea con valores precargados y foco en el encabezado.
-- [ ] Al guardar, el índice de seguridad mostrado se actualiza sin recargar la página.
-- [ ] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
-- [ ] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] Un factor se edita en el formulario en línea con valores precargados y foco en el encabezado.
+- [x] Al guardar, el índice de seguridad mostrado se actualiza sin recargar la página.
+- [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
+- [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
 - [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 ## Trazabilidad

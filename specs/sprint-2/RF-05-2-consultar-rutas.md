@@ -1,6 +1,6 @@
 # RF-05-2 — Consultar rutas de running
 
-> Spec de Sprint 2 · Épica EP-05 · Debe tener · Estado: **Implementada** (verificación en navegador pendiente de registrar)
+> Spec de Sprint 2 · Épica EP-05 · Debe tener · Estado: **Verificada en navegador (2026-11-17)**
 
 ## Historia de usuario
 
@@ -12,12 +12,12 @@ El sistema deberá permitir leer las rutas registradas y sus características, f
 
 ## Criterios de aceptación
 
-- [ ] `/admin/rutas` lista las rutas de la ciudad elegida, incluidas las inactivas, con nombre, distancia, dificultad, estado y nivel de seguridad por franja.
-- [ ] Permite elegir ciudad o zona (por defecto "Todas las ciudades") y filtrar por texto.
-- [ ] Existen los estados de carga, vacío y error; el de error ofrece reintentar.
-- [ ] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
-- [ ] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] `/admin/rutas` lista las rutas de la ciudad elegida, incluidas las inactivas, con nombre, distancia, dificultad, estado y nivel de seguridad por franja.
+- [x] Permite elegir ciudad o zona (por defecto "Todas las ciudades") y filtrar por texto.
+- [x] Existen los estados de carga, vacío y error; el de error ofrece reintentar.
+- [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
+- [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
 - [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 ## Trazabilidad
