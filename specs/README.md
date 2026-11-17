@@ -1,6 +1,6 @@
-# Specs — Sprint 2 (SDD)
+# Specs — Sprints 1 y 2 (SDD)
 
-Cada historia del Sprint 2 tiene su propio documento. **La spec manda**: si el comportamiento cambia, primero se cambia la spec y después el código y las pruebas.
+Cada historia de los Sprints 1 y 2 que toca al administrador tiene su propio documento. **La spec manda**: si el comportamiento cambia, primero se cambia la spec y después el código y las pruebas.
 
 ## Flujo SDD en este repositorio
 
@@ -9,18 +9,27 @@ Cada historia del Sprint 2 tiene su propio documento. **La spec manda**: si el c
 3. Se implementa hasta que pase (GREEN) y se refactoriza.
 4. Se marca el criterio en la spec y se anota la evidencia en `odd/tasks/<feature>.md`.
 
-Fuente de verdad de los requisitos: `D:\Proyecto5to\Docs\RequsitosExcelFInal.xlsx`; backlog: `BacklogRUNCTY_Final.xlsx` (hoja `BKL-G1`). Los criterios por pantalla salen de `odd/tasks/admin-routes-sprint2.md`.
+Fuente de verdad de los requisitos: `D:\Proyecto5to\Docs\RequsitosExcelFInal.xlsx`; backlog: `BacklogRUNCTY_Final.xlsx` (hoja `BKL-G1`). Los criterios por pantalla salen de `odd/tasks/admin-routes-sprint2.md` (Sprint 2) y `odd/tasks/admin-users-roles-cities-sprint1.md` (Sprint 1).
 
 ## Cómo ver el sprint funcionando
 
 - Backend y emuladores: `docker compose up -d --build` desde la raíz (Docker Desktop encendido). Espera a que `runcty-seed` quede en `Exited (0)`.
-- Frontend: desde `frontend/`, `npm start` → http://localhost:4200/admin/rutas
+- Frontend: desde `frontend/`, `npm start` → http://localhost:4200/admin
 - Usuario administrador del emulador: `admin@runcty.dev` / `Admin123!`.
 
 ## Índice
 
 | Spec | Historia | Épica |
 | --- | --- | --- |
+| [RF-01-2](sprint-1/RF-01-2-consultar-usuarios.md) | Consultar los datos de los usuarios autorizados | EP-01 |
+| [RF-02-1](sprint-1/RF-02-1-registrar-rol.md) | Registrar rol de usuario | EP-02 |
+| [RF-02-2](sprint-1/RF-02-2-consultar-roles.md) | Consultar roles de usuario | EP-02 |
+| [RF-02-3](sprint-1/RF-02-3-modificar-rol.md) | Modificar rol de usuario | EP-02 |
+| [RF-02-4](sprint-1/RF-02-4-eliminar-rol.md) | Eliminar rol de usuario | EP-02 |
+| [RF-04-1](sprint-1/RF-04-1-registrar-ciudad-o-zona.md) | Registrar ciudad o zona de operación | EP-04 |
+| [RF-04-2](sprint-1/RF-04-2-consultar-ciudades-y-zonas.md) | Consultar ciudades y zonas de operación | EP-04 |
+| [RF-04-3](sprint-1/RF-04-3-modificar-ciudad-o-zona.md) | Modificar ciudad o zona de operación | EP-04 |
+| [RF-04-4](sprint-1/RF-04-4-eliminar-ciudad-o-zona.md) | Eliminar ciudad o zona de operación | EP-04 |
 | [RF-05-1](sprint-2/RF-05-1-registrar-ruta.md) | Registrar ruta de running | EP-05 |
 | [RF-05-2](sprint-2/RF-05-2-consultar-rutas.md) | Consultar rutas de running | EP-05 |
 | [RF-05-3](sprint-2/RF-05-3-modificar-ruta.md) | Modificar ruta de running | EP-05 |
