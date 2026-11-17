@@ -20,7 +20,7 @@ src/app/
   emergency/     SOS button of the runner shell: confirmation, then the phone dialer for 911 (`tel:911`)
   runner/        /app    runner area shell, Home, routes (mobile-first, bottom tabs)
   admin/         /admin  admin area, desktop-first, side menu (ion-split-pane)
-src/theme/   design tokens (CSS variables), Ionic mapping, per-area overrides, Inter font
+src/theme/   design tokens (CSS variables), Ionic mapping, per-area overrides, Plus Jakarta Sans font
 src/environments/  development (emulators) and production (placeholders)
 ```
 

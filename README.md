@@ -214,7 +214,7 @@ npm run admin:build                        # build de producción del panel
   - eliminación de la cuenta;
   - perfil deportivo;
   - preferencias de tamaño de letra, modo oscuro, unidades, notificaciones y privacidad de ubicación;
-  - diseño propio con la fuente Inter, íconos y pestañas Inicio, Rutas y Perfil;
+  - diseño propio con la fuente Plus Jakarta Sans, íconos y pestañas Inicio, Rutas y Perfil;
   - inicio con la próxima franja de entrenamiento y las rutas recomendadas para ella;
   - catálogo de rutas de la ciudad del corredor, con filtros por franja, distancia y dificultad;
   - detalle de cada ruta con su nivel de seguridad (Alto, Medio o Bajo) por franja, los factores que lo explican y los tramos.

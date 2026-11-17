@@ -5,51 +5,51 @@
 // override any token, see _areas.scss.
 
 @mixin light-colors {
-  --rc-background: #{p.$white};
-  --rc-surface: #{p.$grey50};
+  --rc-background: #{p.$blush50};
+  --rc-surface: #{p.$blush100};
   --rc-surface-elevated: #{p.$white};
-  --rc-border: #{p.$grey300};
-  --rc-control-border: #{p.$grey500};
-  --rc-text: #{p.$black};
-  --rc-text-muted: #{p.$grey600};
-  --rc-primary: #{p.$red600};
-  --rc-primary-pressed: #{p.$red700};
-  --rc-primary-tint: #{p.$red100};
+  --rc-border: #{p.$blush200};
+  --rc-control-border: #{p.$mauve500};
+  --rc-text: #{p.$plum900};
+  --rc-text-muted: #{p.$mauve600};
+  --rc-primary: #{p.$magenta600};
+  --rc-primary-pressed: #{p.$magenta700};
+  --rc-primary-tint: #{p.$blush100};
   --rc-on-primary: #{p.$white};
-  --rc-primary-text: #{p.$red600};
+  --rc-primary-text: #{p.$magenta800};
   --rc-success: #{p.$green600};
   --rc-warning: #{p.$amber700};
-  --rc-danger: #{p.$red600};
+  --rc-danger: #{p.$magenta800};
   --rc-success-tint: #{p.$green50};
   --rc-warning-tint: #{p.$amber50};
-  --rc-danger-tint: #{p.$red50};
+  --rc-danger-tint: #{p.$rose50};
 }
 
 @mixin dark-colors {
-  --rc-background: #{p.$black};
-  --rc-surface: #{p.$grey900};
-  --rc-surface-elevated: #{p.$grey800};
-  --rc-border: #{p.$grey700};
-  --rc-control-border: #{p.$grey500};
+  --rc-background: #{p.$plum950};
+  --rc-surface: #{p.$plum850};
+  --rc-surface-elevated: #{p.$plum800};
+  --rc-border: #{p.$plum700};
+  --rc-control-border: #{p.$mauve400};
   --rc-text: #{p.$white};
-  --rc-text-muted: #{p.$grey400};
-  --rc-primary: #{p.$red600};
-  --rc-primary-pressed: #{p.$red700};
-  --rc-primary-tint: #{p.$grey800};
+  --rc-text-muted: #{p.$mauve300};
+  --rc-primary: #{p.$magenta600};
+  --rc-primary-pressed: #{p.$magenta700};
+  --rc-primary-tint: #{p.$plum800};
   --rc-on-primary: #{p.$white};
-  --rc-primary-text: #{p.$red300};
+  --rc-primary-text: #{p.$magenta300};
   --rc-success: #{p.$green300};
   --rc-warning: #{p.$amber300};
-  --rc-danger: #{p.$red400};
+  --rc-danger: #{p.$magenta300};
   --rc-success-tint: #{p.$green900};
   --rc-warning-tint: #{p.$amber900};
-  --rc-danger-tint: #{p.$red900};
+  --rc-danger-tint: #{p.$rose900};
 }
 
 :root {
   @include light-colors;
 
-  --rc-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --rc-font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --rc-font-size-caption: 0.75rem;
   --rc-font-size-label: 0.875rem;
   --rc-font-size-body: 1rem;
@@ -64,16 +64,16 @@
   --rc-space-xl: 24px;
   --rc-space-xxl: 32px;
 
-  --rc-radius-sm: 6px;
-  --rc-radius-md: 10px;
-  --rc-radius-lg: 16px;
+  --rc-radius-sm: 10px;
+  --rc-radius-md: 16px;
+  --rc-radius-lg: 24px;
 
   --rc-radius-pill: 999px;
 
   // Soft elevation from the original mobile app (cards, primary buttons, floating actions).
-  --rc-shadow-sm: 0 1px 3px rgb(17 17 17 / 6%);
-  --rc-shadow-md: 0 3px 8px rgb(17 17 17 / 8%);
-  --rc-shadow-lg: 0 8px 16px rgb(17 17 17 / 12%);
+  --rc-shadow-sm: 0 1px 2px rgb(60 10 40 / 6%);
+  --rc-shadow-md: 0 4px 14px rgb(60 10 40 / 8%);
+  --rc-shadow-lg: 0 12px 28px rgb(60 10 40 / 14%);
 
   // Minimum touch target (accessibility: controls >= 48px).
   --rc-min-touch-target: 48px;

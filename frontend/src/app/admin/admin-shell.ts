@@ -74,25 +74,50 @@ addIcons({ businessOutline, peopleOutline, shieldCheckmarkOutline, trailSignOutl
 
     ion-menu {
       --background: var(--rc-sidebar-background);
-      --width: 16rem;
+      --width: 17rem;
+      --border: 0;
+    }
+
+    // A floating white panel on the tinted page, like a rounded card.
+    ion-menu ion-content {
+      --background: var(--rc-surface-elevated);
+      position: absolute;
+      inset: var(--rc-space-lg);
+      width: auto;
+      height: auto;
+      border-radius: var(--rc-radius-lg);
+      box-shadow: var(--rc-shadow-md);
+      overflow: hidden;
     }
 
     .brand {
       margin: 0;
-      padding: var(--rc-space-lg);
+      padding: var(--rc-space-xl) var(--rc-space-xl) var(--rc-space-md);
+      font-size: var(--rc-font-size-subtitle);
       font-weight: 700;
       color: var(--rc-primary-text);
     }
 
+    ion-list {
+      padding: var(--rc-space-sm) var(--rc-space-md);
+      background: transparent;
+    }
+
     ion-item {
       --background: transparent;
+      --border-radius: var(--rc-radius-pill);
       --min-height: var(--rc-min-touch-target);
+      margin-bottom: var(--rc-space-xs);
+      font-weight: 600;
     }
 
     ion-item.active {
-      --background: var(--rc-primary-tint);
-      --color: var(--rc-primary-text);
-      font-weight: 600;
+      --background: var(--rc-primary);
+      --color: var(--rc-on-primary);
+    }
+
+    ion-item.active ion-icon {
+      color: var(--rc-on-primary);
     }
 
     .footer {
@@ -102,6 +127,7 @@ addIcons({ businessOutline, peopleOutline, shieldCheckmarkOutline, trailSignOutl
       gap: var(--rc-space-md);
       padding: var(--rc-space-lg);
       border-top: 1px solid var(--rc-border);
+      margin-top: var(--rc-space-md);
       font-size: var(--rc-font-size-label);
       color: var(--rc-text-muted);
       overflow-wrap: anywhere;

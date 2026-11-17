@@ -1,32 +1,37 @@
-// Raw palette. Components never read these; they use the semantic --rc-* variables.
-// red500 (#D9534F) is the brand tone but only reaches 3.96:1 with white, so filled controls
-// use red600 (#C9302C) to keep text at >= 4.5:1.
+// Raw palette from the Gacelas Running Team brand (magenta, plum black and soft pinks).
+// Components never read these; they use the semantic --rc-* variables.
+// magenta600 (#D6006F) is the brand tone for filled controls (5.1:1 with white);
+// magenta700 is the pressed state and the text tone on tinted surfaces.
 $white: #ffffff;
-$black: #111111;
+$plum950: #14060e;
+$plum900: #1b0a14;
+$plum850: #1f0c18;
+$plum800: #2c1523;
+$plum700: #4d2b40;
 
-$red50: #fdf1f0;
-$red100: #fbe9e8;
-$red300: #e8807c;
-$red400: #f08a86;
-$red600: #c9302c;
-$red700: #a8322e;
-$red900: #3a1f1e;
+$blush50: #fceef5;
+$blush100: #f8e1ec;
+$blush200: #f3cfe0;
 
-$grey50: #f7f7f7;
-$grey300: #d4d4d4;
-$grey400: #a3a3a3;
-$grey500: #767676;
-$grey600: #5f5f5f;
-$grey700: #48484a;
-$grey800: #2a2a2c;
-$grey900: #1c1c1e;
+$mauve300: #cdaebf;
+$mauve400: #9a7488;
+$mauve500: #82596f;
+$mauve600: #654b59;
 
-$green50: #eef7ee;
+$magenta300: #f06bb0;
+$magenta600: #d6006f;
+$magenta700: #b80058;
+$magenta800: #c0005c;
+
+$green50: #e6f5e8;
 $green300: #81c784;
-$green600: #2e7d32;
+$green600: #1f6b25;
 $green900: #1a2e1c;
 
 $amber50: #fff3e0;
 $amber300: #ffb74d;
 $amber700: #8a5300;
 $amber900: #33270f;
+
+$rose50: #fde8f1;
+$rose900: #3d1226;

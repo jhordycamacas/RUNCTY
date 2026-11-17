@@ -9,9 +9,9 @@
   --rc-font-size-body: 0.9375rem;
   --rc-font-size-title: 1.25rem;
   --rc-space-lg: 14px;
-  --rc-radius-md: 8px;
+  --rc-radius-md: 14px;
   --rc-min-touch-target: 40px;
-  --rc-sidebar-background: var(--rc-surface);
+  --rc-sidebar-background: transparent;
 }
 
 // Touch screens (a tablet, or the admin on a phone) keep the full 48px target.
