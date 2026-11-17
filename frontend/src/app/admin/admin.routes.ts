@@ -3,10 +3,14 @@ import { permissionGuard } from '../core/guards/auth.guards';
 import { adminLandingGuard } from './admin-landing.guard';
 import { ADMIN_SECTIONS } from './admin-sections';
 
-/** The screens of the sections that are built; the rest show the placeholder. */
-const SECTION_SCREENS: Partial<Record<string, Pick<Route, 'loadChildren'>>> = {
+/** The lazy screens of every admin section, by path. */
+const SECTION_SCREENS: Record<string, Pick<Route, 'loadChildren'>> = {
   usuarios: {
     loadChildren: () => import('./users/users-admin.routes').then((m) => m.USERS_ADMIN_ROUTES),
+  },
+  ciudades: {
+    loadChildren: () =>
+      import('./cities/cities-admin.routes').then((m) => m.CITIES_ADMIN_ROUTES),
   },
   roles: {
     loadChildren: () => import('./roles/roles-admin.routes').then((m) => m.ROLES_ADMIN_ROUTES),
@@ -31,10 +35,7 @@ export const ADMIN_ROUTES: Routes = [
         path: section.path,
         canActivate: [permissionGuard(section.permission)],
         data: { title: section.label },
-        ...(SECTION_SCREENS[section.path] ?? {
-          loadComponent: () =>
-            import('./section-placeholder.page').then((m) => m.SectionPlaceholderPage),
-        }),
+        ...SECTION_SCREENS[section.path],
       })),
     ],
   },

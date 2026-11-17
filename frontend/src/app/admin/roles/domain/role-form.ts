@@ -13,7 +13,7 @@ export interface RoleForm {
 }
 
 export type RoleFormField = keyof RoleForm;
-export type RoleFormErrors = Partial<Record<RoleFormField, string>>;
+type RoleFormErrors = Partial<Record<RoleFormField, string>>;
 
 export const EMPTY_ROLE_FORM: RoleForm = { id: '', name: '', description: '', permissions: [] };
 

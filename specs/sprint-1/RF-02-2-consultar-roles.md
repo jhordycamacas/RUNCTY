@@ -37,6 +37,7 @@ El sistema deberá permitir leer los roles existentes, sus permisos y el rol asi
 ## Pruebas
 
 - `frontend/src/app/admin/roles/infrastructure/http-role-admin.repository.spec.ts`
+- `frontend/src/app/admin/roles/domain/role.spec.ts`
 - `frontend/src/app/admin/roles/application/admin-roles.store.spec.ts`
 - `frontend/src/app/admin/roles/presentation/roles-admin.page.spec.ts`
 

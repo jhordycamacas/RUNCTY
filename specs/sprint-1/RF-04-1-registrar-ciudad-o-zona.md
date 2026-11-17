@@ -1,6 +1,6 @@
 # RF-04-1 — Registrar ciudad o zona de operación
 
-> Spec de Sprint 1 · Épica EP-04 · Debe tener · Estado: **Pendiente**
+> Spec de Sprint 1 · Épica EP-04 · Debe tener · Estado: **Implementada** (verificada en el navegador con el stack local)
 
 ## Historia de usuario
 
@@ -12,15 +12,15 @@ El sistema deberá permitir crear una ciudad o zona de operación con su ubicaci
 
 ## Criterios de aceptación
 
-- [ ] El formulario `/admin/ciudades/nueva` crea una ciudad o una zona con tipo, identificador (minúsculas, números y `-`, 2 a 64 caracteres), nombre, provincia, ubicación (latitud y longitud) y cobertura (activa, planificada o suspendida).
-- [ ] Una zona exige elegir la ciudad a la que pertenece; una ciudad no envía ciudad padre.
-- [ ] Una entrada inválida muestra el mensaje del campo en español y no envía nada a la API (latitud de -90 a 90, longitud de -180 a 180).
-- [ ] Al guardar aparece un aviso de éxito y la lista muestra la ciudad o zona nueva.
-- [ ] Los códigos `city-exists` e `invalid-parent-city` se muestran en español dentro del formulario sin perder lo escrito.
-- [ ] Salir del formulario con cambios sin guardar pide confirmación.
-- [ ] Requiere el permiso `cities.manage`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español; un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas (360 px) y el área sigue pensada para escritorio.
+- [x] El formulario `/admin/ciudades/nueva` crea una ciudad o una zona con tipo, identificador (minúsculas, números y `-`, 2 a 64 caracteres), nombre, provincia, ubicación (latitud y longitud) y cobertura (activa, planificada o suspendida).
+- [x] Una zona exige elegir la ciudad a la que pertenece; una ciudad no envía ciudad padre.
+- [x] Una entrada inválida muestra el mensaje del campo en español y no envía nada a la API (latitud de -90 a 90, longitud de -180 a 180).
+- [x] Al guardar aparece un aviso de éxito y la lista muestra la ciudad o zona nueva.
+- [x] Los códigos `city-exists` e `invalid-parent-city` se muestran en español dentro del formulario sin perder lo escrito.
+- [x] Salir del formulario con cambios sin guardar pide confirmación.
+- [x] Requiere el permiso `cities.manage`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español; un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas (360 px) y el área sigue pensada para escritorio.
 
 ## Trazabilidad
 

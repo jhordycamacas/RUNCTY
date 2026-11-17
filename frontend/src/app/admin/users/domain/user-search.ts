@@ -10,8 +10,8 @@ export interface UserSearchForm {
   cityId: string;
 }
 
-export type UserSearchField = keyof UserSearchForm;
-export type UserSearchErrors = Partial<Record<UserSearchField, string>>;
+type UserSearchField = keyof UserSearchForm;
+type UserSearchErrors = Partial<Record<UserSearchField, string>>;
 
 export const EMPTY_USER_SEARCH: UserSearchForm = {
   firstName: '',

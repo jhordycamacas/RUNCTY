@@ -24,7 +24,7 @@ export interface CityForm {
 }
 
 export type CityFormField = keyof CityForm;
-export type CityFormErrors = Partial<Record<CityFormField, string>>;
+type CityFormErrors = Partial<Record<CityFormField, string>>;
 
 export const EMPTY_CITY_FORM: CityForm = {
   type: '',
