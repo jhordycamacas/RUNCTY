@@ -1,6 +1,6 @@
 # RF-01-2 — Consultar los datos de los usuarios autorizados
 
-> Spec de Sprint 1 · Épica EP-01 · Debe tener · Estado: **Pendiente**
+> Spec de Sprint 1 · Épica EP-01 · Debe tener · Estado: **Implementada** (verificada en el navegador con el stack local)
 
 ## Historia de usuario
 
@@ -12,15 +12,15 @@ El sistema deberá permitir leer los datos de los usuarios, filtrándolos por no
 
 ## Criterios de aceptación
 
-- [ ] `/admin/usuarios` lista los usuarios con nombre, correo, ciudad y rol, con estados de carga, vacío y error con botón «Reintentar».
-- [ ] Se puede filtrar por nombres, apellidos, correo, identificación, fecha de nacimiento y ciudad; solo se envían a la API los filtros con valor.
-- [ ] Una identificación que no tiene 10 dígitos o una fecha que no es AAAA-MM-DD muestra el mensaje del campo en español y no envía nada a la API.
-- [ ] Si la API devuelve `nextCursor`, aparece «Cargar más» y añade la página siguiente; sin cursor no aparece. Un cursor inválido (`invalid-cursor`) muestra un mensaje y permite volver a buscar.
-- [ ] La lista no muestra la identificación (minimización de datos): la API tampoco la devuelve.
-- [ ] Cada usuario muestra el nombre de su rol (RF-02-2).
-- [ ] Requiere el permiso `users.read`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español; un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas (360 px) y el área sigue pensada para escritorio.
+- [x] `/admin/usuarios` lista los usuarios con nombre, correo, ciudad y rol, con estados de carga, vacío y error con botón «Reintentar».
+- [x] Se puede filtrar por nombres, apellidos, correo, identificación, fecha de nacimiento y ciudad; solo se envían a la API los filtros con valor.
+- [x] Una identificación que no tiene 10 dígitos o una fecha que no es AAAA-MM-DD muestra un aviso en español y no envía nada a la API.
+- [x] Si la API devuelve `nextCursor`, aparece «Cargar más» y añade la página siguiente; sin cursor no aparece. Un cursor inválido (`invalid-cursor`) muestra un mensaje y permite volver a buscar.
+- [x] La lista no muestra la identificación (minimización de datos): la API tampoco la devuelve.
+- [x] Cada usuario muestra el nombre de su rol (RF-02-2).
+- [x] Requiere el permiso `users.read`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español; un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas (360 px) y el área sigue pensada para escritorio.
 
 ## Trazabilidad
 
