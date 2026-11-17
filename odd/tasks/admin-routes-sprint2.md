@@ -1,5 +1,7 @@
 # Feature: Admin route management in the single frontend (Sprint 2, S5b)
 
+> Specs (SDD): [EP-05 route catalogue](../../specs/05-catalogo-de-rutas.md), [EP-07 safety evaluation](../../specs/07-evaluacion-de-seguridad.md)
+
 Locator: `odd/tasks/admin-routes-sprint2.md` · Engram mirror: `odd/admin-routes-sprint2/tasks` · Branch: `feat/admin-routes-sprint2`
 
 ## Objective

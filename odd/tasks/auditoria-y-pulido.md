@@ -1,5 +1,7 @@
 # Feature: auditoría (seguridad, UX/UI, sprints) y pulido de las dos apps
 
+> Specs (SDD): [Non-functional requirements](../../specs/transversal/rnf-requisitos-no-funcionales.md), [Architecture](../../specs/transversal/arquitectura.md)
+
 - **Rama:** `feat/hardening-and-polish`
 - **Locator:** `odd/tasks/auditoria-y-pulido.md` (espejo Engram `odd/auditoria-y-pulido/tasks`: **pendiente**, Engram no está disponible en la sesión del 2026-11-10)
 - **Estrategia de entrega:** `ask-on-risk`. Commits por unidad de trabajo en la rama; PR a decisión del usuario.

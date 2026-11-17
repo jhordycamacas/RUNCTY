@@ -1,5 +1,7 @@
 # Feature: Django backend + Angular web panel (frontend/backend split)
 
+> Specs (SDD): [Architecture](../../specs/transversal/arquitectura.md)
+
 > **Frontend decisions superseded on 2026-11-13** by `single-frontend-ionic.md` (one Angular + Ionic + Capacitor app instead of React Native + Angular). Backend decisions, API contract and audit findings below remain valid.
 
 - **Branch:** `feat/django-angular-architecture` (from `feat/hardening-and-polish` at `7d36585`)

@@ -1,10 +1,12 @@
 # Feature: Admin users, roles and cities in the single frontend (Sprint 1, S5a)
 
+> Specs (SDD): [EP-01 users](../../specs/01-gestion-de-usuarios.md), [EP-02 roles](../../specs/02-roles-y-permisos.md), [EP-04 cities](../../specs/04-ciudades-y-zonas.md)
+
 Locator: `odd/tasks/admin-users-roles-cities-sprint1.md` · Engram mirror: `odd/admin-users-roles-cities-sprint1/tasks` (pending, the Engram tools are not available in this session) · Branch: `feat/admin-users-roles-cities` (from `feat/admin-routes-sprint2`)
 
 ## Objective
 
-Give the administrator, inside the Angular + Ionic frontend, the Sprint 1 admin screens: user search and role assignment (`/admin/usuarios`), role management (`/admin/roles`) and city and zone management (`/admin/ciudades`). It closes the admin stories RF-01-2, RF-02-1 to RF-02-4 and RF-04-1 to RF-04-4. The specs live in `specs/sprint-1/` (one per story).
+Give the administrator, inside the Angular + Ionic frontend, the Sprint 1 admin screens: user search and role assignment (`/admin/usuarios`), role management (`/admin/roles`) and city and zone management (`/admin/ciudades`). It closes the admin stories RF-01-2, RF-02-1 to RF-02-4 and RF-04-1 to RF-04-4. The specs live in `specs/01-gestion-de-usuarios.md`, `specs/02-roles-y-permisos.md` and `specs/04-ciudades-y-zonas.md` (grouped by capability).
 
 ## Problem and why
 
@@ -23,7 +25,7 @@ In scope: the `usuarios`, `roles` and `ciudades` admin sections in `frontend/src
 
 ## Tasks
 
-- [x] T1 Specs: one `specs/sprint-1/*.md` per admin story plus the README index. Route: inline (committed first). Commit `fe15884`.
+- [x] T1 Specs: one spec per admin story plus the README index (later consolidated into the capability specs `specs/01-*.md`, `specs/02-*.md` and `specs/04-*.md`). Route: inline (committed first). Commit `fe15884`.
 - [x] T2 Roles: domain, HTTP repository, store, list, form with the grouped permission checklist, delete. Route: delegated writer (this one). Commits `c2d1b3f`, `b3b2a16`.
 - [x] T3 Users: search with filters and cursor paging, role assignment with confirmation. Route: delegated writer. Commits `b25af72`, `83c9d18`.
 - [x] T4 Theme selector in the admin menu (extra request), reusing `PreferencesStore`. Route: delegated writer. Commit `23c62d0`.

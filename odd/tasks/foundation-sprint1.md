@@ -1,5 +1,7 @@
 # Feature: Base del proyecto + Sprint 1
 
+> Specs (SDD): [EP-01 users](../../specs/01-gestion-de-usuarios.md), [EP-02 roles](../../specs/02-roles-y-permisos.md), [EP-04 cities](../../specs/04-ciudades-y-zonas.md), [EP-25 authentication](../../specs/25-autenticacion-y-credenciales.md), [EP-26 preferences](../../specs/26-preferencias-de-usuario.md)
+
 - **Rama:** `feat/foundation-sprint1`
 - **Locator:** `odd/tasks/foundation-sprint1.md` · espejo Engram `odd/foundation-sprint1/tasks` (**pendiente**: Engram no disponible en la sesión 2026-11-02).
 - **Estrategia de entrega:** `ask-on-risk`. Forecast > 400 líneas autoradas; la estrategia de PR encadenado se pregunta al usuario antes de abrir PRs (push/PR son decisión del usuario).

@@ -730,7 +730,7 @@ RUNCTY/
 | S3 Frontend: base | **Hecha** | `4488be5`, `2b9d074`, `c690d1f`, `0d3a951`, `1dd08fa`. Angular + Ionic + Capacitor, cliente de la API con interceptor, mapa de errores a español, login con Firebase, guards (`canMatch`), layouts de las dos áreas, tokens claro/oscuro con Inter local, CORS del backend para Ionic y Capacitor, plataforma Android y APK de depuración. |
 | S4a Área del corredor: cuenta | **Hecha** | `add05a1`, `439b6fa`, `f5f3f83`. Registro con consentimiento, login, recuperar contraseña, correo sin verificar con "Reenviar correo", perfil, perfil deportivo, preferencias, cambiar contraseña, eliminar cuenta (reautenticación y `recent-sign-in-required`), selector de ciudad con búsqueda y fecha en tres campos. |
 | S4b Área del corredor: rutas | **Hecha** | `21f094c`, `00920a1`, `518e0be`, `464c06a`. Pestaña Rutas con filtros, tarjeta con "Factor principal", detalle con segmentos y factores, "Abrir en Google Maps", rutas recomendadas en Inicio y botón SOS (confirma y abre `tel:911`). |
-| S5a Área de admin: usuarios, roles y ciudades | **Hecha** (2026-11-17) | En la rama `feat/admin-users-roles-cities`: `fe15884` (specs), `b3b2a16` (roles), `83c9d18` (usuarios), `23c62d0` (selector de tema), `276d66d` (ciudades y zonas). Cubre RF-01-2, RF-02-1 a RF-02-4 y RF-04-1 a RF-04-4 (specs en `specs/sprint-1/`); se eliminó la página provisional "no disponible". |
+| S5a Área de admin: usuarios, roles y ciudades | **Hecha** (2026-11-17) | En la rama `feat/admin-users-roles-cities`: `fe15884` (specs), `b3b2a16` (roles), `83c9d18` (usuarios), `23c62d0` (selector de tema), `276d66d` (ciudades y zonas). Cubre RF-01-2, RF-02-1 a RF-02-4 y RF-04-1 a RF-04-4 (specs en `specs/01-gestion-de-usuarios.md`, `specs/02-roles-y-permisos.md` y `specs/04-ciudades-y-zonas.md`); se eliminó la página provisional "no disponible". |
 | S5b Área de admin: rutas, segmentos, franjas y factores | **Hecha** (2026-11-16) | En la rama `feat/admin-routes-sprint2`: `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`. La gestión de rutas del Sprint 2 (RF-05-1 a RF-05-8 y RF-07-1 a RF-07-11; Jira RUN-14, RUN-28, RUN-73 a RUN-79 y RUN-87 a RUN-96) vive en `/admin/rutas` del frontend único: lista con rutas inactivas, formulario de ruta, detalle con tramos, franjas, factores de riesgo y resumen de seguridad. Detalle y evidencia en `odd/tasks/admin-routes-sprint2.md`. |
 | S6 Limpieza, Android y documentación | Pendiente | Borrar `frontend/mobile`, `admin/`, `functions/` y `scripts/seed-emulator.ts`; reglas de Firestore cerradas (deny-all); verificar web y APK; reescribir la sección 9, el README y el manual de Android. |
 
@@ -777,11 +777,17 @@ RUNCTY/
 
 ### 17.5b Resumen del panel y rediseño (2026-11-17)
 
-- **Resumen** es la primera sección de `/admin` (permiso `admin.access`) y la pantalla de aterrizaje. Muestra analíticas reales de la app móvil: usuarios, altas por semana, rutas por dificultad, superficie y ciudad, nivel de seguridad por ruta (peor nivel de sus franjas, nunca «segura» o «insegura»), perfil deportivo y preferencias. Specs: `specs/admin/ADM-resumen-*.md` y `ADM-diseno-visual.md`.
+- **Resumen** es la primera sección de `/admin` (permiso `admin.access`) y la pantalla de aterrizaje. Muestra analíticas reales de la app móvil: usuarios, altas por semana, rutas por dificultad, superficie y ciudad, nivel de seguridad por ruta (peor nivel de sus franjas, nunca «segura» o «insegura»), perfil deportivo y preferencias. Specs: `specs/transversal/panel-de-administracion.md` y `specs/transversal/sistema-de-diseno.md`.
 - **Endpoint** `GET /api/v1/admin/summary` (app `backend/apps/summary`): solo agregados, sin datos personales; cada bloque (`users`, `routes`, `cities`) llega solo si el usuario tiene `users.read`, `routes.manage` o `cities.manage`, si no es `null`. Lecturas acotadas (5000 documentos; 2000 rutas) y `truncated` avisa si se alcanzó el tope.
 - **No inventar cifras:** entrenamientos, alertas SOS y eventos no existen todavía; la pantalla muestra fichas «Próximamente» sin números. El correo verificado no se cuenta porque vive en Auth, no en Firestore.
 - **Diseño:** lienzo rosado suave, barra lateral flotante con marca y tarjeta de cuenta, fichas y columnas en pasteles (rosa, durazno, cielo, lavanda, menta) con tokens claro y oscuro en `frontend/src/theme/` (la tinta sobre cada pastel cumple 4,5:1 en `tokens.spec.ts`). Gráficos propios sin librería (barras, barra apilada, barras semanales, progreso) con alternativa de texto.
 - **Ojo en desarrollo:** recrear el contenedor `firebase` pierde los datos de los emuladores; se vuelven a cargar con `python manage.py seed` apuntando a `127.0.0.1:8080` y `:9099`.
+
+### 17.7 Specs (SDD)
+
+- Viven en `specs/` y se organizan **por capacidad, no por sprint**: una spec por épica del backlog (`01-gestion-de-usuarios.md` a `26-preferencias-de-usuario.md`, que cubren los 153 sub-requisitos `RF-XX-N`) y cuatro transversales en `specs/transversal/` (RNF, arquitectura, sistema de diseño, panel de administración). El índice, la leyenda de estados y la matriz de trazabilidad están en `specs/README.md`.
+- Flujo: **spec primero** -> prueba que falla (RED) -> implementación (GREEN) -> marcar el criterio con evidencia -> anotar en `odd/tasks/<feature>.md`. Si cambia el comportamiento, primero se cambia la spec.
+- Estados honestos: `Hecha` (todos los criterios con evidencia), `Parcial` (implementada con criterios abiertos o sin verificar en navegador o celular) y `Pendiente`. Al 2026-11-17: 9 Hecha, 35 Parcial y 109 Pendiente.
 
 ### 17.6 Cómo retomar
 

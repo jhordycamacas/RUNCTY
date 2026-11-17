@@ -1,5 +1,7 @@
 # Feature: sistema de diseño + Sprint 2 (catálogo de rutas y evaluación de seguridad)
 
+> Specs (SDD): [Design system](../../specs/transversal/sistema-de-diseno.md), [EP-05 route catalogue](../../specs/05-catalogo-de-rutas.md), [EP-07 safety evaluation](../../specs/07-evaluacion-de-seguridad.md)
+
 - **Rama:** `feat/design-system-sprint2`
 - **Locator:** `odd/tasks/design-system-sprint2.md` (espejo Engram `odd/design-system-sprint2/tasks`: **pendiente**, Engram no disponible en la sesión del 2026-11-02)
 - **Estrategia de entrega:** `ask-on-risk`. El forecast supera ~400 líneas por mucho (~3.000), así que antes de abrir PRs se define con el usuario si van como cadena (`stacked-to-main` o `feature-branch-chain`). Por ahora: commits por unidad de trabajo en la rama.

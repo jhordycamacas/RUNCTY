@@ -1,5 +1,7 @@
 # Feature: Single frontend (Angular + Ionic + Capacitor) on a Django backend
 
+> Specs (SDD): [Architecture](../../specs/transversal/arquitectura.md)
+
 - **Started:** 2026-11-13
 - **Supersedes:** the frontend decisions of `odd/tasks/django-angular-architecture.md` (React Native mobile + separate Angular panel). Its backend decisions, API contract and audit findings stay valid.
 - **Engram mirror:** `odd/single-frontend-ionic/tasks` — **pending** (Engram tools unavailable in this session)

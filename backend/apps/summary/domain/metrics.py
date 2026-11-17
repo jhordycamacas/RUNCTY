@@ -1,7 +1,7 @@
 """Pure aggregation of the admin summary. Everything here returns counts, never personal data.
 
 The functions return the response shape (camelCase) because that shape is the whole contract of
-the summary; see `specs/admin/ADM-resumen-endpoint.md`.
+the summary; see `specs/transversal/panel-de-administracion.md`.
 """
 
 from collections import Counter

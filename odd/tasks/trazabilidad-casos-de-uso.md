@@ -1,5 +1,7 @@
 # Traceability: use cases, backlog and requirements
 
+> Specs (SDD): [Spec index and RF traceability matrix](../../specs/README.md)
+
 ## Objective
 Make the final requirements (`D:\Proyecto5to\Docs\RequsitosExcelFInal.xlsx`, read-only source of truth), the product backlog (`BacklogRUNCTY_PlantillaFinal.xlsx`) and the EA use case diagrams (`RunCty.eap`, Vista de Escenarios) trace one-to-one, for a traceability review: UR -> RF -> RNF -> backlog story -> use case diagram.
 

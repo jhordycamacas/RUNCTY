@@ -1,5 +1,7 @@
 # Feature: Admin summary dashboard and visual refresh
 
+> Specs (SDD): [Admin panel](../../specs/transversal/panel-de-administracion.md), [Design system](../../specs/transversal/sistema-de-diseno.md)
+
 Locator: `odd/tasks/admin-resumen-dashboard.md` · Engram mirror: `odd/admin-resumen-dashboard/tasks` (pending: not written by the bounded writer) · Branch: `feat/admin-users-roles-cities`
 
 ## Objective
@@ -12,7 +14,7 @@ Only real figures (no analytics existed: unbuilt metrics are "Próximamente"), a
 
 ## Tasks
 
-- [x] T1 Specs `specs/admin/ADM-resumen-endpoint.md`, `ADM-resumen-pantalla.md`, `ADM-diseno-visual.md` and index rows. Route: inline (docs). Evidence: commit `93d9c3f`.
+- [x] T1 Specs (now consolidated in `specs/transversal/panel-de-administracion.md` and `specs/transversal/sistema-de-diseno.md`) and index rows. Route: inline (docs). Evidence: commit `93d9c3f`.
 - [x] T2 Backend `GET /api/v1/admin/summary` (`backend/apps/summary`), tests first. Route: delegated direct (this writer). Evidence: commit `c5f8a1b`; pytest 776 passed (was 753), `ruff check` and `ruff format --check` clean.
 - [x] T3 Frontend domain, mapper, HTTP repository, store, page and chart components; Resumen first in `ADMIN_SECTIONS`; landing guard spec updated. Evidence: commit `d0de170`; 24 summary specs plus guard specs.
 - [x] T4 Visual refresh: pastel tokens (light and dark) with contrast specs, floating sidebar with brand and account card, transparent top bar, card shadows. Evidence: the `style(frontend)` commit after `d0de170`.
