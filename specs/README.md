@@ -50,3 +50,6 @@ Fuente de verdad de los requisitos: `D:\Proyecto5to\Docs\RequsitosExcelFInal.xls
 | [RF-07-9](sprint-2/RF-07-9-calcular-indice-de-seguridad.md) | Calcular el índice de seguridad de cada tramo por franja horaria | EP-07 |
 | [RF-07-10](sprint-2/RF-07-10-consultar-indices-de-seguridad.md) | Consultar índices de seguridad | EP-07 |
 | [RF-07-11](sprint-2/RF-07-11-recalcular-indice-de-seguridad.md) | Recalcular el índice de seguridad cuando cambian sus factores | EP-07 |
+| [ADM-2](admin/ADM-resumen-endpoint.md) | Endpoint del resumen del panel (`GET /admin/summary`) | Apoyo |
+| [ADM-3](admin/ADM-resumen-pantalla.md) | Pantalla «Resumen» del panel | Apoyo |
+| [ADM-4](admin/ADM-diseno-visual.md) | Sistema visual del panel y del área del corredor | Apoyo |
