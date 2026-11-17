@@ -36,6 +36,14 @@ describe('ToastService', () => {
     expect(options.htmlAttributes).toEqual({ role: 'alert' });
   });
 
+  it('still shows when there is no previous toast (Ionic rejects dismiss in that case)', async () => {
+    dismissPrevious.mockRejectedValue('overlay does not exist');
+
+    await service.success('Ruta creada.');
+
+    expect(present).toHaveBeenCalledOnce();
+  });
+
   it('replaces the toast that is still showing', async () => {
     await service.success('Uno');
     await service.error('Dos');

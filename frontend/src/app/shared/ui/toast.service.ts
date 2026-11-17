@@ -30,7 +30,8 @@ export class ToastService {
   }
 
   private async show(options: Parameters<ToastController['create']>[0]): Promise<void> {
-    await this.toasts.dismiss();
+    // Ionic rejects dismiss() when no toast is open; that is the normal case, not a failure.
+    await this.toasts.dismiss().catch(() => false);
     const toast = await this.toasts.create({ position: 'bottom', ...options });
     await toast.present();
   }
