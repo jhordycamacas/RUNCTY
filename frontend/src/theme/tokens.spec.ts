@@ -69,6 +69,18 @@ describe.each(['light-colors', 'dark-colors'] as const)('design tokens (%s)', (m
     expect(contrast(colors['on-primary'], colors['primary'])).toBeGreaterThanOrEqual(4.5);
   });
 
+  it('keeps the ink at 4.5:1 or more on every pastel accent', () => {
+    for (const pastel of ['pink', 'peach', 'sky', 'lavender', 'mint']) {
+      expect(colors[`pastel-${pastel}`]).toBeDefined();
+      expect(contrast(colors['on-pastel'], colors[`pastel-${pastel}`])).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('keeps the progress fill visible (3:1) on the raised surface and its track', () => {
+    expect(contrast(colors['progress'], colors['surface-elevated'])).toBeGreaterThanOrEqual(3);
+    expect(contrast(colors['progress'], colors['progress-track'])).toBeGreaterThanOrEqual(3);
+  });
+
   it('gives the page, the surface and the raised surface different colors', () => {
     expect(
       new Set([colors['background'], colors['surface'], colors['surface-elevated']]).size,

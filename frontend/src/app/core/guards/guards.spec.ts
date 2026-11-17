@@ -103,20 +103,26 @@ describe('route guards', () => {
   describe('adminLandingGuard', () => {
     const landing = () => url(run(adminLandingGuard as () => boolean | UrlTree));
 
-    it('opens the first permitted section (UXN-12)', () => {
+    it('opens the summary, the first section, for whoever may enter the panel', () => {
       current.set(session('staff', ['admin.access', 'cities.manage', 'routes.manage']));
+
+      expect(landing()).toBe('/admin/resumen');
+    });
+
+    it('opens the summary for an administrator', () => {
+      current.set(session('admin'));
+
+      expect(landing()).toBe('/admin/resumen');
+    });
+
+    it('opens the first permitted section when the summary is not permitted (UXN-12)', () => {
+      current.set(session('staff', ['cities.manage', 'routes.manage']));
 
       expect(landing()).toBe('/admin/ciudades');
     });
 
-    it('opens the users section for an administrator', () => {
-      current.set(session('admin'));
-
-      expect(landing()).toBe('/admin/usuarios');
-    });
-
     it('shows the empty state when no section is permitted', () => {
-      current.set(session('staff', ['admin.access']));
+      current.set(session('staff', []));
 
       expect(landing()).toBe(true);
     });

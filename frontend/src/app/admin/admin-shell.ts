@@ -12,12 +12,12 @@ import {
   IonSplitPane,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { businessOutline, peopleOutline, shieldCheckmarkOutline, trailSignOutline } from 'ionicons/icons';
+import { businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, trailSignOutline } from 'ionicons/icons';
 import { AuthService } from '../core/auth/auth.service';
 import { ADMIN_SECTIONS } from './admin-sections';
 import { ThemeSelector } from './theme-selector';
 
-addIcons({ businessOutline, peopleOutline, shieldCheckmarkOutline, trailSignOutline });
+addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, trailSignOutline });
 
 /** Admin area layout: desktop-first, a permanent side menu that collapses on narrow screens. */
 @Component({

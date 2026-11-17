@@ -5,6 +5,9 @@ import { ADMIN_SECTIONS } from './admin-sections';
 
 /** The lazy screens of every admin section, by path. */
 const SECTION_SCREENS: Record<string, Pick<Route, 'loadChildren'>> = {
+  resumen: {
+    loadChildren: () => import('./summary/summary-admin.routes').then((m) => m.SUMMARY_ADMIN_ROUTES),
+  },
   usuarios: {
     loadChildren: () => import('./users/users-admin.routes').then((m) => m.USERS_ADMIN_ROUTES),
   },

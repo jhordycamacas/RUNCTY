@@ -23,6 +23,14 @@
   --rc-success-tint: #{p.$green50};
   --rc-warning-tint: #{p.$amber50};
   --rc-danger-tint: #{p.$rose50};
+  --rc-pastel-pink: #{p.$pastelPink};
+  --rc-pastel-peach: #{p.$pastelPeach};
+  --rc-pastel-sky: #{p.$pastelSky};
+  --rc-pastel-lavender: #{p.$pastelLavender};
+  --rc-pastel-mint: #{p.$pastelMint};
+  --rc-on-pastel: #{p.$plum900};
+  --rc-progress: #{p.$teal700};
+  --rc-progress-track: #{p.$tealTrack};
 }
 
 @mixin dark-colors {
@@ -44,6 +52,14 @@
   --rc-success-tint: #{p.$green900};
   --rc-warning-tint: #{p.$amber900};
   --rc-danger-tint: #{p.$rose900};
+  --rc-pastel-pink: #{p.$pastelPinkDark};
+  --rc-pastel-peach: #{p.$pastelPeachDark};
+  --rc-pastel-sky: #{p.$pastelSkyDark};
+  --rc-pastel-lavender: #{p.$pastelLavenderDark};
+  --rc-pastel-mint: #{p.$pastelMintDark};
+  --rc-on-pastel: #{p.$pastelInkDark};
+  --rc-progress: #{p.$teal300};
+  --rc-progress-track: #{p.$tealTrackDark};
 }
 
 :root {
