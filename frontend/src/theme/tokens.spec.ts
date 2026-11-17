@@ -77,13 +77,27 @@ describe.each(['light-colors', 'dark-colors'] as const)('design tokens (%s)', (m
     }
   });
 
+  it('keeps every chart color visible (3:1) on the raised surface', () => {
+    const chartColors = ['primary', 'accent-blue', 'accent-orange', 'accent-teal', 'accent-ink'];
+    for (const token of [...chartColors, 'accent-grey', 'success', 'warning', 'danger']) {
+      expect(colors[token]).toBeDefined();
+      expect(contrast(colors[token], colors['surface-elevated'])).toBeGreaterThanOrEqual(3);
+    }
+  });
+
   it('keeps the progress fill visible (3:1) on the raised surface', () => {
     expect(contrast(colors['progress'], colors['surface-elevated'])).toBeGreaterThanOrEqual(3);
   });
 
-  it('keeps the text of the sidebar at 4.5:1 or more on it', () => {
-    expect(contrast(colors['on-sidebar'], colors['sidebar'])).toBeGreaterThanOrEqual(4.5);
-    expect(contrast(colors['on-sidebar-muted'], colors['sidebar'])).toBeGreaterThanOrEqual(4.5);
+  it('keeps the text of the sidebar (the raised surface) and of its account card at 4.5:1', () => {
+    for (const surface of ['surface-elevated', 'surface']) {
+      expect(contrast(colors['text'], colors[surface])).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(colors['text-muted'], colors[surface])).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('keeps the white text of the active navigation pill at 4.5:1 on the fuchsia', () => {
+    expect(contrast(colors['on-primary'], colors['primary'])).toBeGreaterThanOrEqual(4.5);
   });
 
   it('keeps the state colors readable as text (4.5:1) on the page and the surfaces', () => {

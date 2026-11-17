@@ -89,10 +89,11 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
       --border: 0;
     }
 
-    // A floating white panel on the tinted page, like a rounded card.
+    // A floating panel that follows the theme: white with a hairline in light, dark in dark.
     ion-menu ion-content {
-      --background: var(--rc-sidebar);
-      color: var(--rc-on-sidebar);
+      --background: var(--rc-surface-elevated);
+      color: var(--rc-text);
+      border: 1px solid var(--rc-border);
       position: absolute;
       inset: var(--rc-space-lg);
       width: auto;
@@ -123,7 +124,7 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
     }
 
     .brand p strong {
-      color: var(--rc-on-sidebar);
+      color: var(--rc-text);
       font-size: var(--rc-font-size-subtitle);
       font-weight: 800;
       letter-spacing: 0.04em;
@@ -134,7 +135,7 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--rc-on-sidebar-muted);
+      color: var(--rc-text-muted);
     }
 
     .logo {
@@ -161,7 +162,7 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
 
     ion-item {
       --background: transparent;
-      --color: var(--rc-on-sidebar-muted);
+      --color: var(--rc-text-muted);
       --border-radius: var(--rc-radius-md);
       --min-height: var(--rc-min-touch-target);
       margin-bottom: var(--rc-space-xs);
@@ -169,7 +170,7 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
     }
 
     ion-item ion-icon {
-      color: var(--rc-on-sidebar-muted);
+      color: var(--rc-text-muted);
     }
 
     ion-item.active {
@@ -190,8 +191,8 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
       margin: var(--rc-space-md);
       padding: var(--rc-space-lg);
       border-radius: var(--rc-radius-md);
-      background: rgb(255 255 255 / 8%);
-      color: var(--rc-on-sidebar);
+      background: var(--rc-surface);
+      color: var(--rc-text);
       font-size: var(--rc-font-size-label);
       overflow-wrap: anywhere;
     }
@@ -216,13 +217,13 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
     }
 
     .footer ion-button.button-outline:not(.ion-color) {
-      --color: var(--rc-on-sidebar);
-      --border-color: var(--rc-on-sidebar-muted);
+      --color: var(--rc-primary-text);
+      --border-color: var(--rc-primary-text);
     }
 
     app-theme-selector {
       align-self: stretch;
-      --label-color: var(--rc-on-sidebar-muted);
+      --label-color: var(--rc-text-muted);
     }
   `,
 })
