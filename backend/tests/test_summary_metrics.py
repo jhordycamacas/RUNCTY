@@ -155,6 +155,17 @@ class TestRoutesSummary:
 
         assert levels == {"high": 1, "medium": 1, "low": 1, "unrated": 2}
 
+    def test_lists_the_longest_routes_first_and_at_most_eight(self):
+        routes = [route(f"r{i}", km=float(i)) for i in range(1, 11)]
+
+        distances = routes_summary(routes, {}, 0, [])["distances"]
+
+        assert len(distances) == 8
+        assert distances[0] == {"name": "r10", "distanceKm": 10.0}
+        assert [item["distanceKm"] for item in distances] == sorted(
+            (item["distanceKm"] for item in distances), reverse=True
+        )
+
     def test_routes_by_city_use_names_and_sort_by_count_then_name(self):
         routes = [
             route("a", city="quito"),

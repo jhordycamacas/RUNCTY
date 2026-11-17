@@ -108,6 +108,10 @@ class TestPayload:
         assert (routes["total"], routes["active"], routes["inactive"]) == (2, 1, 1)
         assert routes["totalKm"] == 16.5
         assert routes["safetyLevels"] == {"high": 0, "medium": 0, "low": 1, "unrated": 1}
+        assert routes["distances"] == [
+            {"name": "Ruta", "distanceKm": 8.5},
+            {"name": "Ruta", "distanceKm": 8.0},
+        ]
         assert routes["timeSlots"] == 1
         assert routes["riskFactors"]["bySeverity"]["high"] == 1
         assert routes["byCity"] == [{"cityId": "loja", "cityName": "Loja", "count": 2}]

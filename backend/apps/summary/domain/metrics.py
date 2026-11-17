@@ -15,6 +15,7 @@ from apps.routes.domain.safety import SEVERITIES
 from apps.users.domain.models import APPEARANCES, UNIT_SYSTEMS, PreferenciaUsuario
 
 WEEKS = 8
+LONGEST_ROUTES = 8
 _LEVELS_WORST_FIRST = ("low", "medium", "high")
 _SPORT_PROFILE = "sportProfile"
 _PREFERENCES = "preferences"
@@ -124,6 +125,12 @@ def routes_summary(
         "bySurface": _count_in((route.surface for route in routes), SURFACES),
         "byCity": by_city,
         "safetyLevels": {level: levels[level] for level in ("high", "medium", "low", "unrated")},
+        "distances": [
+            {"name": route.name, "distanceKm": route.distance_km}
+            for route in sorted(routes, key=lambda r: (-r.distance_km, r.name.casefold()))[
+                :LONGEST_ROUTES
+            ]
+        ],
         "timeSlots": time_slot_count,
         "riskFactors": {
             "total": len(risk_factor_severities),

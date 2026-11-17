@@ -40,6 +40,7 @@ Como administrador · Deseo ver en un solo lugar cifras reales de uso de la app 
     "bySurface": { "asphalt": 3, "trail": 1, "mixed": 1, "track": 0 },
     "byCity": [{ "cityId": "loja", "cityName": "Loja", "count": 5 }],
     "safetyLevels": { "high": 2, "medium": 2, "low": 1, "unrated": 0 },
+    "distances": [{ "name": "Parque Jipiro", "distanceKm": 10.8 }],
     "timeSlots": 8,
     "riskFactors": { "total": 6, "bySeverity": { "low": 2, "medium": 3, "high": 1 } }
   },
@@ -51,6 +52,7 @@ Como administrador · Deseo ver en un solo lugar cifras reales de uso de la app 
 - `registeredLast7Days` / `registeredLast30Days`: ventanas móviles hasta `generatedAt`.
 - `sportProfiles.percentage`: entero redondeado de `completed / total * 100`; `0` si no hay usuarios.
 - `routes.safetyLevels`: cuenta cada ruta una vez, por su **peor nivel** entre las franjas guardadas (Bajo < Medio < Alto). Una ruta sin índice guardado cuenta en `unrated`. Son niveles, nunca «segura» o «insegura».
+- `routes.distances`: las 8 rutas más largas (nombre y km), de mayor a menor; solo nombre de la ruta, nunca datos de cuentas.
 - `routes.byCity`: orden descendente por cantidad y luego por nombre; el nombre sale del catálogo de ciudades (si la ciudad ya no existe, se usa el id).
 - Las claves de los diccionarios `by*` aparecen siempre (con `0`), salvo `users.byRole`, que solo trae los roles presentes.
 
