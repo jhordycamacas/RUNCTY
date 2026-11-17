@@ -131,14 +131,14 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
           <section class="kpis" aria-label="Cifras principales">
             @if (summary.users; as users) {
               <app-kpi-tile
-                tone="pink"
+                tone="fuchsia"
                 icon="people-outline"
                 label="Usuarios"
                 [value]="users.total"
                 [hint]="users.sportProfiles.completed + ' con perfil deportivo'"
               />
               <app-kpi-tile
-                tone="sky"
+                tone="blue"
                 icon="person-add-outline"
                 label="Altas en 7 días"
                 [value]="users.registeredLast7Days"
@@ -147,14 +147,14 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
             }
             @if (summary.routes; as routes) {
               <app-kpi-tile
-                tone="peach"
+                tone="orange"
                 icon="trail-sign-outline"
                 label="Rutas activas"
                 [value]="routes.active"
                 [hint]="'de ' + routes.total + ' rutas · ' + routes.totalKm + ' km'"
               />
               <app-kpi-tile
-                tone="lavender"
+                tone="ink"
                 icon="alert-circle-outline"
                 label="Rutas con nivel Bajo"
                 [value]="routes.safetyLevels.low"
@@ -163,7 +163,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
             }
             @if (summary.cities; as cities) {
               <app-kpi-tile
-                tone="mint"
+                tone="teal"
                 icon="business-outline"
                 label="Ciudades"
                 [value]="cities.cities"
@@ -197,7 +197,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
           @if (summary.routes; as routes) {
             <h2 class="group">Rutas</h2>
             <div class="row columns four">
-              <section class="column tone-peach" aria-labelledby="difficulty-title">
+              <section class="column tone-orange" aria-labelledby="difficulty-title">
                 <header>
                   <h3 id="difficulty-title">Por dificultad</h3>
                   <span class="count">{{ routes.total }}</span>
@@ -209,7 +209,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                   />
                 </div>
               </section>
-              <section class="column tone-sky" aria-labelledby="surface-title">
+              <section class="column tone-blue" aria-labelledby="surface-title">
                 <header>
                   <h3 id="surface-title">Por superficie</h3>
                   <span class="count">{{ routes.total }}</span>
@@ -218,7 +218,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                   <app-bar-list label="Rutas por superficie" [items]="surface(routes.bySurface)" />
                 </div>
               </section>
-              <section class="column tone-lavender" aria-labelledby="city-title">
+              <section class="column tone-ink" aria-labelledby="city-title">
                 <header>
                   <h3 id="city-title">Por ciudad</h3>
                   <span class="count">{{ routes.byCity.length }}</span>
@@ -227,7 +227,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                   <app-bar-list label="Rutas por ciudad" [items]="cityItems(routes.byCity)" />
                 </div>
               </section>
-              <section class="column tone-mint" aria-labelledby="factors-title">
+              <section class="column tone-teal" aria-labelledby="factors-title">
                 <header>
                   <h3 id="factors-title">Factores de riesgo</h3>
                   <span class="count">{{ routes.riskFactors.total }}</span>
@@ -246,7 +246,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
           @if (summary.users; as users) {
             <h2 class="group">Cuentas</h2>
             <div class="row columns">
-              <section class="column tone-pink" aria-labelledby="profile-title">
+              <section class="column tone-fuchsia" aria-labelledby="profile-title">
                 <header>
                   <h3 id="profile-title">Perfil deportivo</h3>
                   <span class="count">{{ users.sportProfiles.percentage }}%</span>
@@ -259,7 +259,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                   />
                 </div>
               </section>
-              <section class="column tone-sky" aria-labelledby="role-title">
+              <section class="column tone-blue" aria-labelledby="role-title">
                 <header>
                   <h3 id="role-title">Usuarios por rol</h3>
                   <span class="count">{{ users.total }}</span>
@@ -268,7 +268,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                   <app-bar-list label="Usuarios por rol" [items]="roles(users.byRole)" />
                 </div>
               </section>
-              <section class="column tone-lavender" aria-labelledby="appearance-title">
+              <section class="column tone-ink" aria-labelledby="appearance-title">
                 <header>
                   <h3 id="appearance-title">Apariencia elegida</h3>
                   <span class="count">{{ users.preferences.saved }}</span>
@@ -292,13 +292,13 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
             <p class="note">Estas métricas llegan con las funciones de la app que las generan.</p>
             <div class="kpis">
               <app-kpi-tile
-                tone="pink"
+                tone="fuchsia"
                 icon="barbell-outline"
                 label="Entrenamientos registrados"
                 [soon]="true"
               />
-              <app-kpi-tile tone="peach" icon="warning-outline" label="Alertas SOS" [soon]="true" />
-              <app-kpi-tile tone="sky" icon="calendar-outline" label="Eventos" [soon]="true" />
+              <app-kpi-tile tone="orange" icon="warning-outline" label="Alertas SOS" [soon]="true" />
+              <app-kpi-tile tone="blue" icon="calendar-outline" label="Eventos" [soon]="true" />
             </div>
           </section>
         } @else if (!store.error()) {
@@ -413,7 +413,8 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
       align-content: start;
       gap: var(--rc-space-md);
       padding: var(--rc-space-xl);
-      border-radius: var(--rc-radius-lg);
+      border: 1px solid var(--rc-border);
+      border-radius: var(--rc-radius-md);
       background: var(--rc-surface-elevated);
       box-shadow: var(--rc-shadow-sm);
     }
@@ -446,53 +447,46 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
     .column {
       display: grid;
       align-content: start;
-      gap: var(--rc-space-md);
+      gap: var(--rc-space-lg);
       padding: var(--rc-space-lg);
-      border-radius: var(--rc-radius-lg);
-      color: var(--rc-on-pastel);
-      background: var(--tone);
+      border: 1px solid var(--rc-border);
+      border-top: 4px solid var(--tone);
+      border-radius: var(--rc-radius-md);
+      background: var(--rc-surface-elevated);
+      box-shadow: var(--rc-shadow-sm);
     }
 
-    .tone-pink {
-      --tone: var(--rc-pastel-pink);
+    .tone-fuchsia {
+      --tone: var(--rc-primary);
     }
-    .tone-mint {
-      --tone: var(--rc-pastel-mint);
+    .tone-orange {
+      --tone: var(--rc-accent-orange);
     }
-    .tone-peach {
-      --tone: var(--rc-pastel-peach);
+    .tone-blue {
+      --tone: var(--rc-accent-blue);
     }
-    .tone-sky {
-      --tone: var(--rc-pastel-sky);
+    .tone-teal {
+      --tone: var(--rc-accent-teal);
     }
-    .tone-lavender {
-      --tone: var(--rc-pastel-lavender);
+    .tone-ink {
+      --tone: var(--rc-accent-ink);
     }
 
     .column header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 var(--rc-space-xs);
     }
 
     .count {
       min-width: 1.75rem;
       padding: 0 var(--rc-space-sm);
-      border-radius: var(--rc-radius-pill);
-      background: var(--rc-surface-elevated);
+      border-radius: var(--rc-radius-sm);
+      background: var(--rc-surface);
       color: var(--rc-text);
       text-align: center;
       font-size: var(--rc-font-size-label);
       font-weight: 800;
-    }
-
-    .inner {
-      padding: var(--rc-space-lg);
-      border-radius: var(--rc-radius-md);
-      background: var(--rc-surface-elevated);
-      color: var(--rc-text);
-      box-shadow: var(--rc-shadow-sm);
     }
 
     .soon {
@@ -508,7 +502,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
 
     .block {
       height: 8rem;
-      border-radius: var(--rc-radius-lg);
+      border-radius: var(--rc-radius-md);
       background: var(--rc-surface);
       animation: pulse 1.4s ease-in-out infinite;
     }

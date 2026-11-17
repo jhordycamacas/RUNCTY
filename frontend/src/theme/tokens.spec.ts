@@ -69,16 +69,29 @@ describe.each(['light-colors', 'dark-colors'] as const)('design tokens (%s)', (m
     expect(contrast(colors['on-primary'], colors['primary'])).toBeGreaterThanOrEqual(4.5);
   });
 
-  it('keeps the ink at 4.5:1 or more on every pastel accent', () => {
-    for (const pastel of ['pink', 'peach', 'sky', 'lavender', 'mint']) {
-      expect(colors[`pastel-${pastel}`]).toBeDefined();
-      expect(contrast(colors['on-pastel'], colors[`pastel-${pastel}`])).toBeGreaterThanOrEqual(4.5);
+  it('keeps the icon on every accent legible (3:1) and every accent visible on the cards (3:1)', () => {
+    for (const accent of ['blue', 'orange', 'teal', 'ink']) {
+      expect(colors[`accent-${accent}`]).toBeDefined();
+      expect(contrast(colors['on-accent'], colors[`accent-${accent}`])).toBeGreaterThanOrEqual(3);
+      expect(contrast(colors[`accent-${accent}`], colors['surface-elevated'])).toBeGreaterThanOrEqual(3);
     }
   });
 
-  it('keeps the progress fill visible (3:1) on the raised surface and its track', () => {
+  it('keeps the progress fill visible (3:1) on the raised surface', () => {
     expect(contrast(colors['progress'], colors['surface-elevated'])).toBeGreaterThanOrEqual(3);
-    expect(contrast(colors['progress'], colors['progress-track'])).toBeGreaterThanOrEqual(3);
+  });
+
+  it('keeps the text of the sidebar at 4.5:1 or more on it', () => {
+    expect(contrast(colors['on-sidebar'], colors['sidebar'])).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(colors['on-sidebar-muted'], colors['sidebar'])).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('keeps the state colors readable as text (4.5:1) on the page and the surfaces', () => {
+    for (const surface of ['background', 'surface', 'surface-elevated']) {
+      for (const state of ['success', 'warning', 'danger']) {
+        expect(contrast(colors[state], colors[surface])).toBeGreaterThanOrEqual(4.5);
+      }
+    }
   });
 
   it('gives the page, the surface and the raised surface different colors', () => {
@@ -86,6 +99,22 @@ describe.each(['light-colors', 'dark-colors'] as const)('design tokens (%s)', (m
       new Set([colors['background'], colors['surface'], colors['surface-elevated']]).size,
     ).toBeGreaterThan(1);
     expect(colors['border']).not.toBe(colors['surface-elevated']);
+  });
+});
+
+describe('light theme', () => {
+  const light = readColors('light-colors');
+
+  it('has a pure white page, with no tinted surface', () => {
+    expect(light['background']).toBe('#ffffff');
+    for (const surface of ['surface', 'surface-elevated', 'border']) {
+      const [r, g, b] = [1, 3, 5].map((i) => parseInt(light[surface].slice(i, i + 2), 16));
+      expect(Math.max(r, g, b) - Math.min(r, g, b)).toBeLessThan(16);
+    }
+  });
+
+  it('keeps the danger color a red, apart from the fuchsia of the brand', () => {
+    expect(light['danger']).not.toBe(light['primary-text']);
   });
 });
 

@@ -2,14 +2,14 @@
 // changes. The runner is mobile-first and roomy; the admin is desktop-first and compact.
 
 .area-runner {
-  --rc-radius-md: 14px;
+  --rc-radius-md: 12px;
 }
 
 .area-admin {
   --rc-font-size-body: 0.9375rem;
   --rc-font-size-title: 1.25rem;
   --rc-space-lg: 14px;
-  --rc-radius-md: 14px;
+  --rc-radius-md: 12px;
   --rc-min-touch-target: 40px;
   --rc-sidebar-background: transparent;
 }
@@ -30,7 +30,7 @@
   font-weight: 800;
 }
 
-// Fields on the white cards of the admin read as white pills, like the reference's search box.
+// Fields on the white cards of the admin read as crisp white fields.
 .area-admin ion-input,
 .area-admin ion-select,
 .area-admin ion-textarea {

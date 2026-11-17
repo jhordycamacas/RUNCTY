@@ -5,61 +5,65 @@
 // override any token, see _areas.scss.
 
 @mixin light-colors {
-  --rc-background: #{p.$blush50};
-  --rc-surface: #{p.$blush100};
+  --rc-background: #{p.$white};
+  --rc-surface: #{p.$grey50};
   --rc-surface-elevated: #{p.$white};
-  --rc-border: #{p.$blush200};
-  --rc-control-border: #{p.$mauve500};
-  --rc-text: #{p.$plum900};
-  --rc-text-muted: #{p.$mauve600};
+  --rc-border: #{p.$grey200};
+  --rc-control-border: #{p.$grey500};
+  --rc-text: #{p.$ink};
+  --rc-text-muted: #{p.$grey600};
   --rc-primary: #{p.$magenta600};
   --rc-primary-pressed: #{p.$magenta700};
-  --rc-primary-tint: #{p.$blush100};
+  --rc-primary-tint: #{p.$grey100};
   --rc-on-primary: #{p.$white};
   --rc-primary-text: #{p.$magenta800};
   --rc-success: #{p.$green600};
   --rc-warning: #{p.$amber700};
-  --rc-danger: #{p.$magenta800};
+  --rc-danger: #{p.$red700};
   --rc-success-tint: #{p.$green50};
   --rc-warning-tint: #{p.$amber50};
-  --rc-danger-tint: #{p.$rose50};
-  --rc-pastel-pink: #{p.$pastelPink};
-  --rc-pastel-peach: #{p.$pastelPeach};
-  --rc-pastel-sky: #{p.$pastelSky};
-  --rc-pastel-lavender: #{p.$pastelLavender};
-  --rc-pastel-mint: #{p.$pastelMint};
-  --rc-on-pastel: #{p.$plum900};
-  --rc-progress: #{p.$teal700};
-  --rc-progress-track: #{p.$tealTrack};
+  --rc-danger-tint: #{p.$red50};
+  --rc-sidebar: #{p.$charcoal};
+  --rc-on-sidebar: #{p.$white};
+  --rc-on-sidebar-muted: #{p.$silver300};
+  --rc-accent-blue: #{p.$blue500};
+  --rc-accent-orange: #{p.$orange500};
+  --rc-accent-teal: #{p.$teal500};
+  --rc-accent-ink: #{p.$charcoal};
+  --rc-on-accent: #{p.$white};
+  --rc-progress: #{p.$teal500};
+  --rc-progress-track: #{p.$grey200};
 }
 
 @mixin dark-colors {
-  --rc-background: #{p.$plum950};
-  --rc-surface: #{p.$plum850};
-  --rc-surface-elevated: #{p.$plum800};
-  --rc-border: #{p.$plum700};
-  --rc-control-border: #{p.$mauve400};
-  --rc-text: #{p.$white};
-  --rc-text-muted: #{p.$mauve300};
+  --rc-background: #{p.$night900};
+  --rc-surface: #{p.$night800};
+  --rc-surface-elevated: #{p.$night700};
+  --rc-border: #{p.$night600};
+  --rc-control-border: #{p.$silver400};
+  --rc-text: #{p.$mist};
+  --rc-text-muted: #{p.$silver300};
   --rc-primary: #{p.$magenta600};
   --rc-primary-pressed: #{p.$magenta700};
-  --rc-primary-tint: #{p.$plum800};
+  --rc-primary-tint: #{p.$night700};
   --rc-on-primary: #{p.$white};
   --rc-primary-text: #{p.$magenta300};
   --rc-success: #{p.$green300};
   --rc-warning: #{p.$amber300};
-  --rc-danger: #{p.$magenta300};
+  --rc-danger: #{p.$red300};
   --rc-success-tint: #{p.$green900};
   --rc-warning-tint: #{p.$amber900};
-  --rc-danger-tint: #{p.$rose900};
-  --rc-pastel-pink: #{p.$pastelPinkDark};
-  --rc-pastel-peach: #{p.$pastelPeachDark};
-  --rc-pastel-sky: #{p.$pastelSkyDark};
-  --rc-pastel-lavender: #{p.$pastelLavenderDark};
-  --rc-pastel-mint: #{p.$pastelMintDark};
-  --rc-on-pastel: #{p.$pastelInkDark};
+  --rc-danger-tint: #{p.$red900};
+  --rc-sidebar: #{p.$night950};
+  --rc-on-sidebar: #{p.$white};
+  --rc-on-sidebar-muted: #{p.$silver300};
+  --rc-accent-blue: #{p.$blue300};
+  --rc-accent-orange: #{p.$orange300};
+  --rc-accent-teal: #{p.$teal300};
+  --rc-accent-ink: #{p.$mist};
+  --rc-on-accent: #{p.$night900};
   --rc-progress: #{p.$teal300};
-  --rc-progress-track: #{p.$tealTrackDark};
+  --rc-progress-track: #{p.$night600};
 }
 
 :root {
@@ -80,16 +84,16 @@
   --rc-space-xl: 24px;
   --rc-space-xxl: 32px;
 
-  --rc-radius-sm: 10px;
-  --rc-radius-md: 16px;
-  --rc-radius-lg: 24px;
+  --rc-radius-sm: 8px;
+  --rc-radius-md: 12px;
+  --rc-radius-lg: 16px;
 
   --rc-radius-pill: 999px;
 
-  // Soft elevation from the original mobile app (cards, primary buttons, floating actions).
-  --rc-shadow-sm: 0 1px 2px rgb(60 10 40 / 6%);
-  --rc-shadow-md: 0 4px 14px rgb(60 10 40 / 8%);
-  --rc-shadow-lg: 0 12px 28px rgb(60 10 40 / 14%);
+  // Very soft neutral elevation (cards, primary buttons, floating actions).
+  --rc-shadow-sm: 0 1px 2px rgb(16 18 24 / 5%);
+  --rc-shadow-md: 0 4px 14px rgb(16 18 24 / 8%);
+  --rc-shadow-lg: 0 12px 28px rgb(16 18 24 / 14%);
 
   // Minimum touch target (accessibility: controls >= 48px).
   --rc-min-touch-target: 48px;

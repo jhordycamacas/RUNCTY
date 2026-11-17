@@ -1,57 +1,51 @@
-// Raw palette from the Gacelas Running Team brand (magenta, plum black and soft pinks).
-// Components never read these; they use the semantic --rc-* variables.
-// magenta600 (#D6006F) is the brand tone for filled controls (5.1:1 with white);
-// magenta700 is the pressed state and the text tone on tinted surfaces.
+// Raw palette of the running club: white, charcoal and cool greys, with the Gacelas fuchsia kept
+// only as the action color. Components never read these; they use the semantic --rc-* variables.
 $white: #ffffff;
-$plum950: #14060e;
-$plum900: #1b0a14;
-$plum850: #1f0c18;
-$plum800: #2c1523;
-$plum700: #4d2b40;
 
-$blush50: #fceef5;
-$blush100: #f8e1ec;
-$blush200: #f3cfe0;
+// Cool neutrals (light theme surfaces, borders and text).
+$grey50: #f4f5f7;
+$grey100: #f1f2f5;
+$grey200: #e3e5ea;
+$grey500: #6b7280;
+$grey600: #5a606b;
+$ink: #101218;
+$charcoal: #14161c;
 
-$mauve300: #cdaebf;
-$mauve400: #9a7488;
-$mauve500: #82596f;
-$mauve600: #654b59;
+// Charcoal layers (dark theme) and the text tones on them.
+$night950: #090a0d;
+$night900: #0f1115;
+$night800: #171a21;
+$night700: #1e222b;
+$night600: #2a2f3a;
+$silver400: #8a92a0;
+$silver300: #a8aeba;
+$mist: #f4f5f7;
 
-$magenta300: #f06bb0;
+// Brand fuchsia (Gacelas): magenta600 is the fill (5.1:1 with white), magenta800 the text tone on
+// light surfaces and magenta300 the text tone on dark ones.
+$magenta300: #ff5ca8;
 $magenta600: #d6006f;
 $magenta700: #b80058;
 $magenta800: #c0005c;
 
-$green50: #e6f5e8;
-$green300: #81c784;
-$green600: #1f6b25;
-$green900: #1a2e1c;
-
-$amber50: #fff3e0;
-$amber300: #ffb74d;
+// Semantic states. The "low" safety level is a true red, never confused with the brand.
+$green600: #1b7a3a;
+$green300: #5fd38a;
+$green50: #e7f5ea;
+$green900: #14301e;
 $amber700: #8a5300;
+$amber300: #ffb74d;
+$amber50: #fff3e0;
 $amber900: #33270f;
+$red700: #c62828;
+$red300: #ff6b6b;
+$red50: #fdecec;
+$red900: #3a1618;
 
-$rose50: #fde8f1;
-$rose900: #3d1226;
-
-// Pastel accents of the dashboard cards, derived from the Gacelas pink. The light ones carry plum
-// ink (`$plum900`); the dark ones are deep tints that carry `$pastelInkDark`.
-$pastelPink: #fbd5e6;
-$pastelPeach: #ffe0cc;
-$pastelSky: #cfe8fb;
-$pastelLavender: #e1d8fa;
-$pastelMint: #cdeee6;
-$pastelPinkDark: #4a1833;
-$pastelPeachDark: #4a2b1b;
-$pastelSkyDark: #163149;
-$pastelLavenderDark: #2d2352;
-$pastelMintDark: #123e39;
-$pastelInkDark: #fdf1f7;
-
-// Progress bars: a teal that reads on white and on the dark surfaces.
-$teal700: #0b7a6f;
-$teal300: #4fd6c4;
-$tealTrack: #e4ecea;
-$tealTrackDark: #3b2a35;
+// Dashboard accents: icon chips and top bars. Light tones carry white icons, dark tones carry ink.
+$blue500: #1f6feb;
+$orange500: #e8590c;
+$teal500: #0e9f8e;
+$blue300: #5b9bff;
+$orange300: #ff8a4c;
+$teal300: #2dd4bf;

@@ -44,7 +44,7 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
           <div class="panel">
             <nav aria-label="Administración">
               <div class="brand">
-                <span class="logo" aria-hidden="true">R</span>
+                <img class="logo" src="brand/logo.png" alt="" width="40" height="40" />
                 <p>
                   <strong>RUNCTY</strong>
                   <span>Administración</span>
@@ -91,7 +91,8 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
 
     // A floating white panel on the tinted page, like a rounded card.
     ion-menu ion-content {
-      --background: var(--rc-surface-elevated);
+      --background: var(--rc-sidebar);
+      color: var(--rc-on-sidebar);
       position: absolute;
       inset: var(--rc-space-lg);
       width: auto;
@@ -122,6 +123,7 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
     }
 
     .brand p strong {
+      color: var(--rc-on-sidebar);
       font-size: var(--rc-font-size-subtitle);
       font-weight: 800;
       letter-spacing: 0.04em;
@@ -129,25 +131,27 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
 
     .brand p span {
       font-size: var(--rc-font-size-caption);
-      color: var(--rc-text-muted);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--rc-on-sidebar-muted);
     }
 
-    .logo,
+    .logo {
+      flex: none;
+      width: 2.5rem;
+      height: 2.5rem;
+      object-fit: contain;
+    }
+
     .avatar {
       display: grid;
       flex: none;
       place-items: center;
-      border-radius: var(--rc-radius-pill);
+      border-radius: var(--rc-radius-sm);
       background: var(--rc-primary);
       color: var(--rc-on-primary);
       font-weight: 800;
-    }
-
-    .logo {
-      width: 2.5rem;
-      height: 2.5rem;
-      border-radius: var(--rc-radius-md);
-      font-size: 1.25rem;
     }
 
     ion-list {
@@ -157,17 +161,21 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
 
     ion-item {
       --background: transparent;
-      --border-radius: var(--rc-radius-pill);
+      --color: var(--rc-on-sidebar-muted);
+      --border-radius: var(--rc-radius-md);
       --min-height: var(--rc-min-touch-target);
       margin-bottom: var(--rc-space-xs);
-      font-weight: 600;
+      font-weight: 700;
+    }
+
+    ion-item ion-icon {
+      color: var(--rc-on-sidebar-muted);
     }
 
     ion-item.active {
       --background: var(--rc-primary);
       --color: var(--rc-on-primary);
-      box-shadow: 0 6px 14px rgb(214 0 111 / 28%);
-      border-radius: var(--rc-radius-pill);
+      border-radius: var(--rc-radius-md);
     }
 
     ion-item.active ion-icon {
@@ -182,8 +190,8 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
       margin: var(--rc-space-md);
       padding: var(--rc-space-lg);
       border-radius: var(--rc-radius-md);
-      background: var(--rc-pastel-pink);
-      color: var(--rc-on-pastel);
+      background: rgb(255 255 255 / 8%);
+      color: var(--rc-on-sidebar);
       font-size: var(--rc-font-size-label);
       overflow-wrap: anywhere;
     }
@@ -207,9 +215,14 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
       font-weight: 600;
     }
 
+    .footer ion-button.button-outline:not(.ion-color) {
+      --color: var(--rc-on-sidebar);
+      --border-color: var(--rc-on-sidebar-muted);
+    }
+
     app-theme-selector {
       align-self: stretch;
-      --label-color: var(--rc-on-pastel);
+      --label-color: var(--rc-on-sidebar-muted);
     }
   `,
 })

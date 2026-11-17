@@ -4,31 +4,40 @@
 
 ## Historia de usuario
 
-Como administrador · Deseo un panel con un diseño más limpio y reconocible de Gacelas Running Team. Para trabajar a gusto y que el producto se vea cuidado.
+Como administrador · Deseo un panel con aspecto de club de running, sobrio y deportivo. Para trabajar a gusto y que el producto represente al club, no a un estilo pastel.
 
 ## Dirección
 
-Referencia: tablero con lienzo suave tintado, barra lateral flotante redondeada, tarjetas blancas con radios amplios y **columnas y fichas en colores pastel**. Marca: magenta Gacelas (acción primaria), negro ciruela y blanco.
+Fondo blanco, superficies de grises fríos, tinta casi negra y un lateral flotante de carbón con la píldora activa en fucsia. El fucsia original de Gacelas (`#D6006F`) es **solo** el color de acción y acento (botones, navegación activa, foco, estados seleccionados); no se usa como fondo. Referencia de tono: club deportivo (Strava, Nike Run Club), no app de bienestar. Radios de 8 a 16 px, números en negrita y microetiquetas en mayúsculas.
 
-## Decisiones
+## Paleta
 
-- Los tokens viven en `frontend/src/theme/` y tienen valor claro y oscuro. Se añaden tokens semánticos pastel (rosa, durazno, cielo, lavanda) y un verde azulado de progreso.
-- El texto sobre cada pastel usa un token de tinta propio (ciruela oscuro en claro; claro sobre pasteles oscuros en el tema oscuro).
-- Tipografía Plus Jakarta Sans incluida en el paquete (sin red en ejecución).
-- Componentes de gráficos propios, sin librería: ficha KPI, barras, barra apilada, barra de progreso y barras semanales.
+| Rol | Claro | Oscuro |
+| --- | --- | --- |
+| Fondo / superficie / tarjeta | `#FFFFFF` / `#F4F5F7` / `#FFFFFF` | `#0F1115` / `#171A21` / `#1E222B` |
+| Borde / borde de control | `#E3E5EA` / `#6B7280` | `#2A2F3A` / `#8A92A0` |
+| Texto / texto atenuado | `#101218` / `#5A606B` | `#F4F5F7` / `#A8AEBA` |
+| Acción (relleno) / texto de acento | `#D6006F` / `#C0005C` | `#D6006F` / `#FF5CA8` |
+| Lateral | `#14161C` con texto `#FFFFFF` y `#A8AEBA` | `#090A0D` |
+| Acentos (azul, naranja, verde azulado) | `#1F6FEB`, `#E8590C`, `#0E9F8E` | `#5B9BFF`, `#FF8A4C`, `#2DD4BF` |
+| Niveles Alto / Medio / Bajo | `#1B7A3A` / `#8A5300` / `#C62828` | `#5FD38A` / `#FFB74D` / `#FF6B6B` |
+
+«Bajo» es un rojo verdadero, distinto del fucsia de la marca. Las fichas y tarjetas del Resumen son blancas, con borde de 1 px, sombra muy suave y una barra superior de color (fucsia, azul, naranja, verde azulado o carbón); los íconos van en un chip de color.
 
 ## Criterios de aceptación
 
-- [x] Todo par texto/superficie del tema cumple 4,5:1 en claro y oscuro (`frontend/src/theme/tokens.spec.ts`), incluida la tinta sobre cada pastel.
-- [x] Barra lateral flotante con marca y tarjeta de cuenta, barra superior transparente con título; chips y botones en forma de píldora (sin buscador: no tendría función).
-- [x] Resumen, Usuarios, Roles, Ciudades, Rutas y el inicio del corredor (`/app`, 390 px) se ven coherentes en claro y oscuro.
+- [x] El fondo del tema claro es blanco puro y no hay superficies, paneles ni tarjetas teñidos de rosa (`tokens.spec.ts`).
+- [x] Todo par texto/superficie cumple 4,5:1 en claro y oscuro; los colores de estado son legibles como texto; los acentos y el relleno de progreso se ven (3:1) sobre la tarjeta; el texto del lateral cumple 4,5:1.
+- [x] Lateral de carbón con marca, píldora activa fucsia y tarjeta de cuenta; barra superior transparente con título.
+- [x] «Bajo» usa un rojo propio, no el fucsia.
+- [x] Resumen, Usuarios, Roles, Ciudades, Rutas, inicio de sesión y el inicio del corredor (`/app`) siguen el mismo sistema en claro y oscuro.
 - [x] El tema por defecto es Claro y el selector «Tema» sigue funcionando.
 - [x] El paquete inicial sigue por debajo de 1,2 MB (`ng build` sin avisos de presupuesto).
 
 ## Implementación
 
 - `frontend/src/theme/*`, `frontend/src/styles.scss`
-- `frontend/src/app/admin/admin-shell.ts` y componentes de `frontend/src/app/shared/ui/`
+- `frontend/src/app/admin/admin-shell.ts` y las tarjetas de `frontend/src/app/admin/summary/`
 
 ## Pruebas
 

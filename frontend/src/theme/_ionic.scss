@@ -24,8 +24,8 @@
   --ion-color-primary-tint: var(--rc-primary);
 
   --ion-color-danger: var(--rc-danger);
-  --ion-color-danger-contrast: var(--rc-on-primary);
-  --ion-color-danger-shade: var(--rc-primary-pressed);
+  --ion-color-danger-contrast: var(--rc-background);
+  --ion-color-danger-shade: var(--rc-danger);
   --ion-color-danger-tint: var(--rc-danger);
 
   --ion-color-success: var(--rc-success);
@@ -46,22 +46,21 @@
   // Ionic computes translucent surfaces (ripples, focus rings) from the RGB triplets.
   --ion-color-primary-rgb: 214, 0, 111;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-rgb: 192, 0, 92;
-  --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-text-color-rgb: 27, 10, 20;
-  --ion-background-color-rgb: 252, 238, 245;
+  --ion-color-danger-rgb: 198, 40, 40;
+    --ion-text-color-rgb: 16, 18, 24;
+  --ion-background-color-rgb: 255, 255, 255;
 }
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme='system'] {
-    --ion-text-color-rgb: 255, 255, 255;
-    --ion-background-color-rgb: 20, 6, 14;
+    --ion-text-color-rgb: 244, 245, 247;
+    --ion-background-color-rgb: 15, 17, 21;
   }
 }
 
 :root[data-theme='dark'] {
-  --ion-text-color-rgb: 255, 255, 255;
-  --ion-background-color-rgb: 20, 6, 14;
+  --ion-text-color-rgb: 244, 245, 247;
+  --ion-background-color-rgb: 15, 17, 21;
 }
 
 // Headers: flat like the original app, a hairline instead of the Material drop shadow, and a bold
