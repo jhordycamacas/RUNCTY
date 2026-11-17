@@ -12,6 +12,7 @@ from apps.routes.domain.models import FactorDeRiesgo, FranjaHoraria, RouteState,
 from apps.shared.application.ports import AuthUserNotFound, TokenRejected
 from apps.shared.domain.models import Principal
 from apps.shared.domain.permissions import ADMIN_ROLE
+from apps.summary.domain.metrics import UserRecord
 from apps.users.domain.models import PerfilDeportivo, PreferenciaUsuario, Usuario
 
 RUNNER = Principal(
@@ -432,3 +433,38 @@ class InMemorySportProfileRepository(_InMemoryPrivateDocuments):
 class InMemoryPreferencesRepository(_InMemoryPrivateDocuments):
     document_id = "preferences"
     model = PreferenciaUsuario
+
+
+class InMemorySummarySource:
+    """The summary reads over `FakeFirebase`, like the Firestore adapter but without queries."""
+
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        self._firebase = firebase or FIREBASE
+
+    def users(self, limit: int) -> list[UserRecord]:
+        users = self._firebase.users
+        return [
+            UserRecord(users[uid].get("role"), users[uid].get("createdAt")) for uid in sorted(users)
+        ][:limit]
+
+    def private_documents(self, limit: int) -> list[tuple[str, dict]]:
+        private = self._firebase.private
+        return [(key[1], dict(private[key])) for key in sorted(private)][:limit]
+
+    def routes(self, limit: int) -> list[Ruta]:
+        return InMemoryRouteRepository(self._firebase).list()[:limit]
+
+    def _under(self, collection: str) -> list[dict]:
+        return [
+            document
+            for path, document in sorted(self._firebase.docs.items())
+            if path.split("/")[-2] == collection
+        ]
+
+    def time_slot_count(self) -> int:
+        return len(self._under("timeSlots"))
+
+    def risk_factor_severities(self, limit: int) -> list[str]:
+        return [str(document.get("severity", "")) for document in self._under("riskFactors")][
+            :limit
+        ]

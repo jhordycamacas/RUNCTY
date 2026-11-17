@@ -54,6 +54,7 @@ ROLE_MEMBERS = "apps.roles.infrastructure.firestore_role_members.FirestoreRoleMe
 CITY_REPOSITORY = "apps.cities.infrastructure.firestore_city_repository.FirestoreCityRepository"
 CITY_USAGE = "apps.cities.infrastructure.firestore_city_usage.FirestoreCityUsage"
 ROUTE_REPOSITORY = "apps.routes.infrastructure.firestore_route_repository.FirestoreRouteRepository"
+SUMMARY_SOURCE = "apps.summary.infrastructure.firestore_summary_source.FirestoreSummarySource"
 SEED_ACCOUNTS = "apps.seed.infrastructure.firebase_seed_accounts.FirebaseSeedAccounts"
 USER_REPOSITORY = "apps.users.infrastructure.firestore_user_repository.FirestoreUserRepository"
 SPORT_PROFILE_REPOSITORY = (
