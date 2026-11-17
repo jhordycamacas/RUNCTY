@@ -15,12 +15,12 @@ describe('DocumentPreferencesDisplay', () => {
     expect(root.getAttribute('data-theme')).toBe('light');
   });
 
-  it('follows the system again when the appearance is "system"', () => {
+  it('marks the theme as "system" so the stylesheet follows the device', () => {
     display.apply({ ...defaultPreferences(), appearance: 'dark' }, root);
 
-    display.apply(defaultPreferences(), root);
+    display.apply({ ...defaultPreferences(), appearance: 'system' }, root);
 
-    expect(root.hasAttribute('data-theme')).toBe(false);
+    expect(root.getAttribute('data-theme')).toBe('system');
   });
 
   it('scales the root font size through the token', () => {

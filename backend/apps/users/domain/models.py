@@ -241,7 +241,7 @@ class PreferenciaUsuario:
 
     language: str = "es"
     font_scale: str = "normal"
-    appearance: str = "system"
+    appearance: str = "light"
     units: str = "metric"
     notifications: PreferenciaNotificaciones = field(default_factory=PreferenciaNotificaciones)
     location_privacy: str = "trustedContactsDuringSession"

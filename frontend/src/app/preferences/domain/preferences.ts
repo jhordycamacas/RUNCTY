@@ -46,7 +46,7 @@ export function defaultPreferences(): Preferences {
   return {
     language: 'es',
     fontScale: 'normal',
-    appearance: 'system',
+    appearance: 'light',
     units: 'metric',
     notifications: { enabled: true, safetyAlerts: true, events: true },
     locationPrivacy: 'trustedContactsDuringSession',

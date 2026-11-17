@@ -161,7 +161,7 @@ class TestPreferencesValues:
         assert response.json() == {
             "language": "es",
             "fontScale": "xlarge",
-            "appearance": "system",
+            "appearance": "light",
             "units": "metric",
             "notifications": {"enabled": True, "safetyAlerts": True, "events": True},
             "locationPrivacy": "trustedContactsDuringSession",

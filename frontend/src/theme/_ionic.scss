@@ -53,7 +53,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
+  :root[data-theme='system'] {
     --ion-text-color-rgb: 255, 255, 255;
     --ion-background-color-rgb: 17, 17, 17;
   }

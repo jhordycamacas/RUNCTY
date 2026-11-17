@@ -264,7 +264,7 @@ class TestPreferenciaUsuario:
         assert PreferenciaUsuario().to_document() == {
             "language": "es",
             "fontScale": "normal",
-            "appearance": "system",
+            "appearance": "light",
             "units": "metric",
             "notifications": {"enabled": True, "safetyAlerts": True, "events": True},
             "locationPrivacy": "trustedContactsDuringSession",

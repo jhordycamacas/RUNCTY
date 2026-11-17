@@ -1,7 +1,7 @@
 @use 'palette' as p;
 
-// Design tokens as CSS variables. Light is the default; dark follows the system, and
-// `data-theme` on <html> forces either one. Each area (`.area-runner`, `.area-admin`) may
+// Design tokens as CSS variables. Light is the default. `data-theme` on <html> is `light`,
+// `dark` or `system` (follows the device); the preferences set it. Each area (`.area-runner`, `.area-admin`) may
 // override any token, see _areas.scss.
 
 @mixin light-colors {
@@ -87,7 +87,7 @@ html {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
+  :root[data-theme='system'] {
     @include dark-colors;
   }
 }
