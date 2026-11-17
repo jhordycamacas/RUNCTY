@@ -22,6 +22,7 @@ Fuente de verdad de los requisitos: `D:\Proyecto5to\Docs\RequsitosExcelFInal.xls
 | Spec | Historia | Épica |
 | --- | --- | --- |
 | [RF-01-2](sprint-1/RF-01-2-consultar-usuarios.md) | Consultar los datos de los usuarios autorizados | EP-01 |
+| [ADM-1](sprint-1/ADM-tema-del-panel.md) | Tema del panel de administración (apoyo) | EP-26 |
 | [RF-02-1](sprint-1/RF-02-1-registrar-rol.md) | Registrar rol de usuario | EP-02 |
 | [RF-02-2](sprint-1/RF-02-2-consultar-roles.md) | Consultar roles de usuario | EP-02 |
 | [RF-02-3](sprint-1/RF-02-3-modificar-rol.md) | Modificar rol de usuario | EP-02 |

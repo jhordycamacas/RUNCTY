@@ -15,6 +15,7 @@ import { addIcons } from 'ionicons';
 import { businessOutline, peopleOutline, shieldCheckmarkOutline, trailSignOutline } from 'ionicons/icons';
 import { AuthService } from '../core/auth/auth.service';
 import { ADMIN_SECTIONS } from './admin-sections';
+import { ThemeSelector } from './theme-selector';
 
 addIcons({ businessOutline, peopleOutline, shieldCheckmarkOutline, trailSignOutline });
 
@@ -33,6 +34,7 @@ addIcons({ businessOutline, peopleOutline, shieldCheckmarkOutline, trailSignOutl
     IonSplitPane,
     RouterLink,
     RouterLinkActive,
+    ThemeSelector,
   ],
   host: { class: 'area-admin' },
   template: `
@@ -57,6 +59,7 @@ addIcons({ businessOutline, peopleOutline, shieldCheckmarkOutline, trailSignOutl
           </nav>
           <div class="footer">
             <p>{{ email() }}</p>
+            <app-theme-selector />
             <ion-button fill="outline" size="small" (click)="signOut()">Cerrar sesión</ion-button>
           </div>
         </ion-content>
@@ -93,11 +96,23 @@ addIcons({ businessOutline, peopleOutline, shieldCheckmarkOutline, trailSignOutl
     }
 
     .footer {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--rc-space-md);
       padding: var(--rc-space-lg);
       border-top: 1px solid var(--rc-border);
       font-size: var(--rc-font-size-label);
       color: var(--rc-text-muted);
       overflow-wrap: anywhere;
+    }
+
+    .footer p {
+      margin: 0;
+    }
+
+    app-theme-selector {
+      align-self: stretch;
     }
   `,
 })
