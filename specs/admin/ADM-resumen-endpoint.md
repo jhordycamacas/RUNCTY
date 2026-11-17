@@ -1,6 +1,6 @@
 # ADM-2 — Endpoint del resumen del panel (`GET /api/v1/admin/summary`)
 
-> Spec de apoyo · Panel de administración · Estado: **En implementación**
+> Spec de apoyo · Panel de administración · Estado: **Implementada**
 
 ## Historia de usuario
 
@@ -73,14 +73,14 @@ Un bloque no permitido llega como `null`; el cliente no lo muestra. Sin sesión:
 
 ## Criterios de aceptación
 
-- [ ] Sin sesión responde 401; con un corredor (sin `admin.access`) responde 403.
-- [ ] Un administrador recibe los tres bloques; un delegado recibe solo los bloques de sus permisos y `null` en los demás.
-- [ ] Los conteos de usuarios, roles, perfiles deportivos y preferencias coinciden con los documentos guardados.
-- [ ] `registrationsByWeek` tiene 8 semanas ordenadas y cuenta cada alta en su semana UTC; las ventanas de 7 y 30 días son móviles.
-- [ ] `safetyLevels` usa el peor nivel por ruta y `unrated` para rutas sin índice.
-- [ ] La respuesta no contiene ningún dato personal (prueba que busca correos, nombres y uids).
-- [ ] `truncated` pasa a `true` al alcanzar el tope de lectura.
-- [ ] `ruff check .` y `ruff format --check .` limpios y toda la suite de pytest en verde.
+- [x] Sin sesión responde 401; con un corredor (sin `admin.access`) responde 403.
+- [x] Un administrador recibe los tres bloques; un delegado recibe solo los bloques de sus permisos y `null` en los demás.
+- [x] Los conteos de usuarios, roles, perfiles deportivos y preferencias coinciden con los documentos guardados.
+- [x] `registrationsByWeek` tiene 8 semanas ordenadas y cuenta cada alta en su semana UTC; las ventanas de 7 y 30 días son móviles.
+- [x] `safetyLevels` usa el peor nivel por ruta y `unrated` para rutas sin índice.
+- [x] La respuesta no contiene ningún dato personal (prueba que busca correos, nombres y uids).
+- [x] `truncated` pasa a `true` al alcanzar el tope de lectura.
+- [x] `ruff check .` y `ruff format --check .` limpios y toda la suite de pytest en verde.
 
 ## Trazabilidad
 

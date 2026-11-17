@@ -159,6 +159,7 @@ import { CITY_TYPE_LABELS, COVERAGE_LABELS, ManagedCity } from '../domain/manage
       padding: var(--rc-space-lg);
       border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
+      box-shadow: var(--rc-shadow-sm);
       background: var(--rc-surface-elevated);
       box-shadow: var(--rc-shadow-sm);
     }

@@ -250,6 +250,7 @@ import {
       padding: var(--rc-space-xs) var(--rc-space-md);
       border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
+      box-shadow: var(--rc-shadow-sm);
     }
 
     .state {

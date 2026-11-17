@@ -197,6 +197,7 @@ function options<T extends string>(values: readonly T[], labels: Record<T, strin
       padding: 2px var(--rc-space-sm);
       border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
+      box-shadow: var(--rc-shadow-sm);
       color: var(--rc-text-muted);
       font-size: var(--rc-font-size-caption);
       font-weight: 500;

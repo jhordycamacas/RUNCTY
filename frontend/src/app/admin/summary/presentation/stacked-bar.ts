@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 
-export type SegmentTone = 'success' | 'warning' | 'danger' | 'muted';
+type SegmentTone = 'success' | 'warning' | 'danger' | 'muted';
 
 export interface Segment {
   label: string;

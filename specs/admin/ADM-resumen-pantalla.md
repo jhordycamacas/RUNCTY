@@ -1,6 +1,6 @@
 # ADM-3 — Pantalla «Resumen» del panel
 
-> Spec de apoyo · Panel de administración · Estado: **En implementación**
+> Spec de apoyo · Panel de administración · Estado: **Implementada**
 
 ## Historia de usuario
 
@@ -22,13 +22,13 @@ La sección **Resumen** es la primera del menú, antes de Usuarios, y la pantall
 
 ## Criterios de aceptación
 
-- [ ] «Resumen» es la primera sección del menú y `/admin` aterriza en ella para quien tiene `admin.access`; con otro permiso solo, aterriza en su primera sección permitida.
-- [ ] Muestra solo cifras que devuelve el endpoint; los bloques `null` no se pintan; las métricas inexistentes son fichas «Próximamente», sin números.
-- [ ] Estado de carga con esqueleto, estado de error con «Reintentar» y estado vacío (sin datos todavía) legible.
-- [ ] Cada gráfico tiene alternativa textual (`aria-label` y lista equivalente visualmente oculta); el color nunca es la única señal (hay etiqueta y número).
-- [ ] Contraste de texto 4,5:1 en claro y oscuro; sin scroll horizontal de la página a 360 px; las tarjetas se reacomodan.
-- [ ] Si `truncated` es `true`, un aviso indica que las cifras son un mínimo.
-- [ ] Todo el texto está en español; sin gráficos externos (SVG y CSS propios).
+- [x] «Resumen» es la primera sección del menú y `/admin` aterriza en ella para quien tiene `admin.access`; con otro permiso solo, aterriza en su primera sección permitida.
+- [x] Muestra solo cifras que devuelve el endpoint; los bloques `null` no se pintan; las métricas inexistentes son fichas «Próximamente», sin números.
+- [x] Estado de carga con esqueleto, estado de error con «Reintentar» y estado vacío (sin datos todavía) legible.
+- [x] Cada gráfico tiene alternativa textual (`aria-label` y lista equivalente visualmente oculta); el color nunca es la única señal (hay etiqueta y número).
+- [x] Contraste de texto 4,5:1 en claro y oscuro; sin scroll horizontal de la página a 360 px; las tarjetas se reacomodan.
+- [x] Si `truncated` es `true`, un aviso indica que las cifras son un mínimo.
+- [x] Todo el texto está en español; sin gráficos externos (SVG y CSS propios).
 
 ## Implementación
 

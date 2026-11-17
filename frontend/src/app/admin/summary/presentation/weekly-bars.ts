@@ -97,6 +97,12 @@ export function weekLabel(weekStart: string): string {
       white-space: nowrap;
     }
 
+    @media (max-width: 40rem) {
+      .column:nth-child(odd) .week {
+        visibility: hidden;
+      }
+    }
+
     .current .week {
       color: var(--rc-text);
       font-weight: 800;

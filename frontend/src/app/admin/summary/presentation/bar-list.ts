@@ -16,10 +16,10 @@ export interface BarItem {
       @for (item of rows(); track item.label) {
         <li>
           <span class="name">{{ item.label }}</span>
+          <span class="value">{{ item.value }}</span>
           <span class="track" aria-hidden="true"
             ><span class="fill" [style.width.%]="item.percent"></span
           ></span>
-          <span class="value">{{ item.value }}</span>
         </li>
       } @empty {
         <li class="none">Sin datos todavía.</li>
@@ -29,7 +29,7 @@ export interface BarItem {
   styles: `
     .bars {
       display: grid;
-      gap: var(--rc-space-md);
+      gap: var(--rc-space-lg);
       margin: 0;
       padding: 0;
       list-style: none;
@@ -37,9 +37,9 @@ export interface BarItem {
 
     li {
       display: grid;
-      grid-template-columns: minmax(5rem, 1fr) minmax(3rem, 2fr) auto;
-      align-items: center;
-      gap: var(--rc-space-md);
+      grid-template-columns: 1fr auto;
+      align-items: baseline;
+      gap: var(--rc-space-xs) var(--rc-space-md);
       font-size: var(--rc-font-size-label);
     }
 
@@ -49,6 +49,7 @@ export interface BarItem {
     }
 
     .track {
+      grid-column: 1 / -1;
       display: block;
       height: 0.5rem;
       border-radius: var(--rc-radius-pill);
@@ -64,8 +65,6 @@ export interface BarItem {
     }
 
     .value {
-      min-width: 1.5rem;
-      text-align: end;
       font-weight: 800;
     }
 

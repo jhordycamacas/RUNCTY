@@ -14,6 +14,29 @@
   --rc-sidebar-background: transparent;
 }
 
+// The top bar is part of the canvas: no rule under it, a bold title, the page color behind it.
+.area-admin ion-header.header-md {
+  border-bottom: 0;
+}
+
+.area-admin ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  padding-top: var(--rc-space-sm);
+}
+
+.area-admin ion-title {
+  font-size: var(--rc-font-size-title);
+  font-weight: 800;
+}
+
+// Fields on the white cards of the admin read as white pills, like the reference's search box.
+.area-admin ion-input,
+.area-admin ion-select,
+.area-admin ion-textarea {
+  --background: var(--rc-surface-elevated);
+}
+
 // Touch screens (a tablet, or the admin on a phone) keep the full 48px target.
 @media (pointer: coarse) {
   .area-admin {

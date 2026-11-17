@@ -775,6 +775,14 @@ RUNCTY/
 - Las secciones 9 a 15 describen la arquitectura anterior y nombran archivos como `functions/src/...` o `admin/src/...`; se reescriben en S6.
 - El aviso del hook de `gentle-ai review` sigue apareciendo al terminar cada turno y se ignora por la regla de este repositorio.
 
+### 17.5b Resumen del panel y rediseño (2026-11-17)
+
+- **Resumen** es la primera sección de `/admin` (permiso `admin.access`) y la pantalla de aterrizaje. Muestra analíticas reales de la app móvil: usuarios, altas por semana, rutas por dificultad, superficie y ciudad, nivel de seguridad por ruta (peor nivel de sus franjas, nunca «segura» o «insegura»), perfil deportivo y preferencias. Specs: `specs/admin/ADM-resumen-*.md` y `ADM-diseno-visual.md`.
+- **Endpoint** `GET /api/v1/admin/summary` (app `backend/apps/summary`): solo agregados, sin datos personales; cada bloque (`users`, `routes`, `cities`) llega solo si el usuario tiene `users.read`, `routes.manage` o `cities.manage`, si no es `null`. Lecturas acotadas (5000 documentos; 2000 rutas) y `truncated` avisa si se alcanzó el tope.
+- **No inventar cifras:** entrenamientos, alertas SOS y eventos no existen todavía; la pantalla muestra fichas «Próximamente» sin números. El correo verificado no se cuenta porque vive en Auth, no en Firestore.
+- **Diseño:** lienzo rosado suave, barra lateral flotante con marca y tarjeta de cuenta, fichas y columnas en pasteles (rosa, durazno, cielo, lavanda, menta) con tokens claro y oscuro en `frontend/src/theme/` (la tinta sobre cada pastel cumple 4,5:1 en `tokens.spec.ts`). Gráficos propios sin librería (barras, barra apilada, barras semanales, progreso) con alternativa de texto.
+- **Ojo en desarrollo:** recrear el contenedor `firebase` pierde los datos de los emuladores; se vuelven a cargar con `python manage.py seed` apuntando a `127.0.0.1:8080` y `:9099`.
+
 ### 17.6 Cómo retomar
 
 1. Abrir la sesión en `D:\RUNCTY` y leer `odd/tasks/single-frontend-ionic.md`.

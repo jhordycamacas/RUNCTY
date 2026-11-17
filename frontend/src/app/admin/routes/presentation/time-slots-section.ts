@@ -214,6 +214,7 @@ type Editing = { kind: 'new' } | { kind: 'edit'; slot: TimeSlot };
       padding: var(--rc-space-md) var(--rc-space-lg);
       border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
+      box-shadow: var(--rc-shadow-sm);
       background: var(--rc-surface-elevated);
     }
 

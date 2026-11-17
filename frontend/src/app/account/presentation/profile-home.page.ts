@@ -218,6 +218,7 @@ const SECTIONS: Section[] = [
       padding: 2px var(--rc-space-sm);
       border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
+      box-shadow: var(--rc-shadow-sm);
       color: var(--rc-text);
       font-size: var(--rc-font-size-caption);
     }

@@ -35,7 +35,7 @@ export type PastelTone = 'pink' | 'peach' | 'sky' | 'lavender' | 'mint';
       align-items: center;
       gap: var(--rc-space-xs) var(--rc-space-md);
       height: 100%;
-      padding: var(--rc-space-lg) var(--rc-space-xl) var(--rc-space-xl);
+      padding: var(--rc-space-lg) var(--rc-space-lg) var(--rc-space-xl);
       border-radius: var(--rc-radius-lg);
       color: var(--rc-on-pastel);
       background: var(--tone);
@@ -87,7 +87,7 @@ export type PastelTone = 'pink' | 'peach' | 'sky' | 'lavender' | 'mint';
 
     .value {
       margin-top: var(--rc-space-sm);
-      font-size: 2.5rem;
+      font-size: 2.25rem;
       font-weight: 800;
       line-height: 1.05;
       letter-spacing: -0.02em;

@@ -172,42 +172,34 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
             }
           </section>
 
-          @if (summary.users; as users) {
+          @if (summary.users || summary.routes) {
             <div class="row wide">
-              <section class="card" aria-labelledby="weekly-title">
-                <h2 id="weekly-title">Altas por semana</h2>
-                <p class="note">Últimas 8 semanas, de lunes a domingo.</p>
-                <app-weekly-bars [weeks]="users.registrationsByWeek" />
-              </section>
-
-              <section class="card" aria-labelledby="profile-title">
-                <h2 id="profile-title">Perfil deportivo</h2>
-                <p class="note">Cuentas que ya completaron su perfil de corredor.</p>
-                <app-progress-bar
-                  label="Perfiles completados"
-                  [percent]="users.sportProfiles.percentage"
-                  [detail]="users.sportProfiles.completed + ' de ' + users.total + ' usuarios'"
-                />
-                <h3>Usuarios por rol</h3>
-                <app-bar-list label="Usuarios por rol" [items]="roles(users.byRole)" />
-                <h3>Preferencias guardadas ({{ users.preferences.saved }})</h3>
-                <app-bar-list
-                  label="Apariencia elegida"
-                  [items]="appearance(users.preferences.appearance)"
-                />
-                <p class="note">
-                  Notificaciones activas: {{ users.preferences.notificationsEnabled }} de
-                  {{ users.preferences.saved }}
-                </p>
-              </section>
+              @if (summary.users; as users) {
+                <section class="card" aria-labelledby="weekly-title">
+                  <h2 id="weekly-title">Altas por semana</h2>
+                  <p class="note">Últimas 8 semanas, de lunes a domingo.</p>
+                  <app-weekly-bars [weeks]="users.registrationsByWeek" />
+                </section>
+              }
+              @if (summary.routes; as routes) {
+                <section class="card" aria-labelledby="safety-title">
+                  <h2 id="safety-title">Nivel de seguridad de las rutas</h2>
+                  <p class="note">Cada ruta cuenta una vez, con el peor nivel de sus franjas.</p>
+                  <app-stacked-bar
+                    subject="Rutas por nivel de seguridad"
+                    [segments]="safetySegments(routes.safetyLevels)"
+                  />
+                </section>
+              }
             </div>
           }
 
           @if (summary.routes; as routes) {
-            <div class="row columns">
+            <h2 class="group">Rutas</h2>
+            <div class="row columns four">
               <section class="column tone-peach" aria-labelledby="difficulty-title">
                 <header>
-                  <h2 id="difficulty-title">Por dificultad</h2>
+                  <h3 id="difficulty-title">Por dificultad</h3>
                   <span class="count">{{ routes.total }}</span>
                 </header>
                 <div class="inner">
@@ -219,7 +211,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
               </section>
               <section class="column tone-sky" aria-labelledby="surface-title">
                 <header>
-                  <h2 id="surface-title">Por superficie</h2>
+                  <h3 id="surface-title">Por superficie</h3>
                   <span class="count">{{ routes.total }}</span>
                 </header>
                 <div class="inner">
@@ -228,36 +220,69 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
               </section>
               <section class="column tone-lavender" aria-labelledby="city-title">
                 <header>
-                  <h2 id="city-title">Por ciudad</h2>
+                  <h3 id="city-title">Por ciudad</h3>
                   <span class="count">{{ routes.byCity.length }}</span>
                 </header>
                 <div class="inner">
                   <app-bar-list label="Rutas por ciudad" [items]="cityItems(routes.byCity)" />
                 </div>
               </section>
-            </div>
-
-            <div class="row wide">
-              <section class="card" aria-labelledby="safety-title">
-                <h2 id="safety-title">Nivel de seguridad de las rutas</h2>
-                <p class="note">
-                  Cada ruta cuenta una vez, con el peor nivel de sus franjas horarias.
-                </p>
-                <app-stacked-bar
-                  subject="Rutas por nivel de seguridad"
-                  [segments]="safetySegments(routes.safetyLevels)"
-                />
+              <section class="column tone-mint" aria-labelledby="factors-title">
+                <header>
+                  <h3 id="factors-title">Factores de riesgo</h3>
+                  <span class="count">{{ routes.riskFactors.total }}</span>
+                </header>
+                <div class="inner">
+                  <app-bar-list
+                    label="Factores de riesgo por severidad"
+                    [items]="severities(routes.riskFactors.bySeverity)"
+                  />
+                  <p class="note">En {{ routes.timeSlots }} franjas horarias.</p>
+                </div>
               </section>
-              <section class="card" aria-labelledby="factors-title">
-                <h2 id="factors-title">Factores de riesgo</h2>
-                <p class="note">
-                  {{ routes.riskFactors.total }} registrados en {{ routes.timeSlots }} franjas
-                  horarias.
-                </p>
-                <app-bar-list
-                  label="Factores de riesgo por severidad"
-                  [items]="severities(routes.riskFactors.bySeverity)"
-                />
+            </div>
+          }
+
+          @if (summary.users; as users) {
+            <h2 class="group">Cuentas</h2>
+            <div class="row columns">
+              <section class="column tone-pink" aria-labelledby="profile-title">
+                <header>
+                  <h3 id="profile-title">Perfil deportivo</h3>
+                  <span class="count">{{ users.sportProfiles.percentage }}%</span>
+                </header>
+                <div class="inner">
+                  <app-progress-bar
+                    label="Perfiles completados"
+                    [percent]="users.sportProfiles.percentage"
+                    [detail]="users.sportProfiles.completed + ' de ' + users.total + ' usuarios'"
+                  />
+                </div>
+              </section>
+              <section class="column tone-sky" aria-labelledby="role-title">
+                <header>
+                  <h3 id="role-title">Usuarios por rol</h3>
+                  <span class="count">{{ users.total }}</span>
+                </header>
+                <div class="inner">
+                  <app-bar-list label="Usuarios por rol" [items]="roles(users.byRole)" />
+                </div>
+              </section>
+              <section class="column tone-lavender" aria-labelledby="appearance-title">
+                <header>
+                  <h3 id="appearance-title">Apariencia elegida</h3>
+                  <span class="count">{{ users.preferences.saved }}</span>
+                </header>
+                <div class="inner">
+                  <app-bar-list
+                    label="Apariencia elegida"
+                    [items]="appearance(users.preferences.appearance)"
+                  />
+                  <p class="note">
+                    Notificaciones activas: {{ users.preferences.notificationsEnabled }} de
+                    {{ users.preferences.saved }}.
+                  </p>
+                </div>
               </section>
             </div>
           }
@@ -353,12 +378,13 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
 
     .kpis {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr));
-      gap: var(--rc-space-lg);
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+      gap: var(--rc-space-md);
     }
 
     .row {
       display: grid;
+      align-items: start;
       gap: var(--rc-space-lg);
     }
 
@@ -369,6 +395,10 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
 
       .row.columns {
         grid-template-columns: repeat(3, 1fr);
+      }
+
+      .row.columns.four {
+        grid-template-columns: repeat(4, 1fr);
       }
     }
 
@@ -395,9 +425,22 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
     }
 
     h3 {
-      margin: var(--rc-space-md) 0 0;
-      font-size: var(--rc-font-size-label);
+      margin: 0;
+      font-size: var(--rc-font-size-body);
+      font-weight: 800;
+    }
+
+    .group {
+      margin: var(--rc-space-sm) 0 calc(var(--rc-space-sm) * -1);
+      font-size: var(--rc-font-size-caption);
       font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--rc-text-muted);
+    }
+
+    .inner .note {
+      margin-top: var(--rc-space-lg);
     }
 
     .column {
@@ -410,6 +453,12 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
       background: var(--tone);
     }
 
+    .tone-pink {
+      --tone: var(--rc-pastel-pink);
+    }
+    .tone-mint {
+      --tone: var(--rc-pastel-mint);
+    }
     .tone-peach {
       --tone: var(--rc-pastel-peach);
     }

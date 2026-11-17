@@ -41,26 +41,37 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
     <ion-split-pane contentId="admin-content" when="md">
       <ion-menu contentId="admin-content">
         <ion-content>
-          <nav aria-label="Administración">
-            <p class="brand">RUNCTY · Administración</p>
-            <ion-list lines="none">
-              @for (section of sections(); track section.path) {
-                <ion-item
-                  button
-                  detail="false"
-                  [routerLink]="['/admin', section.path]"
-                  routerLinkActive="active"
-                >
-                  <ion-icon slot="start" [name]="section.icon" aria-hidden="true" />
-                  <ion-label>{{ section.label }}</ion-label>
-                </ion-item>
-              }
-            </ion-list>
-          </nav>
-          <div class="footer">
-            <p>{{ email() }}</p>
-            <app-theme-selector />
-            <ion-button fill="outline" size="small" (click)="signOut()">Cerrar sesión</ion-button>
+          <div class="panel">
+            <nav aria-label="Administración">
+              <div class="brand">
+                <span class="logo" aria-hidden="true">R</span>
+                <p>
+                  <strong>RUNCTY</strong>
+                  <span>Administración</span>
+                </p>
+              </div>
+              <ion-list lines="none">
+                @for (section of sections(); track section.path) {
+                  <ion-item
+                    button
+                    detail="false"
+                    [routerLink]="['/admin', section.path]"
+                    routerLinkActive="active"
+                  >
+                    <ion-icon slot="start" [name]="section.icon" aria-hidden="true" />
+                    <ion-label>{{ section.label }}</ion-label>
+                  </ion-item>
+                }
+              </ion-list>
+            </nav>
+            <div class="footer">
+              <div class="account">
+                <span class="avatar" aria-hidden="true">{{ initial() }}</span>
+                <p>{{ email() }}</p>
+              </div>
+              <app-theme-selector />
+              <ion-button fill="outline" size="small" (click)="signOut()">Cerrar sesión</ion-button>
+            </div>
           </div>
         </ion-content>
       </ion-menu>
@@ -90,12 +101,53 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
       overflow: hidden;
     }
 
+    .panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100%;
+    }
+
     .brand {
-      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--rc-space-md);
       padding: var(--rc-space-xl) var(--rc-space-xl) var(--rc-space-md);
+    }
+
+    .brand p {
+      display: grid;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .brand p strong {
       font-size: var(--rc-font-size-subtitle);
-      font-weight: 700;
-      color: var(--rc-primary-text);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .brand p span {
+      font-size: var(--rc-font-size-caption);
+      color: var(--rc-text-muted);
+    }
+
+    .logo,
+    .avatar {
+      display: grid;
+      flex: none;
+      place-items: center;
+      border-radius: var(--rc-radius-pill);
+      background: var(--rc-primary);
+      color: var(--rc-on-primary);
+      font-weight: 800;
+    }
+
+    .logo {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: var(--rc-radius-md);
+      font-size: 1.25rem;
     }
 
     ion-list {
@@ -114,6 +166,8 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
     ion-item.active {
       --background: var(--rc-primary);
       --color: var(--rc-on-primary);
+      box-shadow: 0 6px 14px rgb(214 0 111 / 28%);
+      border-radius: var(--rc-radius-pill);
     }
 
     ion-item.active ion-icon {
@@ -125,20 +179,37 @@ addIcons({ businessOutline, gridOutline, peopleOutline, shieldCheckmarkOutline, 
       flex-direction: column;
       align-items: flex-start;
       gap: var(--rc-space-md);
+      margin: var(--rc-space-md);
       padding: var(--rc-space-lg);
-      border-top: 1px solid var(--rc-border);
-      margin-top: var(--rc-space-md);
+      border-radius: var(--rc-radius-md);
+      background: var(--rc-pastel-pink);
+      color: var(--rc-on-pastel);
       font-size: var(--rc-font-size-label);
-      color: var(--rc-text-muted);
       overflow-wrap: anywhere;
     }
 
-    .footer p {
+    .account {
+      display: flex;
+      align-items: center;
+      gap: var(--rc-space-md);
+      min-width: 0;
+    }
+
+    .avatar {
+      width: 2.25rem;
+      height: 2.25rem;
+      text-transform: uppercase;
+    }
+
+    .account p {
       margin: 0;
+      min-width: 0;
+      font-weight: 600;
     }
 
     app-theme-selector {
       align-self: stretch;
+      --label-color: var(--rc-on-pastel);
     }
   `,
 })
@@ -151,6 +222,7 @@ export class AdminShell {
     ADMIN_SECTIONS.filter((section) => this.auth.can(section.permission)),
   );
   protected readonly email = computed(() => this.auth.session()?.email ?? '');
+  protected readonly initial = computed(() => this.email().charAt(0) || 'A');
 
   protected async signOut(): Promise<void> {
     await this.auth.signOut();

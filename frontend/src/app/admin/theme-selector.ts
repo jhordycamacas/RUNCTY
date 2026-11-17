@@ -34,7 +34,7 @@ import { ToastService } from '../shared/ui/toast.service';
     }
 
     .label {
-      color: var(--rc-text-muted);
+      color: var(--label-color, var(--rc-text-muted));
       font-size: var(--rc-font-size-caption);
     }
 
@@ -44,7 +44,7 @@ import { ToastService } from '../shared/ui/toast.service';
       padding: 0 var(--rc-space-md);
       border: 1px solid var(--rc-control-border);
       border-radius: var(--rc-radius-sm);
-      background: transparent;
+      background: var(--rc-surface-elevated);
       color: var(--rc-text);
       font: inherit;
     }
