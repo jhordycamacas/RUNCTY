@@ -204,7 +204,6 @@ import { parseUserSearch } from '../domain/user-search';
       border-radius: var(--rc-radius-lg);
       box-shadow: var(--rc-shadow-sm);
       background: var(--rc-surface-elevated);
-      box-shadow: var(--rc-shadow-sm);
     }
 
     .summary {

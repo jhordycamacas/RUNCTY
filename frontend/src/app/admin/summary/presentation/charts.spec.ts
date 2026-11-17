@@ -28,8 +28,8 @@ class Host {
   ];
   slices = [
     { label: 'Principiante', value: 1, color: 'fuchsia' as const },
-    { label: 'Intermedio', value: 1, color: 'blue' as const },
-    { label: 'Avanzado', value: 1, color: 'orange' as const },
+    { label: 'Intermedio', value: 1, color: 'ink' as const },
+    { label: 'Avanzado', value: 1, color: 'silver' as const },
   ];
   empty = [{ label: 'Asfalto', value: 0, color: 'fuchsia' as const }];
   single = [{ label: 'Corredores', value: 7, color: 'fuchsia' as const }];

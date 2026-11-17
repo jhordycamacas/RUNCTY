@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { userMessage } from '../core/errors/user-message';
 import { PreferencesStore } from '../preferences/application/preferences.store';
 import { APPEARANCES, APPEARANCE_LABELS, Appearance } from '../preferences/domain/preferences';
@@ -11,7 +11,7 @@ import { ToastService } from '../shared/ui/toast.service';
 @Component({
   selector: 'app-theme-selector',
   template: `
-    <label class="field">
+    <label class="field" [class.compact]="compact()">
       <span class="label">Tema</span>
       <select [value]="store.preferences().appearance" (change)="choose($event)">
         @for (option of options; track option.value) {
@@ -33,6 +33,17 @@ import { ToastService } from '../shared/ui/toast.service';
       gap: var(--rc-space-xs);
     }
 
+    .compact {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--rc-space-sm);
+    }
+
+    .compact select {
+      width: auto;
+      min-height: 2.25rem;
+    }
+
     .label {
       color: var(--label-color, var(--rc-text-muted));
       font-size: var(--rc-font-size-caption);
@@ -51,6 +62,9 @@ import { ToastService } from '../shared/ui/toast.service';
   `,
 })
 export class ThemeSelector {
+  /** One row with the label beside the select, for a top bar. */
+  readonly compact = input(false);
+
   protected readonly store = inject(PreferencesStore);
   private readonly toast = inject(ToastService);
 

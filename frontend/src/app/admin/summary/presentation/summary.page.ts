@@ -140,7 +140,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                 [hint]="users.sportProfiles.completed + ' con perfil deportivo'"
               />
               <app-kpi-tile
-                tone="blue"
+                tone="neutral"
                 icon="person-add-outline"
                 label="Altas en 7 días"
                 [value]="users.registeredLast7Days"
@@ -149,14 +149,14 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
             }
             @if (summary.routes; as routes) {
               <app-kpi-tile
-                tone="orange"
+                tone="neutral"
                 icon="trail-sign-outline"
                 label="Rutas activas"
                 [value]="routes.active"
                 [hint]="'de ' + routes.total + ' rutas · ' + routes.totalKm + ' km'"
               />
               <app-kpi-tile
-                tone="ink"
+                tone="neutral"
                 icon="alert-circle-outline"
                 label="Rutas con nivel Bajo"
                 [value]="routes.safetyLevels.low"
@@ -165,7 +165,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
             }
             @if (summary.cities; as cities) {
               <app-kpi-tile
-                tone="teal"
+                tone="neutral"
                 icon="business-outline"
                 label="Ciudades"
                 [value]="cities.cities"
@@ -204,7 +204,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
           @if (summary.routes; as routes) {
             <h2 class="group">Rutas</h2>
             <div class="charts">
-              <section class="column tone-orange" aria-labelledby="difficulty-title">
+              <section class="column" aria-labelledby="difficulty-title">
                 <h3 id="difficulty-title">Por dificultad</h3>
                 <app-donut-chart
                   subject="Rutas por dificultad"
@@ -212,7 +212,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                   [slices]="slices(routes.byDifficulty, difficultyLabel)"
                 />
               </section>
-              <section class="column tone-blue" aria-labelledby="surface-title">
+              <section class="column" aria-labelledby="surface-title">
                 <h3 id="surface-title">Por superficie</h3>
                 <app-donut-chart
                   subject="Rutas por superficie"
@@ -220,7 +220,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                   [slices]="slices(routes.bySurface, surfaceLabel)"
                 />
               </section>
-              <section class="column tone-teal" aria-labelledby="factors-title">
+              <section class="column" aria-labelledby="factors-title">
                 <h3 id="factors-title">Factores de riesgo</h3>
                 <app-donut-chart
                   subject="Factores de riesgo por severidad"
@@ -229,16 +229,16 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                 />
                 <p class="note">En {{ routes.timeSlots }} franjas horarias.</p>
               </section>
-              <section class="column tone-ink" aria-labelledby="city-title">
+              <section class="column" aria-labelledby="city-title">
                 <h3 id="city-title">Rutas por ciudad</h3>
                 <app-bar-chart subject="Rutas por ciudad" [bars]="cityBars(routes.byCity)" />
               </section>
-              <section class="column wide-chart tone-fuchsia" aria-labelledby="distance-title">
+              <section class="column wide-chart" aria-labelledby="distance-title">
                 <h3 id="distance-title">Rutas más largas</h3>
                 <app-bar-chart
                   subject="Distancia por ruta"
                   unit="km"
-                  colorName="blue"
+                  colorName="fuchsia"
                   [bars]="distanceBars(routes.distances)"
                 />
               </section>
@@ -248,7 +248,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
           @if (summary.users; as users) {
             <h2 class="group">Cuentas</h2>
             <div class="charts">
-              <section class="column tone-fuchsia" aria-labelledby="profile-title">
+              <section class="column" aria-labelledby="profile-title">
                 <h3 id="profile-title">Perfil deportivo</h3>
                 <app-progress-bar
                   label="Perfiles completados"
@@ -256,7 +256,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                   [detail]="users.sportProfiles.completed + ' de ' + users.total + ' usuarios'"
                 />
               </section>
-              <section class="column tone-blue" aria-labelledby="role-title">
+              <section class="column" aria-labelledby="role-title">
                 <h3 id="role-title">Usuarios por rol</h3>
                 <app-donut-chart
                   subject="Usuarios por rol"
@@ -264,7 +264,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                   [slices]="slices(users.byRole, roleLabel)"
                 />
               </section>
-              <section class="column tone-ink" aria-labelledby="appearance-title">
+              <section class="column" aria-labelledby="appearance-title">
                 <h3 id="appearance-title">Apariencia elegida</h3>
                 <app-bar-list
                   label="Apariencia elegida"
@@ -288,8 +288,8 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                 label="Entrenamientos registrados"
                 [soon]="true"
               />
-              <app-kpi-tile tone="orange" icon="warning-outline" label="Alertas SOS" [soon]="true" />
-              <app-kpi-tile tone="blue" icon="calendar-outline" label="Eventos" [soon]="true" />
+              <app-kpi-tile tone="neutral" icon="warning-outline" label="Alertas SOS" [soon]="true" />
+              <app-kpi-tile tone="neutral" icon="calendar-outline" label="Eventos" [soon]="true" />
             </div>
           </section>
         } @else if (!store.error()) {
@@ -460,26 +460,9 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
       gap: var(--rc-space-lg);
       padding: var(--rc-space-lg);
       border: 1px solid var(--rc-border);
-      border-top: 4px solid var(--tone);
       border-radius: var(--rc-radius-md);
       background: var(--rc-surface-elevated);
       box-shadow: var(--rc-shadow-sm);
-    }
-
-    .tone-fuchsia {
-      --tone: var(--rc-primary);
-    }
-    .tone-orange {
-      --tone: var(--rc-accent-orange);
-    }
-    .tone-blue {
-      --tone: var(--rc-accent-blue);
-    }
-    .tone-teal {
-      --tone: var(--rc-accent-teal);
-    }
-    .tone-ink {
-      --tone: var(--rc-accent-ink);
     }
 
     .column header {
@@ -588,7 +571,7 @@ export class SummaryPage implements ViewWillEnter {
       slice('Nivel Alto', levels.high, 'success'),
       slice('Nivel Medio', levels.medium, 'warning'),
       slice('Nivel Bajo', levels.low, 'danger'),
-      slice('Sin índice', levels.unrated, 'grey'),
+      slice('Sin índice', levels.unrated, 'silver'),
     ];
   }
 }

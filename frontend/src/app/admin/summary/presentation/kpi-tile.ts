@@ -1,10 +1,10 @@
 import { Component, input } from '@angular/core';
 import { IonIcon } from '@ionic/angular';
 
-export type AccentTone = 'fuchsia' | 'blue' | 'orange' | 'teal' | 'ink';
+export type AccentTone = 'fuchsia' | 'neutral';
 
 /**
- * A headline figure on a white card with a colored top bar: a small-caps label, a large number and a short hint. With
+ * A headline figure on a white card, with a gray icon chip (fuchsia for emphasis): a small-caps label, a large number and a short hint. With
  * `soon` it announces a metric that does not exist yet and shows no number at all.
  */
 @Component({
@@ -37,27 +37,10 @@ export type AccentTone = 'fuchsia' | 'blue' | 'orange' | 'teal' | 'ink';
       height: 100%;
       padding: var(--rc-space-lg) var(--rc-space-lg) var(--rc-space-xl);
       border: 1px solid var(--rc-border);
-      border-top: 4px solid var(--tone);
       border-radius: var(--rc-radius-md);
       background: var(--rc-surface-elevated);
       box-shadow: var(--rc-shadow-sm);
       color: var(--rc-text);
-    }
-
-    .tone-fuchsia {
-      --tone: var(--rc-primary);
-    }
-    .tone-blue {
-      --tone: var(--rc-accent-blue);
-    }
-    .tone-orange {
-      --tone: var(--rc-accent-orange);
-    }
-    .tone-teal {
-      --tone: var(--rc-accent-teal);
-    }
-    .tone-ink {
-      --tone: var(--rc-accent-ink);
     }
 
     .icon {
@@ -66,12 +49,13 @@ export type AccentTone = 'fuchsia' | 'blue' | 'orange' | 'teal' | 'ink';
       width: 2.25rem;
       height: 2.25rem;
       border-radius: var(--rc-radius-sm);
-      background: var(--tone);
-      color: var(--rc-on-accent);
+      background: var(--rc-surface);
+      color: var(--rc-text);
       font-size: 1.25rem;
     }
 
     .tone-fuchsia .icon {
+      background: var(--rc-primary);
       color: var(--rc-on-primary);
     }
 
@@ -133,6 +117,6 @@ export class KpiTile {
   readonly icon = input.required<string>();
   readonly value = input<string | number>('');
   readonly hint = input<string>('');
-  readonly tone = input<AccentTone>('fuchsia');
+  readonly tone = input<AccentTone>('neutral');
   readonly soon = input(false);
 }

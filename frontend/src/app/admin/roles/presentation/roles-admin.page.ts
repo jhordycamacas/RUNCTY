@@ -147,7 +147,6 @@ import { PERMISSION_LABELS, Role } from '../domain/role';
       border-radius: var(--rc-radius-lg);
       box-shadow: var(--rc-shadow-sm);
       background: var(--rc-surface-elevated);
-      box-shadow: var(--rc-shadow-sm);
     }
 
     .summary {

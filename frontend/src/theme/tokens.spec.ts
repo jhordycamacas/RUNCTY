@@ -69,17 +69,9 @@ describe.each(['light-colors', 'dark-colors'] as const)('design tokens (%s)', (m
     expect(contrast(colors['on-primary'], colors['primary'])).toBeGreaterThanOrEqual(4.5);
   });
 
-  it('keeps the icon on every accent legible (3:1) and every accent visible on the cards (3:1)', () => {
-    for (const accent of ['blue', 'orange', 'teal', 'ink']) {
-      expect(colors[`accent-${accent}`]).toBeDefined();
-      expect(contrast(colors['on-accent'], colors[`accent-${accent}`])).toBeGreaterThanOrEqual(3);
-      expect(contrast(colors[`accent-${accent}`], colors['surface-elevated'])).toBeGreaterThanOrEqual(3);
-    }
-  });
-
   it('keeps every chart color visible (3:1) on the raised surface', () => {
-    const chartColors = ['primary', 'accent-blue', 'accent-orange', 'accent-teal', 'accent-ink'];
-    for (const token of [...chartColors, 'accent-grey', 'success', 'warning', 'danger']) {
+    const chartColors = ['primary', 'chart-ink', 'chart-slate', 'chart-silver', 'chart-rose'];
+    for (const token of [...chartColors, 'success', 'warning', 'danger']) {
       expect(colors[token]).toBeDefined();
       expect(contrast(colors[token], colors['surface-elevated'])).toBeGreaterThanOrEqual(3);
     }
@@ -89,11 +81,15 @@ describe.each(['light-colors', 'dark-colors'] as const)('design tokens (%s)', (m
     expect(contrast(colors['progress'], colors['surface-elevated'])).toBeGreaterThanOrEqual(3);
   });
 
-  it('keeps the text of the sidebar (the raised surface) and of its account card at 4.5:1', () => {
-    for (const surface of ['surface-elevated', 'surface']) {
+  it('keeps the text at 4.5:1 or more on the gray sidebar and on the content backdrop', () => {
+    for (const surface of ['sidebar', 'backdrop', 'surface-elevated']) {
       expect(contrast(colors['text'], colors[surface])).toBeGreaterThanOrEqual(4.5);
       expect(contrast(colors['text-muted'], colors[surface])).toBeGreaterThanOrEqual(4.5);
     }
+  });
+
+  it('keeps the fuchsia text readable on the sidebar', () => {
+    expect(contrast(colors['primary-text'], colors['sidebar'])).toBeGreaterThanOrEqual(4.5);
   });
 
   it('keeps the white text of the active navigation pill at 4.5:1 on the fuchsia', () => {

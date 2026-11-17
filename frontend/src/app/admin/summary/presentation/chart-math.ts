@@ -1,10 +1,9 @@
 export type ChartColor =
   | 'fuchsia'
-  | 'blue'
-  | 'orange'
-  | 'teal'
   | 'ink'
-  | 'grey'
+  | 'slate'
+  | 'silver'
+  | 'rose'
   | 'success'
   | 'warning'
   | 'danger';
@@ -12,18 +11,17 @@ export type ChartColor =
 /** The design token behind each chart color. */
 export const CHART_COLOR_VARS: Record<ChartColor, string> = {
   fuchsia: '--rc-primary',
-  blue: '--rc-accent-blue',
-  orange: '--rc-accent-orange',
-  teal: '--rc-accent-teal',
-  ink: '--rc-accent-ink',
-  grey: '--rc-accent-grey',
+  ink: '--rc-chart-ink',
+  slate: '--rc-chart-slate',
+  silver: '--rc-chart-silver',
+  rose: '--rc-chart-rose',
   success: '--rc-success',
   warning: '--rc-warning',
   danger: '--rc-danger',
 };
 
 /** Categories take these colors in this order; the semantic ones are only for safety levels. */
-export const CATEGORICAL: readonly ChartColor[] = ['fuchsia', 'blue', 'orange', 'teal', 'ink', 'grey'];
+export const CATEGORICAL: readonly ChartColor[] = ['fuchsia', 'ink', 'silver', 'slate', 'rose'];
 
 export const colorVar = (color: ChartColor): string => `var(${CHART_COLOR_VARS[color]})`;
 

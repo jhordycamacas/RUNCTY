@@ -23,13 +23,13 @@
   --rc-success-tint: #{p.$green50};
   --rc-warning-tint: #{p.$amber50};
   --rc-danger-tint: #{p.$red50};
-  --rc-accent-blue: #{p.$blue500};
-  --rc-accent-orange: #{p.$orange500};
-  --rc-accent-teal: #{p.$teal500};
-  --rc-accent-ink: #{p.$charcoal};
-  --rc-accent-grey: #{p.$slate500};
-  --rc-on-accent: #{p.$white};
-  --rc-progress: #{p.$teal500};
+  --rc-chart-ink: #{p.$charcoal};
+  --rc-chart-slate: #{p.$chartSlate};
+  --rc-chart-silver: #{p.$chartSilver};
+  --rc-chart-rose: #{p.$chartRose};
+  --rc-sidebar: #{p.$sidebar};
+  --rc-backdrop: #{p.$backdrop};
+  --rc-progress: #{p.$magenta600};
   --rc-progress-track: #{p.$grey200};
 }
 
@@ -52,13 +52,13 @@
   --rc-success-tint: #{p.$green900};
   --rc-warning-tint: #{p.$amber900};
   --rc-danger-tint: #{p.$red900};
-  --rc-accent-blue: #{p.$blue300};
-  --rc-accent-orange: #{p.$orange300};
-  --rc-accent-teal: #{p.$teal300};
-  --rc-accent-ink: #{p.$mist};
-  --rc-accent-grey: #{p.$slate500};
-  --rc-on-accent: #{p.$night900};
-  --rc-progress: #{p.$teal300};
+  --rc-chart-ink: #{p.$mist};
+  --rc-chart-slate: #{p.$chartSlateDark};
+  --rc-chart-silver: #{p.$chartSilverDark};
+  --rc-chart-rose: #{p.$magenta300};
+  --rc-sidebar: #{p.$sidebarDark};
+  --rc-backdrop: #{p.$night900};
+  --rc-progress: #{p.$magenta600};
   --rc-progress-track: #{p.$night600};
 }
 
@@ -80,9 +80,9 @@
   --rc-space-xl: 24px;
   --rc-space-xxl: 32px;
 
-  --rc-radius-sm: 8px;
-  --rc-radius-md: 12px;
-  --rc-radius-lg: 16px;
+  --rc-radius-sm: 6px;
+  --rc-radius-md: 8px;
+  --rc-radius-lg: 10px;
 
   --rc-radius-pill: 999px;
 

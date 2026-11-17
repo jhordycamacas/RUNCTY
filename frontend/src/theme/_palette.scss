@@ -41,13 +41,15 @@ $red300: #ff6b6b;
 $red50: #fdecec;
 $red900: #3a1618;
 
-// Dashboard accents: icon chips and top bars. Light tones carry white icons, dark tones carry ink.
-$blue500: #1f6feb;
-$orange500: #e8590c;
-$teal500: #0e9f8e;
-$blue300: #5b9bff;
-$orange300: #ff8a4c;
-$teal300: #2dd4bf;
+// Chart series: fuchsia first, then a graded gray scale and a fuchsia tint. Light tones sit 3:1 or
+// more on white; dark tones sit 3:1 or more on the dark card.
+$chartSlate: #4b5563;
+$chartSilver: #8a919e;
+$chartRose: #e8559f;
+$chartSlateDark: #b4bac6;
+$chartSilverDark: #7c8493;
 
-// Neutral slice of the charts (the sixth category), 3:1 on both card colors.
-$slate500: #7c8493;
+// Gray sidebar and the very light gray backdrop behind the white cards.
+$sidebar: #e5e7eb;
+$sidebarDark: #1f2329;
+$backdrop: #f6f7f9;

@@ -2,27 +2,33 @@
 // changes. The runner is mobile-first and roomy; the admin is desktop-first and compact.
 
 .area-runner {
-  --rc-radius-md: 12px;
+  --rc-radius-md: 8px;
 }
 
 .area-admin {
   --rc-font-size-body: 0.9375rem;
-  --rc-font-size-title: 1.25rem;
+  --rc-font-size-title: 1.125rem;
   --rc-space-lg: 14px;
-  --rc-radius-md: 12px;
   --rc-min-touch-target: 40px;
-  --rc-sidebar-background: transparent;
+  --rc-topbar-height: 3.5rem;
 }
 
-// The top bar is part of the canvas: no rule under it, a bold title, the page color behind it.
+// Content sits on a very light gray backdrop so the white, bordered cards stand out.
+.area-admin ion-content {
+  --background: var(--rc-backdrop);
+}
+
+// A real top bar: white, a hairline under it, the page title on the left. The shell places the
+// theme and account actions on its right side.
 .area-admin ion-header.header-md {
-  border-bottom: 0;
+  border-bottom: 1px solid var(--rc-border);
+  background: var(--rc-surface-elevated);
 }
 
 .area-admin ion-toolbar {
-  --background: transparent;
+  --background: var(--rc-surface-elevated);
   --border-width: 0;
-  padding-top: var(--rc-space-sm);
+  --min-height: var(--rc-topbar-height);
 }
 
 .area-admin ion-title {
@@ -30,11 +36,65 @@
   font-weight: 800;
 }
 
+@media (min-width: 768px) {
+  .area-admin ion-toolbar {
+    --padding-end: 12rem;
+  }
+}
+
+@media (min-width: 1100px) {
+  .area-admin ion-toolbar {
+    --padding-end: 26rem;
+  }
+}
+
 // Fields on the white cards of the admin read as crisp white fields.
 .area-admin ion-input,
 .area-admin ion-select,
 .area-admin ion-textarea {
   --background: var(--rc-surface-elevated);
+}
+
+// Lists read as dense data tables: one bordered container, hairline-separated rows, a hover state.
+.area-admin :is(ul.routes, ul.users, ul.roles, ul.groups) {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--rc-border);
+  border-radius: var(--rc-radius-md);
+  background: var(--rc-surface-elevated);
+  box-shadow: var(--rc-shadow-sm);
+}
+
+.area-admin :is(ul.routes > li.route, ul.users > li.user, ul.roles > li.role, ul.groups > li.group) {
+  padding: var(--rc-space-md) var(--rc-space-lg);
+  border: 0;
+  border-bottom: 1px solid var(--rc-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.area-admin :is(ul.routes > li.route, ul.users > li.user, ul.roles > li.role, ul.groups > li.group):last-child {
+  border-bottom: 0;
+}
+
+.area-admin :is(ul.routes > li.route, ul.users > li.user, ul.roles > li.role, ul.groups > li.group):hover {
+  background: var(--rc-surface);
+}
+
+// Filters sit in a bordered card above the list.
+.area-admin ion-content .filters {
+  padding: var(--rc-space-md);
+  border: 1px solid var(--rc-border);
+  border-radius: var(--rc-radius-md);
+  background: var(--rc-surface-elevated);
+  box-shadow: var(--rc-shadow-sm);
+}
+
+// A clear focus ring on everything that takes the keyboard.
+.area-admin :is(a, button, select, input, textarea, [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 2px solid var(--rc-primary-text);
+  outline-offset: 2px;
 }
 
 // Touch screens (a tablet, or the admin on a phone) keep the full 48px target.
