@@ -12,15 +12,15 @@ El sistema deberá permitir actualizar los permisos de un rol o el rol asignado 
 
 ## Criterios de aceptación
 
-- [ ] El formulario `/admin/roles/:id/editar` carga el rol, muestra su identificador sin poder cambiarlo y guarda nombre, descripción y permisos; el foco pasa al título del formulario.
-- [ ] Al guardar aparece un aviso de éxito que indica a cuántos usuarios se les actualizó el acceso (`syncedUsers`).
-- [ ] Los códigos `admin-permissions` (el rol Administrador conserva todos los permisos), `permission-escalation`, `admin-only` y `role-not-found` se muestran en español.
+- [x] El formulario `/admin/roles/:id/editar` carga el rol, muestra su identificador sin poder cambiarlo y guarda nombre, descripción y permisos; el foco pasa al título del formulario.
+- [x] Al guardar aparece un aviso de éxito que indica a cuántos usuarios se les actualizó el acceso (`syncedUsers`).
+- [x] Los códigos `admin-permissions` (el rol Administrador conserva todos los permisos), `permission-escalation`, `admin-only` y `role-not-found` se muestran en español.
 - [ ] En `/admin/usuarios`, un usuario con rol puede cambiar de rol eligiendo uno de la lista; antes de cambiarlo se pide confirmación.
 - [ ] Los códigos `last-admin`, `self-lockout`, `user-not-found` y `user-profile-missing` se muestran en español y la fila del usuario no cambia.
 - [ ] La asignación de rol solo se ofrece a quien tiene `roles.manage`.
-- [ ] Requiere el permiso `roles.manage`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español; un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas (360 px) y el área sigue pensada para escritorio.
+- [x] Requiere el permiso `roles.manage`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español; un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas (360 px) y el área sigue pensada para escritorio.
 
 ## Trazabilidad
 

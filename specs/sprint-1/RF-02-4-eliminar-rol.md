@@ -1,6 +1,6 @@
 # RF-02-4 — Eliminar rol de usuario
 
-> Spec de Sprint 1 · Épica EP-02 · Debe tener · Estado: **Pendiente**
+> Spec de Sprint 1 · Épica EP-02 · Debe tener · Estado: **Implementada** (verificada en el navegador con el stack local)
 
 ## Historia de usuario
 
@@ -12,12 +12,12 @@ El sistema deberá permitir eliminar un rol que no tenga usuarios asignados, par
 
 ## Criterios de aceptación
 
-- [ ] Eliminar un rol pide confirmación con un botón de estilo destructivo; los roles del sistema no ofrecen el botón.
-- [ ] Si se confirma, el rol sale de la lista y aparece un aviso; si se cancela, no cambia nada.
-- [ ] Los códigos `role-has-users` y `system-role` se muestran en español y el rol sigue en la lista.
-- [ ] Requiere el permiso `roles.manage`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español; un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas (360 px) y el área sigue pensada para escritorio.
+- [x] Eliminar un rol pide confirmación con un botón de estilo destructivo; los roles del sistema no ofrecen el botón.
+- [x] Si se confirma, el rol sale de la lista y aparece un aviso; si se cancela, no cambia nada.
+- [x] Los códigos `role-has-users` y `system-role` se muestran en español y el rol sigue en la lista.
+- [x] Requiere el permiso `roles.manage`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español; un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas (360 px) y el área sigue pensada para escritorio.
 
 ## Trazabilidad
 

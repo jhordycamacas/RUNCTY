@@ -12,12 +12,12 @@ El sistema deberá permitir leer los roles existentes, sus permisos y el rol asi
 
 ## Criterios de aceptación
 
-- [ ] `/admin/roles` lista cada rol con su nombre, identificador, descripción y permisos (con su nombre en español), y marca los roles del sistema.
-- [ ] Hay estados de carga, vacío y error con botón «Reintentar».
+- [x] `/admin/roles` lista cada rol con su nombre, identificador, descripción y permisos (con su nombre en español), y marca los roles del sistema.
+- [x] Hay estados de carga, vacío y error con botón «Reintentar».
 - [ ] El rol asignado a cada usuario se ve en `/admin/usuarios` (RF-01-2).
-- [ ] Requiere el permiso `roles.manage`; sin él la pantalla no es accesible.
-- [ ] Todo el texto de la interfaz está en español; un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas (360 px) y el área sigue pensada para escritorio.
+- [x] Requiere el permiso `roles.manage`; sin él la pantalla no es accesible.
+- [x] Todo el texto de la interfaz está en español; un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas (360 px) y el área sigue pensada para escritorio.
 
 ## Trazabilidad
 

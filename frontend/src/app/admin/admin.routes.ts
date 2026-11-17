@@ -5,6 +5,9 @@ import { ADMIN_SECTIONS } from './admin-sections';
 
 /** The screens of the sections that are built; the rest show the placeholder. */
 const SECTION_SCREENS: Partial<Record<string, Pick<Route, 'loadChildren'>>> = {
+  roles: {
+    loadChildren: () => import('./roles/roles-admin.routes').then((m) => m.ROLES_ADMIN_ROUTES),
+  },
   rutas: {
     loadChildren: () => import('./routes/routes-admin.routes').then((m) => m.ROUTES_ADMIN_ROUTES),
   },
