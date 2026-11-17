@@ -32,6 +32,10 @@ export function summaryFixture(changes: Partial<Summary> = {}): Summary {
       bySurface: { asphalt: 3, trail: 1, mixed: 1, track: 0 },
       byCity: [{ cityId: 'loja', cityName: 'Loja', count: 5 }],
       safetyLevels: { high: 2, medium: 1, low: 1, unrated: 1 },
+      distances: [
+        { name: 'Jipiro', distanceKm: 10.8 },
+        { name: 'Tebaida', distanceKm: 2.8 },
+      ],
       timeSlots: 8,
       riskFactors: { total: 6, bySeverity: { low: 2, medium: 3, high: 1 } },
     },

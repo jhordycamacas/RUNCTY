@@ -14,9 +14,9 @@ La sección **Resumen** es la primera del menú, antes de Usuarios, y la pantall
 
 1. Saludo con la fecha de hoy en español.
 2. Fichas KPI (números grandes, etiqueta pequeña en mayúsculas): Usuarios, Altas en 7 días, Rutas activas, Rutas con nivel Bajo, Ciudades y zonas.
-3. Altas por semana (últimas 8 semanas): barras.
-4. Rutas por dificultad, por superficie y por ciudad: barras horizontales con número.
-5. Nivel de seguridad de las rutas (Alto, Medio, Bajo, Sin índice): barra apilada con leyenda y cifras. Nunca «segura» ni «insegura».
+3. Altas por semana (últimas 8 semanas): gráfico de barras verticales con valor sobre cada barra, categorías debajo, líneas de guía y base.
+4. Gráficos de pastel (anillo con total al centro y leyenda con cantidad y porcentaje): rutas por dificultad, por superficie, factores de riesgo por severidad, usuarios por rol y nivel de seguridad de las rutas (Alto, Medio, Bajo, Sin índice; nunca «segura» ni «insegura»).
+5. Gráficos de barras verticales: rutas por ciudad y rutas más largas (km, hasta 6 rutas).
 6. Perfil deportivo completado: barra de progreso con porcentaje; preferencias de apariencia y notificaciones activas.
 7. Fichas «Próximamente» (sin cifras): Entrenamientos registrados, Alertas SOS y Eventos.
 
@@ -28,6 +28,9 @@ La sección **Resumen** es la primera del menú, antes de Usuarios, y la pantall
 - [x] Cada gráfico tiene alternativa textual (`aria-label` y lista equivalente visualmente oculta); el color nunca es la única señal (hay etiqueta y número).
 - [x] Contraste de texto 4,5:1 en claro y oscuro; sin scroll horizontal de la página a 360 px; las tarjetas se reacomodan.
 - [x] Si `truncated` es `true`, un aviso indica que las cifras son un mínimo.
+- [x] Los gráficos de pastel y de barras son SVG y CSS propios; los porcentajes de cada anillo suman 100 (resto mayor); un anillo sin datos muestra un aro neutro y «Sin datos»; un solo dato llena el anillo; los nombres largos se recortan con el nombre completo en el título.
+- [x] Cada gráfico tiene `role="img"` con `aria-label` y una tabla oculta con los datos; la animación de entrada respeta `prefers-reduced-motion`; los colores de las porciones salen de los tokens y se ven a 3:1 sobre la tarjeta.
+- [x] A 360 px los gráficos pasan a una columna con la leyenda debajo.
 - [x] Todo el texto está en español; sin gráficos externos (SVG y CSS propios).
 
 ## Implementación

@@ -30,6 +30,11 @@ export interface RoutesByCity {
   count: number;
 }
 
+export interface RouteDistance {
+  name: string;
+  distanceKm: number;
+}
+
 export interface RoutesSummary {
   total: number;
   active: number;
@@ -40,6 +45,8 @@ export interface RoutesSummary {
   byCity: RoutesByCity[];
   /** Routes by their worst level; `unrated` has no stored index. */
   safetyLevels: { high: number; medium: number; low: number; unrated: number };
+  /** The longest routes, longest first. */
+  distances: RouteDistance[];
   timeSlots: number;
   riskFactors: { total: number; bySeverity: Record<string, number> };
 }

@@ -84,6 +84,12 @@ function toRoutes(value: unknown): RoutesSummary | null {
       low: count(levels['low']),
       unrated: count(levels['unrated']),
     },
+    distances: (Array.isArray(data['distances']) ? data['distances'] : []).flatMap((item) => {
+      const route = asRecord(item);
+      return typeof route['name'] === 'string'
+        ? [{ name: route['name'], distanceKm: count(route['distanceKm']) }]
+        : [];
+    }),
     timeSlots: count(data['timeSlots']),
     riskFactors: { total: count(factors['total']), bySeverity: counts(factors['bySeverity']) },
   };

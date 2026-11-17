@@ -28,6 +28,7 @@ describe('toSummary', () => {
         bySurface: { asphalt: 2 },
         byCity: [{ cityId: 'loja', cityName: 'Loja', count: 2 }],
         safetyLevels: { high: 1, medium: 0, low: 1, unrated: 0 },
+        distances: [{ name: 'Jipiro', distanceKm: 3.6 }, { name: 7 }],
         timeSlots: 3,
         riskFactors: { total: 2, bySeverity: { high: 2 } },
       },
@@ -39,6 +40,7 @@ describe('toSummary', () => {
     expect(summary.users?.registrationsByWeek).toEqual([{ weekStart: '2026-11-16', count: 2 }]);
     expect(summary.routes?.byCity[0]).toEqual({ cityId: 'loja', cityName: 'Loja', count: 2 });
     expect(summary.routes?.safetyLevels.low).toBe(1);
+    expect(summary.routes?.distances).toEqual([{ name: 'Jipiro', distanceKm: 3.6 }]);
     expect(summary.cities).toEqual({ cities: 1, zones: 2 });
   });
 
