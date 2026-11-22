@@ -1,35 +1,43 @@
 import { Component, input } from '@angular/core';
-import { IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
+import { RouterLink } from '@angular/router';
+import { IonButton, IonButtons, IonHeader, IonIcon, IonTitle, IonToolbar } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { notificationsOutline } from 'ionicons/icons';
+import { BrandLogo } from './brand-logo';
+
+addIcons({ notificationsOutline });
 
 /**
- * Header of a runner tab: a clean bar on the page color (see `_areas.scss`) with the club logo
- * and a large left-aligned title. The logo is decorative; the title names the screen.
+ * Header of a runner tab: a clean bar on the page color (see `_areas.scss`) with the club logo, a
+ * large left-aligned title and, on the right, the bell that opens the alerts. The logo is
+ * decorative; the title names the screen.
  */
 @Component({
   selector: 'app-tab-header',
-  imports: [IonHeader, IonTitle, IonToolbar],
+  imports: [BrandLogo, RouterLink,IonButton, IonButtons, IonHeader, IonIcon, IonTitle, IonToolbar],
   template: `
     <ion-header>
       <ion-toolbar>
-        <img slot="start" class="logo" src="brand/logo.png" alt="" width="40" height="40" />
+        <app-brand-logo slot="start" size="2.25rem" />
         <ion-title>{{ title() }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button class="bell" routerLink="/app/alertas" aria-label="Alertas">
+            <ion-icon slot="icon-only" name="notifications-outline" aria-hidden="true" />
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
   `,
   styles: `
-    // The logo file has a white background, so it sits in a white round badge on the dark bar.
-    .logo {
-      display: block;
-      width: 2.5rem;
-      height: 2.5rem;
-      border-radius: var(--rc-radius-pill);
-      background: #ffffff;
-      object-fit: cover;
-    }
-
     ion-title {
       padding-inline: var(--rc-space-md);
       text-align: start;
+    }
+
+    .bell {
+      --color: var(--rc-text);
+      min-width: var(--rc-min-touch-target);
+      font-size: 1.25rem;
     }
   `,
 })

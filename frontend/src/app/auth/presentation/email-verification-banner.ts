@@ -1,9 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
-import { IonButton, IonSpinner } from '@ionic/angular';
+import { IonButton, IonIcon, IonSpinner } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { mailUnreadOutline } from 'ionicons/icons';
 import { AuthService } from '../../core/auth/auth.service';
 import { FirebaseAuthGateway } from '../../core/auth/firebase-auth.gateway';
 import { userMessage } from '../../core/errors/user-message';
 import { Notice } from '../../shared/ui/notice';
+
+addIcons({ mailUnreadOutline });
 
 type Busy = 'resend' | 'check' | null;
 
@@ -18,22 +22,21 @@ interface Feedback {
  */
 @Component({
   selector: 'app-email-verification-banner',
-  imports: [IonButton, IonSpinner, Notice],
+  imports: [IonButton, IonIcon, IonSpinner, Notice],
   template: `
     @if (session()?.emailVerified === false) {
       <section class="banner" aria-labelledby="verify-title">
-        <h2 id="verify-title">Verifica tu correo</h2>
-        <p>
-          Te enviamos un mensaje a <strong>{{ session()?.email }}</strong>. Abre el enlace para
-          confirmar tu cuenta.
-        </p>
-        <app-notice [tone]="feedback().tone" [message]="feedback().message" />
+        <ion-icon class="icon" name="mail-unread-outline" aria-hidden="true" />
+        <div class="text">
+          <h2 id="verify-title">Verifica tu correo</h2>
+          <p>{{ session()?.email }}</p>
+        </div>
         <div class="actions">
-          <ion-button fill="outline" [disabled]="busy() !== null" (click)="resend()">
+          <ion-button fill="clear" [disabled]="busy() !== null" (click)="resend()">
             @if (busy() === 'resend') {
               <ion-spinner name="crescent" aria-label="Enviando" />
             } @else {
-              Reenviar correo
+              Reenviar
             }
           </ion-button>
           <ion-button [disabled]="busy() !== null" (click)="check()">
@@ -44,31 +47,69 @@ interface Feedback {
             }
           </ion-button>
         </div>
+        <app-notice class="feedback" [tone]="feedback().tone" [message]="feedback().message" />
       </section>
     }
   `,
   styles: `
+    // One compact row (icon, the title with the address under it, two small pills); the pills
+    // drop below the text only when the row does not fit. The pills keep the 48px touch target.
     .banner {
-      padding: var(--rc-space-lg);
-      border: 1px solid var(--rc-warning);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--rc-space-xs) var(--rc-space-sm);
+      padding: var(--rc-space-xs) var(--rc-space-xs) var(--rc-space-xs) var(--rc-space-md);
       border-radius: var(--rc-radius-md);
       background: var(--rc-warning-tint);
     }
 
+    .icon {
+      flex: none;
+      color: var(--rc-warning);
+      font-size: 1.25rem;
+    }
+
+    .text {
+      flex: 1 1 7.5rem;
+      min-width: 0;
+    }
+
     h2 {
-      margin: 0 0 var(--rc-space-xs);
-      font-size: var(--rc-font-size-subtitle);
+      margin: 0;
+      font-size: var(--rc-font-size-label);
+      font-weight: 600;
+      line-height: 1.25;
     }
 
     p {
-      margin: 0 0 var(--rc-space-md);
+      margin: 0;
+      overflow: hidden;
+      color: var(--rc-text-muted);
+      font-size: var(--rc-font-size-caption);
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: var(--rc-space-sm);
-      margin-top: var(--rc-space-md);
+      flex: none;
+      gap: var(--rc-space-xs);
+      margin-left: auto;
+    }
+
+    ion-button {
+      --border-radius: var(--rc-radius-pill);
+      --padding-start: var(--rc-space-md);
+      --padding-end: var(--rc-space-md);
+      min-height: var(--rc-min-touch-target);
+      margin: 0;
+      font-size: var(--rc-font-size-caption);
+      font-weight: 600;
+    }
+
+    .feedback {
+      flex-basis: 100%;
     }
   `,
 })

@@ -117,8 +117,8 @@ addIcons({ chevronForward, locationOutline });
     .hero {
       display: grid;
       gap: var(--rc-space-sm);
-      margin-top: var(--rc-space-xl);
-      padding: var(--rc-space-xl) var(--rc-space-lg);
+      margin-top: var(--rc-space-lg);
+      padding: var(--rc-space-lg);
       border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
       background:
@@ -187,7 +187,7 @@ addIcons({ chevronForward, locationOutline });
 
     .figure {
       font-family: var(--rc-font-family-display);
-      font-size: 3rem;
+      font-size: calc(var(--rc-font-size-display) * 1.5);
       font-weight: 500;
       line-height: 1;
       color: var(--rc-primary-text);

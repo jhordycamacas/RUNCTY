@@ -20,7 +20,7 @@ describe('RunnerShell', () => {
       ['inicio', 'Inicio'],
       ['rutas', 'Rutas'],
       ['correr', 'Correr'],
-      ['alertas', 'Alertas'],
+      ['clubes', 'Clubes'],
       ['cuenta', 'Cuenta'],
     ]);
   });

@@ -28,6 +28,8 @@ export interface RunState {
   stretchStart: number | null;
   distanceM: number;
   lastFix: PositionFix | null;
+  /** The ground covered, one stretch per running period: a pause breaks the line. */
+  path: LatLng[][];
   /** Recent marks (last `PACE_WINDOW_MS`), for the current pace. */
   marks: Mark[];
 }
@@ -47,17 +49,24 @@ export const idleRun = (): RunState => ({
   stretchStart: null,
   distanceM: 0,
   lastFix: null,
+  path: [],
   marks: [],
 });
 
 export function startRun(now: number): RunState {
-  return { ...idleRun(), status: 'running', stretchStart: now, marks: [{ at: now, distanceM: 0 }] };
+  return {
+    ...idleRun(),
+    status: 'running',
+    stretchStart: now,
+    path: [[]],
+    marks: [{ at: now, distanceM: 0 }],
+  };
 }
 
 export function addFix(state: RunState, fix: PositionFix): RunState {
   if (state.status !== 'running') return state;
   if (fix.accuracyM !== null && fix.accuracyM > MAX_ACCURACY_M) return state;
-  if (!state.lastFix) return { ...state, lastFix: fix };
+  if (!state.lastFix) return { ...state, lastFix: fix, path: extendPath(state.path, fix) };
 
   const step = distanceMeters(state.lastFix, fix);
   if (step < MIN_STEP_M) return state;
@@ -66,7 +75,13 @@ export function addFix(state: RunState, fix: PositionFix): RunState {
   const marks = [...state.marks, { at: fix.timestamp, distanceM }];
   // Keep the newest mark that is older than the window, so the window is always covered.
   const firstInWindow = marks.findIndex((mark) => mark.at >= fix.timestamp - PACE_WINDOW_MS);
-  return { ...state, distanceM, lastFix: fix, marks: marks.slice(Math.max(0, firstInWindow - 1)) };
+  return {
+    ...state,
+    distanceM,
+    lastFix: fix,
+    path: extendPath(state.path, fix),
+    marks: marks.slice(Math.max(0, firstInWindow - 1)),
+  };
 }
 
 export function pauseRun(state: RunState, now: number): RunState {
@@ -76,7 +91,13 @@ export function pauseRun(state: RunState, now: number): RunState {
 
 export function resumeRun(state: RunState, now: number): RunState {
   if (state.status !== 'paused') return state;
-  return { ...state, status: 'running', stretchStart: now, marks: [{ at: now, distanceM: state.distanceM }] };
+  return {
+    ...state,
+    status: 'running',
+    stretchStart: now,
+    path: [...state.path, []],
+    marks: [{ at: now, distanceM: state.distanceM }],
+  };
 }
 
 export function finishRun(state: RunState, now: number): RunState {
@@ -117,4 +138,9 @@ export function formatDuration(ms: number): string {
 
 function closeStretch(state: RunState, now: number): RunState {
   return { ...state, elapsedMs: elapsedAt(state, now), stretchStart: null };
+}
+
+/** Adds a point to the open stretch of the path. */
+function extendPath(path: LatLng[][], { lat, lng }: LatLng): LatLng[][] {
+  return [...path.slice(0, -1), [...(path.at(-1) ?? []), { lat, lng }]];
 }

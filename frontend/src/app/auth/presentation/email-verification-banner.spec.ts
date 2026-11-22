@@ -61,7 +61,7 @@ describe('EmailVerificationBanner', () => {
   it('resends the verification email', async () => {
     create(session(false));
 
-    await click('Reenviar correo');
+    await click('Reenviar');
 
     expect(gateway.calls).toEqual(['sendEmailVerification']);
     expect(text()).toContain('Te enviamos un nuevo correo.');
@@ -71,7 +71,7 @@ describe('EmailVerificationBanner', () => {
     create(session(false));
     gateway.failures.sendEmailVerification = { code: 'auth/too-many-requests' };
 
-    await click('Reenviar correo');
+    await click('Reenviar');
 
     expect(text()).toContain('Demasiados intentos');
   });

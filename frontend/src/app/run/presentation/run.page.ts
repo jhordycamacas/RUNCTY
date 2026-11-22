@@ -1,15 +1,17 @@
 import { Component, computed, inject } from '@angular/core';
 import { IonContent, IonIcon, IonSpinner } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { chevronForward, mapOutline, pause, play, refresh, stop } from 'ionicons/icons';
+import { chevronForward, pause, play, refresh, stop } from 'ionicons/icons';
 import { PreferencesStore } from '../../preferences/application/preferences.store';
 import { distanceParts, paceParts } from '../../preferences/domain/units';
+import { MapLine, MapMarker } from '../../shared/map/map-renderer';
+import { MapView } from '../../shared/map/map-view';
 import { Notice } from '../../shared/ui/notice';
 import { TabHeader } from '../../shared/ui/tab-header';
 import { RunStore } from '../application/run.store';
 import { formatDuration } from '../domain/run-tracker';
 
-addIcons({ chevronForward, mapOutline, pause, play, refresh, stop });
+addIcons({ chevronForward, pause, play, refresh, stop });
 
 const STATUS_LABELS = {
   idle: 'Listo para correr',
@@ -20,20 +22,23 @@ const STATUS_LABELS = {
 
 /**
  * «Correr» tab: live GPS tracking with the time, the distance and the pace in big condensed
- * numerals, and round controls to pause, resume and finish. The map comes when Google Maps is
- * configured; saving the training is EP-12 (Sprint 4), so nothing leaves the phone yet.
+ * numerals, round controls to pause, resume and finish, and a map that follows the runner and
+ * draws the ground covered. Saving the training is EP-12 (Sprint 4), so nothing leaves the phone.
  */
 @Component({
   selector: 'app-run-page',
-  imports: [IonContent, IonIcon, IonSpinner, Notice, TabHeader],
+  imports: [IonContent, IonIcon, IonSpinner, MapView, Notice, TabHeader],
   template: `
     <app-tab-header title="Correr" />
     <ion-content>
       <div class="page">
-        <section class="map" aria-label="Mapa">
-          <ion-icon name="map-outline" aria-hidden="true" />
-          <p>El mapa se activará cuando se configure Google Maps.</p>
-        </section>
+        <app-map-view
+          class="map"
+          label="Mapa de tu recorrido"
+          [lines]="track()"
+          [markers]="here()"
+          [follow]="run.status() === 'running'"
+        />
 
         <p class="status" role="status">
           <span class="dot" [class]="run.status()" aria-hidden="true"></span>
@@ -127,28 +132,8 @@ const STATUS_LABELS = {
       padding: var(--rc-space-sm) var(--rc-space-lg) var(--rc-space-xxl);
     }
 
-    // An honest placeholder until the map exists: no fake map, just what will be here.
     .map {
-      display: grid;
-      place-items: center;
-      gap: var(--rc-space-sm);
-      min-height: 8.5rem;
-      padding: var(--rc-space-lg);
-      border: 1px dashed var(--rc-control-border);
-      border-radius: var(--rc-radius-lg);
-      background: var(--rc-surface);
-      color: var(--rc-text-muted);
-      text-align: center;
-    }
-
-    .map ion-icon {
-      font-size: 1.75rem;
-      color: var(--rc-primary-text);
-    }
-
-    .map p {
-      margin: 0;
-      font-size: var(--rc-font-size-label);
+      height: 12rem;
     }
 
     .status {
@@ -317,6 +302,14 @@ export class RunPage {
   protected readonly run = inject(RunStore);
   private readonly preferences = inject(PreferencesStore);
 
+  /** The ground covered as neon lines; a pause leaves a gap. */
+  protected readonly track = computed(() =>
+    this.run.path().map((points): MapLine => ({ points, tone: 'route' })),
+  );
+  protected readonly here = computed((): MapMarker[] => {
+    const position = this.run.position();
+    return position ? [{ kind: 'position', at: position }] : [];
+  });
   protected readonly statusLabel = computed(() => STATUS_LABELS[this.run.status()]);
   protected readonly time = computed(() => formatDuration(this.run.elapsedMs()));
   protected readonly distance = computed(() =>

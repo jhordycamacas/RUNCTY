@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { ApiError } from '../../../core/errors/api-error';
 import { route, segment, slot } from '../../../routes/domain/testing/fixtures';
+import { FakeMapRenderer, provideFakeMapRenderer } from '../../../shared/map/testing/fake-map-renderer';
 import { ConfirmActionOptions, ConfirmDialog } from '../../../shared/ui/confirm-dialog';
 import { ToastService } from '../../../shared/ui/toast.service';
 import { ManagedRouteDetail, RouteAdminRepository } from '../domain/managed-route';
@@ -73,6 +74,7 @@ describe('RouteDetailPage', () => {
   let confirmAction: ReturnType<typeof vi.fn<ConfirmDialog['confirmAction']>>;
   let success: ReturnType<typeof vi.fn<ToastService['success']>>;
   let query: Record<string, string>;
+  let map: FakeMapRenderer;
 
   const root = () => fixture.nativeElement as HTMLElement;
   const text = () => root().textContent ?? '';
@@ -117,6 +119,7 @@ describe('RouteDetailPage', () => {
 
   beforeEach(() => {
     query = {};
+    map = new FakeMapRenderer();
     repository = fakeRouteAdminRepository();
     repository.get.mockResolvedValue(DETAIL);
     confirmAction = vi
@@ -129,6 +132,7 @@ describe('RouteDetailPage', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
+        provideFakeMapRenderer(map),
         { provide: RouteAdminRepository, useValue: repository },
         {
           provide: ActivatedRoute,
@@ -145,6 +149,20 @@ describe('RouteDetailPage', () => {
         { provide: ToastService, useValue: { success } },
       ],
     });
+  });
+
+  it('draws the segments on a map in the segments tab', async () => {
+    await create();
+
+    expect(root().querySelector('#route-panel-tramos app-map-view')).not.toBeNull();
+    expect(map.scene?.lines[0]).toEqual({
+      tone: 'route',
+      points: [
+        { lat: -3.97, lng: -79.2 },
+        { lat: -3.971, lng: -79.201 },
+      ],
+    });
+    expect(map.scene?.markers.map((marker) => marker.kind)[0]).toBe('start');
   });
 
   it('shows the route summary and its segments in order with the level per slot', async () => {

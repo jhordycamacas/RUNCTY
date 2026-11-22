@@ -73,6 +73,21 @@ describe('run tracker', () => {
     expect(state.distanceM).toBeCloseTo(200, 0);
   });
 
+  it('draws the path of the counted fixes, breaking the line at a pause', () => {
+    const point = (metersNorth: number) => ({ lat: fix(metersNorth, 0).lat, lng: -79.0 });
+    let state = run(fix(0, 0), fix(1, 10), fix(100, 30));
+    state = pauseRun(state, 30_000);
+    state = addFix(state, fix(600, 60));
+    state = resumeRun(state, 90_000);
+    state = [fix(600, 90), fix(700, 120)].reduce(addFix, state);
+
+    expect(state.path).toEqual([
+      [point(0), point(100)],
+      [point(600), point(700)],
+    ]);
+    expect(idleRun().path).toEqual([]);
+  });
+
   it('computes the pace in seconds per kilometre', () => {
     expect(paceSecondsPerKm(1000, 300_000)).toBe(300);
     expect(paceSecondsPerKm(2500, 750_000)).toBe(300);

@@ -3,18 +3,18 @@ import { IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs } from '@ionic/angu
 import { addIcons } from 'ionicons';
 import {
   homeOutline,
-  notificationsOutline,
+  peopleOutline,
   personCircleOutline,
   play,
   trailSignOutline,
 } from 'ionicons/icons';
 
-addIcons({ homeOutline, notificationsOutline, personCircleOutline, play, trailSignOutline });
+addIcons({ homeOutline, peopleOutline, personCircleOutline, play, trailSignOutline });
 
 /**
  * Runner area layout: mobile-first, navigation in a bottom tab bar of five tabs with «Correr» as
- * the neon circle in the middle. The panic alert (EP-15) is triggered with a hardware button, so
- * there is no on-screen emergency button here.
+ * the neon circle in the middle. The alerts open from the bell of each tab header. The panic alert
+ * (EP-15) is triggered with a hardware button, so there is no on-screen emergency button here.
  */
 @Component({
   selector: 'app-runner-shell',
@@ -35,9 +35,9 @@ addIcons({ homeOutline, notificationsOutline, personCircleOutline, play, trailSi
           <span class="run-circle" aria-hidden="true"><ion-icon name="play" /></span>
           <ion-label>Correr</ion-label>
         </ion-tab-button>
-        <ion-tab-button tab="alertas">
-          <ion-icon name="notifications-outline" aria-hidden="true" />
-          <ion-label>Alertas</ion-label>
+        <ion-tab-button tab="clubes">
+          <ion-icon name="people-outline" aria-hidden="true" />
+          <ion-label>Clubes</ion-label>
         </ion-tab-button>
         <ion-tab-button tab="cuenta">
           <ion-icon name="person-circle-outline" aria-hidden="true" />
@@ -56,19 +56,20 @@ addIcons({ homeOutline, notificationsOutline, personCircleOutline, play, trailSi
       font-size: var(--rc-font-size-caption);
     }
 
-    // «Correr» stands out: a neon circle (dark icon on it, 5.6:1) lifted above the bar.
+    // «Correr» stands out: a neon circle (dark icon on it, 5.6:1) inside the bar, which is tall
+    // enough for it (see _areas.scss). Lifting it with a negative margin would get it clipped by
+    // the tab button's native element (overflow: hidden in its shadow DOM), so the glow is a
+    // thin ring that stays inside the button too.
     .run-circle {
       display: grid;
       place-items: center;
-      width: 3.5rem;
-      height: 3.5rem;
-      margin-top: -1.25rem;
-      border: 4px solid var(--rc-page);
+      width: 3rem;
+      height: 3rem;
       border-radius: var(--rc-radius-pill);
       background: var(--rc-primary);
       color: var(--rc-on-primary);
-      font-size: 1.5rem;
-      box-shadow: 0 0 18px color-mix(in srgb, var(--rc-primary) 45%, transparent);
+      font-size: 1.375rem;
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--rc-primary) 30%, transparent);
     }
 
     .run ion-label {

@@ -5,8 +5,22 @@
 // Runner: dark first (near-black page, dark gray rounded cards, one neon accent). The header is
 // a clean bar with the club logo and a large left-aligned title.
 
+// The type scale is tuned for a 360–400px phone; tablets get the roomier base scale back.
 .area-runner {
   --ion-item-background: var(--rc-surface-elevated);
+  --rc-font-size-body: 0.9375rem;
+  --rc-font-size-subtitle: 1.0625rem;
+  --rc-font-size-title: 1.25rem;
+  --rc-font-size-display: 1.5rem;
+}
+
+@media (min-width: 40rem) {
+  .area-runner {
+    --rc-font-size-body: 1rem;
+    --rc-font-size-subtitle: 1.125rem;
+    --rc-font-size-title: 1.5rem;
+    --rc-font-size-display: 2rem;
+  }
 }
 
 .area-runner ion-content {
@@ -39,12 +53,15 @@
 }
 
 // Bottom bar on the page color; inactive tabs in the muted gray (4.5:1), the active one in neon.
+// The height is the content box: Ionic adds `--ion-safe-area-bottom` as padding below it, so the
+// bar color also fills the area behind the gesture bar. It is tall enough to hold the «Correr»
+// circle with its label, so nothing has to stick out of the (clipping) tab buttons.
 .area-runner ion-tab-bar {
   --background: var(--rc-page);
   --border: 1px solid var(--rc-border);
   --color: var(--rc-text-muted);
   --color-selected: var(--rc-primary-text);
-  min-height: 4rem;
+  height: 4.5rem;
 }
 
 .area-runner ion-tab-button {

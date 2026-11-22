@@ -33,6 +33,9 @@ addIcons({ lockClosedOutline, mapOutline, shieldOutline });
       justify-content: center;
       min-height: 100%;
       padding: var(--rc-space-xl);
+      // No header here: clear the status bar and the gesture bar on the phone.
+      padding-top: calc(var(--rc-space-xl) + var(--ion-safe-area-top, 0px));
+      padding-bottom: calc(var(--rc-space-xl) + var(--ion-safe-area-bottom, 0px));
       text-align: center;
       gap: var(--rc-space-md);
     }

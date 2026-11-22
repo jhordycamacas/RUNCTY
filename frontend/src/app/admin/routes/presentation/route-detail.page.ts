@@ -11,6 +11,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IonButton, IonContent, IonSpinner, ViewWillEnter } from '@ionic/angular';
 import { formatDistance } from '../../../preferences/domain/units';
 import { DIFFICULTY_LABELS, SURFACE_LABELS } from '../../../routes/domain/labels';
+import { routeMapScene } from '../../../routes/presentation/route-map';
+import { MapView } from '../../../shared/map/map-view';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
 import { Notice } from '../../../shared/ui/notice';
 import { RouteDetailStore } from '../application/route-detail.store';
@@ -47,6 +49,7 @@ const isDetailTab = (value: string | null): value is DetailTab =>
     IonButton,
     IonContent,
     IonSpinner,
+    MapView,
     Notice,
     SafetySummarySection,
     SegmentsSection,
@@ -134,6 +137,14 @@ const isDetailTab = (value: string | null): value is DetailTab =>
           aria-labelledby="route-tab-tramos"
           [hidden]="activeTab() !== 'tramos'"
         >
+          @if (routeMap(); as scene) {
+            <app-map-view
+              class="route-map"
+              label="Mapa de la ruta"
+              [lines]="scene.lines"
+              [markers]="scene.markers"
+            />
+          }
           <app-segments-section />
         </div>
       } @else if (store.error(); as failure) {
@@ -248,6 +259,11 @@ const isDetailTab = (value: string | null): value is DetailTab =>
       text-align: center;
     }
 
+    .route-map {
+      height: 18rem;
+      margin-bottom: var(--rc-space-lg);
+    }
+
     app-safety-summary-section,
     app-time-slots-section,
     app-segments-section {
@@ -284,6 +300,14 @@ export class RouteDetailPage implements ViewWillEnter, HasUnsavedChanges {
   protected readonly routeLevels = computed(() => {
     const detail = this.store.detail();
     return detail ? routeSlotLevels(detail.route) : [];
+  });
+  /** The segments in order on the map, in neon: the levels per slot are listed below it. */
+  protected readonly routeMap = computed(() => {
+    const segments = this.store.detail()?.segments ?? [];
+    const scene = routeMapScene(
+      segments.map((segment) => ({ coordinates: segment.coordinates, level: null })),
+    );
+    return scene.lines.length > 0 ? scene : null;
   });
   protected readonly meta = computed(() => {
     const route = this.store.detail()?.route;

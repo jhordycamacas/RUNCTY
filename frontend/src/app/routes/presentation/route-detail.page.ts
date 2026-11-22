@@ -23,7 +23,9 @@ import {
   formatSegmentLength,
 } from '../domain/labels';
 import { googleMapsUrl } from '../domain/maps';
+import { MapView } from '../../shared/map/map-view';
 import { FactorList } from './factor-list';
+import { routeMapScene } from './route-map';
 import { SafetyBadge } from './safety-badge';
 
 addIcons({ helpCircleOutline, mapOutline });
@@ -35,6 +37,7 @@ addIcons({ helpCircleOutline, mapOutline });
     RouterLink,
     ChoiceChips,
     FactorList,
+    MapView,
     Notice,
     SafetyBadge,
     SubpageHeader,
@@ -87,6 +90,15 @@ addIcons({ helpCircleOutline, mapOutline });
                 <dd>{{ surface() }}</dd>
               </div>
             </dl>
+
+            @if (routeMap(); as scene) {
+              <app-map-view
+                class="route-map"
+                label="Mapa de la ruta"
+                [lines]="scene.lines"
+                [markers]="scene.markers"
+              />
+            }
 
             @if (detail.route.start || detail.route.end) {
               <dl class="places">
@@ -232,13 +244,17 @@ addIcons({ helpCircleOutline, mapOutline });
     // Distance and elevation in big condensed numerals, distance in neon.
     .stat dd.figure {
       font-family: var(--rc-font-family-display);
-      font-size: 2.5rem;
+      font-size: calc(var(--rc-font-size-display) * 1.5);
       font-weight: 500;
       line-height: 1;
     }
 
     .stat:first-child dd.figure {
       color: var(--rc-primary-text);
+    }
+
+    .route-map {
+      margin: 0 0 var(--rc-space-lg);
     }
 
     .places {
@@ -365,6 +381,19 @@ export class RouteDetailPage {
         safety: segmentSafetyForSlot(segment, detail.route, this.slotKey()),
       };
     });
+  });
+
+  /** The route drawn on the map, each segment in the color of its level in the selected slot. */
+  protected readonly routeMap = computed(() => {
+    const detail = this.store.detail();
+    if (!detail) return null;
+    const scene = routeMapScene(
+      detail.segments.map((segment) => ({
+        coordinates: segment.coordinates,
+        level: segmentSafetyForSlot(segment, detail.route, this.slotKey())?.level ?? null,
+      })),
+    );
+    return scene.lines.length > 0 ? scene : null;
   });
 
   constructor() {

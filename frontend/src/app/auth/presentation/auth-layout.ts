@@ -1,15 +1,16 @@
 import { Component, input } from '@angular/core';
 import { IonContent } from '@ionic/angular';
+import { BrandLogo } from '../../shared/ui/brand-logo';
 
 /** Frame of the screens outside the areas (sign in, sign up, password reset). */
 @Component({
   selector: 'app-auth-layout',
-  imports: [IonContent],
+  imports: [BrandLogo, IonContent],
   template: `
     <ion-content>
       <main class="auth">
         <header class="brand">
-          <img class="logo" src="brand/logo.png" alt="" width="104" height="104" />
+          <app-brand-logo size="6.5rem" />
           <h1>RUNCTY</h1>
           <p class="slogan">Corre más seguro</p>
           <p class="tagline">{{ tagline() }}</p>
@@ -31,6 +32,9 @@ import { IonContent } from '@ionic/angular';
       max-width: 28rem;
       margin: 0 auto;
       padding: var(--rc-space-xl);
+      // There is no header here: the frame itself clears the status bar and the gesture bar.
+      padding-top: calc(var(--rc-space-xl) + var(--ion-safe-area-top, 0px));
+      padding-bottom: calc(var(--rc-space-xl) + var(--ion-safe-area-bottom, 0px));
       justify-content: center;
     }
 
@@ -40,13 +44,6 @@ import { IonContent } from '@ionic/angular';
       align-items: center;
       margin: var(--rc-space-xxl) 0 var(--rc-space-xl);
       text-align: center;
-    }
-
-    .logo {
-      width: 104px;
-      height: 104px;
-      border-radius: var(--rc-radius-lg);
-      object-fit: contain;
     }
 
     h1 {

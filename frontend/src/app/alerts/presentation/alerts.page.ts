@@ -5,7 +5,7 @@ import { addIcons } from 'ionicons';
 import { shieldCheckmarkOutline } from 'ionicons/icons';
 import { RunnerCity } from '../../routes/application/runner-city';
 import { Notice } from '../../shared/ui/notice';
-import { TabHeader } from '../../shared/ui/tab-header';
+import { SubpageHeader } from '../../shared/ui/subpage-header';
 import { RiskZoneAlertsStore } from '../application/risk-zone-alerts.store';
 import { RiskZoneAlertItem } from './risk-zone-alert-item';
 
@@ -25,10 +25,10 @@ addIcons({ shieldCheckmarkOutline });
     IonSpinner,
     Notice,
     RiskZoneAlertItem,
-    TabHeader,
+    SubpageHeader,
   ],
   template: `
-    <app-tab-header title="Alertas" />
+    <app-subpage-header title="Alertas" backTo="/app/inicio" />
     <ion-content>
       <div class="page">
         <p class="intro">

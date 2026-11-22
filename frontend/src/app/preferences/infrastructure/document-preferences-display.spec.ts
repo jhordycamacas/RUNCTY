@@ -1,5 +1,17 @@
+import { SystemBarsStyle } from '@capacitor/core';
 import { defaultPreferences } from '../domain/preferences';
-import { DocumentPreferencesDisplay } from './document-preferences-display';
+import { DocumentPreferencesDisplay, systemBarsStyleFor } from './document-preferences-display';
+
+describe('systemBarsStyleFor', () => {
+  it('gives light icons on the dark theme and dark icons on the light theme', () => {
+    expect(systemBarsStyleFor('dark')).toBe(SystemBarsStyle.Dark);
+    expect(systemBarsStyleFor('light')).toBe(SystemBarsStyle.Light);
+  });
+
+  it('lets the device decide when the theme follows the system', () => {
+    expect(systemBarsStyleFor('system')).toBe(SystemBarsStyle.Default);
+  });
+});
 
 describe('DocumentPreferencesDisplay', () => {
   const display = new DocumentPreferencesDisplay();

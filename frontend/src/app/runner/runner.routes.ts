@@ -27,6 +27,10 @@ export const RUNNER_ROUTES: Routes = [
         loadComponent: () => import('../run/presentation/run.page').then((m) => m.RunPage),
       },
       {
+        path: 'clubes',
+        loadComponent: () => import('../clubs/presentation/clubs.page').then((m) => m.ClubsPage),
+      },
+      {
         path: 'alertas',
         loadComponent: () =>
           import('../alerts/presentation/alerts.page').then((m) => m.AlertsPage),

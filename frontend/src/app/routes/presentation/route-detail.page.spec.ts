@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { ApiError } from '../../core/errors/api-error';
+import { FakeMapRenderer, provideFakeMapRenderer } from '../../shared/map/testing/fake-map-renderer';
 import { Segment } from '../domain/route';
 import {
   catalogRoutes,
@@ -43,6 +44,7 @@ const SEGMENTS: Segment[] = [
 describe('RouteDetailPage', () => {
   let fixture: ComponentFixture<RouteDetailPage>;
   let backend: FakeBackend;
+  let map: FakeMapRenderer;
 
   const root = () => fixture.nativeElement as HTMLElement;
   /** The visible text with a space where an element ends, so labels and values stay apart. */
@@ -55,6 +57,7 @@ describe('RouteDetailPage', () => {
     TestBed.configureTestingModule({
       providers: [
         ...provideFakeBackend(backend),
+        provideFakeMapRenderer(map),
         {
           provide: ActivatedRoute,
           useValue: {
@@ -75,6 +78,29 @@ describe('RouteDetailPage', () => {
     const routes = catalogRoutes();
     backend = fakeBackend(routes);
     backend.detail = { route: routes[0], segments: SEGMENTS };
+    map = new FakeMapRenderer();
+  });
+
+  it('draws the route on the map, each segment in the color of its level for the slot', async () => {
+    await create('18:00-20:00');
+
+    expect(root().querySelector('app-map-view')?.getAttribute('aria-label')).toBe(
+      'Mapa de la ruta',
+    );
+    expect(map.scene?.lines.map((line) => line.tone)).toEqual(['caution', 'route']);
+    expect(map.scene?.lines[0].points).toEqual(SEGMENTS[0].coordinates);
+    expect(map.scene?.markers).toEqual([
+      { kind: 'start', at: { lat: -3.97, lng: -79.2 } },
+      { kind: 'end', at: { lat: -3.98, lng: -79.2 } },
+    ]);
+  });
+
+  it('shows no map for a route without points', async () => {
+    backend.detail = { route: catalogRoutes()[0], segments: [] };
+
+    await create();
+
+    expect(root().querySelector('app-map-view')).toBeNull();
   });
 
   it('shows the key stats, start and end and the disclaimer', async () => {

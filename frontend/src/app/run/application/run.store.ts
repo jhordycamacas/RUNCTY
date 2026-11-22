@@ -45,6 +45,10 @@ export class RunStore {
       ? paceSecondsPerKm(this.state().distanceM, this.elapsedMs())
       : currentPace(this.state()),
   );
+  /** The ground covered, one line per running period. */
+  readonly path = computed(() => this.state().path);
+  /** The runner's last counted position while running; none while paused or stopped. */
+  readonly position = computed(() => this.state().lastFix);
   /** `denied`: no permission; `unavailable`: no GPS signal right now. */
   readonly problem = this.trouble.asReadonly();
   /** True while asking for the permission and starting the GPS. */

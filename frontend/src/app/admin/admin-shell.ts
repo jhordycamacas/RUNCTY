@@ -30,6 +30,7 @@ import {
   trailSignOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../core/auth/auth.service';
+import { BrandLogo } from '../shared/ui/brand-logo';
 import { AdminTopbar } from './admin-header';
 import { ADMIN_SECTIONS } from './admin-sections';
 import { ThemeSelector } from './theme-selector';
@@ -56,6 +57,7 @@ const DESKTOP_QUERY = '(min-width: 768px)';
 @Component({
   selector: 'app-admin-shell',
   imports: [
+    BrandLogo,
     IonButton,
     IonContent,
     IonIcon,
@@ -77,7 +79,7 @@ const DESKTOP_QUERY = '(min-width: 768px)';
           <div class="panel">
             <nav aria-label="Administración">
               <div class="brand">
-                <img class="logo" src="brand/logo.png" alt="" width="36" height="36" />
+                <app-brand-logo size="2.75rem" />
                 <p>
                   <strong>RUNCTY</strong>
                   <span>Gacelas Running Team</span>
@@ -157,8 +159,13 @@ const DESKTOP_QUERY = '(min-width: 768px)';
       flex-direction: column;
       justify-content: space-between;
       gap: var(--rc-space-lg);
-      min-height: calc(100% - 2 * var(--rc-admin-gutter));
-      margin: var(--rc-admin-gutter) 0 var(--rc-admin-gutter) var(--rc-admin-gutter);
+      // On the phone the menu also clears the status bar and the gesture bar.
+      min-height: calc(
+        100% - 2 * var(--rc-admin-gutter) - var(--ion-safe-area-top, 0px) -
+          var(--ion-safe-area-bottom, 0px)
+      );
+      margin: calc(var(--rc-admin-gutter) + var(--ion-safe-area-top, 0px)) 0
+        calc(var(--rc-admin-gutter) + var(--ion-safe-area-bottom, 0px)) var(--rc-admin-gutter);
       padding: var(--rc-space-md);
       border-radius: var(--rc-radius-lg);
       background: var(--rc-sidebar);
@@ -186,16 +193,6 @@ const DESKTOP_QUERY = '(min-width: 768px)';
     .brand p span {
       font-size: var(--rc-font-size-caption);
       color: var(--rc-text-muted);
-    }
-
-    .logo {
-      flex: none;
-      width: 2.75rem;
-      height: 2.75rem;
-      padding: var(--rc-space-xs);
-      border-radius: var(--rc-radius-pill);
-      background: var(--rc-surface);
-      object-fit: contain;
     }
 
     .group {
