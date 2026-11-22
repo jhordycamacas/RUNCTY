@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonButton, IonSpinner } from '@ionic/angular';
 import { Notice } from '../../shared/ui/notice';
@@ -12,7 +12,8 @@ const LIMIT = 3;
 /**
  * Home section: the routes of the runner's city with the best safety level for the current or
  * next training slot. Loading, a failed load, a missing city and a city without routes are
- * different states, so a failure is never presented as "no routes".
+ * different states, so a failure is never presented as "no routes". With `featured` the routes
+ * show as the brand-gradient cards of the home's dark band.
  */
 @Component({
   selector: 'app-recommended-routes',
@@ -50,7 +51,7 @@ const LIMIT = 3;
             <p class="slot">Nivel de seguridad para la franja de {{ label }}</p>
           }
           @for (route of top(); track route.id) {
-            <app-route-card [route]="route" [slotKey]="slotKey()" />
+            <app-route-card [route]="route" [slotKey]="slotKey()" [featured]="featured()" />
           }
           <ion-button fill="clear" routerLink="/app/rutas">Ver todas las rutas</ion-button>
         }
@@ -60,7 +61,8 @@ const LIMIT = 3;
   styles: `
     h2 {
       margin: var(--rc-space-xl) 0 var(--rc-space-sm);
-      font-size: var(--rc-font-size-subtitle);
+      font-size: var(--rc-font-size-title);
+      font-weight: 400;
     }
 
     h3 {
@@ -70,9 +72,8 @@ const LIMIT = 3;
 
     .card {
       padding: var(--rc-space-lg);
-      border: 1px solid var(--rc-border);
-      border-radius: var(--rc-radius-md);
-      background: var(--rc-surface);
+      border-radius: var(--rc-radius-lg);
+      background: var(--rc-surface-elevated);
     }
 
     .card p {
@@ -94,6 +95,9 @@ const LIMIT = 3;
   `,
 })
 export class RecommendedRoutes {
+  /** Shows the routes as featured cards, for a dark band. */
+  readonly featured = input(false);
+
   protected readonly data = inject(CityRoutes);
 
   private readonly now = new Date();

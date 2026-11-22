@@ -72,6 +72,7 @@ describe('RouteDetailPage', () => {
   let repository: FakeRouteAdminRepository;
   let confirmAction: ReturnType<typeof vi.fn<ConfirmDialog['confirmAction']>>;
   let success: ReturnType<typeof vi.fn<ToastService['success']>>;
+  let query: Record<string, string>;
 
   const root = () => fixture.nativeElement as HTMLElement;
   const text = () => root().textContent ?? '';
@@ -106,7 +107,16 @@ describe('RouteDetailPage', () => {
     await settle(fixture);
   }
 
+  const tabs = () => [...root().querySelectorAll<HTMLButtonElement>('[role=tab]')];
+  const selectedTab = () =>
+    tabs()
+      .find((tab) => tab.getAttribute('aria-selected') === 'true')
+      ?.textContent?.trim();
+  const visiblePanel = () =>
+    [...root().querySelectorAll<HTMLElement>('[role=tabpanel]')].filter((panel) => !panel.hidden);
+
   beforeEach(() => {
+    query = {};
     repository = fakeRouteAdminRepository();
     repository.get.mockResolvedValue(DETAIL);
     confirmAction = vi
@@ -122,7 +132,14 @@ describe('RouteDetailPage', () => {
         { provide: RouteAdminRepository, useValue: repository },
         {
           provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: convertToParamMap({ id: 'jipiro' }) } },
+          useValue: {
+            snapshot: {
+              paramMap: convertToParamMap({ id: 'jipiro' }),
+              get queryParamMap() {
+                return convertToParamMap(query);
+              },
+            },
+          },
         },
         { provide: ConfirmDialog, useValue: { confirmAction, confirm: async () => true } },
         { provide: ToastService, useValue: { success } },
@@ -142,6 +159,46 @@ describe('RouteDetailPage', () => {
     expect(text()).toContain('Bajo');
     expect(text()).toContain('Sin evaluar');
     expect(text()).not.toMatch(/segura|insegura/i);
+  });
+
+  it('organizes the detail in tabs, opening on the summary', async () => {
+    await create();
+
+    expect(tabs().map((tab) => tab.textContent?.replace(/\s+/g, ' ').trim())).toEqual([
+      'Resumen',
+      'Franjas horarias',
+      'Tramos y factores 2',
+    ]);
+    expect(selectedTab()).toBe('Resumen');
+    expect(visiblePanel()).toHaveLength(1);
+    expect(visiblePanel()[0].querySelector('app-safety-summary-section')).not.toBeNull();
+  });
+
+  it('opens on the segments tab when the list asks for it', async () => {
+    query = { seccion: 'tramos' };
+
+    await create();
+
+    expect(selectedTab()).toContain('Tramos y factores');
+    expect(visiblePanel()[0].querySelector('app-segments-section')).not.toBeNull();
+  });
+
+  it('switches tabs by click and with the arrow keys, keeping one tab in the tab order', async () => {
+    await create();
+
+    await press(tabs()[1]);
+    expect(selectedTab()).toBe('Franjas horarias');
+    expect(visiblePanel()[0].querySelector('app-time-slots-section')).not.toBeNull();
+
+    tabs()[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    await settle(fixture);
+    expect(selectedTab()).toContain('Tramos y factores');
+    expect(document.activeElement).toBe(tabs()[2]);
+    expect(tabs().map((tab) => tab.tabIndex)).toEqual([-1, -1, 0]);
+
+    tabs()[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home' }));
+    await settle(fixture);
+    expect(selectedTab()).toBe('Resumen');
   });
 
   it('includes the time slots and counts a slot draft as unsaved changes', async () => {
@@ -194,6 +251,7 @@ describe('RouteDetailPage', () => {
   });
 
   it('adds a segment, moving the focus to the form and refreshing the detail', async () => {
+    query = { seccion: 'tramos' };
     await create();
 
     await press(button('Agregar tramo'));
@@ -230,6 +288,7 @@ describe('RouteDetailPage', () => {
   });
 
   it('edits a segment with its values preloaded', async () => {
+    query = { seccion: 'tramos' };
     await create();
 
     await press(segmentButton('Entrada', 'Editar'));

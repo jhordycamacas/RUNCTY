@@ -39,8 +39,11 @@ import { ToastService } from '../shared/ui/toast.service';
       gap: var(--rc-space-sm);
     }
 
+    // In the top bar the select is a white pill, like the other actions there.
     .compact select {
       width: auto;
+      padding: 0 var(--rc-space-lg);
+      border-radius: var(--rc-radius-pill);
     }
 
     .label {

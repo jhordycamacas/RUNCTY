@@ -37,10 +37,10 @@ addIcons({
 const DESKTOP_QUERY = '(min-width: 768px)';
 
 /**
- * Admin area layout, like a conventional admin web: a gray sidebar flush to the left edge with the
- * brand on top and the account pinned at the bottom, and a top bar whose right side holds the
- * theme and the account actions. On narrow screens the sidebar collapses into the Ionic menu and
- * those actions move into it.
+ * Admin area layout: a warm gray frame with a white rounded sidebar (brand on top, the sections
+ * with the active one as a dark pill, the account card at the bottom) and a top bar whose right
+ * side holds the theme and the account actions as pills. On narrow screens the sidebar collapses
+ * into the Ionic menu and those actions move into it.
  */
 @Component({
   selector: 'app-admin-shell',
@@ -129,32 +129,35 @@ const DESKTOP_QUERY = '(min-width: 768px)';
       display: contents;
     }
 
+    // The sidebar is a white rounded panel floating on the warm gray frame.
     ion-menu {
-      --background: var(--rc-sidebar);
-      --width: 15rem;
+      --background: var(--rc-backdrop);
+      --width: 16.5rem;
       --border: 0;
     }
 
     ion-menu ion-content {
-      --background: var(--rc-sidebar);
+      --background: var(--rc-backdrop);
       color: var(--rc-text);
     }
 
-    // Full height, flush to the edges, with a hairline on its right side.
     .panel {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 100%;
-      border-right: 1px solid color-mix(in srgb, var(--rc-text) 14%, transparent);
+      gap: var(--rc-space-lg);
+      min-height: calc(100% - 2 * var(--rc-space-md));
+      margin: var(--rc-space-md) 0 var(--rc-space-md) var(--rc-space-md);
+      padding: var(--rc-space-md);
+      border-radius: var(--rc-radius-lg);
+      background: var(--rc-sidebar);
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: var(--rc-space-md);
-      padding: var(--rc-space-lg) var(--rc-space-lg) var(--rc-space-md);
-      border-bottom: 1px solid color-mix(in srgb, var(--rc-text) 14%, transparent);
+      padding: var(--rc-space-xs) var(--rc-space-xs) var(--rc-space-md);
     }
 
     .brand p {
@@ -165,8 +168,8 @@ const DESKTOP_QUERY = '(min-width: 768px)';
 
     .brand p strong {
       font-size: var(--rc-font-size-subtitle);
-      font-weight: 800;
-      letter-spacing: 0.04em;
+      font-weight: 600;
+      letter-spacing: 0.02em;
     }
 
     .brand p span {
@@ -176,22 +179,23 @@ const DESKTOP_QUERY = '(min-width: 768px)';
 
     .logo {
       flex: none;
-      width: 2.25rem;
-      height: 2.25rem;
+      width: 2.75rem;
+      height: 2.75rem;
+      padding: var(--rc-space-xs);
+      border-radius: var(--rc-radius-pill);
+      background: var(--rc-surface);
       object-fit: contain;
     }
 
     .group {
-      margin: var(--rc-space-lg) var(--rc-space-lg) var(--rc-space-xs);
+      margin: var(--rc-space-sm) var(--rc-space-sm) var(--rc-space-xs);
       font-size: var(--rc-font-size-caption);
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      font-weight: 500;
       color: var(--rc-text-muted);
     }
 
     ion-list {
-      padding: 0 var(--rc-space-sm);
+      padding: 0;
       background: transparent;
     }
 
@@ -200,33 +204,36 @@ const DESKTOP_QUERY = '(min-width: 768px)';
       --background-hover: var(--rc-text);
       --background-hover-opacity: 0.06;
       --color: var(--rc-text);
-      --border-radius: var(--rc-radius-md);
-      --min-height: 2.5rem;
+      --border-radius: var(--rc-radius-pill);
+      --min-height: var(--rc-min-touch-target);
       margin-bottom: 2px;
-      font-weight: 600;
+      font-weight: 500;
     }
 
     ion-item ion-icon {
       color: var(--rc-text-muted);
     }
 
+    // The active section is a dark pill (a light one in the dark theme).
     ion-item.active {
-      --background: var(--rc-primary);
-      --color: var(--rc-on-primary);
-      border-radius: var(--rc-radius-md);
+      --background: var(--rc-text);
+      --color: var(--rc-surface-elevated);
+      border-radius: var(--rc-radius-pill);
     }
 
     ion-item.active ion-icon {
-      color: var(--rc-on-primary);
+      color: var(--rc-surface-elevated);
     }
 
+    // The signed-in user, as a soft card at the bottom of the sidebar.
     .account {
       display: flex;
       flex-direction: column;
       align-items: stretch;
       gap: var(--rc-space-md);
-      padding: var(--rc-space-md) var(--rc-space-lg) var(--rc-space-lg);
-      border-top: 1px solid color-mix(in srgb, var(--rc-text) 14%, transparent);
+      padding: var(--rc-space-md);
+      border-radius: var(--rc-radius-md);
+      background: var(--rc-surface);
     }
 
     .who {
@@ -248,7 +255,7 @@ const DESKTOP_QUERY = '(min-width: 768px)';
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .who p span {
@@ -260,13 +267,13 @@ const DESKTOP_QUERY = '(min-width: 768px)';
       display: grid;
       flex: none;
       place-items: center;
-      width: 2rem;
-      height: 2rem;
+      width: 2.25rem;
+      height: 2.25rem;
       border-radius: var(--rc-radius-pill);
       background: var(--rc-primary);
       color: var(--rc-on-primary);
       font-size: var(--rc-font-size-label);
-      font-weight: 800;
+      font-weight: 600;
       text-transform: uppercase;
     }
 
@@ -278,7 +285,7 @@ const DESKTOP_QUERY = '(min-width: 768px)';
       height: 100%;
     }
 
-    // The right side of every page's top bar.
+    // The right side of every page's top bar: the theme, the user and the sign-out, as pills.
     .topbar-actions {
       position: absolute;
       z-index: 5;
@@ -286,7 +293,7 @@ const DESKTOP_QUERY = '(min-width: 768px)';
       right: 0;
       display: flex;
       align-items: center;
-      gap: var(--rc-space-lg);
+      gap: var(--rc-space-sm);
       height: var(--rc-topbar-height);
       padding-inline: var(--rc-space-xl);
     }
@@ -295,13 +302,21 @@ const DESKTOP_QUERY = '(min-width: 768px)';
       display: flex;
       align-items: center;
       gap: var(--rc-space-sm);
+      min-height: var(--rc-min-touch-target);
+      padding: 0 var(--rc-space-lg) 0 var(--rc-space-xs);
+      border-radius: var(--rc-radius-pill);
+      background: var(--rc-surface-elevated);
       font-size: var(--rc-font-size-label);
-      font-weight: 600;
+      font-weight: 500;
     }
 
     @media (max-width: 70rem) {
       .user-email {
         display: none;
+      }
+
+      .user {
+        padding-right: var(--rc-space-xs);
       }
     }
 

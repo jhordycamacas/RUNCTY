@@ -143,6 +143,7 @@ addIcons({ helpCircleOutline, mapOutline });
             </section>
 
             <h2>Tramos</h2>
+            <p class="muted">Nivel de cada tramo en la franja elegida.</p>
             @for (segment of segments(); track segment.id; let index = $index) {
               <section class="card segment">
                 <div class="segment-header">
@@ -174,11 +175,13 @@ addIcons({ helpCircleOutline, mapOutline });
     h1 {
       margin: var(--rc-space-md) 0 var(--rc-space-xs);
       font-size: var(--rc-font-size-title);
+      font-weight: 500;
     }
 
     h2 {
       margin: var(--rc-space-xl) 0 var(--rc-space-sm);
       font-size: var(--rc-font-size-subtitle);
+      font-weight: 500;
     }
 
     h3 {
@@ -207,17 +210,22 @@ addIcons({ helpCircleOutline, mapOutline });
       margin: var(--rc-space-lg) 0;
     }
 
+    // White rounded cards on the light gray surface.
     .stat,
     .card {
-      padding: var(--rc-space-md) var(--rc-space-lg);
-      border: 1px solid var(--rc-border);
-      border-radius: var(--rc-radius-md);
-      background: var(--rc-surface);
+      padding: var(--rc-space-lg);
+      border-radius: var(--rc-radius-lg);
+      background: var(--rc-surface-elevated);
+      box-shadow: var(--rc-shadow-sm);
     }
 
     .stat dd {
-      font-size: var(--rc-font-size-subtitle);
-      font-weight: 600;
+      margin-top: var(--rc-space-xs);
+      font-size: 1.75rem;
+      font-weight: var(--rc-font-weight-figure);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      overflow-wrap: anywhere;
     }
 
     .places {
@@ -242,7 +250,7 @@ addIcons({ helpCircleOutline, mapOutline });
       min-height: var(--rc-min-touch-target);
       padding: 0 var(--rc-space-lg);
       border: 1px solid var(--rc-primary-text);
-      border-radius: var(--rc-radius-md);
+      border-radius: var(--rc-radius-pill);
       color: var(--rc-primary-text);
       font-weight: 600;
       text-decoration: none;

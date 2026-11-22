@@ -61,27 +61,29 @@ const round = (value: number): number => Math.round(value * 100) / 100;
         }
       </ul>
     </div>
-    <table class="sr-only">
-      <caption>
-        {{ subject() }}
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col">Categoría</th>
-          <th scope="col">Cantidad</th>
-          <th scope="col">Porcentaje</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (part of parts(); track part.label) {
+    <div class="sr-only">
+      <table>
+        <caption>
+          {{ subject() }}
+        </caption>
+        <thead>
           <tr>
-            <td>{{ part.label }}</td>
-            <td>{{ part.value }}</td>
-            <td>{{ part.percent }}%</td>
+            <th scope="col">Categoría</th>
+            <th scope="col">Cantidad</th>
+            <th scope="col">Porcentaje</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (part of parts(); track part.label) {
+            <tr>
+              <td>{{ part.label }}</td>
+              <td>{{ part.value }}</td>
+              <td>{{ part.percent }}%</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   `,
   styles: `
     :host {

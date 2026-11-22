@@ -49,7 +49,15 @@ $chartRose: #e8559f;
 $chartSlateDark: #b4bac6;
 $chartSilverDark: #7c8493;
 
-// Gray sidebar and the very light gray backdrop behind the white cards.
-$sidebar: #e5e7eb;
+// Admin frame: a warm light-gray backdrop with the white sidebar panel and cards floating on it,
+// and its warm near-black counterpart in the dark theme.
+$sidebar: #ffffff;
 $sidebarDark: #1f2329;
-$backdrop: #f6f7f9;
+$backdrop: #eceae6;
+$backdropDark: #141311;
+
+// Inverse band (the dark lower section of the runner home) and the brand-tinted gradient of its
+// featured cards: deep fuchsia to plum, both dark enough for light text at 4.5:1 or more.
+$inverse: #0a0b0e;
+$featureStart: #6e003a;
+$featureEnd: #2a0a1a;

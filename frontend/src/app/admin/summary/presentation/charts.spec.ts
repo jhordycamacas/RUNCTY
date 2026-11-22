@@ -83,7 +83,7 @@ describe('summary charts', () => {
       expect(donut.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(
         'Rutas por dificultad: Principiante 1, Intermedio 1, Avanzado 1',
       );
-      expect(donut.querySelectorAll('table.sr-only tbody tr')).toHaveLength(3);
+      expect(donut.querySelectorAll('.sr-only table tbody tr')).toHaveLength(3);
     });
 
     it('shows a neutral ring and "Sin datos" when the total is zero', () => {
@@ -130,7 +130,7 @@ describe('summary charts', () => {
       expect(chart.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(
         'Altas por semana: 9 nov 2, Un nombre de ruta muy largo 4',
       );
-      expect(chart.querySelectorAll('table.sr-only tbody tr')).toHaveLength(2);
+      expect(chart.querySelectorAll('.sr-only table tbody tr')).toHaveLength(2);
     });
 
     it('says there is no data instead of drawing an empty plot', () => {

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { By } from '@angular/platform-browser';
+import { RouterLink, provideRouter } from '@angular/router';
 import { CityRepository } from '../../../cities/domain/city';
 import { ApiError } from '../../../core/errors/api-error';
 import { route, slot } from '../../../routes/domain/testing/fixtures';
@@ -100,6 +101,18 @@ describe('RoutesAdminPage', () => {
     expect(text()).toContain('Alto');
     expect(text()).toContain('Bajo');
     expect(text()).not.toMatch(/segura|insegura/i);
+  });
+
+  it('shows the segment count and opens the detail on its segments tab', async () => {
+    await create();
+
+    expect(text()).toContain('1 tramo');
+    const action = routeButton('Parque Jipiro', 'Tramos');
+    const link = fixture.debugElement
+      .queryAll(By.directive(RouterLink))
+      .find((element) => element.nativeElement === action)
+      ?.injector.get(RouterLink);
+    expect(link?.urlTree?.toString()).toBe('/admin/rutas/jipiro?seccion=tramos');
   });
 
   it('lists the routes of the city chosen in the picker', async () => {

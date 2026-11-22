@@ -17,8 +17,10 @@
   --ion-tab-bar-color: var(--rc-text-muted);
   --ion-tab-bar-color-selected: var(--rc-primary-text);
   --ion-placeholder-color: var(--rc-text-muted);
-  // Field hints and counters use this step; Ionic's fallback gray is unreadable on the dark page.
+  // Field hints and counters (step 300) and paragraphs inside labels (step 400) use these steps;
+  // Ionic's fallback grays are unreadable on the dark page.
   --ion-text-color-step-300: var(--rc-text-muted);
+  --ion-text-color-step-400: var(--rc-text-muted);
 
   --ion-color-primary: var(--rc-primary);
   --ion-color-primary-contrast: var(--rc-on-primary);
@@ -77,9 +79,9 @@ ion-title {
   font-weight: 700;
 }
 
-// Buttons: 48px tall, rounded, semibold label in sentence case.
+// Buttons: 48px tall pills, semibold label in sentence case.
 ion-button {
-  --border-radius: var(--rc-radius-md);
+  --border-radius: var(--rc-radius-pill);
   --padding-start: var(--rc-space-xl);
   --padding-end: var(--rc-space-xl);
   --box-shadow: none;
@@ -119,13 +121,13 @@ ion-button.button-clear:not(.ion-color) {
   --background-focused: var(--rc-primary-tint);
 }
 
-// Fields: filled with the surface tone, 1.5px border, brand-colored focus.
+// Fields: filled with the surface tone, 1.5px border, softly rounded, brand-colored focus.
 ion-input,
 ion-select,
 ion-textarea {
   --background: var(--rc-surface);
   --border-color: var(--rc-control-border);
-  --border-radius: var(--rc-radius-md);
+  --border-radius: var(--rc-radius-sm);
   --border-width: 1.5px;
   --highlight-color-focused: var(--rc-primary-text);
   --highlight-color-valid: var(--rc-control-border);

@@ -139,4 +139,11 @@ describe('dark theme layers', () => {
   it('draws separators lighter than the raised surface so they can be seen', () => {
     expect(luminance(dark['border'])).toBeGreaterThan(luminance(dark['surface-elevated']));
   });
+
+  it('keeps the text of the dark band at 4.5:1 or more on its backdrop and featured gradient', () => {
+    for (const surface of ['inverse', 'feature-start', 'feature-end']) {
+      expect(contrast(dark['text'], dark[surface])).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(contrast(dark['text-muted'], dark['inverse'])).toBeGreaterThanOrEqual(4.5);
+  });
 });

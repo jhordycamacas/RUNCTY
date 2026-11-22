@@ -20,11 +20,13 @@ addIcons({ chevronForward, helpCircleOutline });
 
 /**
  * Catalog card: the route summary with its safety level for the selected time slot and the main
- * risk factor that explains it. It links to the detail, carrying the slot along.
+ * risk factor that explains it. It links to the detail, carrying the slot along. A `featured`
+ * card (the home's dark band) is drawn on the brand gradient with light text.
  */
 @Component({
   selector: 'app-route-card',
   imports: [RouterLink, IonIcon, SafetyBadge],
+  host: { '[class.featured]': 'featured()' },
   template: `
     <a class="card" [routerLink]="['/app/rutas', route().id]" [queryParams]="{ franja: slotKey() }">
       <span class="header">
@@ -64,7 +66,6 @@ addIcons({ chevronForward, helpCircleOutline });
       gap: var(--rc-space-sm);
       min-height: var(--rc-min-touch-target);
       padding: var(--rc-space-lg);
-      border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
       box-shadow: var(--rc-shadow-sm);
       background: var(--rc-surface-elevated);
@@ -81,6 +82,24 @@ addIcons({ chevronForward, helpCircleOutline });
     .name {
       flex: 1;
       font-size: var(--rc-font-size-subtitle);
+      font-weight: 500;
+    }
+
+    // Deep fuchsia to plum: dark enough for the light text of the band at 4.5:1 or more.
+    :host(.featured) .card {
+      gap: var(--rc-space-md);
+      padding: var(--rc-space-xl) var(--rc-space-lg);
+      box-shadow: none;
+      background: linear-gradient(145deg, var(--rc-feature-start), var(--rc-feature-end));
+    }
+
+    :host(.featured) .name {
+      font-size: var(--rc-font-size-title);
+      font-weight: 400;
+    }
+
+    :host(.featured) :is(.meta, .factor-text, .unrated) {
+      color: var(--rc-text);
     }
 
     .meta,
@@ -110,7 +129,7 @@ addIcons({ chevronForward, helpCircleOutline });
     .severity {
       padding: 2px var(--rc-space-sm);
       border: 1px solid var(--rc-border);
-      border-radius: var(--rc-radius-sm);
+      border-radius: var(--rc-radius-pill);
       color: var(--rc-text);
       font-size: var(--rc-font-size-caption);
       font-weight: 600;
@@ -121,6 +140,7 @@ export class RouteCard {
   readonly route = input.required<Route>();
   /** Time slot window ("05:00-07:00") whose safety level is shown. */
   readonly slotKey = input<string | null>(null);
+  readonly featured = input(false);
 
   private readonly preferences = inject(PreferencesStore);
 

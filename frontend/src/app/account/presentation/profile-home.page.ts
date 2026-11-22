@@ -3,14 +3,11 @@ import { Router, RouterLink } from '@angular/router';
 import {
   IonButton,
   IonContent,
-  IonHeader,
   IonIcon,
   IonItem,
   IonLabel,
   IonList,
   IonSpinner,
-  IonTitle,
-  IonToolbar,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -28,6 +25,7 @@ import { CitiesStore } from '../../cities/application/cities.store';
 import { AuthService } from '../../core/auth/auth.service';
 import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { Notice } from '../../shared/ui/notice';
+import { TabHeader } from '../../shared/ui/tab-header';
 import { ProfileStore } from '../application/profile.store';
 
 addIcons({
@@ -78,25 +76,19 @@ const SECTIONS: Section[] = [
     RouterLink,
     IonButton,
     IonContent,
-    IonHeader,
     IonIcon,
     IonItem,
     IonLabel,
     IonList,
     IonSpinner,
-    IonTitle,
-    IonToolbar,
     Notice,
+    TabHeader,
   ],
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Cuenta</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <app-tab-header title="Cuenta" />
     <ion-content class="ion-padding">
       @if (profile(); as data) {
-        <section class="identity" aria-label="Tu perfil">
+        <section class="card identity" aria-label="Tu perfil">
           <span class="avatar" aria-hidden="true">{{ initials() }}</span>
           <div>
             <h1>{{ data.firstName }} {{ data.lastName }}</h1>
@@ -116,7 +108,7 @@ const SECTIONS: Section[] = [
             </p>
           </div>
         </section>
-        <dl class="facts">
+        <dl class="card facts">
           <div>
             <dt>Fecha de nacimiento</dt>
             <dd>{{ data.birthDate }}</dd>
@@ -168,6 +160,14 @@ const SECTIONS: Section[] = [
     </ion-content>
   `,
   styles: `
+    // White rounded cards on the light gray surface.
+    .card {
+      padding: var(--rc-space-xl);
+      border-radius: var(--rc-radius-lg);
+      background: var(--rc-surface-elevated);
+      box-shadow: var(--rc-shadow-sm);
+    }
+
     .identity {
       display: flex;
       align-items: center;
@@ -190,11 +190,13 @@ const SECTIONS: Section[] = [
     h1 {
       margin: 0;
       font-size: var(--rc-font-size-subtitle);
+      font-weight: 500;
     }
 
     h2 {
       margin: var(--rc-space-xl) 0 var(--rc-space-sm);
       font-size: var(--rc-font-size-subtitle);
+      font-weight: 500;
     }
 
     .muted {
@@ -216,9 +218,8 @@ const SECTIONS: Section[] = [
       align-items: center;
       gap: var(--rc-space-xs);
       padding: 2px var(--rc-space-sm);
-      border: 1px solid var(--rc-border);
-      border-radius: var(--rc-radius-lg);
-      box-shadow: var(--rc-shadow-sm);
+      border-radius: var(--rc-radius-pill);
+      background: var(--rc-surface);
       color: var(--rc-text);
       font-size: var(--rc-font-size-caption);
     }
@@ -235,9 +236,7 @@ const SECTIONS: Section[] = [
       display: flex;
       flex-wrap: wrap;
       gap: var(--rc-space-xl);
-      margin: var(--rc-space-lg) 0 0;
-      padding-top: var(--rc-space-md);
-      border-top: 1px solid var(--rc-border);
+      margin: var(--rc-space-md) 0 0;
     }
 
     dt {

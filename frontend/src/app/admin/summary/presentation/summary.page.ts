@@ -327,16 +327,14 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
     .hero h1 {
       margin: var(--rc-space-xs) 0;
       font-size: clamp(1.75rem, 4vw, 2.5rem);
-      font-weight: 800;
-      letter-spacing: -0.02em;
+      font-weight: 500;
+      letter-spacing: -0.03em;
     }
 
     .eyebrow {
       margin: 0;
-      font-size: var(--rc-font-size-caption);
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      font-size: var(--rc-font-size-label);
+      font-weight: 500;
       color: var(--rc-primary-text);
     }
 
@@ -369,8 +367,8 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
 
     .kpis {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
-      gap: var(--rc-space-md);
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+      gap: var(--rc-space-sm);
     }
 
     .row {
@@ -383,43 +381,28 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
       .row.wide {
         grid-template-columns: 3fr 2fr;
       }
-
-      .row.columns {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .row.columns.four {
-        grid-template-columns: repeat(4, 1fr);
-      }
     }
 
-    @media (min-width: 40rem) and (max-width: 63.99rem) {
-      .row.columns {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
+    // White rounded panels on the warm gray frame, without heavy borders.
     .card {
       display: grid;
       align-content: start;
       gap: var(--rc-space-md);
       padding: var(--rc-space-xl);
-      border: 1px solid var(--rc-border);
-      border-radius: var(--rc-radius-md);
+      border-radius: var(--rc-radius-lg);
       background: var(--rc-surface-elevated);
-      box-shadow: var(--rc-shadow-sm);
     }
 
     h2 {
       margin: 0;
       font-size: var(--rc-font-size-subtitle);
-      font-weight: 800;
+      font-weight: 500;
     }
 
     h3 {
       margin: 0;
       font-size: var(--rc-font-size-body);
-      font-weight: 800;
+      font-weight: 600;
     }
 
     .charts {
@@ -443,15 +426,8 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
 
     .group {
       margin: var(--rc-space-sm) 0 calc(var(--rc-space-sm) * -1);
-      font-size: var(--rc-font-size-caption);
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--rc-text-muted);
-    }
-
-    .inner .note {
-      margin-top: var(--rc-space-lg);
+      font-size: var(--rc-font-size-subtitle);
+      font-weight: 500;
     }
 
     .column {
@@ -459,27 +435,8 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
       align-content: start;
       gap: var(--rc-space-lg);
       padding: var(--rc-space-lg);
-      border: 1px solid var(--rc-border);
-      border-radius: var(--rc-radius-md);
+      border-radius: var(--rc-radius-lg);
       background: var(--rc-surface-elevated);
-      box-shadow: var(--rc-shadow-sm);
-    }
-
-    .column header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .count {
-      min-width: 1.75rem;
-      padding: 0 var(--rc-space-sm);
-      border-radius: var(--rc-radius-sm);
-      background: var(--rc-surface);
-      color: var(--rc-text);
-      text-align: center;
-      font-size: var(--rc-font-size-label);
-      font-weight: 800;
     }
 
     .soon {
@@ -496,7 +453,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
     .block {
       height: 8rem;
       border-radius: var(--rc-radius-md);
-      background: var(--rc-surface);
+      background: var(--rc-surface-elevated);
       animation: pulse 1.4s ease-in-out infinite;
     }
 

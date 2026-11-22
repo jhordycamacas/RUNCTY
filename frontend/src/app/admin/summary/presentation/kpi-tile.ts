@@ -4,8 +4,9 @@ import { IonIcon } from '@ionic/angular';
 export type AccentTone = 'fuchsia' | 'neutral';
 
 /**
- * A headline figure on a white card, with a gray icon chip (fuchsia for emphasis): a small-caps label, a large number and a short hint. With
- * `soon` it announces a metric that does not exist yet and shows no number at all.
+ * A headline figure on a white rounded tile (the whole tile in fuchsia for emphasis): an icon chip
+ * and a label, a large thin number and a short hint. With `soon` it announces a metric that does
+ * not exist yet and shows no number at all.
  */
 @Component({
   selector: 'app-kpi-tile',
@@ -33,29 +34,37 @@ export type AccentTone = 'fuchsia' | 'neutral';
       display: grid;
       grid-template-columns: auto 1fr;
       align-items: center;
-      gap: var(--rc-space-xs) var(--rc-space-md);
+      gap: var(--rc-space-xs) var(--rc-space-sm);
       height: 100%;
-      padding: var(--rc-space-lg) var(--rc-space-lg) var(--rc-space-xl);
-      border: 1px solid var(--rc-border);
+      padding: var(--rc-space-lg);
       border-radius: var(--rc-radius-md);
       background: var(--rc-surface-elevated);
-      box-shadow: var(--rc-shadow-sm);
       color: var(--rc-text);
     }
 
     .icon {
       display: grid;
       place-items: center;
-      width: 2.25rem;
-      height: 2.25rem;
-      border-radius: var(--rc-radius-sm);
+      width: 2rem;
+      height: 2rem;
+      border-radius: var(--rc-radius-pill);
       background: var(--rc-surface);
       color: var(--rc-text);
-      font-size: 1.25rem;
+      font-size: 1.05rem;
     }
 
-    .tone-fuchsia .icon {
+    // The highlighted tile takes the brand color as a whole (white on fuchsia is 5.1:1).
+    .tone-fuchsia:not(.soon) {
       background: var(--rc-primary);
+      color: var(--rc-on-primary);
+    }
+
+    .tone-fuchsia:not(.soon) .icon {
+      background: color-mix(in srgb, var(--rc-on-primary) 20%, transparent);
+      color: var(--rc-on-primary);
+    }
+
+    .tone-fuchsia:not(.soon) :is(.label, .hint) {
       color: var(--rc-on-primary);
     }
 
@@ -64,10 +73,8 @@ export type AccentTone = 'fuchsia' | 'neutral';
     }
 
     .label {
-      font-size: var(--rc-font-size-caption);
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      font-size: var(--rc-font-size-label);
+      font-weight: 500;
       color: var(--rc-text-muted);
     }
 
@@ -77,10 +84,11 @@ export type AccentTone = 'fuchsia' | 'neutral';
       grid-column: 1 / -1;
     }
 
+    // A large, thin figure, as in the reference dashboards.
     .value {
-      margin-top: var(--rc-space-sm);
-      font-size: 2.5rem;
-      font-weight: 800;
+      margin-top: var(--rc-space-md);
+      font-size: 2.75rem;
+      font-weight: var(--rc-font-weight-figure);
       line-height: 1;
       letter-spacing: -0.03em;
       font-variant-numeric: tabular-nums;
@@ -88,15 +96,13 @@ export type AccentTone = 'fuchsia' | 'neutral';
 
     .badge {
       justify-self: start;
-      margin-top: var(--rc-space-sm);
+      margin-top: var(--rc-space-md);
       padding: var(--rc-space-xs) var(--rc-space-md);
-      border-radius: var(--rc-radius-sm);
+      border-radius: var(--rc-radius-pill);
       background: var(--rc-surface);
       color: var(--rc-text);
       font-size: var(--rc-font-size-caption);
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      font-weight: 600;
     }
 
     .hint {
@@ -105,10 +111,8 @@ export type AccentTone = 'fuchsia' | 'neutral';
     }
 
     .soon {
-      border-style: dashed;
-      border-top-style: dashed;
+      border: 1px dashed var(--rc-control-border);
       background: transparent;
-      box-shadow: none;
     }
   `,
 })

@@ -107,6 +107,7 @@ import { SlotSafetyList } from './slot-safety-list';
                   <p class="meta">
                     <span>{{ distance(route) }}</span>
                     <span>{{ difficulty(route) }}</span>
+                    <span class="segments">{{ segments(route) }}</span>
                     <span class="status" [class.inactive]="!route.active">{{
                       route.active ? 'Activa' : 'Inactiva'
                     }}</span>
@@ -117,6 +118,13 @@ import { SlotSafetyList } from './slot-safety-list';
                   <app-slot-safety-list [levels]="levels(route)" />
                 </div>
                 <div class="actions">
+                  <ion-button
+                    fill="outline"
+                    [routerLink]="['/admin/rutas', route.id]"
+                    [queryParams]="{ seccion: 'tramos' }"
+                    [attr.aria-label]="'Tramos de ' + route.name"
+                    >Tramos</ion-button
+                  >
                   <ion-button
                     fill="outline"
                     [routerLink]="['/admin/rutas', route.id, 'editar']"
@@ -173,13 +181,9 @@ import { SlotSafetyList } from './slot-safety-list';
     .route {
       display: flex;
       flex-wrap: wrap;
+      align-items: center;
       justify-content: space-between;
       gap: var(--rc-space-md);
-      padding: var(--rc-space-lg);
-      border: 1px solid var(--rc-border);
-      border-radius: var(--rc-radius-lg);
-      box-shadow: var(--rc-shadow-sm);
-      background: var(--rc-surface-elevated);
     }
 
     .summary {
@@ -202,7 +206,7 @@ import { SlotSafetyList } from './slot-safety-list';
       min-height: var(--rc-min-touch-target);
       color: var(--rc-text);
       font-size: var(--rc-font-size-subtitle);
-      font-weight: 600;
+      font-weight: 500;
       text-decoration-color: var(--rc-primary-text);
       text-underline-offset: 4px;
     }
@@ -223,6 +227,13 @@ import { SlotSafetyList } from './slot-safety-list';
 
     .status.inactive {
       color: var(--rc-text-muted);
+    }
+
+    .segments {
+      padding: 0 var(--rc-space-sm);
+      border-radius: var(--rc-radius-pill);
+      background: var(--rc-surface);
+      color: var(--rc-text);
     }
 
     .actions {
@@ -264,6 +275,11 @@ export class RoutesAdminPage implements ViewWillEnter {
 
   protected difficulty(route: Route): string {
     return route.difficulty ? DIFFICULTY_LABELS[route.difficulty] : 'Sin dificultad';
+  }
+
+  /** "1 tramo", "4 tramos". */
+  protected segments(route: Route): string {
+    return `${route.segmentCount} ${route.segmentCount === 1 ? 'tramo' : 'tramos'}`;
   }
 
   protected levels(route: Route) {

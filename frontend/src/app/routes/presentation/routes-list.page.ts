@@ -3,16 +3,14 @@ import { RouterLink } from '@angular/router';
 import {
   IonButton,
   IonContent,
-  IonHeader,
   IonRefresher,
   IonRefresherContent,
   IonSpinner,
-  IonTitle,
-  IonToolbar,
   RefresherCustomEvent,
 } from '@ionic/angular';
 import { ChoiceChips, ChipOption } from '../../shared/ui/choice-chips';
 import { Notice } from '../../shared/ui/notice';
+import { TabHeader } from '../../shared/ui/tab-header';
 import { CityRoutes } from '../application/city-routes';
 import {
   DEFAULT_FILTERS,
@@ -48,19 +46,13 @@ const DIFFICULTY_OPTIONS: ChipOption[] = [
     RouteCard,
     IonButton,
     IonContent,
-    IonHeader,
     IonRefresher,
     IonRefresherContent,
     IonSpinner,
-    IonTitle,
-    IonToolbar,
+    TabHeader,
   ],
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Rutas</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <app-tab-header title="Rutas" />
     <ion-content class="ion-padding">
       <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
         <ion-refresher-content />
@@ -135,15 +127,15 @@ const DIFFICULTY_OPTIONS: ChipOption[] = [
     }
 
     .card {
-      padding: var(--rc-space-lg);
-      border: 1px solid var(--rc-border);
-      border-radius: var(--rc-radius-md);
-      background: var(--rc-surface);
+      padding: var(--rc-space-xl);
+      border-radius: var(--rc-radius-lg);
+      background: var(--rc-surface-elevated);
     }
 
     .card h2 {
       margin: 0 0 var(--rc-space-sm);
       font-size: var(--rc-font-size-subtitle);
+      font-weight: 500;
     }
 
     .card p {

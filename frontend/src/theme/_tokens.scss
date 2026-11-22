@@ -31,6 +31,9 @@
   --rc-backdrop: #{p.$backdrop};
   --rc-progress: #{p.$magenta600};
   --rc-progress-track: #{p.$grey200};
+  --rc-inverse: #{p.$inverse};
+  --rc-feature-start: #{p.$featureStart};
+  --rc-feature-end: #{p.$featureEnd};
 }
 
 @mixin dark-colors {
@@ -57,15 +60,22 @@
   --rc-chart-silver: #{p.$chartSilverDark};
   --rc-chart-rose: #{p.$magenta300};
   --rc-sidebar: #{p.$sidebarDark};
-  --rc-backdrop: #{p.$night900};
+  --rc-backdrop: #{p.$backdropDark};
   --rc-progress: #{p.$magenta600};
   --rc-progress-track: #{p.$night600};
+  --rc-inverse: #{p.$inverse};
+  --rc-feature-start: #{p.$featureStart};
+  --rc-feature-end: #{p.$featureEnd};
 }
 
 :root {
   @include light-colors;
 
-  --rc-font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  // Geometric family for the app; the admin area swaps in a grotesk (see _areas.scss).
+  --rc-font-family: 'Outfit Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --rc-font-family-admin: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  // Large metric figures are drawn thin, as in the references.
+  --rc-font-weight-figure: 300;
   --rc-font-size-caption: 0.75rem;
   --rc-font-size-label: 0.875rem;
   --rc-font-size-body: 1rem;
@@ -80,9 +90,10 @@
   --rc-space-xl: 24px;
   --rc-space-xxl: 32px;
 
-  --rc-radius-sm: 6px;
-  --rc-radius-md: 8px;
-  --rc-radius-lg: 10px;
+  // Soft, very rounded shapes: fields and chips, cards, and the large panels.
+  --rc-radius-sm: 12px;
+  --rc-radius-md: 20px;
+  --rc-radius-lg: 24px;
 
   --rc-radius-pill: 999px;
 
@@ -110,4 +121,13 @@ html {
 
 :root[data-theme='dark'] {
   @include dark-colors;
+}
+
+// A dark band inside a light page (the runner home's lower section): everything in it reads the
+// dark color set, so text, links and buttons keep their contrast without per-component overrides.
+.rc-inverse {
+  @include dark-colors;
+
+  background: var(--rc-inverse);
+  color: var(--rc-text);
 }

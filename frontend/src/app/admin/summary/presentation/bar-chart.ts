@@ -42,25 +42,27 @@ const NUMBER = new Intl.NumberFormat('es', { maximumFractionDigits: 1 });
           }
         </div>
       </div>
-      <table class="sr-only">
-        <caption>
-          {{ subject() }}
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Categoría</th>
-            <th scope="col">Valor</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (bar of rows(); track bar.label) {
+      <div class="sr-only">
+        <table>
+          <caption>
+            {{ subject() }}
+          </caption>
+          <thead>
             <tr>
-              <td>{{ bar.label }}</td>
-              <td>{{ bar.title }}</td>
+              <th scope="col">Categoría</th>
+              <th scope="col">Valor</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (bar of rows(); track bar.label) {
+              <tr>
+                <td>{{ bar.label }}</td>
+                <td>{{ bar.title }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   `,
   styles: `

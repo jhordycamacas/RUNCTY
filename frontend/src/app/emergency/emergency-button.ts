@@ -29,9 +29,10 @@ const EMERGENCY_NUMBER = '911';
     </button>
   `,
   styles: `
+    // Centered on the right end of the floating header pill (3.5rem tall, see _areas.scss).
     .sos {
       position: fixed;
-      top: calc(env(safe-area-inset-top, 0px) + var(--rc-space-sm));
+      top: calc(var(--ion-safe-area-top, 0px) + var(--rc-space-sm) + (3.5rem - 48px) / 2);
       right: var(--rc-space-md);
       z-index: 1000;
       display: inline-flex;
