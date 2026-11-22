@@ -4,7 +4,7 @@ import { IonIcon } from '@ionic/angular';
 export type AccentTone = 'fuchsia' | 'neutral';
 
 /**
- * A headline figure on a white rounded tile (the whole tile in fuchsia for emphasis): an icon chip
+ * A headline figure on a white rounded tile (the whole tile in neon fuchsia for emphasis): an icon chip
  * and a label, a large thin number and a short hint. With `soon` it announces a metric that does
  * not exist yet and shows no number at all.
  */
@@ -53,7 +53,7 @@ export type AccentTone = 'fuchsia' | 'neutral';
       font-size: 1.05rem;
     }
 
-    // The highlighted tile takes the brand color as a whole (white on fuchsia is 5.1:1).
+    // The highlighted tile takes the neon brand color as a whole, with dark text (5.6:1).
     .tone-fuchsia:not(.soon) {
       background: var(--rc-primary);
       color: var(--rc-on-primary);

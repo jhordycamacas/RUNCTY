@@ -16,7 +16,6 @@ import { formValues } from '../../../shared/forms/form-values';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
 import { Notice } from '../../../shared/ui/notice';
 import { SelectField, SelectOption } from '../../../shared/ui/select-field';
-import { SubpageHeader } from '../../../shared/ui/subpage-header';
 import { TextField } from '../../../shared/ui/text-field';
 import { ToastService } from '../../../shared/ui/toast.service';
 import { AdminCitiesStore } from '../application/admin-cities.store';
@@ -28,6 +27,7 @@ import {
   toCityForm,
 } from '../domain/city-form';
 import { CITY_TYPES, CITY_TYPE_LABELS, COVERAGES, COVERAGE_LABELS } from '../domain/managed-city';
+import { AdminHeader } from '../../admin-header';
 
 const LIST_URL = '/admin/ciudades';
 
@@ -38,6 +38,7 @@ const LIST_URL = '/admin/ciudades';
 @Component({
   selector: 'app-city-form-page',
   imports: [
+    AdminHeader,
     ReactiveFormsModule,
     RouterLink,
     IonButton,
@@ -45,11 +46,10 @@ const LIST_URL = '/admin/ciudades';
     IonSpinner,
     Notice,
     SelectField,
-    SubpageHeader,
     TextField,
   ],
   template: `
-    <app-subpage-header [title]="title()" backTo="/admin/ciudades" />
+    <app-admin-header [title]="title()" backTo="/admin/ciudades" />
     <ion-content class="ion-padding">
       @if (!ready()) {
         @if (loadError(); as failure) {

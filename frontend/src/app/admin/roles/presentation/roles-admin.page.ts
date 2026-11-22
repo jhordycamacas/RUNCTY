@@ -2,13 +2,8 @@ import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
-  IonMenuButton,
   IonSpinner,
-  IonTitle,
-  IonToolbar,
   ViewWillEnter,
 } from '@ionic/angular';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog';
@@ -16,31 +11,21 @@ import { Notice } from '../../../shared/ui/notice';
 import { ToastService } from '../../../shared/ui/toast.service';
 import { AdminRolesStore } from '../application/admin-roles.store';
 import { PERMISSION_LABELS, Role } from '../domain/role';
+import { AdminHeader } from '../../admin-header';
 
 /** RF-02-2 and RF-02-4: the roles with their permissions, and the deletion of the unused ones. */
 @Component({
   selector: 'app-roles-admin-page',
   imports: [
+    AdminHeader,
     RouterLink,
     IonButton,
-    IonButtons,
     IonContent,
-    IonHeader,
-    IonMenuButton,
     IonSpinner,
-    IonTitle,
-    IonToolbar,
     Notice,
   ],
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-menu-button />
-        </ion-buttons>
-        <ion-title>Roles</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <app-admin-header title="Roles" />
     <ion-content class="ion-padding">
       <div class="toolbar">
         <ion-button routerLink="/admin/roles/nuevo">Nuevo rol</ion-button>

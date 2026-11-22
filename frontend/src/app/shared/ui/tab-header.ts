@@ -2,9 +2,8 @@ import { Component, input } from '@angular/core';
 import { IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
 
 /**
- * Header of a runner tab: the floating pill (see `_areas.scss`) with the club logo on the left and
- * the title centered. The logo is decorative; the title names the screen. Both ends are equally
- * wide, so the title stays centered.
+ * Header of a runner tab: a clean bar on the page color (see `_areas.scss`) with the club logo
+ * and a large left-aligned title. The logo is decorative; the title names the screen.
  */
 @Component({
   selector: 'app-tab-header',
@@ -14,21 +13,23 @@ import { IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
       <ion-toolbar>
         <img slot="start" class="logo" src="brand/logo.png" alt="" width="40" height="40" />
         <ion-title>{{ title() }}</ion-title>
-        <span slot="end" class="balance" aria-hidden="true"></span>
       </ion-toolbar>
     </ion-header>
   `,
   styles: `
-    .logo,
-    .balance {
+    // The logo file has a white background, so it sits in a white round badge on the dark bar.
+    .logo {
       display: block;
-      width: 5.5rem;
+      width: 2.5rem;
       height: 2.5rem;
+      border-radius: var(--rc-radius-pill);
+      background: #ffffff;
+      object-fit: cover;
     }
 
-    .logo {
-      object-fit: contain;
-      object-position: left center;
+    ion-title {
+      padding-inline: var(--rc-space-md);
+      text-align: start;
     }
   `,
 })

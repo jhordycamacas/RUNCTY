@@ -1,4 +1,13 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  TemplateRef,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import {
   IonButton,
@@ -21,6 +30,7 @@ import {
   trailSignOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../core/auth/auth.service';
+import { AdminTopbar } from './admin-header';
 import { ADMIN_SECTIONS } from './admin-sections';
 import { ThemeSelector } from './theme-selector';
 
@@ -37,10 +47,11 @@ addIcons({
 const DESKTOP_QUERY = '(min-width: 768px)';
 
 /**
- * Admin area layout: a warm gray frame with a white rounded sidebar (brand on top, the sections
- * with the active one as a dark pill, the account card at the bottom) and a top bar whose right
- * side holds the theme and the account actions as pills. On narrow screens the sidebar collapses
- * into the Ionic menu and those actions move into it.
+ * Admin area layout, as in the reference: a warm gray frame with one gutter everywhere, a white
+ * rounded sidebar (brand on top, the sections with the active one as a dark pill, the account
+ * card at the bottom) and the pages beside it. Each page's header (`app-admin-header`) draws the
+ * theme and account actions this shell hands it. On narrow screens the sidebar collapses into
+ * the Ionic menu and those actions move into it.
  */
 @Component({
   selector: 'app-admin-shell',
@@ -108,31 +119,31 @@ const DESKTOP_QUERY = '(min-width: 768px)';
 
       <div id="admin-content" class="main">
         <ion-router-outlet />
-        @if (desktop()) {
-          <div class="topbar-actions">
-            <app-theme-selector [compact]="true" />
-            <span class="user"
-              ><span class="avatar" aria-hidden="true">{{ initial() }}</span
-              ><span class="user-email">{{ email() }}</span></span
-            >
-            <ion-button fill="outline" size="small" (click)="signOut()">
-              <ion-icon slot="start" name="log-out-outline" aria-hidden="true" />
-              Cerrar sesión
-            </ion-button>
-          </div>
-        }
       </div>
     </ion-split-pane>
+
+    <ng-template #topbarActions>
+      <app-theme-selector [compact]="true" />
+      <span class="user"
+        ><span class="avatar" aria-hidden="true">{{ initial() }}</span
+        ><span class="user-email">{{ email() }}</span></span
+      >
+      <ion-button fill="outline" size="small" (click)="signOut()">
+        <ion-icon slot="start" name="log-out-outline" aria-hidden="true" />
+        Cerrar sesión
+      </ion-button>
+    </ng-template>
   `,
   styles: `
     :host {
       display: contents;
     }
 
-    // The sidebar is a white rounded panel floating on the warm gray frame.
+    // The sidebar is a white rounded panel floating on the warm gray frame, one gutter from the
+    // top, the bottom and the left edge; the page beside it starts one gutter further right.
     ion-menu {
       --background: var(--rc-backdrop);
-      --width: 16.5rem;
+      --width: calc(16rem + var(--rc-admin-gutter));
       --border: 0;
     }
 
@@ -146,8 +157,8 @@ const DESKTOP_QUERY = '(min-width: 768px)';
       flex-direction: column;
       justify-content: space-between;
       gap: var(--rc-space-lg);
-      min-height: calc(100% - 2 * var(--rc-space-md));
-      margin: var(--rc-space-md) 0 var(--rc-space-md) var(--rc-space-md);
+      min-height: calc(100% - 2 * var(--rc-admin-gutter));
+      margin: var(--rc-admin-gutter) 0 var(--rc-admin-gutter) var(--rc-admin-gutter);
       padding: var(--rc-space-md);
       border-radius: var(--rc-radius-lg);
       background: var(--rc-sidebar);
@@ -285,19 +296,6 @@ const DESKTOP_QUERY = '(min-width: 768px)';
       height: 100%;
     }
 
-    // The right side of every page's top bar: the theme, the user and the sign-out, as pills.
-    .topbar-actions {
-      position: absolute;
-      z-index: 5;
-      top: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
-      gap: var(--rc-space-sm);
-      height: var(--rc-topbar-height);
-      padding-inline: var(--rc-space-xl);
-    }
-
     .user {
       display: flex;
       align-items: center;
@@ -346,7 +344,14 @@ export class AdminShell {
   );
   protected readonly initial = computed(() => this.email().charAt(0) || 'A');
 
+  private readonly topbarActions = viewChild.required<TemplateRef<unknown>>('topbarActions');
+
   constructor() {
+    const topbar = inject(AdminTopbar);
+    // On wide screens the page headers carry the account actions; on narrow ones the menu does.
+    effect(() => topbar.actions.set(this.desktop() ? this.topbarActions() : null));
+    inject(DestroyRef).onDestroy(() => topbar.actions.set(null));
+
     const listener = (event: MediaQueryListEvent) => this.desktop.set(event.matches);
     this.media.addEventListener('change', listener);
     inject(DestroyRef).onDestroy(() => this.media.removeEventListener('change', listener));

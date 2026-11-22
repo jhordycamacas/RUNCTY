@@ -40,11 +40,11 @@ describe('isValidPreferences', () => {
 });
 
 describe('defaultPreferences', () => {
-  it('uses Spanish, normal text, light appearance, metric units and trusted-contacts sharing', () => {
+  it('uses Spanish, normal text, dark appearance, metric units and trusted-contacts sharing', () => {
     expect(defaultPreferences()).toEqual({
       language: 'es',
       fontScale: 'normal',
-      appearance: 'light',
+      appearance: 'dark',
       units: 'metric',
       notifications: { enabled: true, safetyAlerts: true, events: true },
       locationPrivacy: 'trustedContactsDuringSession',

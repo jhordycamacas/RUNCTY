@@ -2,20 +2,15 @@
 // changes. The runner is mobile-first and roomy; the admin is desktop-first and compact.
 
 // ---------------------------------------------------------------------------------------------
-// Runner: white, very rounded cards on the light gray surface, a floating pill header.
+// Runner: dark first (near-black page, dark gray rounded cards, one neon accent). The header is
+// a clean bar with the club logo and a large left-aligned title.
 
 .area-runner {
   --ion-item-background: var(--rc-surface-elevated);
 }
 
 .area-runner ion-content {
-  --background: var(--rc-surface);
-}
-
-// The header is a white pill floating over the page, with the logo and a centered title.
-.area-runner ion-header {
-  padding: 0 var(--rc-space-md);
-  background: var(--rc-surface);
+  --background: var(--rc-page);
 }
 
 .area-runner ion-header.header-md {
@@ -23,42 +18,44 @@
   box-shadow: none;
 }
 
-.area-runner ion-header ion-toolbar:first-of-type {
-  padding-top: 0;
-  margin-top: calc(var(--ion-safe-area-top, 0px) + var(--rc-space-sm));
-}
-
 .area-runner ion-header ion-toolbar {
-  --background: var(--rc-surface-elevated);
+  --background: var(--rc-page);
   --border-width: 0;
-  --min-height: 3.5rem;
-  --padding-start: var(--rc-space-sm);
-  --padding-end: var(--rc-space-sm);
-  overflow: hidden;
-  border-radius: var(--rc-radius-pill);
-  box-shadow: var(--rc-shadow-md);
+  --min-height: 4rem;
+  --padding-start: var(--rc-space-lg);
+  --padding-end: var(--rc-space-lg);
 }
 
 .area-runner ion-title {
-  font-size: var(--rc-font-size-subtitle);
-  font-weight: 500;
-  text-align: center;
+  font-size: var(--rc-font-size-title);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-// Grouped lists read as one white rounded card.
+// Grouped lists read as one rounded card.
 .area-runner ion-list.list-inset {
   border-radius: var(--rc-radius-lg);
   box-shadow: var(--rc-shadow-sm);
 }
 
+// Bottom bar on the page color; inactive tabs in the muted gray (4.5:1), the active one in neon.
 .area-runner ion-tab-bar {
-  --background: var(--rc-surface-elevated);
-  --border: 0;
-  box-shadow: 0 -4px 18px rgb(16 18 24 / 8%);
+  --background: var(--rc-page);
+  --border: 1px solid var(--rc-border);
+  --color: var(--rc-text-muted);
+  --color-selected: var(--rc-primary-text);
+  min-height: 4rem;
+}
+
+.area-runner ion-tab-button {
+  --color: var(--rc-text-muted);
+  --color-selected: var(--rc-primary-text);
+  min-height: var(--rc-min-touch-target);
 }
 
 // ---------------------------------------------------------------------------------------------
 // Admin: a warm gray frame with white panels floating on it, a large page title, black pills.
+// One gutter separates everything: the frame edges, the sidebar, the top bar and the panels.
 
 .area-admin {
   --rc-font-family: var(--rc-font-family-admin);
@@ -67,6 +64,8 @@
   --rc-font-size-title: 1.125rem;
   --rc-space-lg: 14px;
   --rc-topbar-height: 4.5rem;
+  --rc-admin-gutter: 1rem;
+  --ion-padding: var(--rc-admin-gutter);
   font-family: var(--rc-font-family-admin);
 }
 
@@ -74,8 +73,8 @@
   --background: var(--rc-backdrop);
 }
 
-// The top bar is the frame itself: no white strip, just the large page title on the left. The
-// shell places the theme and account pills on its right side.
+// The top bar is the frame itself: no white strip, the page header (app-admin-header) lays out
+// the title and the actions in one row, one gutter from each side like the content below.
 .area-admin ion-header.header-md {
   border-bottom: 0;
   background: var(--rc-backdrop);
@@ -85,24 +84,10 @@
   --background: var(--rc-backdrop);
   --border-width: 0;
   --min-height: var(--rc-topbar-height);
-}
-
-.area-admin ion-title {
-  font-size: clamp(1.375rem, 2.2vw, 1.875rem);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-
-@media (min-width: 768px) {
-  .area-admin ion-toolbar {
-    --padding-end: 12rem;
-  }
-}
-
-@media (min-width: 1100px) {
-  .area-admin ion-toolbar {
-    --padding-end: 28rem;
-  }
+  --padding-start: var(--rc-admin-gutter);
+  --padding-end: var(--rc-admin-gutter);
+  --padding-top: 0;
+  --padding-bottom: 0;
 }
 
 // The primary action is a black pill (a light one in the dark theme); secondary actions are

@@ -11,7 +11,7 @@ describe('RunnerShell', () => {
     fixture.detectChanges();
   });
 
-  it('offers the three tabs: Inicio, Rutas and Cuenta', () => {
+  it('offers the five tabs with «Correr» in the middle', () => {
     const tabs = [...fixture.nativeElement.querySelectorAll('ion-tab-button')].map(
       (el: Element) => [el.getAttribute('tab'), el.textContent?.trim()],
     );
@@ -19,6 +19,8 @@ describe('RunnerShell', () => {
     expect(tabs).toEqual([
       ['inicio', 'Inicio'],
       ['rutas', 'Rutas'],
+      ['correr', 'Correr'],
+      ['alertas', 'Alertas'],
       ['cuenta', 'Cuenta'],
     ]);
   });

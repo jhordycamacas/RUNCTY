@@ -46,7 +46,8 @@ export function defaultPreferences(): Preferences {
   return {
     language: 'es',
     fontScale: 'normal',
-    appearance: 'light',
+    // The runner app is designed dark first (near-black with a neon accent); light stays selectable.
+    appearance: 'dark',
     units: 'metric',
     notifications: { enabled: true, safetyAlerts: true, events: true },
     locationPrivacy: 'trustedContactsDuringSession',

@@ -72,11 +72,11 @@ addIcons({ helpCircleOutline, mapOutline });
             <dl class="stats">
               <div class="stat">
                 <dt>Distancia</dt>
-                <dd>{{ distance() }}</dd>
+                <dd class="figure">{{ distance() }}</dd>
               </div>
               <div class="stat">
                 <dt>Desnivel</dt>
-                <dd>{{ elevation() }}</dd>
+                <dd class="figure">{{ elevation() }}</dd>
               </div>
               <div class="stat">
                 <dt>Dificultad</dt>
@@ -174,8 +174,10 @@ addIcons({ helpCircleOutline, mapOutline });
   styles: `
     h1 {
       margin: var(--rc-space-md) 0 var(--rc-space-xs);
-      font-size: var(--rc-font-size-title);
-      font-weight: 500;
+      font-size: var(--rc-font-size-display);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
     }
 
     h2 {
@@ -210,22 +212,33 @@ addIcons({ helpCircleOutline, mapOutline });
       margin: var(--rc-space-lg) 0;
     }
 
-    // White rounded cards on the light gray surface.
+    // Dark rounded cards on the near-black page (raised white cards in the light theme).
     .stat,
     .card {
       padding: var(--rc-space-lg);
+      border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
       background: var(--rc-surface-elevated);
-      box-shadow: var(--rc-shadow-sm);
     }
 
     .stat dd {
       margin-top: var(--rc-space-xs);
-      font-size: 1.75rem;
-      font-weight: var(--rc-font-weight-figure);
-      line-height: 1.1;
-      letter-spacing: -0.02em;
+      font-size: var(--rc-font-size-subtitle);
+      font-weight: 600;
+      line-height: 1.2;
       overflow-wrap: anywhere;
+    }
+
+    // Distance and elevation in big condensed numerals, distance in neon.
+    .stat dd.figure {
+      font-family: var(--rc-font-family-display);
+      font-size: 2.5rem;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .stat:first-child dd.figure {
+      color: var(--rc-primary-text);
     }
 
     .places {

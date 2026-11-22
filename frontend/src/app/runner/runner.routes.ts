@@ -23,6 +23,15 @@ export const RUNNER_ROUTES: Routes = [
         ],
       },
       {
+        path: 'correr',
+        loadComponent: () => import('../run/presentation/run.page').then((m) => m.RunPage),
+      },
+      {
+        path: 'alertas',
+        loadComponent: () =>
+          import('../alerts/presentation/alerts.page').then((m) => m.AlertsPage),
+      },
+      {
         path: 'cuenta',
         children: [
           {

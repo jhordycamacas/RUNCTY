@@ -2,13 +2,8 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {
   IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
-  IonMenuButton,
   IonSpinner,
-  IonTitle,
-  IonToolbar,
   ViewWillEnter,
 } from '@ionic/angular';
 import { CitiesStore } from '../../../cities/application/cities.store';
@@ -23,6 +18,7 @@ import { AdminRolesStore } from '../../roles/application/admin-roles.store';
 import { AdminUsersStore } from '../application/admin-users.store';
 import { ManagedUser, fullName } from '../domain/managed-user';
 import { parseUserSearch } from '../domain/user-search';
+import { AdminHeader } from '../../admin-header';
 
 /**
  * RF-01-2 and RF-02-3: the search of the users (filters and pages) and the assignment of their
@@ -31,28 +27,17 @@ import { parseUserSearch } from '../domain/user-search';
 @Component({
   selector: 'app-users-admin-page',
   imports: [
+    AdminHeader,
     IonButton,
-    IonButtons,
     IonContent,
-    IonHeader,
-    IonMenuButton,
     IonSpinner,
-    IonTitle,
-    IonToolbar,
     Notice,
     ReactiveFormsModule,
     SelectField,
     TextField,
   ],
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-menu-button />
-        </ion-buttons>
-        <ion-title>Usuarios</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <app-admin-header title="Usuarios" />
     <ion-content class="ion-padding">
       <form class="filters" [formGroup]="form" (ngSubmit)="search()" novalidate>
         <app-text-field formControlName="firstName" label="Nombres" [maxlength]="120" />

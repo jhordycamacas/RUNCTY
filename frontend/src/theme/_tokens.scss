@@ -1,21 +1,24 @@
 @use 'palette' as p;
 
-// Design tokens as CSS variables. Light is the default. `data-theme` on <html> is `light`,
-// `dark` or `system` (follows the device); the preferences set it. Each area (`.area-runner`, `.area-admin`) may
+// Design tokens as CSS variables. Light is the fallback before any preference is known; the
+// default preference is dark (see preferences.ts). `data-theme` on <html> is `light`, `dark` or
+// `system` (follows the device); the preferences set it. Each area (`.area-runner`, `.area-admin`) may
 // override any token, see _areas.scss.
 
 @mixin light-colors {
   --rc-background: #{p.$white};
+  // Page of the runner app: light gray so its white cards stand out; near-black in the dark theme.
+  --rc-page: #{p.$grey50};
   --rc-surface: #{p.$grey50};
   --rc-surface-elevated: #{p.$white};
   --rc-border: #{p.$grey200};
   --rc-control-border: #{p.$grey500};
   --rc-text: #{p.$ink};
   --rc-text-muted: #{p.$grey600};
-  --rc-primary: #{p.$magenta600};
-  --rc-primary-pressed: #{p.$magenta700};
+  --rc-primary: #{p.$neon};
+  --rc-primary-pressed: #{p.$magenta300};
   --rc-primary-tint: #{p.$grey100};
-  --rc-on-primary: #{p.$white};
+  --rc-on-primary: #{p.$night900};
   --rc-primary-text: #{p.$magenta800};
   --rc-success: #{p.$green600};
   --rc-warning: #{p.$amber700};
@@ -29,25 +32,23 @@
   --rc-chart-rose: #{p.$chartRose};
   --rc-sidebar: #{p.$sidebar};
   --rc-backdrop: #{p.$backdrop};
-  --rc-progress: #{p.$magenta600};
+  --rc-progress: #{p.$neon};
   --rc-progress-track: #{p.$grey200};
-  --rc-inverse: #{p.$inverse};
-  --rc-feature-start: #{p.$featureStart};
-  --rc-feature-end: #{p.$featureEnd};
 }
 
 @mixin dark-colors {
   --rc-background: #{p.$night900};
+  --rc-page: #{p.$night900};
   --rc-surface: #{p.$night800};
   --rc-surface-elevated: #{p.$night700};
   --rc-border: #{p.$night600};
   --rc-control-border: #{p.$silver400};
   --rc-text: #{p.$mist};
   --rc-text-muted: #{p.$silver300};
-  --rc-primary: #{p.$magenta600};
-  --rc-primary-pressed: #{p.$magenta700};
+  --rc-primary: #{p.$neon};
+  --rc-primary-pressed: #{p.$magenta300};
   --rc-primary-tint: #{p.$night700};
-  --rc-on-primary: #{p.$white};
+  --rc-on-primary: #{p.$night900};
   --rc-primary-text: #{p.$magenta300};
   --rc-success: #{p.$green300};
   --rc-warning: #{p.$amber300};
@@ -61,11 +62,8 @@
   --rc-chart-rose: #{p.$magenta300};
   --rc-sidebar: #{p.$sidebarDark};
   --rc-backdrop: #{p.$backdropDark};
-  --rc-progress: #{p.$magenta600};
+  --rc-progress: #{p.$neon};
   --rc-progress-track: #{p.$night600};
-  --rc-inverse: #{p.$inverse};
-  --rc-feature-start: #{p.$featureStart};
-  --rc-feature-end: #{p.$featureEnd};
 }
 
 :root {
@@ -74,6 +72,8 @@
   // Geometric family for the app; the admin area swaps in a grotesk (see _areas.scss).
   --rc-font-family: 'Outfit Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --rc-font-family-admin: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  // Condensed display family for big metric numerals (time, distance, pace, km).
+  --rc-font-family-display: 'Oswald Variable', 'Arial Narrow', system-ui, sans-serif;
   // Large metric figures are drawn thin, as in the references.
   --rc-font-weight-figure: 300;
   --rc-font-size-caption: 0.75rem;
@@ -121,13 +121,4 @@ html {
 
 :root[data-theme='dark'] {
   @include dark-colors;
-}
-
-// A dark band inside a light page (the runner home's lower section): everything in it reads the
-// dark color set, so text, links and buttons keep their contrast without per-component overrides.
-.rc-inverse {
-  @include dark-colors;
-
-  background: var(--rc-inverse);
-  color: var(--rc-text);
 }

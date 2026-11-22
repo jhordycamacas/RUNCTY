@@ -16,7 +16,6 @@ import { userMessage } from '../../../core/errors/user-message';
 import { formValues } from '../../../shared/forms/form-values';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
 import { Notice } from '../../../shared/ui/notice';
-import { SubpageHeader } from '../../../shared/ui/subpage-header';
 import { TextField } from '../../../shared/ui/text-field';
 import { TextareaField } from '../../../shared/ui/textarea-field';
 import { ToastService } from '../../../shared/ui/toast.service';
@@ -29,6 +28,7 @@ import {
   parseRoleForm,
   toRoleForm,
 } from '../domain/role-form';
+import { AdminHeader } from '../../admin-header';
 
 const LIST_URL = '/admin/roles';
 
@@ -36,18 +36,18 @@ const LIST_URL = '/admin/roles';
 @Component({
   selector: 'app-role-form-page',
   imports: [
+    AdminHeader,
     ReactiveFormsModule,
     RouterLink,
     IonButton,
     IonContent,
     IonSpinner,
     Notice,
-    SubpageHeader,
     TextField,
     TextareaField,
   ],
   template: `
-    <app-subpage-header [title]="title" backTo="/admin/roles" />
+    <app-admin-header [title]="title" backTo="/admin/roles" />
     <ion-content class="ion-padding">
       @if (!ready()) {
         @if (loadError(); as failure) {

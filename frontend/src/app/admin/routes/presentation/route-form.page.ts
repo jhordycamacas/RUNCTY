@@ -18,7 +18,6 @@ import { formValues } from '../../../shared/forms/form-values';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
 import { Notice } from '../../../shared/ui/notice';
 import { SelectField } from '../../../shared/ui/select-field';
-import { SubpageHeader } from '../../../shared/ui/subpage-header';
 import { TextField } from '../../../shared/ui/text-field';
 import { TextareaField } from '../../../shared/ui/textarea-field';
 import { ToastService } from '../../../shared/ui/toast.service';
@@ -30,6 +29,7 @@ import {
   parseRouteForm,
   toRouteForm,
 } from '../domain/route-form';
+import { AdminHeader } from '../../admin-header';
 
 const LIST_URL = '/admin/rutas';
 
@@ -37,6 +37,7 @@ const LIST_URL = '/admin/rutas';
 @Component({
   selector: 'app-route-form-page',
   imports: [
+    AdminHeader,
     ReactiveFormsModule,
     RouterLink,
     IonButton,
@@ -45,12 +46,11 @@ const LIST_URL = '/admin/rutas';
     IonToggle,
     Notice,
     SelectField,
-    SubpageHeader,
     TextField,
     TextareaField,
   ],
   template: `
-    <app-subpage-header [title]="title" backTo="/admin/rutas" />
+    <app-admin-header [title]="title" backTo="/admin/rutas" />
     <ion-content class="ion-padding">
       @if (!ready()) {
         @if (loadError(); as failure) {

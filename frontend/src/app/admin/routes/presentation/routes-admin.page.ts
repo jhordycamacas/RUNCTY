@@ -4,14 +4,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import {
   IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
   IonInput,
-  IonMenuButton,
   IonSpinner,
-  IonTitle,
-  IonToolbar,
   ViewWillEnter,
 } from '@ionic/angular';
 import { formatDistance } from '../../../preferences/domain/units';
@@ -24,35 +19,25 @@ import { ToastService } from '../../../shared/ui/toast.service';
 import { AdminRoutesStore } from '../application/admin-routes.store';
 import { routeSlotLevels } from '../domain/slot-safety';
 import { SlotSafetyList } from './slot-safety-list';
+import { AdminHeader } from '../../admin-header';
 
 /** RF-05-2 and RF-05-4: the routes of a city, inactive ones included, and their deletion. */
 @Component({
   selector: 'app-routes-admin-page',
   imports: [
+    AdminHeader,
     RouterLink,
     IonButton,
-    IonButtons,
     IonContent,
-    IonHeader,
     IonInput,
-    IonMenuButton,
     IonSpinner,
-    IonTitle,
-    IonToolbar,
     Notice,
     ReactiveFormsModule,
     SelectField,
     SlotSafetyList,
   ],
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-menu-button />
-        </ion-buttons>
-        <ion-title>Rutas</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <app-admin-header title="Rutas" />
     <ion-content class="ion-padding">
       <div class="filters">
         <app-select-field label="Ciudad o zona" [options]="placeOptions()" [formControl]="city" />

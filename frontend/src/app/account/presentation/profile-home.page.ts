@@ -160,12 +160,12 @@ const SECTIONS: Section[] = [
     </ion-content>
   `,
   styles: `
-    // White rounded cards on the light gray surface.
+    // Dark rounded cards on the near-black page (raised white cards in the light theme).
     .card {
       padding: var(--rc-space-xl);
+      border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
       background: var(--rc-surface-elevated);
-      box-shadow: var(--rc-shadow-sm);
     }
 
     .identity {
@@ -181,22 +181,27 @@ const SECTIONS: Section[] = [
       width: 64px;
       height: 64px;
       border-radius: 50%;
-      background: var(--rc-primary-tint);
-      color: var(--rc-primary-text);
-      font-size: var(--rc-font-size-title);
-      font-weight: 700;
+      background: var(--rc-primary);
+      color: var(--rc-on-primary);
+      font-family: var(--rc-font-family-display);
+      font-size: 1.75rem;
+      font-weight: 600;
+      box-shadow: 0 0 18px color-mix(in srgb, var(--rc-primary) 35%, transparent);
     }
 
     h1 {
       margin: 0;
-      font-size: var(--rc-font-size-subtitle);
-      font-weight: 500;
+      font-size: var(--rc-font-size-title);
+      font-weight: 600;
     }
 
     h2 {
       margin: var(--rc-space-xl) 0 var(--rc-space-sm);
-      font-size: var(--rc-font-size-subtitle);
-      font-weight: 500;
+      color: var(--rc-text-muted);
+      font-size: var(--rc-font-size-label);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
 
     .muted {
@@ -258,10 +263,19 @@ const SECTIONS: Section[] = [
 
     ion-list {
       margin-inline: 0;
+      border: 1px solid var(--rc-border);
+    }
+
+    ion-item ion-icon[slot='start'] {
+      color: var(--rc-primary-text);
     }
 
     .danger {
       --color: var(--rc-danger);
+    }
+
+    .danger ion-icon[slot='start'] {
+      color: var(--rc-danger);
     }
   `,
 })

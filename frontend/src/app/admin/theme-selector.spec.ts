@@ -40,13 +40,13 @@ describe('ThemeSelector', () => {
       'Claro',
       'Oscuro',
     ]);
-    expect(select().value).toBe('light');
+    expect(select().value).toBe('dark');
   });
 
   it('saves the chosen appearance keeping the rest of the preferences', async () => {
-    await choose('dark');
+    await choose('light');
 
-    expect(save).toHaveBeenCalledWith({ ...defaultPreferences(), appearance: 'dark' });
+    expect(save).toHaveBeenCalledWith({ ...defaultPreferences(), appearance: 'light' });
   });
 
   it('follows the stored preference', () => {
@@ -59,9 +59,9 @@ describe('ThemeSelector', () => {
   it('tells the failure and goes back to the saved appearance', async () => {
     save.mockRejectedValueOnce(new Error('boom'));
 
-    await choose('dark');
+    await choose('light');
 
     expect(error).toHaveBeenCalledTimes(1);
-    expect(select().value).toBe('light');
+    expect(select().value).toBe('dark');
   });
 });

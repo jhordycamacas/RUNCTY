@@ -1,12 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import {
   IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
-  IonMenuButton,
-  IonTitle,
-  IonToolbar,
   ViewWillEnter,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -38,6 +33,7 @@ import { CATEGORICAL, ChartColor } from './chart-math';
 import { DonutChart, DonutSlice } from './donut-chart';
 import { KpiTile } from './kpi-tile';
 import { ProgressBar } from './progress-bar';
+import { AdminHeader } from '../../admin-header';
 
 addIcons({
   alertCircleOutline,
@@ -65,35 +61,23 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
 @Component({
   selector: 'app-summary-page',
   imports: [
+    AdminHeader,
     BarChart,
     BarList,
     DonutChart,
     IonButton,
-    IonButtons,
     IonContent,
-    IonHeader,
-    IonMenuButton,
-    IonTitle,
-    IonToolbar,
     KpiTile,
     Notice,
     ProgressBar,
   ],
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-menu-button />
-        </ion-buttons>
-        <ion-title>Resumen</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <app-admin-header [title]="greeting()" />
     <ion-content>
       <div class="page">
         <header class="hero">
           <div>
             <p class="eyebrow">{{ today() }}</p>
-            <h1>{{ greeting() }}</h1>
             <p class="lead">Así va la app móvil de Gacelas Running Team.</p>
           </div>
           <div class="refresh">
@@ -308,12 +292,12 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
       --background: transparent;
     }
 
+    // Full width inside the frame, one gutter on every side and between every block, so the
+    // edges line up with the page title above.
     .page {
       display: grid;
-      gap: var(--rc-space-xl);
-      max-width: 80rem;
-      margin: 0 auto;
-      padding: var(--rc-space-xl);
+      gap: var(--rc-admin-gutter);
+      padding: var(--rc-admin-gutter);
     }
 
     .hero {
@@ -322,13 +306,6 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
       align-items: flex-end;
       justify-content: space-between;
       gap: var(--rc-space-lg);
-    }
-
-    .hero h1 {
-      margin: var(--rc-space-xs) 0;
-      font-size: clamp(1.75rem, 4vw, 2.5rem);
-      font-weight: 500;
-      letter-spacing: -0.03em;
     }
 
     .eyebrow {
@@ -368,18 +345,48 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
     .kpis {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
-      gap: var(--rc-space-sm);
+      gap: var(--rc-admin-gutter);
     }
 
     .row {
       display: grid;
-      align-items: start;
-      gap: var(--rc-space-lg);
+      align-items: stretch;
+      gap: var(--rc-admin-gutter);
     }
 
+    // On desktop every block sits on one 10-column grid: five KPI tiles of two columns, then
+    // panels of 6 + 4 and 3 + 3 + 4 columns, so all the edges line up as in the reference.
     @media (min-width: 64rem) {
-      .row.wide {
-        grid-template-columns: 3fr 2fr;
+      .kpis,
+      .row.wide,
+      .charts {
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+      }
+
+      .kpis > * {
+        grid-column: span 2;
+      }
+
+      .row.wide > :first-child {
+        grid-column: span 6;
+      }
+
+      .row.wide > :last-child,
+      .charts > :nth-child(3n),
+      .charts > :nth-child(4) {
+        grid-column: span 4;
+      }
+
+      .row.wide > :only-child {
+        grid-column: 1 / -1;
+      }
+
+      .charts > * {
+        grid-column: span 3;
+      }
+
+      .charts > .wide-chart {
+        grid-column: span 6;
       }
     }
 
@@ -408,19 +415,13 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
     .charts {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-      align-items: start;
-      gap: var(--rc-space-lg);
+      align-items: stretch;
+      gap: var(--rc-admin-gutter);
     }
 
     @media (max-width: 40rem) {
       .kpis > :last-child:nth-child(odd) {
         grid-column: 1 / -1;
-      }
-    }
-
-    @media (min-width: 64rem) {
-      .charts .wide-chart {
-        grid-column: span 2;
       }
     }
 

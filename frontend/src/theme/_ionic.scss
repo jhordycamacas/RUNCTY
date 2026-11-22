@@ -33,12 +33,12 @@
   --ion-color-danger-tint: var(--rc-danger);
 
   --ion-color-success: var(--rc-success);
-  --ion-color-success-contrast: var(--rc-on-primary);
+  --ion-color-success-contrast: var(--rc-background);
   --ion-color-success-shade: var(--rc-success);
   --ion-color-success-tint: var(--rc-success);
 
   --ion-color-warning: var(--rc-warning);
-  --ion-color-warning-contrast: var(--rc-on-primary);
+  --ion-color-warning-contrast: var(--rc-background);
   --ion-color-warning-shade: var(--rc-warning);
   --ion-color-warning-tint: var(--rc-warning);
 
@@ -48,23 +48,23 @@
   --ion-color-medium-tint: var(--rc-text-muted);
 
   // Ionic computes translucent surfaces (ripples, focus rings) from the RGB triplets.
-  --ion-color-primary-rgb: 214, 0, 111;
-  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-rgb: 255, 45, 149;
+  --ion-color-primary-contrast-rgb: 11, 11, 15;
   --ion-color-danger-rgb: 198, 40, 40;
-    --ion-text-color-rgb: 16, 18, 24;
+  --ion-text-color-rgb: 16, 18, 24;
   --ion-background-color-rgb: 255, 255, 255;
 }
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme='system'] {
     --ion-text-color-rgb: 244, 245, 247;
-    --ion-background-color-rgb: 15, 17, 21;
+    --ion-background-color-rgb: 11, 11, 15;
   }
 }
 
 :root[data-theme='dark'] {
   --ion-text-color-rgb: 244, 245, 247;
-  --ion-background-color-rgb: 15, 17, 21;
+  --ion-background-color-rgb: 11, 11, 15;
 }
 
 // Headers: flat like the original app, a hairline instead of the Material drop shadow, and a bold
@@ -107,7 +107,7 @@ ion-button.button-small {
   font-size: var(--rc-font-size-label);
 }
 
-// Secondary (outline) and ghost (clear) actions use the brand red as text, in its readable tone
+// Secondary (outline) and ghost (clear) actions use the brand fuchsia as text, in its readable tone
 // for the current scheme (the fill tone is too dark on the dark page).
 ion-button.button-outline {
   --border-width: 1.5px;
@@ -176,7 +176,7 @@ ion-segment-button {
   font-weight: 600;
 }
 
-// Tab bar: page-colored with a hairline on top, semibold labels, brand red on the active tab.
+// Tab bar: page-colored with a hairline on top, semibold labels, brand fuchsia on the active tab.
 ion-tab-bar {
   --border: 1px solid var(--rc-border);
 }

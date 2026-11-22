@@ -48,7 +48,7 @@ describe.each(['light-colors', 'dark-colors'] as const)('design tokens (%s)', (m
   });
 
   it('keeps text at 4.5:1 or more on the page and on the surfaces', () => {
-    for (const surface of ['background', 'surface', 'surface-elevated']) {
+    for (const surface of ['background', 'page', 'surface', 'surface-elevated']) {
       expect(contrast(colors['text'], colors[surface])).toBeGreaterThanOrEqual(4.5);
       expect(contrast(colors['text-muted'], colors[surface])).toBeGreaterThanOrEqual(4.5);
       expect(contrast(colors['primary-text'], colors[surface])).toBeGreaterThanOrEqual(4.5);
@@ -65,8 +65,15 @@ describe.each(['light-colors', 'dark-colors'] as const)('design tokens (%s)', (m
     expect(contrast(colors['primary'], colors['background'])).toBeGreaterThanOrEqual(3);
   });
 
-  it('keeps white text readable on the primary fill', () => {
+  it('keeps the dark text readable on the neon fill (white on neon would fail)', () => {
     expect(contrast(colors['on-primary'], colors['primary'])).toBeGreaterThanOrEqual(4.5);
+    expect(contrast('#ffffff', colors['primary'])).toBeLessThan(4.5);
+  });
+
+  it('keeps the neon visible as text on the near-black page of the dark theme', () => {
+    if (mixin === 'dark-colors') {
+      expect(contrast(colors['primary'], colors['background'])).toBeGreaterThanOrEqual(4.5);
+    }
   });
 
   it('keeps every chart color visible (3:1) on the raised surface', () => {
@@ -90,10 +97,6 @@ describe.each(['light-colors', 'dark-colors'] as const)('design tokens (%s)', (m
 
   it('keeps the fuchsia text readable on the sidebar', () => {
     expect(contrast(colors['primary-text'], colors['sidebar'])).toBeGreaterThanOrEqual(4.5);
-  });
-
-  it('keeps the white text of the active navigation pill at 4.5:1 on the fuchsia', () => {
-    expect(contrast(colors['on-primary'], colors['primary'])).toBeGreaterThanOrEqual(4.5);
   });
 
   it('keeps the state colors readable as text (4.5:1) on the page and the surfaces', () => {
@@ -140,10 +143,7 @@ describe('dark theme layers', () => {
     expect(luminance(dark['border'])).toBeGreaterThan(luminance(dark['surface-elevated']));
   });
 
-  it('keeps the text of the dark band at 4.5:1 or more on its backdrop and featured gradient', () => {
-    for (const surface of ['inverse', 'feature-start', 'feature-end']) {
-      expect(contrast(dark['text'], dark[surface])).toBeGreaterThanOrEqual(4.5);
-    }
-    expect(contrast(dark['text-muted'], dark['inverse'])).toBeGreaterThanOrEqual(4.5);
+  it('starts from a near-black page', () => {
+    expect(luminance(dark['background'])).toBeLessThan(0.01);
   });
 });

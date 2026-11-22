@@ -32,11 +32,11 @@ describe('RouteCard', () => {
 
   it('summarizes the route with the units preference', () => {
     render(jipiro, '05:00-07:00');
-    expect(text()).toContain('3,2 km · 15 m de desnivel · Principiante · Asfalto');
+    expect(text()).toContain('3,2km15 m de desnivel · Principiante · Asfalto');
 
     units.set({ ...defaultPreferences(), units: 'imperial' });
     fixture.detectChanges();
-    expect(text()).toContain('2 mi · 49 ft de desnivel');
+    expect(text()).toContain('2mi49 ft de desnivel');
   });
 
   it('shows the level as Alto, Medio or Bajo, never as safe or unsafe', () => {

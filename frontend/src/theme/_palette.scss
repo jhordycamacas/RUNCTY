@@ -11,20 +11,20 @@ $grey600: #5a606b;
 $ink: #101218;
 $charcoal: #14161c;
 
-// Charcoal layers (dark theme) and the text tones on them.
-$night900: #0f1115;
-$night800: #171a21;
-$night700: #1e222b;
-$night600: #2a2f3a;
+// Near-black layers (dark theme, the runner's default) and the text tones on them.
+$night900: #0b0b0f;
+$night800: #15151b;
+$night700: #1e1e26;
+$night600: #2e2e3a;
 $silver400: #8a92a0;
 $silver300: #a8aeba;
 $mist: #f4f5f7;
 
-// Brand fuchsia (Gacelas): magenta600 is the fill (5.1:1 with white), magenta800 the text tone on
-// light surfaces and magenta300 the text tone on dark ones.
+// Brand fuchsia (Gacelas) made fluorescent: neon is the fill and carries near-black text (white
+// on neon stays under 4.5:1); magenta800 is its text tone on light surfaces and magenta300 the
+// text tone on dark ones (also the pressed fill, a step lighter so it still reads on black).
+$neon: #ff2d95;
 $magenta300: #ff5ca8;
-$magenta600: #d6006f;
-$magenta700: #b80058;
 $magenta800: #c0005c;
 
 // Semantic states. The "low" safety level is a true red, never confused with the brand.
@@ -55,9 +55,3 @@ $sidebar: #ffffff;
 $sidebarDark: #1f2329;
 $backdrop: #eceae6;
 $backdropDark: #141311;
-
-// Inverse band (the dark lower section of the runner home) and the brand-tinted gradient of its
-// featured cards: deep fuchsia to plum, both dark enough for light text at 4.5:1 or more.
-$inverse: #0a0b0e;
-$featureStart: #6e003a;
-$featureEnd: #2a0a1a;

@@ -28,8 +28,12 @@ import {
 import { DocumentPreferencesDisplay } from './preferences/infrastructure/document-preferences-display';
 import { HttpPreferencesRepository } from './preferences/infrastructure/http-preferences.repository';
 import { LocalStoragePreferencesCache } from './preferences/infrastructure/local-storage-preferences.cache';
+import { RiskZoneAlertRepository } from './alerts/domain/risk-zone-alert';
+import { HttpRiskZoneAlertRepository } from './alerts/infrastructure/http-risk-zone-alert.repository';
 import { RouteRepository } from './routes/domain/route';
 import { HttpRouteRepository } from './routes/infrastructure/http-route.repository';
+import { PositionSource } from './run/domain/position-source';
+import { CapacitorPositionSource } from './run/infrastructure/capacitor-position-source';
 import { SportProfileRepository } from './sport-profile/domain/sport-profile';
 import { HttpSportProfileRepository } from './sport-profile/infrastructure/http-sport-profile.repository';
 
@@ -47,6 +51,8 @@ export const appConfig: ApplicationConfig = {
     { provide: AccountRepository, useClass: HttpAccountRepository },
     { provide: SportProfileRepository, useClass: HttpSportProfileRepository },
     { provide: RouteRepository, useClass: HttpRouteRepository },
+    { provide: RiskZoneAlertRepository, useClass: HttpRiskZoneAlertRepository },
+    { provide: PositionSource, useClass: CapacitorPositionSource },
     { provide: PreferencesRepository, useClass: HttpPreferencesRepository },
     { provide: PreferencesCache, useClass: LocalStoragePreferencesCache },
     { provide: PreferencesDisplay, useClass: DocumentPreferencesDisplay },

@@ -54,9 +54,19 @@ describe('RunnerHomePage recommended routes', () => {
       expect(text()).toContain('Tu ciudad: Loja');
       expect(text()).toContain('Nivel de seguridad para la franja de 05:00 – 07:00');
       expect(names()).toEqual(['Ruta 90', 'Ruta 70', 'Ruta 60']);
+      expect(text()).toContain('4 rutas disponibles');
+      expect(root().querySelector('.stats .name')?.textContent?.trim()).toBe('Ruta 90');
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('offers a big «Empezar a correr» that goes to the Correr tab', async () => {
+    await create();
+
+    const cta = root().querySelector('a.cta');
+    expect(cta?.textContent).toContain('Empezar a correr');
+    expect(cta?.getAttribute('href')).toBe('/app/correr');
   });
 
   it('orders by the evening slot when that is the next training slot', async () => {

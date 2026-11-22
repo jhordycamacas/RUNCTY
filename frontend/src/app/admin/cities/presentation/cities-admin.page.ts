@@ -3,13 +3,8 @@ import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
-  IonMenuButton,
   IonSpinner,
-  IonTitle,
-  IonToolbar,
   ViewWillEnter,
 } from '@ionic/angular';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog';
@@ -17,32 +12,22 @@ import { Notice } from '../../../shared/ui/notice';
 import { ToastService } from '../../../shared/ui/toast.service';
 import { AdminCitiesStore } from '../application/admin-cities.store';
 import { CITY_TYPE_LABELS, COVERAGE_LABELS, ManagedCity } from '../domain/managed-city';
+import { AdminHeader } from '../../admin-header';
 
 /** RF-04-2 and RF-04-4: the cities with their zones and coverage, and the deletion of a place. */
 @Component({
   selector: 'app-cities-admin-page',
   imports: [
+    AdminHeader,
     NgTemplateOutlet,
     RouterLink,
     IonButton,
-    IonButtons,
     IonContent,
-    IonHeader,
-    IonMenuButton,
     IonSpinner,
-    IonTitle,
-    IonToolbar,
     Notice,
   ],
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-menu-button />
-        </ion-buttons>
-        <ion-title>Ciudades y zonas</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <app-admin-header title="Ciudades y zonas" />
     <ion-content class="ion-padding">
       <div class="toolbar">
         <ion-button routerLink="/admin/ciudades/nueva">Nueva ciudad o zona</ion-button>

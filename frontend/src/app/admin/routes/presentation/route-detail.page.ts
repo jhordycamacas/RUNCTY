@@ -13,13 +13,13 @@ import { formatDistance } from '../../../preferences/domain/units';
 import { DIFFICULTY_LABELS, SURFACE_LABELS } from '../../../routes/domain/labels';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
 import { Notice } from '../../../shared/ui/notice';
-import { SubpageHeader } from '../../../shared/ui/subpage-header';
 import { RouteDetailStore } from '../application/route-detail.store';
 import { routeSlotLevels } from '../domain/slot-safety';
 import { SafetySummarySection } from './safety-summary-section';
 import { SegmentsSection } from './segments-section';
 import { SlotSafetyList } from './slot-safety-list';
 import { TimeSlotsSection } from './time-slots-section';
+import { AdminHeader } from '../../admin-header';
 
 /** The parts of the detail, one tab each; `?seccion=` opens the page on one of them. */
 const DETAIL_TABS = [
@@ -42,6 +42,7 @@ const isDetailTab = (value: string | null): value is DetailTab =>
 @Component({
   selector: 'app-route-detail-admin-page',
   imports: [
+    AdminHeader,
     RouterLink,
     IonButton,
     IonContent,
@@ -50,12 +51,11 @@ const isDetailTab = (value: string | null): value is DetailTab =>
     SafetySummarySection,
     SegmentsSection,
     SlotSafetyList,
-    SubpageHeader,
     TimeSlotsSection,
   ],
   providers: [RouteDetailStore],
   template: `
-    <app-subpage-header [title]="title()" backTo="/admin/rutas" />
+    <app-admin-header [title]="title()" backTo="/admin/rutas" />
     <ion-content class="ion-padding">
       @if (store.detail(); as detail) {
         @if (store.error(); as failure) {
