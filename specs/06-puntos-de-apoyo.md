@@ -1,6 +1,6 @@
 # EP-06 — Puntos de apoyo y senderos con resguardo policial
 
-> Spec de capacidad · Debería tener · **0/8 Hecha, 0 Parcial, 8 Pendiente**
+> Spec de capacidad · Debería tener · **0/8 Hecha, 8 Parcial, 0 Pendiente**
 
 | Campo | Valor |
 | --- | --- |
@@ -11,7 +11,7 @@
 | Prioridad | Debería tener |
 | Responsable | Pedro Vargas |
 | Sprint planificado | Sprint 3 · Semana 7 |
-| Sprint real | Planificada: Sprint 3 (semana 7). Sin implementar. |
+| Sprint real | Sprint 3 (semana 7). Backend: 2026-11-22 (commit `9387ea1`). Falta la interfaz de administración y la del corredor. |
 | Dependencias | [RF-05 · Catálogo de rutas y tramos](05-catalogo-de-rutas.md) |
 
 ## Propósito
@@ -58,7 +58,7 @@ Decididas por el equipo o derivadas de otros documentos:
 
 ## Modelo de datos y contrato de API
 
-**Estado: propuesto** (sin implementar). Contrato REST propuesto; cambia con la spec antes que el código. Las respuestas siguen las reglas de [Arquitectura](transversal/arquitectura.md#contrato-de-la-api): `201 {"id"}` al crear, `204` al modificar o eliminar, errores `{error:{reason,message}}`.
+**Estado: backend implementado** (2026-11-22, commit `9387ea1`; código en `backend/apps/support_points`). El contrato definitivo está en «Decisiones de diseño»; la interfaz está pendiente. Las respuestas siguen las reglas de [Arquitectura](transversal/arquitectura.md#contrato-de-la-api): `201 {"id"}` al crear, `204` al modificar o eliminar, errores `{error:{reason,message}}`.
 
 | Endpoint | Historia | Actor |
 | --- | --- | --- |
@@ -91,14 +91,14 @@ Campos propuestos de «sendero con resguardo policial» (de la hoja MODULOS):
 
 | ID | Historia | Actor | Sprint | Estado |
 | --- | --- | --- | --- | --- |
-| [RF-06-1](#rf-06-1--crear-punto-de-apoyo) | Crear punto de apoyo | Administrador | Sprint 3 · Semana 7 | Pendiente |
-| [RF-06-2](#rf-06-2--leer-puntos-de-apoyo) | Leer puntos de apoyo | Corredor y Administrador | Sprint 3 · Semana 7 | Pendiente |
-| [RF-06-3](#rf-06-3--actualizar-punto-de-apoyo) | Actualizar punto de apoyo | Administrador | Sprint 3 · Semana 7 | Pendiente |
-| [RF-06-4](#rf-06-4--eliminar-punto-de-apoyo) | Eliminar punto de apoyo | Administrador | Sprint 3 · Semana 7 | Pendiente |
-| [RF-06-5](#rf-06-5--crear-sendero-con-resguardo-policial) | Crear sendero con resguardo policial | Administrador | Sprint 3 · Semana 7 | Pendiente |
-| [RF-06-6](#rf-06-6--leer-senderos-con-resguardo-policial) | Leer senderos con resguardo policial | Corredor | Sprint 3 · Semana 7 | Pendiente |
-| [RF-06-7](#rf-06-7--actualizar-sendero-con-resguardo-policial) | Actualizar sendero con resguardo policial | Administrador | Sprint 3 · Semana 7 | Pendiente |
-| [RF-06-8](#rf-06-8--eliminar-sendero-con-resguardo-policial) | Eliminar sendero con resguardo policial | Administrador | Sprint 3 · Semana 7 | Pendiente |
+| [RF-06-1](#rf-06-1--crear-punto-de-apoyo) | Crear punto de apoyo | Administrador | Sprint 3 · Semana 7 | Parcial |
+| [RF-06-2](#rf-06-2--leer-puntos-de-apoyo) | Leer puntos de apoyo | Corredor y Administrador | Sprint 3 · Semana 7 | Parcial |
+| [RF-06-3](#rf-06-3--actualizar-punto-de-apoyo) | Actualizar punto de apoyo | Administrador | Sprint 3 · Semana 7 | Parcial |
+| [RF-06-4](#rf-06-4--eliminar-punto-de-apoyo) | Eliminar punto de apoyo | Administrador | Sprint 3 · Semana 7 | Parcial |
+| [RF-06-5](#rf-06-5--crear-sendero-con-resguardo-policial) | Crear sendero con resguardo policial | Administrador | Sprint 3 · Semana 7 | Parcial |
+| [RF-06-6](#rf-06-6--leer-senderos-con-resguardo-policial) | Leer senderos con resguardo policial | Corredor | Sprint 3 · Semana 7 | Parcial |
+| [RF-06-7](#rf-06-7--actualizar-sendero-con-resguardo-policial) | Actualizar sendero con resguardo policial | Administrador | Sprint 3 · Semana 7 | Parcial |
+| [RF-06-8](#rf-06-8--eliminar-sendero-con-resguardo-policial) | Eliminar sendero con resguardo policial | Administrador | Sprint 3 · Semana 7 | Parcial |
 
 Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = implementada pero con criterios sin cumplir o sin verificar; `Pendiente` = sin implementar.
 
@@ -108,7 +108,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo registrar punto de apoyo. Para ubicar comercios, centros de salud u otros puntos de apoyo con sus horarios registrados.
 - **Actor:** Administrador · **Prioridad:** Debería tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05 · **Caso de uso:** Registrar punto de apoyo
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `POST /support-points`. Falta la pantalla de administración; los mensajes de error en español dependen de esa pantalla.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -116,20 +116,22 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [ ] Con los datos obligatorios completos y válidos (tipo {comercio abierto, puesto de la policía nacional, centro de salud, lugar concurrido}, ubicación), el sistema crea el registro de «punto de apoyo» y confirma al actor.
-- [ ] Se valida que los datos obligatorios estén completos.
-- [ ] Se valida que el tipo sea uno de los definidos.
-- [ ] Se valida que la ubicación sea válida.
-- [ ] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
+- [x] Con los datos obligatorios completos y válidos (tipo {comercio abierto, puesto de la policía nacional, centro de salud, lugar concurrido}, ubicación), el sistema crea el registro de «punto de apoyo» y confirma al actor.
+- [x] Se valida que los datos obligatorios estén completos.
+- [x] Se valida que el tipo sea uno de los definidos.
+- [x] Se valida que la ubicación sea válida.
+- [x] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/support_points/domain/models.py`, `backend/apps/support_points/application/use_cases.py`, `backend/apps/support_points/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_support_points_api.py`
 
 ### RF-06-2 — Leer puntos de apoyo
 
 - **Historia de usuario:** Como corredor o administrador · Deseo consultar puntos de apoyo. Para identificar qué puntos de apoyo están cerca de mi recorrido y cuándo atienden.
 - **Actor:** Corredor y Administrador · **Prioridad:** Debería tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05 · **Caso de uso:** Consultar puntos de apoyo
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `GET /support-points` (filtros `cityId`, `routeId`, `lat`+`lng`+`radiusM`) y `GET /support-points/{id}`. No filtra por tipo ni por horario. Falta la vista del corredor y la de administración.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -138,17 +140,19 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 **Criterios de aceptación**
 
 - [ ] El sistema devuelve los registros de «puntos de apoyo» que cumplen los criterios indicados (tipo, ubicación, horario de atención), o informa que no hay resultados.
-- [ ] El sistema debe mostrar los puntos cercanos a una ruta o a la ubicación del corredor.
-- [ ] Solo un usuario con el permiso correspondiente al actor «Corredor y Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
+- [x] El sistema debe mostrar los puntos cercanos a una ruta o a la ubicación del corredor.
+- [x] Solo un usuario con el permiso correspondiente al actor «Corredor y Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/support_points/application/use_cases.py`, `backend/apps/support_points/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_support_points_api.py`
 
 ### RF-06-3 — Actualizar punto de apoyo
 
 - **Historia de usuario:** Como administrador · Deseo modificar punto de apoyo. Para evitar indicaciones incorrectas cuando un punto de apoyo cambia de ubicación u horario.
 - **Actor:** Administrador · **Prioridad:** Debería tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05 · **Caso de uso:** Actualizar punto de apoyo
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `PUT /support-points/{id}`. Las validaciones al modificar no tienen prueba propia. Falta la pantalla de administración.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -156,20 +160,22 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [ ] El sistema guarda los cambios de «punto de apoyo» (tipo {comercio abierto, puesto de la policía nacional, centro de salud, lugar concurrido}, ubicación) y confirma al actor.
-- [ ] Se valida que el registro exista.
+- [x] El sistema guarda los cambios de «punto de apoyo» (tipo {comercio abierto, puesto de la policía nacional, centro de salud, lugar concurrido}, ubicación) y confirma al actor.
+- [x] Se valida que el registro exista.
 - [ ] Se valida que los datos modificados cumplan las validaciones del registro.
-- [ ] El sistema debe mantener vigentes la ubicación, el tipo y el horario.
-- [ ] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
+- [x] El sistema debe mantener vigentes la ubicación, el tipo y el horario.
+- [x] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/support_points/application/use_cases.py`, `backend/apps/support_points/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_support_points_api.py`
 
 ### RF-06-4 — Eliminar punto de apoyo
 
 - **Historia de usuario:** Como administrador · Deseo eliminar punto de apoyo. Para dejar de mostrar como disponible un punto de apoyo que ya cerró.
 - **Actor:** Administrador · **Prioridad:** Debería tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05 · **Caso de uso:** Eliminar punto de apoyo
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `DELETE /support-points/{id}`. Falta la pantalla de administración con la confirmación previa.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -177,20 +183,22 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [ ] El sistema elimina el registro de «punto de apoyo» indicado y confirma al actor.
-- [ ] Se valida que el registro exista.
+- [x] El sistema elimina el registro de «punto de apoyo» indicado y confirma al actor.
+- [x] Se valida que el registro exista.
 - [ ] El sistema debe solicitar confirmación previa.
-- [ ] El sistema debe dejar de mostrar el punto al corredor.
-- [ ] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
+- [x] El sistema debe dejar de mostrar el punto al corredor.
+- [x] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/support_points/application/use_cases.py`, `backend/apps/support_points/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_support_points_api.py`
 
 ### RF-06-5 — Crear sendero con resguardo policial
 
 - **Historia de usuario:** Como administrador · Deseo registrar sendero con resguardo policial. Para registrar en qué senderos y horarios se ha reportado presencia policial de respaldo.
 - **Actor:** Administrador · **Prioridad:** Debería tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05 · **Caso de uso:** Registrar sendero con resguardo policial
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `POST /guarded-trails`, con rechazo de resguardos que se solapan en día y horario. Falta la pantalla de administración.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -198,19 +206,21 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [ ] Con los datos obligatorios completos y válidos (sendero o tramo, días de presencia policial, horarios de presencia policial), el sistema crea el registro de «sendero con resguardo policial» y confirma al actor.
-- [ ] Se valida que los datos obligatorios estén completos.
-- [ ] Se valida que el sendero o el tramo exista.
-- [ ] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
+- [x] Con los datos obligatorios completos y válidos (sendero o tramo, días de presencia policial, horarios de presencia policial), el sistema crea el registro de «sendero con resguardo policial» y confirma al actor.
+- [x] Se valida que los datos obligatorios estén completos.
+- [x] Se valida que el sendero o el tramo exista.
+- [x] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/support_points/domain/models.py`, `backend/apps/support_points/application/use_cases.py`, `backend/apps/support_points/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_support_points_api.py`
 
 ### RF-06-6 — Leer senderos con resguardo policial
 
 - **Historia de usuario:** Como corredor · Deseo consultar senderos con resguardo policial. Para consultar los días y horarios registrados de resguardo antes de elegir un sendero.
 - **Actor:** Corredor · **Prioridad:** Debería tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05 · **Caso de uso:** Consultar senderos con resguardo policial
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `GET /guarded-trails` (filtro `routeId`) y `GET /guarded-trails/{id}`. No filtra por días ni por horario. Falta la vista del corredor.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -219,16 +229,18 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 **Criterios de aceptación**
 
 - [ ] El sistema devuelve los registros de «senderos con resguardo policial» que cumplen los criterios indicados (sendero o tramo, días de presencia policial, horarios de presencia policial), o informa que no hay resultados.
-- [ ] El sistema debe mostrar los senderos con sus días y horarios registrados.
+- [x] El sistema debe mostrar los senderos con sus días y horarios registrados.
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/support_points/application/use_cases.py`, `backend/apps/support_points/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_support_points_api.py`
 
 ### RF-06-7 — Actualizar sendero con resguardo policial
 
 - **Historia de usuario:** Como administrador · Deseo modificar sendero con resguardo policial. Para mantener vigentes los horarios de resguardo que figuran en la información de los senderos.
 - **Actor:** Administrador · **Prioridad:** Debería tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05 · **Caso de uso:** Actualizar sendero con resguardo policial
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `PUT /guarded-trails/{id}`. Solo la regla de no solapamiento tiene prueba al modificar. Falta la pantalla de administración.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -236,20 +248,22 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [ ] El sistema guarda los cambios de «sendero con resguardo policial» (sendero o tramo, días de presencia policial, horarios de presencia policial) y confirma al actor.
-- [ ] Se valida que el registro exista.
+- [x] El sistema guarda los cambios de «sendero con resguardo policial» (sendero o tramo, días de presencia policial, horarios de presencia policial) y confirma al actor.
+- [x] Se valida que el registro exista.
 - [ ] Se valida que los datos modificados cumplan las validaciones del registro.
-- [ ] El sistema debe mantener vigentes los días y horarios.
-- [ ] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
+- [x] El sistema debe mantener vigentes los días y horarios.
+- [x] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/support_points/application/use_cases.py`, `backend/apps/support_points/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_support_points_api.py`
 
 ### RF-06-8 — Eliminar sendero con resguardo policial
 
 - **Historia de usuario:** Como administrador · Deseo eliminar sendero con resguardo policial. Para dejar de informar un resguardo que ya no está vigente sin eliminar el sendero.
 - **Actor:** Administrador · **Prioridad:** Debería tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05 · **Caso de uso:** Eliminar sendero con resguardo policial
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `DELETE /guarded-trails/{id}`; la ruta y su tramo se conservan. Falta la pantalla de administración con la confirmación previa.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -257,14 +271,16 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [ ] El sistema elimina el registro de «sendero con resguardo policial» indicado y confirma al actor.
-- [ ] Se valida que el registro exista.
+- [x] El sistema elimina el registro de «sendero con resguardo policial» indicado y confirma al actor.
+- [x] Se valida que el registro exista.
 - [ ] El sistema debe solicitar confirmación previa.
-- [ ] El sistema debe retirar el resguardo sin eliminar el sendero o tramo.
-- [ ] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
+- [x] El sistema debe retirar el resguardo sin eliminar el sendero o tramo.
+- [x] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/support_points/application/use_cases.py`, `backend/apps/support_points/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_support_points_api.py`
 
 ## Dependencias
 

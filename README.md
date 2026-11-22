@@ -60,7 +60,7 @@ RUNCTY no tiene un servidor propio. Usa **servicios de Google (Firebase)** como 
 | Notificaciones push | Firebase Cloud Messaging |
 | Lógica de servidor | Cloud Functions |
 | Estado / datos remotos | TanStack React Query |
-| Mapas y ubicación | Google Maps + `expo-location` (detrás de una abstracción) |
+| Mapas y ubicación | Leaflet con OpenStreetMap y la geolocalización del dispositivo; Google Maps pendiente de la clave (detrás de una abstracción) |
 | Panel de administración | Next.js |
 
 ### Principios de diseño
@@ -201,7 +201,7 @@ npm run admin:build                        # build de producción del panel
 | Base | Configuración de Firebase, reglas, emuladores, Cloud Functions, app móvil y panel | ✅ Hecho |
 | 1 | EP-01 Usuarios, EP-25 Autenticación, EP-26 Preferencias, EP-02 Roles y permisos, EP-27 Administración de usuarios, EP-04 Ciudades y zonas | ✅ Hecho |
 | 2 | EP-05 Catálogo de rutas, EP-07 Evaluación de seguridad (franjas, factores, índice) | ✅ Hecho (rama `feat/design-system-sprint2`) |
-| 3 | EP-06 Puntos de apoyo, EP-07 Alertas de zona, EP-08 Incidentes, EP-09 Rutas seguras | ⏳ Pendiente |
+| 3 | EP-06 Puntos de apoyo, EP-07 Alertas de zona, EP-08 Incidentes, EP-09 Rutas seguras | 🔄 En curso: backend hecho (2026-11-22); interfaz pendiente salvo la página Alertas |
 | 4 | EP-03 Contactos, EP-10 Favoritas, EP-11 Rutas de clubes, EP-12 Entrenamientos, EP-15 Pánico, EP-16 Ubicación compartida | ⏳ Pendiente |
 | 5 | EP-12 a EP-24 (resto) | ⏳ Pendiente |
 
@@ -214,10 +214,11 @@ npm run admin:build                        # build de producción del panel
   - eliminación de la cuenta;
   - perfil deportivo;
   - preferencias de tamaño de letra, modo oscuro, unidades, notificaciones y privacidad de ubicación;
-  - diseño propio con la fuente Plus Jakarta Sans, íconos y pestañas Inicio, Rutas y Perfil;
+  - diseño oscuro con el fucsia neón del club (fuentes Outfit y Oswald; Geist en el admin) y pestañas Inicio, Rutas, Correr (GPS en vivo con mapa de OpenStreetMap), Clubes y Cuenta;
+  - campana con las alertas de zona de riesgo vigentes en la ciudad del corredor;
   - inicio con la próxima franja de entrenamiento y las rutas recomendadas para ella;
   - catálogo de rutas de la ciudad del corredor, con filtros por franja, distancia y dificultad;
-  - detalle de cada ruta con su nivel de seguridad (Alto, Medio o Bajo) por franja, los factores que lo explican y los tramos.
+  - detalle de cada ruta con mapa y su nivel de seguridad (Alto, Medio o Bajo) por franja, los factores que lo explican y los tramos.
 - **Panel de administración:**
   - gestión de rutas, tramos, franjas y factores de riesgo;
   - búsqueda de usuarios con filtros;
@@ -233,7 +234,7 @@ npm run admin:build                        # build de producción del panel
 
 - Pulido de la app y del panel que dejó la auditoría del 2026-11-10 (botón de emergencia, preferencias que se aplican, reenvío del correo de verificación, panel responsive y confirmación al cambiar roles). El detalle y el plan están en [CONTEXTO.md](CONTEXTO.md), sección 14.
 - Probar en el navegador la gestión de rutas del panel.
-- Mapas (hoy las coordenadas se cargan a mano).
+- Google Maps (falta la clave; mientras tanto los mapas usan Leaflet con OpenStreetMap y las coordenadas se cargan a mano).
 - Conectar el proyecto real de Firebase (plan Blaze) para desplegar.
 - Decisiones de producto: consentimiento parental de menores, texto legal LOPDP y valores por defecto de las notificaciones (ver [CONTEXTO.md](CONTEXTO.md)).
 

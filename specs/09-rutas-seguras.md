@@ -1,6 +1,6 @@
 # EP-09 — Generación de rutas seguras
 
-> Spec de capacidad · Debe tener · **0/3 Hecha, 1 Parcial, 2 Pendiente**
+> Spec de capacidad · Debe tener · **0/3 Hecha, 3 Parcial, 0 Pendiente**
 
 | Campo | Valor |
 | --- | --- |
@@ -11,7 +11,7 @@
 | Prioridad | Debe tener |
 | Responsable | Jhordy Camacas |
 | Sprint planificado | Sprint 3 · Semana 7 |
-| Sprint real | Planificada: Sprint 3 (semana 7). Parcial: el catálogo del corredor ya filtra y ordena por seguridad en el cliente. |
+| Sprint real | Sprint 3 (semana 7). Backend: 2026-11-22 (commit `9387ea1`); la recomendación ya se calcula en el servidor. Falta la pantalla de solicitud del corredor; el catálogo todavía filtra y ordena en el cliente. |
 | Dependencias | [RF-04 · Ciudades y zonas de operación](04-ciudades-y-zonas.md), [RF-07 · Evaluación de seguridad de rutas y zonas de riesgo](07-evaluacion-de-seguridad.md) |
 
 ## Propósito
@@ -55,7 +55,7 @@ Decididas por el equipo o derivadas de otros documentos:
 
 ## Modelo de datos y contrato de API
 
-**Estado: propuesto** (sin implementar). Contrato REST propuesto; cambia con la spec antes que el código. Las respuestas siguen las reglas de [Arquitectura](transversal/arquitectura.md#contrato-de-la-api): `201 {"id"}` al crear, `204` al modificar o eliminar, errores `{error:{reason,message}}`.
+**Estado: backend implementado** (2026-11-22, commit `9387ea1`; código en `backend/apps/safe_routes`). El contrato definitivo está en «Decisiones de diseño»; la pantalla del corredor está pendiente. Las respuestas siguen las reglas de [Arquitectura](transversal/arquitectura.md#contrato-de-la-api): `201 {"id"}` al crear, `204` al modificar o eliminar, errores `{error:{reason,message}}`.
 
 | Endpoint | Historia | Actor |
 | --- | --- | --- |
@@ -76,8 +76,8 @@ Campos propuestos de «solicitud de ruta segura» (de la hoja MODULOS):
 | ID | Historia | Actor | Sprint | Estado |
 | --- | --- | --- | --- | --- |
 | [RF-09-1](#rf-09-1--crear-solicitud-de-ruta-segura) | Crear solicitud de ruta segura | Corredor | Sprint 3 · Semana 7 | Parcial |
-| [RF-09-2](#rf-09-2--leer-solicitudes-de-ruta-segura) | Leer solicitudes de ruta segura | Corredor | Sprint 3 · Semana 7 | Pendiente |
-| [RF-09-3](#rf-09-3--eliminar-solicitud-de-ruta-segura) | Eliminar solicitud de ruta segura | Corredor | Sprint 3 · Semana 7 | Pendiente |
+| [RF-09-2](#rf-09-2--leer-solicitudes-de-ruta-segura) | Leer solicitudes de ruta segura | Corredor | Sprint 3 · Semana 7 | Parcial |
+| [RF-09-3](#rf-09-3--eliminar-solicitud-de-ruta-segura) | Eliminar solicitud de ruta segura | Corredor | Sprint 3 · Semana 7 | Parcial |
 
 Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = implementada pero con criterios sin cumplir o sin verificar; `Pendiente` = sin implementar.
 
@@ -87,7 +87,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como corredor · Deseo registrar solicitud de ruta segura. Para solicitar recomendaciones indicando la ciudad, la distancia deseada y el horario del entrenamiento.
 - **Actor:** Corredor · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-04, RF-07 · **Caso de uso:** Solicitar ruta segura
-- **Estado:** `Parcial` — Solo la parte de lectura del catálogo del corredor: filtra y ordena las rutas de su ciudad por seguridad en el cliente (commits `21f094c`, `00920a1`). No existe la entidad «solicitud de ruta segura» ni su API.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `POST /safe-route-requests`: guarda la solicitud y devuelve las rutas activas de la ciudad dentro de ±20 % de la distancia, ordenadas por el puntaje de la franja. Antes ya existía la parte de lectura del catálogo del corredor, que filtra y ordena en el cliente (commits `21f094c`, `00920a1`). Falta la pantalla de solicitud del corredor y medir RNF-07.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -95,23 +95,23 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [ ] Con ciudad, distancia aproximada y franja horaria completas y válidas, el servidor crea la solicitud y devuelve las rutas recomendadas.
+- [x] Con ciudad, distancia aproximada y franja horaria completas y válidas, el servidor crea la solicitud y devuelve las rutas recomendadas.
 - [x] Solo se ofrecen las rutas **activas** de la ciudad del corredor, que debe estar en el catálogo vigente (`RunnerCity`).
 - [x] Las rutas se filtran por distancia (hasta 5 km, 5–10 km, más de 10 km) y dificultad, y se ordenan de mayor a menor puntaje en la franja elegida y luego por distancia; las rutas sin dato van al final.
 - [x] Cada ruta muestra su nivel (Alto, Medio o Bajo) con ícono, texto y el factor principal; nunca «segura» o «insegura».
 - [x] Si la ciudad no tiene rutas se muestra un estado vacío en español; un fallo de carga muestra un reintento, no un catálogo vacío.
-- [ ] La distancia aproximada es un valor numérico mayor a cero (hoy es un tramo fijo de distancia).
+- [x] La distancia aproximada es un valor numérico mayor a cero (lo valida la API; la pantalla del catálogo todavía usa tramos fijos de distancia).
 - [ ] Las rutas recomendadas se presentan en ≤ 10 s en el 95 % de las solicitudes con 4G (RNF-07; no medido).
 
-**Implementación:** `frontend/src/app/routes/domain/catalog.ts`, `frontend/src/app/routes/application/city-routes.ts`, `frontend/src/app/routes/application/runner-city.ts`, `frontend/src/app/routes/presentation/routes-list.page.ts`, `frontend/src/app/routes/presentation/recommended-routes.ts`, `frontend/src/app/runner/home.page.ts`
+**Implementación:** `frontend/src/app/routes/domain/catalog.ts`, `frontend/src/app/routes/application/city-routes.ts`, `frontend/src/app/routes/application/runner-city.ts`, `frontend/src/app/routes/presentation/routes-list.page.ts`, `frontend/src/app/routes/presentation/recommended-routes.ts`, `frontend/src/app/runner/home.page.ts`, `backend/apps/safe_routes/domain/models.py`, `backend/apps/safe_routes/application/use_cases.py`, `backend/apps/safe_routes/presentation/views.py`
 
-**Pruebas:** `frontend/src/app/routes/domain/catalog.spec.ts`, `frontend/src/app/routes/application/runner-city.spec.ts`, `frontend/src/app/routes/presentation/routes-list.page.spec.ts`, `frontend/src/app/runner/home.page.spec.ts`
+**Pruebas:** `backend/tests/test_safe_routes.py`, `frontend/src/app/routes/domain/catalog.spec.ts`, `frontend/src/app/routes/application/runner-city.spec.ts`, `frontend/src/app/routes/presentation/routes-list.page.spec.ts`, `frontend/src/app/runner/home.page.spec.ts`
 
 ### RF-09-2 — Leer solicitudes de ruta segura
 
 - **Historia de usuario:** Como corredor · Deseo consultar solicitudes de ruta segura. Para revisar mis solicitudes y las alternativas ordenadas por su índice de seguridad disponible.
 - **Actor:** Corredor · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-04, RF-07 · **Caso de uso:** Consultar solicitudes de ruta
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `GET /safe-route-requests` (solo las del corredor, más recientes primero) y `GET /safe-route-requests/{id}` (recalcula la recomendación al momento). La lista no tiene filtros. Falta la pantalla del corredor.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -120,16 +120,18 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 **Criterios de aceptación**
 
 - [ ] El sistema devuelve los registros de «solicitudes de ruta segura» que cumplen los criterios indicados (ciudad, distancia aproximada, franja horaria), o informa que no hay resultados.
-- [ ] El sistema debe mostrar las rutas ordenadas del mayor al menor nivel de seguridad.
+- [x] El sistema debe mostrar las rutas ordenadas del mayor al menor nivel de seguridad.
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/safe_routes/domain/models.py`, `backend/apps/safe_routes/application/use_cases.py`, `backend/apps/safe_routes/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_safe_routes.py`
 
 ### RF-09-3 — Eliminar solicitud de ruta segura
 
 - **Historia de usuario:** Como corredor · Deseo eliminar solicitud de ruta segura. Para quitar de mi historial una búsqueda de recorrido que ya no necesito conservar.
 - **Actor:** Corredor · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-04, RF-07 · **Caso de uso:** Eliminar solicitud de ruta
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `DELETE /safe-route-requests/{id}`, solo para el dueño. Falta la pantalla del corredor con la confirmación previa.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -137,13 +139,15 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [ ] El sistema elimina el registro de «solicitud de ruta segura» indicado y confirma al actor.
-- [ ] Se valida que el registro exista.
+- [x] El sistema elimina el registro de «solicitud de ruta segura» indicado y confirma al actor.
+- [x] Se valida que el registro exista.
 - [ ] El sistema debe solicitar confirmación previa.
-- [ ] Se valida que el corredor elimine solo sus propias solicitudes.
+- [x] Se valida que el corredor elimine solo sus propias solicitudes.
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/safe_routes/application/use_cases.py`, `backend/apps/safe_routes/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_safe_routes.py`
 
 ## Dependencias
 
@@ -161,5 +165,5 @@ Tomadas para implementar el Sprint 3 sin bloquearlo; se revisan con Gacelas en l
 ## Supuestos por validar
 
 - La tolerancia de la distancia aproximada no está definida en el Excel; se tomó ±20 % (ver Decisiones de diseño).
-- La ordenación actual vive en el cliente (`frontend/src/app/routes/domain/catalog.ts`); al implementar RF-09 debe pasar al servidor para cumplir RNF-07 y evitar duplicar la regla.
+- La recomendación ya está en el servidor (`backend/apps/safe_routes`); el catálogo del corredor (`frontend/src/app/routes/domain/catalog.ts`) todavía ordena en el cliente y debe pasar a consumir `POST /safe-route-requests` para no duplicar la regla.
 - Los criterios de las historias pendientes salen del Excel (entradas, reglas de negocio) y del backlog; los mensajes de confirmación y de error son genéricos, tomados de las salidas del requisito padre (inferido). Se afinan al planificar el sprint.

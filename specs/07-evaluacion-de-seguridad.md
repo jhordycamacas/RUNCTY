@@ -1,6 +1,6 @@
 # EP-07 — Evaluación de seguridad de rutas y zonas de riesgo
 
-> Spec de capacidad · Debe tener · **11/15 Hecha, 0 Parcial, 4 Pendiente**
+> Spec de capacidad · Debe tener · **11/15 Hecha, 4 Parcial, 0 Pendiente**
 
 | Campo | Valor |
 | --- | --- |
@@ -11,7 +11,7 @@
 | Prioridad | Debe tener |
 | Responsable | Jhordy Camacas |
 | Sprint planificado | Sprint 2 · Semana 6 / Sprint 3 · Semana 7 |
-| Sprint real | Sprint 2 (semana 6) para RF-07-1 a RF-07-11; Sprint 3 (semana 7) para las alertas de zona RF-07-12 a RF-07-15. Backend: 2026-11-13. Administración: 2026-11-16, verificada en navegador el 2026-11-17; accesibilidad medida el 2026-11-22. |
+| Sprint real | Sprint 2 (semana 6) para RF-07-1 a RF-07-11; Sprint 3 (semana 7) para las alertas de zona RF-07-12 a RF-07-15. Backend: 2026-11-13. Administración: 2026-11-16, verificada en navegador el 2026-11-17; accesibilidad medida el 2026-11-22. Alertas de zona: backend 2026-11-22 (commit `9387ea1`) y página Alertas del corredor (`1c75a42`, `4fcdb46`); falta la administración de alertas. |
 | Dependencias | [RF-05 · Catálogo de rutas y tramos](05-catalogo-de-rutas.md), [RF-17 · Reportes comunitarios](17-reportes-comunitarios.md) |
 
 ## Propósito
@@ -31,7 +31,7 @@ Entradas, proceso y salidas del requisito padre en el Excel (RF-07):
 - CRUD de franjas horarias de una ruta, sin solapamiento (RF-07-1 a RF-07-4).
 - CRUD de factores de riesgo por tramo (RF-07-5 a RF-07-8).
 - Cálculo, consulta y recálculo del índice de seguridad (RF-07-9 a RF-07-11).
-- Alertas de zona de riesgo para el corredor (RF-07-12 a RF-07-15, pendientes).
+- Alertas de zona de riesgo para el corredor (RF-07-12 a RF-07-15; backend implementado, administración pendiente).
 
 **No incluye**
 
@@ -74,7 +74,7 @@ Decididas por el equipo o derivadas de otros documentos:
 
 ## Modelo de datos y contrato de API
 
-**Estado: RF-07-1 a RF-07-11 implementados**; alertas de zona **propuestas** (sin implementar). Código: `backend/apps/routes` (`domain/safety.py`, `domain/time.py`), `frontend/src/app/admin/routes`, `frontend/src/app/routes`.
+**Estado: RF-07-1 a RF-07-11 implementados**; alertas de zona con **backend implementado** (2026-11-22, `backend/apps/risk_alerts`) y página Alertas del corredor (`frontend/src/app/alerts`); falta la pantalla de administración. Código: `backend/apps/routes` (`domain/safety.py`, `domain/time.py`), `frontend/src/app/admin/routes`, `frontend/src/app/routes`.
 
 | Endpoint | Permiso | Descripción |
 | --- | --- | --- |
@@ -83,7 +83,7 @@ Decididas por el equipo o derivadas de otros documentos:
 | `POST /routes/{id}/segments/{segmentId}/risk-factors` | `routes.manage` | Crea un factor: `type`, `severity`, `description`, `startTime?`, `endTime?` (`201 {id}`). |
 | `PUT` · `DELETE …/risk-factors/{factorId}` | `routes.manage` | Modifica o elimina el factor (`204`). |
 | `GET /routes`, `GET /routes/{id}` | sesión | Devuelven `safety` por franja y por tramo con el puntaje, el nivel y los factores que lo explican. |
-| *(propuesto)* `POST/GET/PUT/DELETE /risk-zone-alerts` | `routes.manage` para escribir | Alertas de zona: `location`, `type`, `validity` (horario), `severity` (alta, media, baja). |
+| `POST/GET/PUT/DELETE /risk-zone-alerts` | `routes.manage` para escribir; sesión para leer | Alertas de zona: ver «Decisiones de diseño de las alertas de zona». |
 
 Códigos propios: `time-slot-not-found`, `time-slot-overlap`, `too-many-time-slots`, `invalid-time-slot-id`, `invalid-slot-label`, `invalid-start-time`, `invalid-end-time`, `invalid-time-range`, `invalid-valid-from`, `invalid-valid-to`, `invalid-date-range`, `risk-factor-not-found`, `too-many-risk-factors`, `invalid-risk-factor-id`, `invalid-factor-type`, `invalid-severity`, `invalid-factor-description`.
 
@@ -102,10 +102,10 @@ Códigos propios: `time-slot-not-found`, `time-slot-overlap`, `too-many-time-slo
 | [RF-07-9](#rf-07-9--crear-índice-de-seguridad-calcular) | Crear índice de seguridad (calcular) | Sistema | Sprint 2 · Semana 6 | Hecha |
 | [RF-07-10](#rf-07-10--leer-índices-de-seguridad) | Leer índices de seguridad | Corredor y Administrador | Sprint 2 · Semana 6 | Hecha |
 | [RF-07-11](#rf-07-11--actualizar-índice-de-seguridad-recalcular) | Actualizar índice de seguridad (recalcular) | Sistema | Sprint 2 · Semana 6 | Hecha |
-| [RF-07-12](#rf-07-12--crear-alerta-de-zona-de-riesgo) | Crear alerta de zona de riesgo | Administrador | Sprint 3 · Semana 7 | Pendiente |
-| [RF-07-13](#rf-07-13--leer-alertas-de-zonas-de-riesgo) | Leer alertas de zonas de riesgo | Corredor | Sprint 3 · Semana 7 | Pendiente |
-| [RF-07-14](#rf-07-14--actualizar-alerta-de-zona-de-riesgo) | Actualizar alerta de zona de riesgo | Administrador | Sprint 3 · Semana 7 | Pendiente |
-| [RF-07-15](#rf-07-15--eliminar-alerta-de-zona-de-riesgo) | Eliminar alerta de zona de riesgo | Administrador | Sprint 3 · Semana 7 | Pendiente |
+| [RF-07-12](#rf-07-12--crear-alerta-de-zona-de-riesgo) | Crear alerta de zona de riesgo | Administrador | Sprint 3 · Semana 7 | Parcial |
+| [RF-07-13](#rf-07-13--leer-alertas-de-zonas-de-riesgo) | Leer alertas de zonas de riesgo | Corredor | Sprint 3 · Semana 7 | Parcial |
+| [RF-07-14](#rf-07-14--actualizar-alerta-de-zona-de-riesgo) | Actualizar alerta de zona de riesgo | Administrador | Sprint 3 · Semana 7 | Parcial |
+| [RF-07-15](#rf-07-15--eliminar-alerta-de-zona-de-riesgo) | Eliminar alerta de zona de riesgo | Administrador | Sprint 3 · Semana 7 | Parcial |
 
 Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = implementada pero con criterios sin cumplir o sin verificar; `Pendiente` = sin implementar.
 
@@ -368,7 +368,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo registrar alerta de zona de riesgo. Para advertir sobre una situación localizada durante el período y con la severidad que corresponda.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Registrar alerta de zona de riesgo
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `POST /risk-zone-alerts`. Falta la pantalla de administración; los mensajes de error en español dependen de esa pantalla.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -376,19 +376,21 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [ ] Con los datos obligatorios completos y válidos (ubicación, tipo, horario de vigencia, nivel de severidad {alta, media, baja}), el sistema crea el registro de «alerta de zona de riesgo» y confirma al actor.
-- [ ] Se valida que los datos obligatorios estén completos.
-- [ ] Se valida que el nivel de severidad sea Alta, Media o Baja.
-- [ ] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
+- [x] Con los datos obligatorios completos y válidos (ubicación, tipo, horario de vigencia, nivel de severidad {alta, media, baja}), el sistema crea el registro de «alerta de zona de riesgo» y confirma al actor.
+- [x] Se valida que los datos obligatorios estén completos.
+- [x] Se valida que el nivel de severidad sea Alta, Media o Baja.
+- [x] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/risk_alerts/domain/models.py`, `backend/apps/risk_alerts/application/use_cases.py`, `backend/apps/risk_alerts/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_risk_alerts_api.py`
 
 ### RF-07-13 — Leer alertas de zonas de riesgo
 
 - **Historia de usuario:** Como corredor · Deseo consultar alertas de zonas de riesgo. Para conocer las alertas vigentes antes de decidir qué calles o senderos utilizar.
 - **Actor:** Corredor · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Consultar alertas de zonas de riesgo
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `GET /risk-zone-alerts` (filtros `cityId`, `routeId`, `active`) y `GET /risk-zone-alerts/{id}`. La página Alertas del corredor (campana de la barra superior, `frontend/src/app/alerts/`) muestra las alertas vigentes de su ciudad. No filtra por tipo ni por severidad; falta la verificación en el celular.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -397,16 +399,18 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 **Criterios de aceptación**
 
 - [ ] El sistema devuelve los registros de «alertas de zonas de riesgo» que cumplen los criterios indicados (ubicación, tipo, horario de vigencia, nivel de severidad), o informa que no hay resultados.
-- [ ] El sistema debe mostrar las alertas vigentes por zona o ruta.
+- [x] El sistema debe mostrar las alertas vigentes por zona o ruta.
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/risk_alerts/application/use_cases.py`, `backend/apps/risk_alerts/presentation/views.py`, `frontend/src/app/alerts/presentation/alerts.page.ts`, `frontend/src/app/alerts/application/risk-zone-alerts.store.ts`, `frontend/src/app/alerts/infrastructure/http-risk-zone-alert.repository.ts`
+
+**Pruebas:** `backend/tests/test_risk_alerts_api.py`, `frontend/src/app/alerts/presentation/alerts.page.spec.ts`, `frontend/src/app/alerts/infrastructure/http-risk-zone-alert.repository.spec.ts`
 
 ### RF-07-14 — Actualizar alerta de zona de riesgo
 
 - **Historia de usuario:** Como administrador · Deseo modificar alerta de zona de riesgo. Para que una alerta refleje su horario, alcance y severidad actuales.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Actualizar alerta de zona de riesgo
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `PUT /risk-zone-alerts/{id}`; el cambio se refleja en la página Alertas del corredor. Las validaciones al modificar no tienen prueba propia. Falta la pantalla de administración.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -414,20 +418,22 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [ ] El sistema guarda los cambios de «alerta de zona de riesgo» (ubicación, tipo, horario de vigencia, nivel de severidad {alta, media, baja}) y confirma al actor.
-- [ ] Se valida que el registro exista.
+- [x] El sistema guarda los cambios de «alerta de zona de riesgo» (ubicación, tipo, horario de vigencia, nivel de severidad {alta, media, baja}) y confirma al actor.
+- [x] Se valida que el registro exista.
 - [ ] Se valida que los datos modificados cumplan las validaciones del registro.
-- [ ] El sistema debe mantener la alerta acorde con la situación actual.
-- [ ] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
+- [x] El sistema debe mantener la alerta acorde con la situación actual.
+- [x] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/risk_alerts/application/use_cases.py`, `backend/apps/risk_alerts/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_risk_alerts_api.py`
 
 ### RF-07-15 — Eliminar alerta de zona de riesgo
 
 - **Historia de usuario:** Como administrador · Deseo eliminar alerta de zona de riesgo. Para evitar mostrar advertencias de zonas que ya no tienen esa alerta vigente.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 3 · Semana 7 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Eliminar alerta de zona de riesgo
-- **Estado:** `Pendiente` — Sin implementar. Planificada en Sprint 3 · Semana 7.
+- **Estado:** `Parcial` — 2026-11-22: API implementada y con pruebas automáticas en el backend (commit `9387ea1`), `DELETE /risk-zone-alerts/{id}`; la alerta eliminada deja de aparecer en la página Alertas del corredor. Falta la pantalla de administración con la confirmación previa.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -435,14 +441,16 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [ ] El sistema elimina el registro de «alerta de zona de riesgo» indicado y confirma al actor.
-- [ ] Se valida que el registro exista.
+- [x] El sistema elimina el registro de «alerta de zona de riesgo» indicado y confirma al actor.
+- [x] Se valida que el registro exista.
 - [ ] El sistema debe solicitar confirmación previa.
-- [ ] El sistema debe dejar de mostrar la alerta al eliminarla.
-- [ ] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
+- [x] El sistema debe dejar de mostrar la alerta al eliminarla.
+- [x] Solo un usuario con el permiso correspondiente al actor «Administrador» puede ejecutarla; cualquier otro recibe un rechazo por falta de permiso (RNF-03).
 - [ ] Si una validación o regla de negocio falla, el sistema informa el motivo en español y no modifica los datos.
 
-**Implementación y pruebas:** aún no existen; la prueba que falla (RED) se escribe a partir de los criterios de arriba.
+**Implementación:** `backend/apps/risk_alerts/application/use_cases.py`, `backend/apps/risk_alerts/presentation/views.py`
+
+**Pruebas:** `backend/tests/test_risk_alerts_api.py`
 
 ## Dependencias
 
@@ -461,7 +469,7 @@ Tomadas para implementar RF-07-12 a RF-07-15 en el Sprint 3; se revisan con Gace
 
 ## Supuestos por validar
 
-- Las alertas de zona (RF-07-12 a RF-07-15) no tienen todavía modelo ni API; el contrato propuesto sale del Excel («ubicación, tipo, horario de vigencia, nivel de severidad») y se afina al planificar el Sprint 3.
+- Las alertas de zona (RF-07-12 a RF-07-15) tienen modelo y API desde el 2026-11-22; el contrato sale del Excel («ubicación, tipo, horario de vigencia, nivel de severidad») y se revisa con Gacelas.
 - El Excel pide que el índice cuente también «reportes validados»: llega con [EP-17](17-reportes-comunitarios.md) mediante `extraPenalties`.
 - RF-07-9 y RF-07-11 tienen como actor al Sistema; sus criterios se verifican en el servidor y en la pantalla de detalle de la ruta, no hay acción manual del usuario.
 - Los criterios de las historias pendientes salen del Excel (entradas, reglas de negocio) y del backlog; los mensajes de confirmación y de error son genéricos, tomados de las salidas del requisito padre (inferido). Se afinan al planificar el sprint.

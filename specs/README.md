@@ -1,6 +1,6 @@
 # Specs de RUNCTY (SDD)
 
-Las specs describen **qué** debe hacer RUNCTY antes de escribir código. Están agrupadas por **capacidad** (una por épica del backlog), no por sprint: cada spec reúne todos los sub-requisitos `RF-XX-N` de su capacidad. Hoy hay 26 specs de capacidad y 4 transversales que cubren los 153 sub-requisitos del backlog: **28 Hecha, 16 Parcial y 109 Pendiente**.
+Las specs describen **qué** debe hacer RUNCTY antes de escribir código. Están agrupadas por **capacidad** (una por épica del backlog), no por sprint: cada spec reúne todos los sub-requisitos `RF-XX-N` de su capacidad. Hoy hay 26 specs de capacidad y 4 transversales que cubren los 153 sub-requisitos del backlog: **28 Hecha, 38 Parcial y 87 Pendiente**.
 
 ## Flujo SDD en este repositorio
 
@@ -35,10 +35,10 @@ Reglas: no se marca un criterio que no se haya observado; si un criterio no se c
 | [03-contactos-de-confianza.md](03-contactos-de-confianza.md) | EP-03 · Contactos de confianza | RF-03-1 a RF-03-4 (4) | 0 / 0 / 4 | Sprint 4 (sem. 9) | Planificada: Sprint 4 (semana 9) |
 | [04-ciudades-y-zonas.md](04-ciudades-y-zonas.md) | EP-04 · Ciudades y zonas de operación | RF-04-1 a RF-04-4 (4) | 4 / 0 / 0 | Sprint 1 (sem. 5) | Sprint 1 (semana 5) |
 | [05-catalogo-de-rutas.md](05-catalogo-de-rutas.md) | EP-05 · Catálogo de rutas y tramos | RF-05-1 a RF-05-8 (8) | 8 / 0 / 0 | Sprint 2 (sem. 6) | Sprint 2 (semana 6) |
-| [06-puntos-de-apoyo.md](06-puntos-de-apoyo.md) | EP-06 · Puntos de apoyo y senderos con resguardo policial | RF-06-1 a RF-06-8 (8) | 0 / 0 / 8 | Sprint 3 (sem. 7) | Planificada: Sprint 3 (semana 7) |
-| [07-evaluacion-de-seguridad.md](07-evaluacion-de-seguridad.md) | EP-07 · Evaluación de seguridad de rutas y zonas de riesgo | RF-07-1 a RF-07-15 (15) | 11 / 0 / 4 | Sprint 2 (sem. 6) / Sprint 3 (sem. 7) | Sprint 2 (semana 6) para RF-07-1 a RF-07-11; Sprint 3 (semana 7) para las alertas de zona RF-07-12 a RF-07-15 |
-| [08-incidentes-y-fuentes.md](08-incidentes-y-fuentes.md) | EP-08 · Incidentes y fuentes de información de seguridad | RF-08-1 a RF-08-8 (8) | 0 / 0 / 8 | Sprint 3 (sem. 7) | Planificada: Sprint 3 (semana 7) |
-| [09-rutas-seguras.md](09-rutas-seguras.md) | EP-09 · Generación de rutas seguras | RF-09-1 a RF-09-3 (3) | 0 / 1 / 2 | Sprint 3 (sem. 7) | Planificada: Sprint 3 (semana 7) |
+| [06-puntos-de-apoyo.md](06-puntos-de-apoyo.md) | EP-06 · Puntos de apoyo y senderos con resguardo policial | RF-06-1 a RF-06-8 (8) | 0 / 8 / 0 | Sprint 3 (sem. 7) | Sprint 3 (semana 7): backend 2026-11-22; interfaz pendiente |
+| [07-evaluacion-de-seguridad.md](07-evaluacion-de-seguridad.md) | EP-07 · Evaluación de seguridad de rutas y zonas de riesgo | RF-07-1 a RF-07-15 (15) | 11 / 4 / 0 | Sprint 2 (sem. 6) / Sprint 3 (sem. 7) | Sprint 2 (semana 6) para RF-07-1 a RF-07-11; Sprint 3 (semana 7) para las alertas de zona RF-07-12 a RF-07-15 (backend y página Alertas del corredor 2026-11-22; administración pendiente) |
+| [08-incidentes-y-fuentes.md](08-incidentes-y-fuentes.md) | EP-08 · Incidentes y fuentes de información de seguridad | RF-08-1 a RF-08-8 (8) | 0 / 8 / 0 | Sprint 3 (sem. 7) | Sprint 3 (semana 7): backend 2026-11-22; interfaz pendiente |
+| [09-rutas-seguras.md](09-rutas-seguras.md) | EP-09 · Generación de rutas seguras | RF-09-1 a RF-09-3 (3) | 0 / 3 / 0 | Sprint 3 (sem. 7) | Sprint 3 (semana 7): backend 2026-11-22; pantalla del corredor pendiente |
 | [10-favoritas-y-valoraciones.md](10-favoritas-y-valoraciones.md) | EP-10 · Rutas favoritas y valoraciones | RF-10-1 a RF-10-7 (7) | 0 / 0 / 7 | Sprint 4 (sem. 9) | Planificada: Sprint 4 (semana 9) |
 | [11-rutas-de-clubes.md](11-rutas-de-clubes.md) | EP-11 · Rutas sugeridas por clubes | RF-11-1 a RF-11-4 (4) | 0 / 0 / 4 | Sprint 4 (sem. 9) | Planificada: Sprint 4 (semana 9) |
 | [12-registro-de-entrenamientos.md](12-registro-de-entrenamientos.md) | EP-12 · Registro de entrenamientos | RF-12-1 a RF-12-9 (9) | 0 / 0 / 9 | Sprint 4 (sem. 9) / Sprint 5 (sem. 10) | Planificada: Sprint 4 (semana 9) para RF-12-1 a RF-12-6 y Sprint 5 (semana 10) para RF-12-7 a RF-12-9 |
@@ -56,7 +56,7 @@ Reglas: no se marca un criterio que no se haya observado; si un criterio no se c
 | [24-publicidad.md](24-publicidad.md) | EP-24 · Publicidad: anunciantes y campañas | RF-24-1 a RF-24-8 (8) | 0 / 0 / 8 | Sprint 5 (sem. 10) | Planificada: Sprint 5 (semana 10) |
 | [25-autenticacion-y-credenciales.md](25-autenticacion-y-credenciales.md) | EP-25 · Autenticación y credenciales | RF-01-5 a RF-01-8 (4) | 0 / 4 / 0 | Sprint 1 (sem. 4) / Sprint 1 (sem. 5) | Sprint 1 (semanas 4–5) |
 | [26-preferencias-de-usuario.md](26-preferencias-de-usuario.md) | EP-26 · Preferencias de usuario | RF-01-13 a RF-01-16 (4) | 0 / 4 / 0 | Sprint 1 (sem. 5) | Sprint 1 (semana 5) |
-| **Total** | 26 épicas | 153 | **28 / 16 / 109** | | |
+| **Total** | 26 épicas | 153 | **28 / 38 / 87** | | |
 
 Notas: EP-01, EP-25 y EP-26 comparten los IDs `RF-01-N` (el backlog dividió RF-01 en tres épicas); la numeración de las épicas EP-01 a EP-24 coincide con RF-01 a RF-24. Lo que el producto difiere a propósito (fuera del piloto según el Documento de Visión) está marcado en el campo «Alcance del piloto» de cada spec: [EP-14](14-retos-entre-corredores.md), [EP-15](15-boton-de-panico.md) y [EP-23](23-eventos-y-carreras.md), además de la expansión de [EP-11](11-rutas-de-clubes.md) y [EP-19](19-clubes-y-membresias.md).
 
@@ -75,7 +75,7 @@ Notas: EP-01, EP-25 y EP-26 comparten los IDs `RF-01-N` (el backlog dividió RF-
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | 4–5 | 24 | 9 | 15 | 0 | Implementado entre 2026-11-12 y 2026-11-17 (backend, área del corredor y administración). |
 | 2 | 6 | 19 | 19 | 0 | 0 | Implementado entre 2026-11-13 y 2026-11-17; verificado en el navegador el 2026-11-17; accesibilidad medida y corregida el 2026-11-22 (`abbc02c`). |
-| 3 | 7 | 23 | 0 | 1 | 22 | No iniciado; solo el catálogo del corredor adelanta parte de RF-09-1. |
+| 3 | 7 | 23 | 0 | 23 | 0 | Backend completo el 2026-11-22 (`9387ea1`, 974 pruebas del backend en verde); en la interfaz solo existe la página Alertas del corredor. Faltan las pantallas de administración (incidentes, fuentes, puntos de apoyo, senderos con resguardo, alertas) y las del corredor (puntos de apoyo, senderos, solicitud de ruta segura). |
 | 4 | 9 | 29 | 0 | 0 | 29 | No iniciado. |
 | 5 | 10 | 58 | 0 | 0 | 58 | No iniciado. |
 
@@ -121,14 +121,14 @@ La semana 8 no tiene actividad y la 11 queda fuera de los sprints (calendario de
 | RF-05-6 | Leer tramos de ruta | [EP-05](05-catalogo-de-rutas.md#rf-05-6--leer-tramos-de-ruta) | Hecha |
 | RF-05-7 | Actualizar tramo de ruta | [EP-05](05-catalogo-de-rutas.md#rf-05-7--actualizar-tramo-de-ruta) | Hecha |
 | RF-05-8 | Eliminar tramo de ruta | [EP-05](05-catalogo-de-rutas.md#rf-05-8--eliminar-tramo-de-ruta) | Hecha |
-| RF-06-1 | Crear punto de apoyo | [EP-06](06-puntos-de-apoyo.md#rf-06-1--crear-punto-de-apoyo) | Pendiente |
-| RF-06-2 | Leer puntos de apoyo | [EP-06](06-puntos-de-apoyo.md#rf-06-2--leer-puntos-de-apoyo) | Pendiente |
-| RF-06-3 | Actualizar punto de apoyo | [EP-06](06-puntos-de-apoyo.md#rf-06-3--actualizar-punto-de-apoyo) | Pendiente |
-| RF-06-4 | Eliminar punto de apoyo | [EP-06](06-puntos-de-apoyo.md#rf-06-4--eliminar-punto-de-apoyo) | Pendiente |
-| RF-06-5 | Crear sendero con resguardo policial | [EP-06](06-puntos-de-apoyo.md#rf-06-5--crear-sendero-con-resguardo-policial) | Pendiente |
-| RF-06-6 | Leer senderos con resguardo policial | [EP-06](06-puntos-de-apoyo.md#rf-06-6--leer-senderos-con-resguardo-policial) | Pendiente |
-| RF-06-7 | Actualizar sendero con resguardo policial | [EP-06](06-puntos-de-apoyo.md#rf-06-7--actualizar-sendero-con-resguardo-policial) | Pendiente |
-| RF-06-8 | Eliminar sendero con resguardo policial | [EP-06](06-puntos-de-apoyo.md#rf-06-8--eliminar-sendero-con-resguardo-policial) | Pendiente |
+| RF-06-1 | Crear punto de apoyo | [EP-06](06-puntos-de-apoyo.md#rf-06-1--crear-punto-de-apoyo) | Parcial |
+| RF-06-2 | Leer puntos de apoyo | [EP-06](06-puntos-de-apoyo.md#rf-06-2--leer-puntos-de-apoyo) | Parcial |
+| RF-06-3 | Actualizar punto de apoyo | [EP-06](06-puntos-de-apoyo.md#rf-06-3--actualizar-punto-de-apoyo) | Parcial |
+| RF-06-4 | Eliminar punto de apoyo | [EP-06](06-puntos-de-apoyo.md#rf-06-4--eliminar-punto-de-apoyo) | Parcial |
+| RF-06-5 | Crear sendero con resguardo policial | [EP-06](06-puntos-de-apoyo.md#rf-06-5--crear-sendero-con-resguardo-policial) | Parcial |
+| RF-06-6 | Leer senderos con resguardo policial | [EP-06](06-puntos-de-apoyo.md#rf-06-6--leer-senderos-con-resguardo-policial) | Parcial |
+| RF-06-7 | Actualizar sendero con resguardo policial | [EP-06](06-puntos-de-apoyo.md#rf-06-7--actualizar-sendero-con-resguardo-policial) | Parcial |
+| RF-06-8 | Eliminar sendero con resguardo policial | [EP-06](06-puntos-de-apoyo.md#rf-06-8--eliminar-sendero-con-resguardo-policial) | Parcial |
 | RF-07-1 | Crear franja horaria | [EP-07](07-evaluacion-de-seguridad.md#rf-07-1--crear-franja-horaria) | Hecha |
 | RF-07-2 | Leer franjas horarias | [EP-07](07-evaluacion-de-seguridad.md#rf-07-2--leer-franjas-horarias) | Hecha |
 | RF-07-3 | Actualizar franja horaria | [EP-07](07-evaluacion-de-seguridad.md#rf-07-3--actualizar-franja-horaria) | Hecha |
@@ -140,21 +140,21 @@ La semana 8 no tiene actividad y la 11 queda fuera de los sprints (calendario de
 | RF-07-9 | Crear índice de seguridad (calcular) | [EP-07](07-evaluacion-de-seguridad.md#rf-07-9--crear-índice-de-seguridad-calcular) | Hecha |
 | RF-07-10 | Leer índices de seguridad | [EP-07](07-evaluacion-de-seguridad.md#rf-07-10--leer-índices-de-seguridad) | Hecha |
 | RF-07-11 | Actualizar índice de seguridad (recalcular) | [EP-07](07-evaluacion-de-seguridad.md#rf-07-11--actualizar-índice-de-seguridad-recalcular) | Hecha |
-| RF-07-12 | Crear alerta de zona de riesgo | [EP-07](07-evaluacion-de-seguridad.md#rf-07-12--crear-alerta-de-zona-de-riesgo) | Pendiente |
-| RF-07-13 | Leer alertas de zonas de riesgo | [EP-07](07-evaluacion-de-seguridad.md#rf-07-13--leer-alertas-de-zonas-de-riesgo) | Pendiente |
-| RF-07-14 | Actualizar alerta de zona de riesgo | [EP-07](07-evaluacion-de-seguridad.md#rf-07-14--actualizar-alerta-de-zona-de-riesgo) | Pendiente |
-| RF-07-15 | Eliminar alerta de zona de riesgo | [EP-07](07-evaluacion-de-seguridad.md#rf-07-15--eliminar-alerta-de-zona-de-riesgo) | Pendiente |
-| RF-08-1 | Crear incidente de seguridad | [EP-08](08-incidentes-y-fuentes.md#rf-08-1--crear-incidente-de-seguridad) | Pendiente |
-| RF-08-2 | Leer incidentes de seguridad | [EP-08](08-incidentes-y-fuentes.md#rf-08-2--leer-incidentes-de-seguridad) | Pendiente |
-| RF-08-3 | Actualizar incidente de seguridad | [EP-08](08-incidentes-y-fuentes.md#rf-08-3--actualizar-incidente-de-seguridad) | Pendiente |
-| RF-08-4 | Eliminar incidente de seguridad | [EP-08](08-incidentes-y-fuentes.md#rf-08-4--eliminar-incidente-de-seguridad) | Pendiente |
-| RF-08-5 | Crear fuente de información | [EP-08](08-incidentes-y-fuentes.md#rf-08-5--crear-fuente-de-información) | Pendiente |
-| RF-08-6 | Leer fuentes de información | [EP-08](08-incidentes-y-fuentes.md#rf-08-6--leer-fuentes-de-información) | Pendiente |
-| RF-08-7 | Actualizar fuente de información | [EP-08](08-incidentes-y-fuentes.md#rf-08-7--actualizar-fuente-de-información) | Pendiente |
-| RF-08-8 | Eliminar fuente de información | [EP-08](08-incidentes-y-fuentes.md#rf-08-8--eliminar-fuente-de-información) | Pendiente |
+| RF-07-12 | Crear alerta de zona de riesgo | [EP-07](07-evaluacion-de-seguridad.md#rf-07-12--crear-alerta-de-zona-de-riesgo) | Parcial |
+| RF-07-13 | Leer alertas de zonas de riesgo | [EP-07](07-evaluacion-de-seguridad.md#rf-07-13--leer-alertas-de-zonas-de-riesgo) | Parcial |
+| RF-07-14 | Actualizar alerta de zona de riesgo | [EP-07](07-evaluacion-de-seguridad.md#rf-07-14--actualizar-alerta-de-zona-de-riesgo) | Parcial |
+| RF-07-15 | Eliminar alerta de zona de riesgo | [EP-07](07-evaluacion-de-seguridad.md#rf-07-15--eliminar-alerta-de-zona-de-riesgo) | Parcial |
+| RF-08-1 | Crear incidente de seguridad | [EP-08](08-incidentes-y-fuentes.md#rf-08-1--crear-incidente-de-seguridad) | Parcial |
+| RF-08-2 | Leer incidentes de seguridad | [EP-08](08-incidentes-y-fuentes.md#rf-08-2--leer-incidentes-de-seguridad) | Parcial |
+| RF-08-3 | Actualizar incidente de seguridad | [EP-08](08-incidentes-y-fuentes.md#rf-08-3--actualizar-incidente-de-seguridad) | Parcial |
+| RF-08-4 | Eliminar incidente de seguridad | [EP-08](08-incidentes-y-fuentes.md#rf-08-4--eliminar-incidente-de-seguridad) | Parcial |
+| RF-08-5 | Crear fuente de información | [EP-08](08-incidentes-y-fuentes.md#rf-08-5--crear-fuente-de-información) | Parcial |
+| RF-08-6 | Leer fuentes de información | [EP-08](08-incidentes-y-fuentes.md#rf-08-6--leer-fuentes-de-información) | Parcial |
+| RF-08-7 | Actualizar fuente de información | [EP-08](08-incidentes-y-fuentes.md#rf-08-7--actualizar-fuente-de-información) | Parcial |
+| RF-08-8 | Eliminar fuente de información | [EP-08](08-incidentes-y-fuentes.md#rf-08-8--eliminar-fuente-de-información) | Parcial |
 | RF-09-1 | Crear solicitud de ruta segura | [EP-09](09-rutas-seguras.md#rf-09-1--crear-solicitud-de-ruta-segura) | Parcial |
-| RF-09-2 | Leer solicitudes de ruta segura | [EP-09](09-rutas-seguras.md#rf-09-2--leer-solicitudes-de-ruta-segura) | Pendiente |
-| RF-09-3 | Eliminar solicitud de ruta segura | [EP-09](09-rutas-seguras.md#rf-09-3--eliminar-solicitud-de-ruta-segura) | Pendiente |
+| RF-09-2 | Leer solicitudes de ruta segura | [EP-09](09-rutas-seguras.md#rf-09-2--leer-solicitudes-de-ruta-segura) | Parcial |
+| RF-09-3 | Eliminar solicitud de ruta segura | [EP-09](09-rutas-seguras.md#rf-09-3--eliminar-solicitud-de-ruta-segura) | Parcial |
 | RF-10-1 | Crear ruta favorita (guardar) | [EP-10](10-favoritas-y-valoraciones.md#rf-10-1--crear-ruta-favorita-guardar) | Pendiente |
 | RF-10-2 | Leer rutas favoritas | [EP-10](10-favoritas-y-valoraciones.md#rf-10-2--leer-rutas-favoritas) | Pendiente |
 | RF-10-3 | Eliminar ruta favorita | [EP-10](10-favoritas-y-valoraciones.md#rf-10-3--eliminar-ruta-favorita) | Pendiente |

@@ -16,7 +16,8 @@
 Reto académico de la **UTPL** (materias Fundamentos de Ingeniería de Software e Ingeniería Web). El club **Gacelas Running Team (Loja, Ecuador)** planteó un problema y varios grupos de estudiantes compiten por proponer y desarrollar la mejor solución. Nuestro grupo quiere ganar el reto.
 
 - Inicio: semana del 12 al 18 de octubre de 2026 (levantamiento de requisitos).
-- Fase actual (2026-11-17): el frontend único (Angular + Ionic + Capacitor) y el backend Django cubren los Sprints 1 y 2, incluido el admin completo (Resumen, Usuarios, Roles, Ciudades y Rutas), y el Sprint 2 se recorrió en Chrome contra el stack de Docker (sección 17). Los specs (SDD) de las 153 historias están en `specs/` (17.7). Antes (2026-11-10): Sprints 1 y 2 verificados contra el código de la arquitectura anterior (sección 14). La demo con Gacelas con Firebase real sigue pendiente. El Sprint 1 cubre usuarios, autenticación, preferencias, roles, administración de usuarios, ciudades y zonas. El Sprint 2 cubre el catálogo de rutas y la evaluación de seguridad por franja. La app también tiene un sistema de diseño nuevo. Sigue el Sprint 3: puntos de apoyo, alertas de zona, incidentes y generación de rutas seguras.
+- Fase actual (2026-11-22): Sprints 1 y 2 funcionando (las 19 historias del Sprint 2 `Hecha`, con la accesibilidad medida); la app del corredor se rediseñó (tema oscuro con fucsia neón, 5 pestañas: Inicio, Rutas, Correr con GPS y mapa de OpenStreetMap, Clubes y Cuenta; campana de alertas; mapas en el detalle de ruta); el backend del Sprint 3 está completo y probado (`9387ea1`) y su interfaz está pendiente salvo la página Alertas. El lunes 2026-11-23 es la defensa ante el docente (guía en `docs/presentacion-2026-11-23.md`). Detalle, problemas conocidos y cómo levantar todo: sección 18.
+- Fase anterior (2026-11-17): el frontend único (Angular + Ionic + Capacitor) y el backend Django cubren los Sprints 1 y 2, incluido el admin completo (Resumen, Usuarios, Roles, Ciudades y Rutas), y el Sprint 2 se recorrió en Chrome contra el stack de Docker (sección 17). Los specs (SDD) de las 153 historias están en `specs/` (17.7). Antes (2026-11-10): Sprints 1 y 2 verificados contra el código de la arquitectura anterior (sección 14). La demo con Gacelas con Firebase real sigue pendiente. El Sprint 1 cubre usuarios, autenticación, preferencias, roles, administración de usuarios, ciudades y zonas. El Sprint 2 cubre el catálogo de rutas y la evaluación de seguridad por franja. La app también tiene un sistema de diseño nuevo. Sigue el Sprint 3: puntos de apoyo, alertas de zona, incidentes y generación de rutas seguras.
 - Docentes tutores: Ing. Segundo Raymundo e Ing. Jorge Landacay.
 
 ## 2. Problema
@@ -271,7 +272,7 @@ Se mantiene el calendario del equipo: Sprint 1, semanas 4–5; Sprint 2, semana 
 - [ ] Validar el diseño y la paleta con el cliente.
 - [ ] **Demo con Gacelas:** pasar a Firebase real. La fecha original (semana del 2026-11-02) ya pasó; confirmar la nueva. Ver "Plan para la demo" abajo.
 - [ ] Mapas: integrar un proveedor detrás del puerto `MapProvider` (pospuesto; hoy las coordenadas se cargan a mano).
-- [ ] Sprint 3: puntos de apoyo (EP-06), alertas de zona (EP-07), incidentes (EP-08) y generación de rutas seguras (EP-09).
+- [ ] Sprint 3: puntos de apoyo (EP-06), alertas de zona (EP-07), incidentes (EP-08) y generación de rutas seguras (EP-09). **2026-11-22:** backend completo y probado (`9387ea1`); en la interfaz solo existe la página Alertas del corredor. Faltan las pantallas (sección 18).
 - [x] Backend local en Docker (2026-11-10): emuladores de Firebase, seed y panel con `docker compose up -d --build`, puertos solo en `127.0.0.1` y procesos sin root.
 - [x] Auditoría del 2026-11-10 (seguridad, UX/UI y verificación de sprints): hallazgos y plan en la sección 14.
 - [x] Correcciones de seguridad del servidor (T1; SEC-01, 02, 03, 05, 06 y 08): hechas en la rama `feat/hardening-and-polish`. El agente reportó los tests en verde; **no se volvieron a ejecutar** antes de subirlas (ver 14.2).
@@ -788,7 +789,7 @@ RUNCTY/
 
 - Viven en `specs/` y se organizan **por capacidad, no por sprint**: una spec por épica del backlog (`01-gestion-de-usuarios.md` a `26-preferencias-de-usuario.md`, que cubren los 153 sub-requisitos `RF-XX-N`) y cuatro transversales en `specs/transversal/` (RNF, arquitectura, sistema de diseño, panel de administración). El índice, la leyenda de estados y la matriz de trazabilidad están en `specs/README.md`.
 - Flujo: **spec primero** -> prueba que falla (RED) -> implementación (GREEN) -> marcar el criterio con evidencia -> anotar en `odd/tasks/<feature>.md`. Si cambia el comportamiento, primero se cambia la spec.
-- Estados honestos: `Hecha` (todos los criterios con evidencia), `Parcial` (implementada con criterios abiertos o sin verificar en navegador o celular) y `Pendiente`. Al 2026-11-22: 28 Hecha, 16 Parcial y 109 Pendiente (el Sprint 2 cerró con sus 19 historias `Hecha`).
+- Estados honestos: `Hecha` (todos los criterios con evidencia), `Parcial` (implementada con criterios abiertos o sin verificar en navegador o celular) y `Pendiente`. Al 2026-11-22: 28 Hecha, 38 Parcial y 87 Pendiente (el Sprint 2 cerró con sus 19 historias `Hecha`; las 23 del Sprint 3 quedaron `Parcial` con el backend hecho, sección 18).
 
 ### 17.6 Cómo retomar (estado al 2026-11-17)
 
@@ -799,3 +800,47 @@ RUNCTY/
 5. Levantar todo en local: emuladores y API con `docker compose up -d --build` (Docker Desktop encendido) o sin Docker con `npm run emulators`, `npm run seed` y `npm run api`; el frontend con `npm start` desde `frontend/`. Usuario de prueba del emulador: `admin@runcty.dev` / `Admin123!`.
 6. Siguiente: validar los "Supuestos por validar" de los specs (política de contraseña, rangos del perfil deportivo, contratos propuestos, proveedor de mapas), decidir si el admin pasa a tablas con encabezado y cabecera de página, y luego S6 (limpieza) y el Sprint 3 (puntos de apoyo, alertas de zona, incidentes y rutas seguras). Para ver el admin: Docker Desktop encendido, `docker compose up -d --build`, `npm start` en `frontend/` y abrir http://localhost:4200 (`admin@runcty.dev` / `Admin123!`); si se reconstruye el contenedor `firebase`, hay que volver a cargar los datos con `python manage.py seed` apuntando a los emuladores.
 7. **Antes de borrar `frontend/mobile`, `admin/` y `functions/`:** abrir el frontend nuevo en un navegador y recorrer el registro, el login, las rutas y el admin.
+
+## 18. Bitácora del 2026-11-22: cierre del Sprint 2, rediseño y backend del Sprint 3
+
+### 18.1 Qué se hizo
+
+- **Sprint 2 cerrado:** las 19 historias quedan `Hecha`; se midió y corrigió el criterio de accesibilidad (`abbc02c`, `ba50290`). Detalle en `odd/tasks/sprint2-cierre-accesibilidad.md`.
+- **Rediseño de la interfaz** (`odd/tasks/rediseno-ui.md` y `odd/tasks/rediseno-ui-v2.md`): app del corredor en tema oscuro con el fucsia neón del club y 5 pestañas (Inicio, Rutas, Correr con GPS en vivo y mapa de Leaflet/OpenStreetMap, Clubes como espacio reservado para EP-19, y Cuenta); la campana abre la página de alertas; logo según el tema; barra de estado de borde a borde; admin con marco cuadrado como la referencia; detalle de ruta con pestañas «Resumen / Franjas horarias / Tramos y factores» y mapa en el corredor y en el admin. Se quitó el botón SOS de la pantalla: el pánico será un disparador con los botones de volumen en el Sprint 4 (spec 15).
+- **Backend del Sprint 3** (`9387ea1`, 974 pruebas del backend en verde; `odd/tasks/sprint3.md`): incidentes y fuentes de información que penalizan el índice de seguridad, puntos de apoyo, senderos con resguardo policial, alertas de zona de riesgo y solicitudes de ruta segura con la recomendación en el servidor. El seed de Loja trae datos de ejemplo (un robo en Jipiro baja su franja de la tarde a Medio 65).
+- **Interfaz del Sprint 3:** solo la página Alertas del corredor, que consume `GET /risk-zone-alerts`. No hay pantallas de administración para incidentes, fuentes, puntos de apoyo, senderos ni alertas, ni pantallas del corredor para puntos de apoyo, senderos o solicitudes de ruta segura.
+- Decisiones registradas en las specs 06, 07, 08, 09, 10, 11 y 15.
+
+### 18.2 Estado de los sprints
+
+| Sprint | Estado |
+| --- | --- |
+| 1 | Funcionando: 9 `Hecha` y 15 `Parcial` (falta recorrer en navegador o celular parte del área del corredor). |
+| 2 | Cerrado: 19 de 19 `Hecha`. |
+| 3 | 23 historias `Parcial`: backend y pruebas hechos, interfaz pendiente (salvo Alertas). |
+| 4 y 5 | No iniciados. |
+
+Totales de las specs: 28 `Hecha`, 38 `Parcial` y 87 `Pendiente` (153).
+
+### 18.3 Problemas conocidos
+
+- En el celular Android (Infinix, Android 14, WebView 157), tras el cambio a borde a borde, la cabecera de cada pestaña se ve como una franja blanca. Las medidas del diseño son correctas; es un problema de composición del WebView que se sigue investigando.
+- El emulador de Firebase Auth pierde los usuarios cada vez que se reinicia el contenedor `runcty-firebase`.
+- La recarga en vivo en el celular necesita el cable USB y `adb reverse` de los puertos 4200, 8000 y 9099.
+- La clave de Google Maps está pendiente (la entrega el usuario); mientras tanto se usa OpenStreetMap.
+- Jira (proyecto RUN) difiere del backlog final del Excel en 15 historias; se presentan el Excel y las specs como versión vigente (hoja «Jira vs Excel final» de `Trazabilidad diagramas RUNCTY.xlsx`).
+
+### 18.4 Cómo levantar todo
+
+1. Docker Desktop encendido. Desde `D:\RUNCTY`: `docker compose up -d --build`. Esperar a que `runcty-seed` quede `Exited (0)` (`docker ps -a`).
+2. Frontend, desde `frontend/`: `npx ng serve --host 127.0.0.1` (el túnel del celular usa IPv4). Navegador en http://localhost:4200.
+3. Usuario administrador: `admin@runcty.dev` / `Admin123!`. Las cuentas de corredor se crean desde «Registro».
+4. Celular por USB: `adb reverse tcp:4200 tcp:4200`, `adb reverse tcp:8000 tcp:8000` y `adb reverse tcp:9099 tcp:9099`.
+5. APK con recarga en vivo: `npx cap sync android` borra `server.url`; volver a poner `"server": { "url": "http://localhost:4200", "cleartext": true }` en `frontend/android/app/src/main/assets/capacitor.config.json` y compilar desde `frontend/android` con `gradlew.bat assembleDebug`.
+
+### 18.5 Siguientes pasos
+
+1. Defensa del lunes 2026-11-23: `docs/presentacion-2026-11-23.md`.
+2. Sprint 3: pantallas de administración (incidentes, fuentes, puntos de apoyo, senderos con resguardo, alertas) y del corredor (puntos de apoyo, senderos, solicitud de ruta segura).
+3. EP-10 (valoraciones con estrellas, opiniones y favoritas) y EP-11 (rutas verificadas por clubes).
+4. Resto del Sprint 4: contactos de confianza, botón de pánico con los botones de volumen, ubicación compartida y registro de entrenamientos.
