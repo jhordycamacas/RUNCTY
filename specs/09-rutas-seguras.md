@@ -149,9 +149,17 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Depende de:** [RF-04 · Ciudades y zonas de operación](04-ciudades-y-zonas.md), [RF-07 · Evaluación de seguridad de rutas y zonas de riesgo](07-evaluacion-de-seguridad.md).
 
+## Decisiones de diseño (2026-11-22)
+
+Tomadas para implementar el Sprint 3 sin bloquearlo; se revisan con Gacelas en la demo.
+
+- **Solicitud:** `cityId`, `distanceKm` (> 0) y la franja como `startTime`/`endTime`. Se guarda por corredor como historial.
+- **Recomendación:** rutas activas de la ciudad cuya distancia esté dentro de ±20 % de la pedida, ordenadas por el puntaje de la franja que se solapa con la pedida (mayor primero), después por cercanía a la distancia pedida; las rutas sin índice para esa franja van al final. La regla pasa al servidor; el cliente deja de ordenar por su cuenta.
+- **API:** `POST /safe-route-requests` responde `201 {id, routes}` (extiende el `201 {id}` habitual para no hacer una segunda llamada); `GET /safe-route-requests` (las del corredor), `GET /safe-route-requests/{id}` (recalcula la recomendación al momento), `DELETE /safe-route-requests/{id}` (solo el dueño).
+- **Generar frente a recomendar:** en el piloto se recomiendan rutas del catálogo; no se trazan rutas nuevas (sin proveedor de mapas).
+
 ## Supuestos por validar
 
-- La tolerancia de la distancia aproximada (por ejemplo ±20 %) no está definida en el Excel; hoy el catálogo usa tramos de distancia (hasta 5 km, 5–10 km, más de 10 km).
-- No está definido si la solicitud se guarda como historial o solo se calcula; el Excel pide crear, leer y eliminar solicitudes, por lo que se guardan (inferido).
+- La tolerancia de la distancia aproximada no está definida en el Excel; se tomó ±20 % (ver Decisiones de diseño).
 - La ordenación actual vive en el cliente (`frontend/src/app/routes/domain/catalog.ts`); al implementar RF-09 debe pasar al servidor para cumplir RNF-07 y evitar duplicar la regla.
 - Los criterios de las historias pendientes salen del Excel (entradas, reglas de negocio) y del backlog; los mensajes de confirmación y de error son genéricos, tomados de las salidas del requisito padre (inferido). Se afinan al planificar el sprint.

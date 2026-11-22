@@ -274,8 +274,18 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Depende de:** [RF-05 · Catálogo de rutas y tramos](05-catalogo-de-rutas.md).
 
+## Decisiones de diseño (2026-11-22)
+
+Tomadas para implementar el Sprint 3 sin bloquearlo; se revisan con Gacelas en la demo.
+
+- **Tipos de incidente:** `robbery` (robo), `assault` (asalto), `harassment` (acoso), `traffic_accident` (accidente de tránsito), `other` (otro).
+- **Efecto en el índice (RF-07-11):** cada incidente de los últimos 12 meses suma una penalización (`ExtraPenalty`, origen `incident`) al tramo donde ocurrió, en la franja que cubre la hora del incidente (±1 h). Severidad por tipo: robo y asalto **alta** (35), acoso **media** (20), accidente de tránsito y otro **baja** (10). Registrar, editar o eliminar un incidente recalcula el índice de su ruta.
+- **Fuente eliminada:** sus incidentes dejan de contar en el índice y se recalculan las rutas afectadas; el registro del incidente se conserva para el historial del administrador.
+- **Permisos:** lectura y escritura solo con `routes.manage` (el corredor nunca ve incidentes; no tienen datos personales).
+- **API:** `GET/POST /safety-incidents`, `GET/PUT/DELETE /safety-incidents/{id}` con filtros `routeId`, `segmentId`, `type`, `from`, `to`; `GET/POST /information-sources`, `GET/PUT/DELETE /information-sources/{id}`. Respuestas: `201 {id}`, `204`, errores `{error:{reason,message}}`.
+
 ## Supuestos por validar
 
-- Los tipos de incidente no están enumerados en el Excel; se definen con Gacelas antes de implementar.
+- Los tipos de incidente no están enumerados en el Excel; se tomó una lista inicial (ver Decisiones de diseño) que se valida con Gacelas.
 - La importación automática desde fuentes externas (RNF-16, «Podría tener») queda fuera de las cuatro historias; aquí solo se cubre el registro manual (inferido).
 - Los criterios de las historias pendientes salen del Excel (entradas, reglas de negocio) y del backlog; los mensajes de confirmación y de error son genéricos, tomados de las salidas del requisito padre (inferido). Se afinan al planificar el sprint.

@@ -449,6 +449,16 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - **Depende de:** [RF-05 · Catálogo de rutas y tramos](05-catalogo-de-rutas.md), [RF-17 · Reportes comunitarios](17-reportes-comunitarios.md).
 - **Dependen de esta capacidad:** [EP-09 · Generación de rutas seguras](09-rutas-seguras.md).
 
+## Decisiones de diseño de las alertas de zona (2026-11-22)
+
+Tomadas para implementar RF-07-12 a RF-07-15 en el Sprint 3; se revisan con Gacelas en la demo.
+
+- **Modelo:** `type`, `severity` (`alta`, `media`, `baja`), `description`, `location {lat, lng}`, `radiusM` (zona circular), `cityId`, `routeId` opcional, vigencia `validFrom`/`validTo` y franja diaria opcional `startTime`/`endTime`.
+- **Vigente:** hoy está entre `validFrom` y `validTo` y, si tiene franja, la hora actual cae dentro. `GET /risk-zone-alerts?cityId=…&active=true` devuelve solo las vigentes (lo que ve el corredor en la pestaña Alertas).
+- **Efecto en el índice:** las alertas se muestran; no cambian el puntaje en el Sprint 3 (las penalizaciones vienen de factores e incidentes).
+- **Permisos:** escritura con `routes.manage`; lectura con sesión iniciada.
+- **API:** `GET/POST /risk-zone-alerts`, `GET/PUT/DELETE /risk-zone-alerts/{id}`.
+
 ## Supuestos por validar
 
 - Las alertas de zona (RF-07-12 a RF-07-15) no tienen todavía modelo ni API; el contrato propuesto sale del Excel («ubicación, tipo, horario de vigencia, nivel de severidad») y se afina al planificar el Sprint 3.

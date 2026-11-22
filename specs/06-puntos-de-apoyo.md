@@ -270,7 +270,18 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Depende de:** [RF-05 · Catálogo de rutas y tramos](05-catalogo-de-rutas.md).
 
+## Decisiones de diseño (2026-11-22)
+
+Tomadas para implementar el Sprint 3 sin bloquearlo; se revisan con Gacelas en la demo.
+
+- **Ubicación:** `{lat, lng}` y `cityId`. «Cercano» a una ruta o al corredor = a 500 m o menos (distancia de haversine al punto o a cualquier punto de los tramos).
+- **Horario de atención:** texto libre opcional (por ejemplo «Lun–Sáb 06:00–20:00»).
+- **Resguardo policial:** `routeId`, `segmentId` opcional (vacío = toda la ruta), `days` (lunes a domingo, al menos uno), `startTime` y `endTime`. No se permiten dos resguardos del mismo tramo que compartan día y se solapen en horario.
+- **Efecto en el índice:** en el Sprint 3 los puntos de apoyo y los resguardos **solo se muestran** al corredor; no cambian el puntaje, porque la fórmula de RF-07 solo resta. Se revisa con Gacelas si deben sumar.
+- **Permisos:** escritura con `routes.manage`; lectura con sesión iniciada (corredor y administrador).
+- **API:** `GET/POST /support-points` (filtros `cityId`, `routeId`, `lat`+`lng`+`radiusM`), `GET/PUT/DELETE /support-points/{id}`; `GET/POST /guarded-trails` (filtro `routeId`), `GET/PUT/DELETE /guarded-trails/{id}`.
+
 ## Supuestos por validar
 
-- El efecto de un punto de apoyo o de un resguardo en el puntaje del índice no está definido en el Excel; la fórmula se decide al implementar RF-07-11 con esta capacidad.
+- El efecto de un punto de apoyo o de un resguardo en el puntaje del índice no está definido en el Excel; en el Sprint 3 solo se muestran (ver Decisiones de diseño).
 - Los criterios de las historias pendientes salen del Excel (entradas, reglas de negocio) y del backlog; los mensajes de confirmación y de error son genéricos, tomados de las salidas del requisito padre (inferido). Se afinan al planificar el sprint.
