@@ -15,6 +15,7 @@ from apps.routes.infrastructure.firestore_route_repository import (
     _apply,
     _mutate,
 )
+from apps.safety_data.domain.models import IncidenteSeguridad
 
 ROUTE = {
     "name": "Loop",
@@ -26,6 +27,15 @@ ROUTE = {
     "surface": "asphalt",
     "difficulty": "beginner",
     "active": True,
+}
+INCIDENT = {
+    "routeId": "r1",
+    "segmentId": "s1",
+    "type": "robbery",
+    "date": "2026-11-01",
+    "time": "20:00",
+    "sourceId": "src1",
+    "sourceDeleted": False,
 }
 
 
@@ -49,9 +59,18 @@ def route_tree(client: MagicMock) -> SimpleNamespace:
     slots = MagicMock()
     slots.stream.return_value = [snapshot("t1", {"startTime": "06:00", "endTime": "09:00"})]
     route = client.collection.return_value.document.return_value
+    route.id = "r1"
     route.get.return_value = snapshot("r1", ROUTE)
     route.collection.side_effect = lambda name: {"segments": segments, "timeSlots": slots}[name]
-    return SimpleNamespace(route=route, segments=segments, slots=slots, factors=factors)
+    # The `safetyIncidents` query by route: a valid and a malformed incident.
+    incidents = client.collection.return_value.where.return_value
+    incidents.stream.return_value = [
+        snapshot("i1", INCIDENT),
+        snapshot("i2", {**INCIDENT, "type": "crime"}),
+    ]
+    return SimpleNamespace(
+        route=route, segments=segments, slots=slots, factors=factors, incidents=incidents
+    )
 
 
 @pytest.fixture
@@ -99,6 +118,10 @@ class TestReading:
         assert state.segments == [Tramo("s1", "Gate", 0, (), 0)]
         assert state.slots == [FranjaHoraria("t1", "06:00", "09:00")]
         assert state.factors == {"s1": [FactorDeRiesgo("f1", "traffic", "low", "x")]}
+        assert state.incidents == [IncidenteSeguridad.from_document("i1", INCIDENT)]
+        client.collection.assert_any_call("safetyIncidents")
+        filter_ = client.collection.return_value.where.call_args.kwargs["filter"]
+        assert (filter_.field_path, filter_.op_string, filter_.value) == ("routeId", "==", "r1")
 
     def test_new_ids_come_from_firestore(self, client):
         client.collection.return_value.document.return_value.id = "auto-id"
@@ -147,6 +170,7 @@ class TestWriting:
         tree.segments.stream.assert_called_once_with(transaction=transaction)
         tree.slots.stream.assert_called_once_with(transaction=transaction)
         tree.factors.stream.assert_called_once_with(transaction=transaction)
+        tree.incidents.stream.assert_called_once_with(transaction=transaction)
         assert planned[0].slots == [FranjaHoraria("t1", "06:00", "09:00")]
         transaction.update.assert_called_once_with(
             client.document.return_value, {"segmentCount": 1}

@@ -8,8 +8,9 @@ from apps.shared.presentation.adapters import adapter
 
 class Command(BaseCommand):
     help = (
-        "Seeds the Firebase emulators with Loja, the system roles, an admin account and sample "
-        "routes. Refuses to run against anything but a demo project on a local emulator."
+        "Seeds the Firebase emulators with Loja, the system roles, an admin account, sample "
+        "routes and the Sprint 3 safety data. Refuses to run against anything but a demo "
+        "project on a local emulator."
     )
 
     def handle(self, *args, **options):
@@ -27,5 +28,9 @@ class Command(BaseCommand):
             auth=adapter("AUTH_GATEWAY"),
             accounts=adapter("SEED_ACCOUNTS"),
             routes=adapter("ROUTE_REPOSITORY"),
+            sources=adapter("SOURCE_REPOSITORY"),
+            support_points=adapter("SUPPORT_POINT_REPOSITORY"),
+            guarded_trails=adapter("GUARDED_TRAIL_REPOSITORY"),
+            alerts=adapter("RISK_ZONE_ALERT_REPOSITORY"),
         )
         run_seed(deps, self.stdout.write)

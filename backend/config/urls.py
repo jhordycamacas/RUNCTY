@@ -7,6 +7,10 @@ urlpatterns = [
     path("api/v1/", include("apps.roles.presentation.urls")),
     path("api/v1/", include("apps.cities.presentation.urls")),
     path("api/v1/", include("apps.routes.presentation.urls")),
+    path("api/v1/", include("apps.safety_data.presentation.urls")),
+    path("api/v1/", include("apps.support_points.presentation.urls")),
+    path("api/v1/", include("apps.risk_alerts.presentation.urls")),
+    path("api/v1/", include("apps.safe_routes.presentation.urls")),
     path("api/v1/", include("apps.summary.presentation.urls")),
 ]
 

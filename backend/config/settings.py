@@ -63,6 +63,24 @@ SPORT_PROFILE_REPOSITORY = (
 PREFERENCES_REPOSITORY = (
     "apps.users.infrastructure.firestore_private_documents.FirestorePreferencesRepository"
 )
+SOURCE_REPOSITORY = (
+    "apps.safety_data.infrastructure.document_repositories.FirestoreSourceRepository"
+)
+INCIDENT_REPOSITORY = (
+    "apps.safety_data.infrastructure.document_repositories.FirestoreIncidentRepository"
+)
+SUPPORT_POINT_REPOSITORY = (
+    "apps.support_points.infrastructure.document_repositories.FirestoreSupportPointRepository"
+)
+GUARDED_TRAIL_REPOSITORY = (
+    "apps.support_points.infrastructure.document_repositories.FirestoreGuardedTrailRepository"
+)
+RISK_ZONE_ALERT_REPOSITORY = (
+    "apps.risk_alerts.infrastructure.document_repositories.FirestoreRiskZoneAlertRepository"
+)
+SAFE_ROUTE_REQUEST_REPOSITORY = (
+    "apps.safe_routes.infrastructure.document_repositories.FirestoreSafeRouteRequestRepository"
+)
 
 # --- Django ----------------------------------------------------------------
 

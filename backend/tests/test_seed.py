@@ -5,6 +5,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 
 from apps.roles.domain.system_roles import SYSTEM_ROLES
+from apps.routes.domain.time import local_now
 from apps.seed.application.use_cases import SeedDeps, run_seed
 from apps.seed.domain.data import ADMIN_EMAIL, SEED_ROUTES
 from apps.shared.domain.permissions import ALL_PERMISSIONS
@@ -27,6 +28,10 @@ def deps() -> SeedDeps:
         auth=fakes.InMemoryAuthGateway(),
         accounts=fakes.InMemorySeedAccounts(),
         routes=fakes.InMemoryRouteRepository(),
+        sources=fakes.InMemorySourceRepository(),
+        support_points=fakes.InMemorySupportPointRepository(),
+        guarded_trails=fakes.InMemoryGuardedTrailRepository(),
+        alerts=fakes.InMemoryRiskZoneAlertRepository(),
     )
 
 
@@ -88,7 +93,7 @@ def test_seeds_the_admin_account_with_claims_and_profile():
 
 def test_seeds_five_routes_with_segments_time_slots_and_risk_factors():
     seed([])
-    routes = {path for path in FIREBASE.docs if path.count("/") == 1}
+    routes = {path for path in FIREBASE.docs if path.startswith("routes/") and path.count("/") == 1}
     assert routes == {f"routes/{route_id}" for route_id in ROUTE_IDS}
     assert len(SEED_ROUTES) == 5
     tebaida = children("routes/loja-tebaida/segments")
@@ -124,8 +129,8 @@ def test_computes_lengths_distance_and_the_safety_index():
     # One low lighting factor (18:00-24:00) takes 10 points off the evening slot only.
     assert segments["seg-3"]["safety"]["morning"]["score"] == 100
     assert segments["seg-3"]["safety"]["evening"]["score"] == 90
-    assert jipiro["safety"]["evening"]["worstSegmentId"] == "seg-3"
-    assert jipiro["safety"]["evening"]["level"] == "high"
+    # The evening of the route is that of seg-2, where the seed adds a robbery (see below).
+    assert jipiro["safety"]["morning"]["level"] == "high"
 
     puear = FIREBASE.docs["routes/loja-puear"]["safety"]
     # seg-2: isolated (high) + uneven (medium) at 05:00-07:00 -> 100 - 35 - 20.
@@ -135,6 +140,37 @@ def test_computes_lengths_distance_and_the_safety_index():
     # poor lighting high + isolated high + uneven medium in the evening -> 100 - 35 - 35 - 20.
     assert puear["evening"]["score"] == 10
     assert puear["evening"]["level"] == "low"
+
+
+def test_seeds_incidents_that_lower_the_index_of_their_segment():
+    seed([])
+    incident = children("safetyIncidents")["inc-jipiro-robo"]
+    assert (incident["routeId"], incident["segmentId"], incident["type"]) == (
+        "loja-jipiro",
+        "seg-2",
+        "robbery",
+    )
+    assert incident["sourceId"] in children("informationSources")
+    jipiro = FIREBASE.docs["routes/loja-jipiro"]["safety"]["evening"]
+    # The robbery at 19:00 (high, -35) beats the low lighting factor of seg-3 (-10).
+    assert (jipiro["score"], jipiro["level"], jipiro["worstSegmentId"]) == (65, "medium", "seg-2")
+    assert jipiro["factors"][0]["source"] == "incident"
+    # seg-1 of the Malecón: traffic (high, -35) and harassment at 06:00 (medium, -20).
+    malecon = FIREBASE.docs["routes/loja-malecon-zamora/segments/seg-1"]["safety"]["morning"]
+    assert malecon["score"] == 45
+
+
+def test_seeds_support_points_a_guarded_trail_and_alerts_in_force():
+    seed([])
+    assert sorted(children("supportPoints")) == [
+        "centro-salud-tebaida",
+        "tienda-malecon",
+        "upc-jipiro",
+    ]
+    assert children("guardedTrails")["resguardo-puear"]["days"] == ["sat", "sun"]
+    alerts = fakes.InMemoryRiskZoneAlertRepository().list("loja")
+    assert sorted(alert.id for alert in alerts) == ["alerta-centro-obras", "alerta-malecon-robos"]
+    assert all(alert.is_active(local_now()) for alert in alerts)
 
 
 def test_route_documents_have_the_expected_fields():

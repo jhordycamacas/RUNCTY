@@ -5,14 +5,37 @@ import time
 from dataclasses import replace
 
 from apps.cities.domain.models import Ciudad
+from apps.risk_alerts.infrastructure.document_repositories import (
+    FirestoreRiskZoneAlertRepository,
+)
 from apps.roles.application.ports import RoleChange
 from apps.roles.domain.models import Rol
 from apps.routes.application.ports import Marker, WriteOp
 from apps.routes.domain.models import FactorDeRiesgo, FranjaHoraria, RouteState, Ruta, Tramo
+from apps.safe_routes.infrastructure.document_repositories import (
+    FirestoreSafeRouteRequestRepository,
+)
+from apps.safety_data.domain.models import IncidenteSeguridad
+from apps.safety_data.infrastructure.document_repositories import (
+    FirestoreIncidentRepository,
+    FirestoreSourceRepository,
+)
 from apps.shared.application.ports import AuthUserNotFound, TokenRejected
 from apps.shared.domain.models import Principal
 from apps.shared.domain.permissions import ADMIN_ROLE
+from apps.shared.infrastructure.firebase.collections import (
+    GUARDED_TRAILS,
+    INFORMATION_SOURCES,
+    RISK_ZONE_ALERTS,
+    SAFE_ROUTE_REQUESTS,
+    SAFETY_INCIDENTS,
+    SUPPORT_POINTS,
+)
 from apps.summary.domain.metrics import UserRecord
+from apps.support_points.infrastructure.document_repositories import (
+    FirestoreGuardedTrailRepository,
+    FirestoreSupportPointRepository,
+)
 from apps.users.domain.models import PerfilDeportivo, PreferenciaUsuario, Usuario
 
 RUNNER = Principal(
@@ -258,7 +281,9 @@ class InMemoryCityUsage:
 
     def has_routes(self, city_id: str) -> bool:
         return any(
-            path.count("/") == 1 and document.get("cityId") == city_id
+            path.startswith("routes/")
+            and path.count("/") == 1
+            and document.get("cityId") == city_id
             for path, document in self._firebase.docs.items()
         )
 
@@ -304,6 +329,11 @@ class InMemoryRouteRepository:
                 )
             )
             factors[segment_id] = [factor for factor in parsed if factor is not None]
+        incidents = (
+            IncidenteSeguridad.from_document(incident_id, document)
+            for incident_id, document in self._children(SAFETY_INCIDENTS)
+            if document.get("routeId") == route_id
+        )
         return RouteState(
             segments=[Tramo.from_document(i, document) for i, document in segments],
             slots=[
@@ -311,6 +341,7 @@ class InMemoryRouteRepository:
                 for i, document in self._children(f"{base}/timeSlots")
             ],
             factors=factors,
+            incidents=[incident for incident in incidents if incident is not None],
         )
 
     def commit(self, ops: list[WriteOp]) -> None:
@@ -468,3 +499,66 @@ class InMemorySummarySource:
         return [str(document.get("severity", "")) for document in self._under("riskFactors")][
             :limit
         ]
+
+
+class InMemoryDocumentStore:
+    """`DocumentStore` over the `FakeFirebase.docs` of one top-level collection."""
+
+    def __init__(self, collection: str, firebase: FakeFirebase | None = None) -> None:
+        self._collection = collection
+        self._firebase = firebase or FIREBASE
+
+    def new_id(self) -> str:
+        self._firebase.id_counter += 1
+        return f"gen-{self._firebase.id_counter}"
+
+    def get(self, doc_id: str) -> dict | None:
+        document = self._firebase.docs.get(f"{self._collection}/{doc_id}")
+        return None if document is None else dict(document)
+
+    def all(self) -> list[tuple[str, dict]]:
+        prefix = f"{self._collection}/"
+        return [
+            (path.removeprefix(prefix), dict(document))
+            for path, document in sorted(self._firebase.docs.items())
+            if path.startswith(prefix) and path.count("/") == 1
+        ]
+
+    def where(self, field: str, value: object) -> list[tuple[str, dict]]:
+        return [(doc_id, data) for doc_id, data in self.all() if data.get(field) == value]
+
+    def set(self, doc_id: str, data: dict) -> None:
+        self._firebase.docs[f"{self._collection}/{doc_id}"] = dict(data)
+
+    def delete(self, doc_id: str) -> None:
+        self._firebase.docs.pop(f"{self._collection}/{doc_id}", None)
+
+
+class InMemorySourceRepository(FirestoreSourceRepository):
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        super().__init__(InMemoryDocumentStore(INFORMATION_SOURCES, firebase))
+
+
+class InMemoryIncidentRepository(FirestoreIncidentRepository):
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        super().__init__(InMemoryDocumentStore(SAFETY_INCIDENTS, firebase))
+
+
+class InMemorySupportPointRepository(FirestoreSupportPointRepository):
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        super().__init__(InMemoryDocumentStore(SUPPORT_POINTS, firebase))
+
+
+class InMemoryGuardedTrailRepository(FirestoreGuardedTrailRepository):
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        super().__init__(InMemoryDocumentStore(GUARDED_TRAILS, firebase))
+
+
+class InMemoryRiskZoneAlertRepository(FirestoreRiskZoneAlertRepository):
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        super().__init__(InMemoryDocumentStore(RISK_ZONE_ALERTS, firebase))
+
+
+class InMemorySafeRouteRequestRepository(FirestoreSafeRouteRequestRepository):
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        super().__init__(InMemoryDocumentStore(SAFE_ROUTE_REQUESTS, firebase))

@@ -1,23 +1,37 @@
 """Seeds the local Firebase emulators with the minimum data for development: the pilot city,
-the system roles, an admin account and sample routes with segments, time slots, risk factors
-and the safety index. Every step is idempotent, so running it again leaves the same data."""
+the system roles, an admin account, sample routes with segments, time slots, risk factors,
+incidents and the safety index, and the sources, support points, guarded trails and risk zone
+alerts of Sprint 3. Every step is idempotent, so running it again the same day leaves the same
+data (incident and alert dates are relative to the day it runs)."""
 
 import math
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import date, datetime, timedelta
 
 from apps.cities.application.ports import CityRepository
 from apps.cities.domain.models import Ciudad
+from apps.risk_alerts.application.ports import RiskZoneAlertRepository
+from apps.risk_alerts.domain.models import AlertaZonaRiesgo
 from apps.roles.application.ports import RoleRepository
 from apps.roles.domain.system_roles import SYSTEM_ROLES
 from apps.routes.application.ports import SERVER_TIMESTAMP, RouteRepository, WriteOp
 from apps.routes.domain.geo import path_length_m
 from apps.routes.domain.models import FactorDeRiesgo, FranjaHoraria, Ruta, TramoInput
 from apps.routes.domain.safety import CalculadoraIndiceSeguridad, TramoEvaluado
+from apps.routes.domain.time import local_now
+from apps.safety_data.application.ports import SourceRepository
+from apps.safety_data.domain.models import (
+    FuenteInformacion,
+    IncidenteSeguridad,
+    incident_penalties,
+)
 from apps.seed.application.ports import SeedAccounts
 from apps.seed.domain import data
 from apps.shared.application.ports import AuthGateway
 from apps.shared.domain.permissions import ADMIN_ROLE, ALL_PERMISSIONS
+from apps.support_points.application.ports import GuardedTrailRepository, SupportPointRepository
+from apps.support_points.domain.models import PuntoApoyo, ResguardoPolicial
 
 _LEVEL_LABELS = {"high": "Alto", "medium": "Medio", "low": "Bajo"}
 
@@ -29,13 +43,21 @@ class SeedDeps:
     auth: AuthGateway
     accounts: SeedAccounts
     routes: RouteRepository
+    sources: SourceRepository
+    support_points: SupportPointRepository
+    guarded_trails: GuardedTrailRepository
+    alerts: RiskZoneAlertRepository
 
 
 def run_seed(deps: SeedDeps, report: Callable[[str], None]) -> None:
+    now = local_now()
     _seed_city(deps.cities, report)
     _seed_roles(deps.roles, report)
     _seed_admin(deps, report)
-    _seed_routes(deps.routes, report)
+    _seed_sources(deps.sources, now.date(), report)
+    _seed_routes(deps.routes, now, report)
+    _seed_support_points(deps, report)
+    _seed_alerts(deps.alerts, now.date(), report)
 
 
 def _seed_city(cities: CityRepository, report: Callable[[str], None]) -> None:
@@ -72,22 +94,74 @@ def _seed_admin(deps: SeedDeps, report: Callable[[str], None]) -> None:
     report(f"Admin seeded: {data.ADMIN_EMAIL} (uid {uid})")
 
 
-def _seed_routes(routes: RouteRepository, report: Callable[[str], None]) -> None:
-    """Rewrites each sample route from scratch under its fixed id: route, segments, time slots
-    and risk factors, with lengths and the safety index computed like the endpoints do."""
+def _seed_sources(sources: SourceRepository, today: date, report: Callable[[str], None]) -> None:
+    for raw in data.SEED_SOURCES:
+        sources.save(FuenteInformacion.parse(raw, raw["id"], today))
+    report(f"Sources seeded: {', '.join(raw['id'] for raw in data.SEED_SOURCES)}")
+
+
+def _seed_routes(routes: RouteRepository, now: datetime, report: Callable[[str], None]) -> None:
+    """Rewrites each sample route from scratch under its fixed id: route, segments, time slots,
+    risk factors and incidents, with lengths and the safety index computed like the endpoints
+    do."""
     for spec in data.SEED_ROUTES:
         # Drops the segments or factors left by an older version of the seed.
         routes.delete_tree(spec.id)
-        ops, summary = _route_writes(spec)
+        ops, summary = _route_writes(spec, _seed_incidents(spec.id, now), now.date())
         routes.commit(ops)
         report(f"Route seeded: routes/{spec.id} — {summary}")
+
+
+def _seed_incidents(route_id: str, now: datetime) -> list[IncidenteSeguridad]:
+    return [
+        IncidenteSeguridad.parse(
+            {
+                "routeId": incident.route_id,
+                "segmentId": incident.segment_id,
+                "type": incident.type,
+                "date": (now.date() - timedelta(days=incident.days_ago)).isoformat(),
+                "time": incident.time,
+                "sourceId": incident.source_id,
+            },
+            incident.id,
+            now,
+        )
+        for incident in data.SEED_INCIDENTS
+        if incident.route_id == route_id
+    ]
+
+
+def _seed_support_points(deps: SeedDeps, report: Callable[[str], None]) -> None:
+    for raw in data.SEED_SUPPORT_POINTS:
+        deps.support_points.save(PuntoApoyo.parse(raw, raw["id"]))
+    for raw in data.SEED_GUARDED_TRAILS:
+        deps.guarded_trails.save(ResguardoPolicial.parse(raw, raw["id"]))
+    report(
+        f"Support points seeded: {len(data.SEED_SUPPORT_POINTS)}; "
+        f"guarded trails: {len(data.SEED_GUARDED_TRAILS)}"
+    )
+
+
+def _seed_alerts(
+    alerts: RiskZoneAlertRepository, today: date, report: Callable[[str], None]
+) -> None:
+    """Alerts in force from a few days ago to some days ahead, so the runner sees them."""
+    for alert in data.SEED_ALERTS:
+        valid = {
+            "validFrom": (today - timedelta(days=alert.days_before)).isoformat(),
+            "validTo": (today + timedelta(days=alert.days_after)).isoformat(),
+        }
+        alerts.save(AlertaZonaRiesgo.parse({**alert.body, **valid}, alert.id))
+    report(f"Risk zone alerts seeded: {', '.join(alert.id for alert in data.SEED_ALERTS)}")
 
 
 def _timestamps() -> dict[str, object]:
     return {"createdAt": SERVER_TIMESTAMP, "updatedAt": SERVER_TIMESTAMP}
 
 
-def _route_writes(spec: data.SeedRoute) -> tuple[list[WriteOp], str]:
+def _route_writes(
+    spec: data.SeedRoute, incidents: list[IncidenteSeguridad], today: date
+) -> tuple[list[WriteOp], str]:
     base = f"routes/{spec.id}"
     slots = [FranjaHoraria.parse(raw, raw["id"]) for raw in data.SEED_SLOTS]
 
@@ -104,7 +178,9 @@ def _route_writes(spec: data.SeedRoute) -> tuple[list[WriteOp], str]:
             for number, raw in enumerate(segment.factors, start=1)
         ]
         length_m = path_length_m(coordinates)
-        safety = CalculadoraIndiceSeguridad.segment_safety(slots, factors)
+        safety = CalculadoraIndiceSeguridad.segment_safety(
+            slots, factors, incident_penalties(incidents, segment_id, today)
+        )
         evaluated.append(TramoEvaluado(segment_id, segment.name, order, safety))
         lengths.append(length_m)
         ops.append(
@@ -132,6 +208,12 @@ def _route_writes(spec: data.SeedRoute) -> tuple[list[WriteOp], str]:
     ops.extend(
         WriteOp("set", f"{base}/timeSlots/{slot.id}", {**slot.to_document(), **_timestamps()})
         for slot in slots
+    )
+    ops.extend(
+        WriteOp(
+            "set", f"safetyIncidents/{incident.id}", {**incident.to_document(), **_timestamps()}
+        )
+        for incident in incidents
     )
 
     route_safety = CalculadoraIndiceSeguridad.route_safety(slots, evaluated)

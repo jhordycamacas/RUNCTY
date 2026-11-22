@@ -30,7 +30,8 @@ from apps.routes.domain.models import (
 )
 from apps.routes.domain.reorder import insert_at, move_to, order_updates, ordered_ids, remove_id
 from apps.routes.domain.safety import CalculadoraIndiceSeguridad, TramoEvaluado
-from apps.routes.domain.time import time_windows_overlap, to_window
+from apps.routes.domain.time import local_now, time_windows_overlap, to_window
+from apps.safety_data.domain.models import incident_penalties
 from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.shared.domain.text import sort_key
 
@@ -121,22 +122,25 @@ def _apply_order(
     return [replace(by_id[segment_id], order=order) for order, segment_id in enumerate(ids)]
 
 
-def _with_recalc(
+def with_recalc(
     route_id: str,
     state: RouteState,
     writes: list[WriteOp],
     segment_writes: dict[str, _SegmentWrite] | None = None,
 ) -> list[WriteOp]:
     """`writes` followed by the recalculated safety of every segment (merged into its pending
-    write) and of the route (RF-07-11)."""
+    write) and of the route (RF-07-11). Risk factors and recent incidents (EP-08) penalize."""
     segment_writes = segment_writes or {}
+    today = local_now().date()
     evaluated = [
         TramoEvaluado(
             segment.id,
             segment.name,
             segment.order,
             CalculadoraIndiceSeguridad.segment_safety(
-                state.slots, state.factors.get(segment.id, [])
+                state.slots,
+                state.factors.get(segment.id, []),
+                incident_penalties(state.incidents, segment.id, today),
             ),
         )
         for segment in state.segments
@@ -269,7 +273,7 @@ def create_segment(raw: object, deps: RoutesDeps) -> str:
         record = Tramo(segment_id, segment.name, -1, segment.coordinates, length_m)
         ids = insert_at(ordered_ids(state.segments), segment_id, segment.order)
         segments = _apply_order([*state.segments, record], ids, writes)
-        return _with_recalc(route_id, replace(state, segments=segments), [], writes)
+        return with_recalc(route_id, replace(state, segments=segments), [], writes)
 
     deps.routes.mutate(route_id, plan)
     return segment_id
@@ -305,7 +309,7 @@ def update_segment(raw: object, deps: RoutesDeps) -> None:
         updated = [changed if s.id == segment_id else s for s in state.segments]
         segments = _apply_order(updated, ids, writes)
         write.data["order"] = ids.index(segment_id)
-        return _with_recalc(route_id, replace(state, segments=segments), [], writes)
+        return with_recalc(route_id, replace(state, segments=segments), [], writes)
 
     deps.routes.mutate(route_id, plan)
 
@@ -330,7 +334,9 @@ def delete_segment(raw: object, deps: RoutesDeps) -> None:
             remaining, remove_id(ordered_ids(state.segments), segment_id), writes
         )
         factors = {key: value for key, value in state.factors.items() if key != segment_id}
-        return _with_recalc(route_id, RouteState(segments, state.slots, factors), deletes, writes)
+        return with_recalc(
+            route_id, replace(state, segments=segments, factors=factors), deletes, writes
+        )
 
     deps.routes.mutate(route_id, plan)
 
@@ -371,7 +377,7 @@ def create_time_slot(raw: object, deps: RoutesDeps) -> str:
             _slot_path(route_id, slot.id),
             {**slot.to_document(), "createdAt": SERVER_TIMESTAMP, "updatedAt": SERVER_TIMESTAMP},
         )
-        return _with_recalc(route_id, replace(state, slots=[*state.slots, slot]), [write])
+        return with_recalc(route_id, replace(state, slots=[*state.slots, slot]), [write])
 
     deps.routes.mutate(route_id, plan)
     return slot.id
@@ -399,7 +405,7 @@ def update_time_slot(raw: object, deps: RoutesDeps) -> None:
             },
         )
         slots = [slot if s.id == slot.id else s for s in state.slots]
-        return _with_recalc(route_id, replace(state, slots=slots), [write])
+        return with_recalc(route_id, replace(state, slots=slots), [write])
 
     deps.routes.mutate(route_id, plan)
 
@@ -414,7 +420,7 @@ def delete_time_slot(raw: object, deps: RoutesDeps) -> None:
         _require_slot(state, slot_id)
         slots = [s for s in state.slots if s.id != slot_id]
         delete = WriteOp("delete", _slot_path(route_id, slot_id))
-        return _with_recalc(route_id, replace(state, slots=slots), [delete])
+        return with_recalc(route_id, replace(state, slots=slots), [delete])
 
     deps.routes.mutate(route_id, plan)
 
@@ -454,7 +460,7 @@ def create_risk_factor(raw: object, deps: RoutesDeps) -> str:
             {**factor.to_document(), "createdAt": SERVER_TIMESTAMP, "updatedAt": SERVER_TIMESTAMP},
         )
         factors = {**state.factors, segment_id: [*existing, factor]}
-        return _with_recalc(route_id, replace(state, factors=factors), [write])
+        return with_recalc(route_id, replace(state, factors=factors), [write])
 
     deps.routes.mutate(route_id, plan)
     return factor.id
@@ -481,7 +487,7 @@ def update_risk_factor(raw: object, deps: RoutesDeps) -> None:
             },
         )
         updated = [factor if f.id == factor.id else f for f in state.factors[segment_id]]
-        return _with_recalc(
+        return with_recalc(
             route_id, replace(state, factors={**state.factors, segment_id: updated}), [write]
         )
 
@@ -498,7 +504,7 @@ def delete_risk_factor(raw: object, deps: RoutesDeps) -> None:
         _require_factor(state, segment_id, factor_id)
         remaining = [f for f in state.factors[segment_id] if f.id != factor_id]
         delete = WriteOp("delete", _factor_path(route_id, segment_id, factor_id))
-        return _with_recalc(
+        return with_recalc(
             route_id, replace(state, factors={**state.factors, segment_id: remaining}), [delete]
         )
 

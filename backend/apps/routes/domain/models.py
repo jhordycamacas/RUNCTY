@@ -8,12 +8,16 @@ import math
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from apps.cities.domain.models import parse_city_id
 from apps.routes.domain.geo import LatLng
 from apps.routes.domain.safety import SEVERITIES
 from apps.routes.domain.time import is_iso_date, parse_time
 from apps.shared.domain.errors import DomainError, ErrorKind
+
+if TYPE_CHECKING:  # The incident model imports this module.
+    from apps.safety_data.domain.models import IncidenteSeguridad
 
 SURFACES = ("asphalt", "trail", "mixed", "track")
 DIFFICULTIES = ("beginner", "intermediate", "advanced")
@@ -53,26 +57,26 @@ def parse_doc_id(value: object, reason: str) -> str:
     return value
 
 
-def _as_mapping(raw: object) -> Mapping[str, object]:
+def as_mapping(raw: object) -> Mapping[str, object]:
     return raw if isinstance(raw, Mapping) else {}
 
 
-def _is_number(value: object) -> bool:
+def is_number(value: object) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
 def _is_whole(value: object) -> bool:
-    return _is_number(value) and float(value).is_integer()
+    return is_number(value) and float(value).is_integer()
 
 
-def _required_text(value: object, max_length: int, reason: str, message: str) -> str:
+def required_text(value: object, max_length: int, reason: str, message: str) -> str:
     text = value.strip() if isinstance(value, str) else ""
     if not text or len(text) > max_length:
         raise _invalid(reason, message)
     return text
 
 
-def _optional_text(value: object, max_length: int, reason: str, message: str) -> str | None:
+def optional_text(value: object, max_length: int, reason: str, message: str) -> str | None:
     if value is None:
         return None
     if not isinstance(value, str) or len(value.strip()) > max_length:
@@ -80,30 +84,30 @@ def _optional_text(value: object, max_length: int, reason: str, message: str) ->
     return value.strip()
 
 
-def _parse_lat_lng(raw: object) -> LatLng | None:
-    point = _as_mapping(raw)
+def parse_lat_lng(raw: object) -> LatLng | None:
+    point = as_mapping(raw)
     lat, lng = point.get("lat"), point.get("lng")
-    if not (_is_number(lat) and _is_number(lng) and -90 <= lat <= 90 and -180 <= lng <= 180):
+    if not (is_number(lat) and is_number(lng) and -90 <= lat <= 90 and -180 <= lng <= 180):
         return None
     return LatLng(lat, lng)
 
 
-def _stored_text(value: object, fallback: str = "") -> str:
+def stored_text(value: object, fallback: str = "") -> str:
     return value if isinstance(value, str) else fallback
 
 
-def _stored_optional_text(value: object) -> str | None:
+def stored_optional_text(value: object) -> str | None:
     return value if isinstance(value, str) else None
 
 
-def _stored_number(value: object, fallback: float = 0) -> float:
-    return value if _is_number(value) else fallback
+def stored_number(value: object, fallback: float = 0) -> float:
+    return value if is_number(value) else fallback
 
 
 def _stored_lat_lngs(value: object) -> tuple[LatLng, ...]:
     points = value if isinstance(value, list) else []
     return tuple(
-        LatLng(_stored_number(_as_mapping(p).get("lat")), _stored_number(_as_mapping(p).get("lng")))
+        LatLng(stored_number(as_mapping(p).get("lat")), stored_number(as_mapping(p).get("lng")))
         for p in points
     )
 
@@ -118,8 +122,8 @@ class PuntoRuta:
 
     @classmethod
     def parse(cls, raw: object, reason: str) -> "PuntoRuta":
-        point = _parse_lat_lng(raw)
-        label = _as_mapping(raw).get("label")
+        point = parse_lat_lng(raw)
+        label = as_mapping(raw).get("label")
         text = label.strip() if isinstance(label, str) else ""
         if point is None or not text or len(text) > _MAX_LABEL:
             raise _invalid(
@@ -129,11 +133,11 @@ class PuntoRuta:
 
     @classmethod
     def from_document(cls, raw: object) -> "PuntoRuta":
-        point = _as_mapping(raw)
+        point = as_mapping(raw)
         return cls(
-            _stored_number(point.get("lat")),
-            _stored_number(point.get("lng")),
-            _stored_text(point.get("label")),
+            stored_number(point.get("lat")),
+            stored_number(point.get("lng")),
+            stored_text(point.get("label")),
         )
 
     def to_document(self) -> dict[str, object]:
@@ -162,15 +166,15 @@ class Ruta:
     @classmethod
     def parse(cls, raw: object, route_id: str) -> "Ruta":
         route_id = parse_doc_id(route_id, "invalid-route-id")
-        data = _as_mapping(raw)
-        name = _required_text(
+        data = as_mapping(raw)
+        name = required_text(
             data.get("name"),
             _MAX_NAME,
             "invalid-route-name",
             f"Route name is required (max {_MAX_NAME} chars).",
         )
         city_id = parse_city_id(data.get("cityId"))
-        description = _optional_text(
+        description = optional_text(
             data.get("description"),
             _MAX_DESCRIPTION,
             "invalid-route-description",
@@ -180,13 +184,13 @@ class Ruta:
         end = PuntoRuta.parse(data.get("end"), "invalid-route-end")
 
         distance = data.get("distanceKm")
-        if not _is_number(distance) or not 0 < distance <= _MAX_DISTANCE_KM:
+        if not is_number(distance) or not 0 < distance <= _MAX_DISTANCE_KM:
             raise _invalid(
                 "invalid-distance",
                 f"Distance must be greater than 0 and at most {_MAX_DISTANCE_KM} km.",
             )
         elevation = data.get("elevationGainM")
-        if not _is_number(elevation) or not 0 <= elevation <= _MAX_ELEVATION_M:
+        if not is_number(elevation) or not 0 <= elevation <= _MAX_ELEVATION_M:
             raise _invalid(
                 "invalid-elevation-gain",
                 f"Elevation gain must be between 0 and {_MAX_ELEVATION_M} m.",
@@ -224,17 +228,17 @@ class Ruta:
         )
         return cls(
             id=route_id,
-            name=_stored_text(data.get("name"), route_id),
-            city_id=_stored_text(data.get("cityId")),
-            description=_stored_text(data.get("description")),
+            name=stored_text(data.get("name"), route_id),
+            city_id=stored_text(data.get("cityId")),
+            description=stored_text(data.get("description")),
             start=PuntoRuta.from_document(data.get("start")),
             end=PuntoRuta.from_document(data.get("end")),
-            distance_km=_stored_number(data.get("distanceKm")),
-            elevation_gain_m=_stored_number(data.get("elevationGainM")),
+            distance_km=stored_number(data.get("distanceKm")),
+            elevation_gain_m=stored_number(data.get("elevationGainM")),
             surface=surface if surface in SURFACES else "mixed",
             difficulty=difficulty if difficulty in DIFFICULTIES else "intermediate",
             active=data.get("active") is True,
-            segment_count=int(_stored_number(data.get("segmentCount"))),
+            segment_count=int(stored_number(data.get("segmentCount"))),
             safety=dict(safety) if isinstance(safety, Mapping) else {},
         )
 
@@ -264,15 +268,15 @@ class TramoInput:
 
     @classmethod
     def parse(cls, raw: object) -> "TramoInput":
-        data = _as_mapping(raw)
-        name = _required_text(
+        data = as_mapping(raw)
+        name = required_text(
             data.get("name"),
             _MAX_NAME,
             "invalid-segment-name",
             f"Segment name is required (max {_MAX_NAME} chars).",
         )
         coordinates = data.get("coordinates")
-        points = [_parse_lat_lng(p) for p in coordinates] if isinstance(coordinates, list) else []
+        points = [parse_lat_lng(p) for p in coordinates] if isinstance(coordinates, list) else []
         if not _MIN_POINTS <= len(points) <= _MAX_POINTS or None in points:
             raise _invalid(
                 "invalid-coordinates",
@@ -305,10 +309,10 @@ class Tramo:
         safety = data.get("safety")
         return cls(
             id=segment_id,
-            name=_stored_text(data.get("name"), segment_id),
-            order=int(_stored_number(data.get("order"), _NO_ORDER)),
+            name=stored_text(data.get("name"), segment_id),
+            order=int(stored_number(data.get("order"), _NO_ORDER)),
             coordinates=_stored_lat_lngs(data.get("coordinates")),
-            length_m=int(_stored_number(data.get("lengthM"))),
+            length_m=int(stored_number(data.get("lengthM"))),
             safety=dict(safety) if isinstance(safety, Mapping) else {},
         )
 
@@ -327,14 +331,14 @@ class FranjaHoraria:
     @classmethod
     def parse(cls, raw: object, slot_id: str) -> "FranjaHoraria":
         slot_id = parse_doc_id(slot_id, "invalid-time-slot-id")
-        data = _as_mapping(raw)
-        label = _optional_text(
+        data = as_mapping(raw)
+        label = optional_text(
             data.get("label"),
             _MAX_SLOT_LABEL,
             "invalid-slot-label",
             f"Label must be text (max {_MAX_SLOT_LABEL} chars).",
         )
-        start_time, end_time = _parse_window(data, required=True)
+        start_time, end_time = parse_window(data, required=True)
 
         valid_from = data.get("validFrom", _MISSING)
         valid_to = data.get("validTo", _MISSING)
@@ -358,11 +362,11 @@ class FranjaHoraria:
     def from_document(cls, slot_id: str, data: Mapping[str, object]) -> "FranjaHoraria":
         return cls(
             id=slot_id,
-            start_time=_stored_text(data.get("startTime")),
-            end_time=_stored_text(data.get("endTime")),
-            label=_stored_optional_text(data.get("label")),
-            valid_from=_stored_optional_text(data.get("validFrom")),
-            valid_to=_stored_optional_text(data.get("validTo")),
+            start_time=stored_text(data.get("startTime")),
+            end_time=stored_text(data.get("endTime")),
+            label=stored_optional_text(data.get("label")),
+            valid_from=stored_optional_text(data.get("validFrom")),
+            valid_to=stored_optional_text(data.get("validTo")),
         )
 
     def to_document(self) -> dict[str, str]:
@@ -391,19 +395,19 @@ class FactorDeRiesgo:
     @classmethod
     def parse(cls, raw: object, factor_id: str) -> "FactorDeRiesgo":
         factor_id = parse_doc_id(factor_id, "invalid-risk-factor-id")
-        data = _as_mapping(raw)
+        data = as_mapping(raw)
         factor_type, severity = data.get("type"), data.get("severity")
         if not isinstance(factor_type, str) or factor_type not in RISK_FACTOR_TYPES:
             raise _invalid("invalid-factor-type", "Unknown risk factor type.")
         if not isinstance(severity, str) or severity not in SEVERITIES:
             raise _invalid("invalid-severity", "Severity must be low, medium or high.")
-        description = _required_text(
+        description = required_text(
             data.get("description"),
             _MAX_FACTOR_DESCRIPTION,
             "invalid-factor-description",
             f"Description is required (max {_MAX_FACTOR_DESCRIPTION} chars).",
         )
-        start_time, end_time = _parse_window(data, required=False)
+        start_time, end_time = parse_window(data, required=False)
         return cls(factor_id, factor_type, severity, description, start_time, end_time)
 
     @classmethod
@@ -416,9 +420,9 @@ class FactorDeRiesgo:
             id=factor_id,
             type=factor_type,
             severity=severity,
-            description=_stored_text(data.get("description")),
-            start_time=_stored_optional_text(data.get("startTime")),
-            end_time=_stored_optional_text(data.get("endTime")),
+            description=stored_text(data.get("description")),
+            start_time=stored_optional_text(data.get("startTime")),
+            end_time=stored_optional_text(data.get("endTime")),
         )
 
     def to_document(self) -> dict[str, str]:
@@ -432,7 +436,7 @@ class FactorDeRiesgo:
         return {key: value for key, value in fields.items() if value is not None}
 
 
-def _parse_window(data: Mapping[str, object], *, required: bool) -> tuple[str | None, str | None]:
+def parse_window(data: Mapping[str, object], *, required: bool) -> tuple[str | None, str | None]:
     """An "HH:MM" window with start before end. When optional: both bounds or none."""
     start = data.get("startTime", _MISSING)
     end = data.get("endTime", _MISSING)
@@ -459,3 +463,5 @@ class RouteState:
     slots: list[FranjaHoraria]
     # Risk factors keyed by segment id.
     factors: dict[str, list[FactorDeRiesgo]]
+    # Safety incidents registered on the route (EP-08), stored outside the route tree.
+    incidents: list["IncidenteSeguridad"] = field(default_factory=list)

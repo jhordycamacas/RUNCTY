@@ -5,8 +5,8 @@ overlaps the slot window) subtracts by severity (low -10, medium -20, high -35),
 Levels: high >= 70, medium 40-69, low < 40. A route takes its worst segment per slot. The
 factors explaining each result are always kept.
 
-Penalty sources are pluggable: risk factors today, and later community reports (RF-17)
-through `extra_penalties`, tagged with their `source`.
+Penalty sources are pluggable: risk factors, plus `extra_penalties` tagged with their `source`:
+safety incidents (EP-08, `source="incident"`) and later community reports (RF-17).
 """
 
 from collections.abc import Mapping, Sequence

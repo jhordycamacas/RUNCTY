@@ -213,6 +213,35 @@ service cloud.firestore {
       }
     }
 
+    // ---------- Sprint 3 (EP-06, EP-07 alerts, EP-08, EP-09) ----------
+
+    // Only the Django API reads and writes these collections (Admin SDK):
+    // it applies `routes.manage`, the signed-in reads and the ownership of
+    // safe route requests. Clients never access them directly.
+    match /informationSources/{sourceId} {
+      allow read, write: if false;
+    }
+
+    match /safetyIncidents/{incidentId} {
+      allow read, write: if false;
+    }
+
+    match /supportPoints/{pointId} {
+      allow read, write: if false;
+    }
+
+    match /guardedTrails/{trailId} {
+      allow read, write: if false;
+    }
+
+    match /riskZoneAlerts/{alertId} {
+      allow read, write: if false;
+    }
+
+    match /safeRouteRequests/{requestId} {
+      allow read, write: if false;
+    }
+
     // Everything else is denied by default (no matching rule).
   }
 }

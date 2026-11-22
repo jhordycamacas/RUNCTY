@@ -11,8 +11,9 @@ from google.cloud.firestore import (
 
 from apps.routes.application.ports import Marker, RoutePlan, WriteOp
 from apps.routes.domain.models import FactorDeRiesgo, FranjaHoraria, RouteState, Ruta, Tramo
+from apps.safety_data.domain.models import IncidenteSeguridad
 from apps.shared.infrastructure.firebase.app import firestore_client
-from apps.shared.infrastructure.firebase.collections import ROUTES
+from apps.shared.infrastructure.firebase.collections import ROUTES, SAFETY_INCIDENTS
 
 SEGMENTS = "segments"
 TIME_SLOTS = "timeSlots"
@@ -29,10 +30,19 @@ def _read_state(route: DocumentReference, transaction: Transaction | None) -> Ro
         documents = segment.reference.collection(RISK_FACTORS).stream(transaction=transaction)
         parsed = (FactorDeRiesgo.from_document(d.id, d.to_dict()) for d in documents)
         factors[segment.id] = [factor for factor in parsed if factor is not None]
+    # Single-field query, so no composite index is needed.
+    incident_documents = (
+        firestore_client()
+        .collection(SAFETY_INCIDENTS)
+        .where(filter=FieldFilter("routeId", "==", route.id))
+        .stream(transaction=transaction)
+    )
+    incidents = (IncidenteSeguridad.from_document(d.id, d.to_dict()) for d in incident_documents)
     return RouteState(
         segments=[Tramo.from_document(s.id, s.to_dict()) for s in segments],
         slots=[FranjaHoraria.from_document(s.id, s.to_dict()) for s in slots],
         factors=factors,
+        incidents=[incident for incident in incidents if incident is not None],
     )
 
 

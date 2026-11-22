@@ -14,7 +14,7 @@ class LatLng:
         return {"lat": self.lat, "lng": self.lng}
 
 
-def _haversine_m(a: LatLng, b: LatLng) -> float:
+def distance_m(a: LatLng, b: LatLng) -> float:
     d_lat = math.radians(b.lat - a.lat)
     d_lng = math.radians(b.lng - a.lng)
     h = (
@@ -26,5 +26,5 @@ def _haversine_m(a: LatLng, b: LatLng) -> float:
 
 def path_length_m(points: Sequence[LatLng]) -> int:
     """Length of a polyline in whole meters."""
-    total = sum(_haversine_m(a, b) for a, b in zip(points, points[1:], strict=False))
+    total = sum(distance_m(a, b) for a, b in zip(points, points[1:], strict=False))
     return math.floor(total + 0.5)

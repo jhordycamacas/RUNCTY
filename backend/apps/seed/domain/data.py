@@ -1,5 +1,6 @@
 """Demo data for the local emulators: the pilot city, the admin account and five sample routes
-in Loja with fictitious risk factors. Written in the shape of the API request bodies, so the
+in Loja with fictitious risk factors, plus fictitious sources, incidents, support points, a
+guarded trail and risk zone alerts. Written in the shape of the API request bodies, so the
 seed validates it with the same domain classes as the endpoints."""
 
 from dataclasses import dataclass
@@ -338,5 +339,119 @@ SEED_ROUTES = [
                 [],
             ),
         ],
+    ),
+]
+
+
+# ---------- Sprint 3 (EP-06, EP-07 alerts, EP-08) ----------
+
+SEED_SOURCES = [
+    {"id": "ecu911-robos", "entity": "ECU 911", "dataType": "Robos y asaltos reportados"},
+    {"id": "policia-acoso", "entity": "Policía Nacional", "dataType": "Denuncias de acoso"},
+]
+
+
+@dataclass(frozen=True, slots=True)
+class SeedIncident:
+    id: str
+    route_id: str
+    segment_id: str
+    type: str
+    # Dated relative to the day the seed runs, so it always falls in the last 12 months.
+    days_ago: int
+    time: str
+    source_id: str
+
+
+SEED_INCIDENTS = [
+    # Takes the evening of Jipiro from high to medium (seg-2: 100 - 35).
+    SeedIncident("inc-jipiro-robo", "loja-jipiro", "seg-2", "robbery", 20, "19:00", "ecu911-robos"),
+    # Adds to the morning traffic of the Malecón (seg-1: 65 - 20).
+    SeedIncident(
+        "inc-malecon-acoso",
+        "loja-malecon-zamora",
+        "seg-1",
+        "harassment",
+        45,
+        "06:00",
+        "policia-acoso",
+    ),
+]
+
+SEED_SUPPORT_POINTS = [
+    {
+        "id": "upc-jipiro",
+        "type": "police_post",
+        "name": "UPC Jipiro",
+        "location": _pt(-3.9671, -79.2052),
+        "cityId": CITY_ID,
+        "openingHours": "Lun–Dom 24 h",
+    },
+    {
+        "id": "centro-salud-tebaida",
+        "type": "health_center",
+        "name": "Centro de Salud La Tebaida",
+        "location": _pt(-4.0145, -79.2092),
+        "cityId": CITY_ID,
+        "openingHours": "Lun–Vie 08:00–17:00",
+    },
+    {
+        "id": "tienda-malecon",
+        "type": "open_business",
+        "name": "Tienda del Malecón",
+        "location": _pt(-3.9938, -79.1989),
+        "cityId": CITY_ID,
+        "openingHours": "Lun–Sáb 06:00–21:00",
+    },
+]
+
+SEED_GUARDED_TRAILS = [
+    {
+        "id": "resguardo-puear",
+        "routeId": "loja-puear",
+        "segmentId": "seg-2",
+        "days": ["sat", "sun"],
+        "startTime": "06:00",
+        "endTime": "09:00",
+    },
+]
+
+
+@dataclass(frozen=True, slots=True)
+class SeedAlert:
+    id: str
+    # The API body without `validFrom`/`validTo`, which the seed dates around the day it runs.
+    body: dict[str, object]
+    days_before: int
+    days_after: int
+
+
+SEED_ALERTS = [
+    SeedAlert(
+        "alerta-malecon-robos",
+        {
+            "type": "Robos frecuentes",
+            "severity": "alta",
+            "description": "Reportes de robo de celulares en el malecón al anochecer.",
+            "location": _pt(-3.9985, -79.1998),
+            "radiusM": 400,
+            "cityId": CITY_ID,
+            "routeId": "loja-malecon-zamora",
+        },
+        days_before=3,
+        days_after=30,
+    ),
+    SeedAlert(
+        "alerta-centro-obras",
+        {
+            "type": "Obras en la vía",
+            "severity": "baja",
+            "description": "Trabajos de alcantarillado con desvíos peatonales en el centro.",
+            "location": _pt(-3.9965, -79.2015),
+            "radiusM": 250,
+            "cityId": CITY_ID,
+        },
+        days_before=1,
+        days_after=14,
     ),
 ]
