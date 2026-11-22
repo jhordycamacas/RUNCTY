@@ -242,6 +242,15 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Depende de:** [RF-01 · Gestión de usuarios](01-gestion-de-usuarios.md), [RF-05 · Catálogo de rutas y tramos](05-catalogo-de-rutas.md).
 
+## Decisiones de diseño (2026-11-22)
+
+Pedidas por el usuario el 2026-11-22; se adelantan para hacerlas justo después del Sprint 3.
+
+- **Valoración con estrellas:** cada corredor valora una ruta una sola vez (puede editarla o borrarla) con tres puntajes de 1 a 5 estrellas (seguridad, iluminación y afluencia de personas) y una opinión escrita opcional (hasta 500 caracteres). La ruta muestra el promedio general en estrellas (media de los tres aspectos de todas las valoraciones) y cuántas valoraciones tiene.
+- **Opiniones dentro de la ruta:** el detalle de la ruta lista las opiniones de los corredores (nombre visible del corredor, estrellas, texto y fecha), la más reciente primero; el corredor ve la suya arriba para editarla.
+- **Favoritas:** un corazón en la tarjeta y en el detalle de la ruta guarda o quita la favorita; la lista de favoritas está en Cuenta.
+- **API:** `GET/POST /routes/{id}/ratings`, `PUT/DELETE /routes/{id}/ratings/mine`; `GET/POST /favorite-routes`, `DELETE /favorite-routes/{routeId}`.
+
 ## Supuestos por validar
 
 - «Si la recorrió» se verifica con un entrenamiento propio sobre esa ruta ([EP-12](12-registro-de-entrenamientos.md)); esa dependencia no está en la columna de dependencias del backlog (RF-01, RF-05) y debe confirmarse.

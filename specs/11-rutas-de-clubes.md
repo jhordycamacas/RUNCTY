@@ -173,6 +173,14 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Depende de:** [RF-05 · Catálogo de rutas y tramos](05-catalogo-de-rutas.md), [RF-19 · Clubes de running y membresías](19-clubes-y-membresias.md).
 
+## Decisiones de diseño (2026-11-22)
+
+Pedidas por el usuario el 2026-11-22; se adelantan para hacerlas justo después del Sprint 3.
+
+- **Ruta verificada por un club:** una ruta sugerida por un club guarda la fecha de la última verificación. En el piloto, además del representante de club, **el administrador puede marcar desde el admin web que un club verificó una ruta** (o quitar la marca), con fecha y observaciones.
+- **Distintivo visible:** las rutas verificadas muestran en la tarjeta y en el detalle un sello «Verificada por <club>» con la fecha; las demás muestran «Sin verificar». El sello se ve en la app del corredor y en el admin.
+- **Rutas sugeridas para cada corredor:** el inicio del corredor muestra primero las rutas que su club sugiere (si es miembro de un club, EP-19) y después las que encajan con su perfil deportivo (distancia preferida y nivel), ordenadas por seguridad de la franja actual.
+
 ## Supuestos por validar
 
 - Depende de [EP-19](19-clubes-y-membresias.md), que se planifica un sprint después (Sprint 5); el backlog lo declara así y obliga a reordenar o a simular el club.
