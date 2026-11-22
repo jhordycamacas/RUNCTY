@@ -41,7 +41,6 @@ import { ToastService } from '../shared/ui/toast.service';
 
     .compact select {
       width: auto;
-      min-height: 2.25rem;
     }
 
     .label {

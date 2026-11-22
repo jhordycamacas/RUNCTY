@@ -17,6 +17,8 @@
   --ion-tab-bar-color: var(--rc-text-muted);
   --ion-tab-bar-color-selected: var(--rc-primary-text);
   --ion-placeholder-color: var(--rc-text-muted);
+  // Field hints and counters use this step; Ionic's fallback gray is unreadable on the dark page.
+  --ion-text-color-step-300: var(--rc-text-muted);
 
   --ion-color-primary: var(--rc-primary);
   --ion-color-primary-contrast: var(--rc-on-primary);
@@ -86,6 +88,11 @@ ion-button {
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
+}
+
+ion-back-button {
+  --min-height: var(--rc-min-touch-target);
+  min-height: var(--rc-min-touch-target);
 }
 
 ion-button.button-solid {

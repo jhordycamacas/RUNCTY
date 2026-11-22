@@ -9,7 +9,6 @@
   --rc-font-size-body: 0.9375rem;
   --rc-font-size-title: 1.125rem;
   --rc-space-lg: 14px;
-  --rc-min-touch-target: 40px;
   --rc-topbar-height: 3.5rem;
 }
 
@@ -95,11 +94,4 @@
 .area-admin :is(a, button, select, input, textarea, [tabindex]:not([tabindex='-1'])):focus-visible {
   outline: 2px solid var(--rc-primary-text);
   outline-offset: 2px;
-}
-
-// Touch screens (a tablet, or the admin on a phone) keep the full 48px target.
-@media (pointer: coarse) {
-  .area-admin {
-    --rc-min-touch-target: 48px;
-  }
 }
