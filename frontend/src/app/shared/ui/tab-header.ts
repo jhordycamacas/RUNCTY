@@ -3,8 +3,8 @@ import { IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
 
 /**
  * Header of a runner tab: the floating pill (see `_areas.scss`) with the club logo on the left and
- * the title centered. The logo is decorative; the title names the screen. Both ends are as wide as
- * the SOS button that floats over the right end, so the title stays centered and clear of it.
+ * the title centered. The logo is decorative; the title names the screen. Both ends are equally
+ * wide, so the title stays centered.
  */
 @Component({
   selector: 'app-tab-header',

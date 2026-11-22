@@ -1,16 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import {
-  IonButton,
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonSpinner,
-} from '@ionic/angular';
-import { addIcons } from 'ionicons';
-import { chevronForward, fitnessOutline, optionsOutline, personOutline } from 'ionicons/icons';
+import { IonButton, IonContent, IonSpinner } from '@ionic/angular';
 import { ProfileStore } from '../account/application/profile.store';
 import { EmailVerificationBanner } from '../auth/presentation/email-verification-banner';
 import { CityRoutes } from '../routes/application/city-routes';
@@ -19,32 +8,19 @@ import { RecommendedRoutes } from '../routes/presentation/recommended-routes';
 import { Notice } from '../shared/ui/notice';
 import { TabHeader } from '../shared/ui/tab-header';
 
-addIcons({ chevronForward, fitnessOutline, optionsOutline, personOutline });
-
-const LINKS = [
-  { icon: 'person-outline', title: 'Datos personales', link: '/app/cuenta/datos' },
-  { icon: 'fitness-outline', title: 'Perfil deportivo', link: '/app/cuenta/deportivo' },
-  { icon: 'options-outline', title: 'Preferencias', link: '/app/cuenta/preferencias' },
-];
-
 /**
- * Runner home: on the light top, the greeting card with the number of routes of the runner's city
- * and the quick links; below, a dark band with the recommended routes as featured cards. A failed
+ * Runner home: on the light top, the greeting card with the number of routes of the runner's city;
+ * below, a dark band with the recommended routes as featured cards. A failed
  * profile load has its own retry; the routes section tells loading, errors, a missing city and an
  * empty city apart by itself.
  */
 @Component({
   selector: 'app-runner-home-page',
   imports: [
-    RouterLink,
     EmailVerificationBanner,
     RecommendedRoutes,
     IonButton,
     IonContent,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
     IonSpinner,
     Notice,
     TabHeader,
@@ -74,17 +50,6 @@ const LINKS = [
           <app-notice [message]="failure" />
           <ion-button fill="outline" (click)="reload()">Reintentar</ion-button>
         }
-
-        <h2>Accesos rápidos</h2>
-        <ion-list inset="true" lines="full">
-          @for (item of links; track item.link) {
-            <ion-item button detail="false" [routerLink]="item.link">
-              <ion-icon [name]="item.icon" slot="start" aria-hidden="true" />
-              <ion-label>{{ item.title }}</ion-label>
-              <ion-icon name="chevron-forward" slot="end" aria-hidden="true" />
-            </ion-item>
-          }
-        </ion-list>
       </div>
 
       @if (profile()) {
@@ -109,12 +74,6 @@ const LINKS = [
     h1 {
       margin: 0 0 var(--rc-space-xs);
       font-size: var(--rc-font-size-title);
-      font-weight: 500;
-    }
-
-    h2 {
-      margin: var(--rc-space-xl) 0 var(--rc-space-sm);
-      font-size: var(--rc-font-size-subtitle);
       font-weight: 500;
     }
 
@@ -146,10 +105,6 @@ const LINKS = [
       color: var(--rc-text-muted);
     }
 
-    ion-list {
-      margin-inline: 0;
-    }
-
     // The dark lower section, rounded on top like a sheet, filling the rest of the screen.
     .band {
       min-height: 50%;
@@ -163,7 +118,6 @@ export class RunnerHomePage {
   protected readonly city = inject(RunnerCity);
   private readonly cityRoutes = inject(CityRoutes);
 
-  protected readonly links = LINKS;
   protected readonly profile = this.store.profile;
   /** How many routes the runner's city has, once they are loaded. */
   protected readonly routeCount = computed(() =>

@@ -23,10 +23,7 @@ describe('RunnerShell', () => {
     ]);
   });
 
-  it('keeps the emergency button outside the tabs, so every tab has it', () => {
-    const root = fixture.nativeElement as HTMLElement;
-
-    expect(root.querySelector('app-emergency-button button')).not.toBeNull();
-    expect(root.querySelector('ion-tabs app-emergency-button')).toBeNull();
+  it('has no on-screen emergency button: the panic alert uses a hardware button', () => {
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-emergency-button')).toBeNull();
   });
 });

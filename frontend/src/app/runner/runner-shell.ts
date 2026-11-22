@@ -2,20 +2,18 @@ import { Component } from '@angular/core';
 import { IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { homeOutline, personCircleOutline, trailSignOutline } from 'ionicons/icons';
-import { EmergencyButton } from '../emergency/emergency-button';
 
 addIcons({ homeOutline, personCircleOutline, trailSignOutline });
 
 /**
- * Runner area layout: mobile-first, navigation in a bottom tab bar. The emergency button lives
- * here, so it is on every tab and every screen reached from them.
+ * Runner area layout: mobile-first, navigation in a bottom tab bar. The panic alert (EP-15) is
+ * triggered with a hardware button, so there is no on-screen emergency button here.
  */
 @Component({
   selector: 'app-runner-shell',
-  imports: [EmergencyButton, IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs],
+  imports: [IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs],
   host: { class: 'area-runner' },
   template: `
-    <app-emergency-button />
     <ion-tabs>
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="inicio">
