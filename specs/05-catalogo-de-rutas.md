@@ -1,6 +1,6 @@
 # EP-05 — Catálogo de rutas y tramos
 
-> Spec de capacidad · Debe tener · **0/8 Hecha, 8 Parcial, 0 Pendiente**
+> Spec de capacidad · Debe tener · **8/8 Hecha, 0 Parcial, 0 Pendiente**
 
 | Campo | Valor |
 | --- | --- |
@@ -11,7 +11,7 @@
 | Prioridad | Debe tener |
 | Responsable | Pedro Vargas |
 | Sprint planificado | Sprint 2 · Semana 6 |
-| Sprint real | Sprint 2 (semana 6). Backend: 2026-11-13. Administración de rutas: 2026-11-16, verificada en navegador el 2026-11-17. |
+| Sprint real | Sprint 2 (semana 6). Backend: 2026-11-13. Administración de rutas: 2026-11-16, verificada en navegador el 2026-11-17; accesibilidad medida el 2026-11-22. |
 | Dependencias | [RF-04 · Ciudades y zonas de operación](04-ciudades-y-zonas.md) |
 
 ## Propósito
@@ -81,14 +81,14 @@ Códigos propios: `route-not-found`, `segment-not-found`, `invalid-route-name`, 
 
 | ID | Historia | Actor | Sprint | Estado |
 | --- | --- | --- | --- | --- |
-| [RF-05-1](#rf-05-1--crear-ruta-de-running) | Crear ruta de running | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-05-2](#rf-05-2--leer-rutas-de-running) | Leer rutas de running | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-05-3](#rf-05-3--actualizar-ruta-de-running) | Actualizar ruta de running | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-05-4](#rf-05-4--eliminar-ruta-de-running) | Eliminar ruta de running | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-05-5](#rf-05-5--crear-tramo-de-ruta) | Crear tramo de ruta | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-05-6](#rf-05-6--leer-tramos-de-ruta) | Leer tramos de ruta | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-05-7](#rf-05-7--actualizar-tramo-de-ruta) | Actualizar tramo de ruta | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-05-8](#rf-05-8--eliminar-tramo-de-ruta) | Eliminar tramo de ruta | Administrador | Sprint 2 · Semana 6 | Parcial |
+| [RF-05-1](#rf-05-1--crear-ruta-de-running) | Crear ruta de running | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-05-2](#rf-05-2--leer-rutas-de-running) | Leer rutas de running | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-05-3](#rf-05-3--actualizar-ruta-de-running) | Actualizar ruta de running | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-05-4](#rf-05-4--eliminar-ruta-de-running) | Eliminar ruta de running | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-05-5](#rf-05-5--crear-tramo-de-ruta) | Crear tramo de ruta | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-05-6](#rf-05-6--leer-tramos-de-ruta) | Leer tramos de ruta | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-05-7](#rf-05-7--actualizar-tramo-de-ruta) | Actualizar tramo de ruta | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-05-8](#rf-05-8--eliminar-tramo-de-ruta) | Eliminar tramo de ruta | Administrador | Sprint 2 · Semana 6 | Hecha |
 
 Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = implementada pero con criterios sin cumplir o sin verificar; `Pendiente` = sin implementar.
 
@@ -98,7 +98,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo registrar ruta de running. Para disponer de recorridos identificados por distancia, superficie, desnivel y dificultad al recomendar rutas.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-04 · **Caso de uso:** Registrar ruta de running
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -112,7 +112,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/route-form.page.ts`, `frontend/src/app/admin/routes/domain/route-form.ts`, `frontend/src/app/admin/routes/infrastructure/http-route-admin.repository.ts`, `backend/apps/routes/presentation/views.py`
 
@@ -122,7 +122,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo consultar rutas de running. Para encontrar rutas que se ajusten a la ciudad, distancia o dificultad que busco.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-04 · **Caso de uso:** Consultar rutas de running
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -136,7 +136,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 - [x] El corredor consulta las rutas activas de su ciudad en `/app/rutas` y en el inicio, con filtros por distancia y dificultad (cubierto por pruebas unitarias; sin verificación manual).
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/routes-admin.page.ts`, `frontend/src/app/admin/routes/application/admin-routes.store.ts`, `frontend/src/app/admin/routes/domain/route-places.ts`, `frontend/src/app/routes/presentation/routes-list.page.ts`, `frontend/src/app/routes/presentation/route-card.ts`, `frontend/src/app/routes/domain/catalog.ts`, `frontend/src/app/routes/infrastructure/http-route.repository.ts`
@@ -147,7 +147,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo modificar ruta de running. Para corregir características del recorrido y evitar que se consulten datos de una ruta desactualizados.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-04 · **Caso de uso:** Actualizar ruta de running
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -161,7 +161,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/route-form.page.ts`, `frontend/src/app/admin/routes/application/admin-routes.store.ts`
 
@@ -171,7 +171,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo eliminar ruta de running. Para dejar de recomendar recorridos que ya no se usan o no son adecuados.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-04 · **Caso de uso:** Eliminar ruta de running
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -185,7 +185,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/routes-admin.page.ts`, `frontend/src/app/admin/routes/application/admin-routes.store.ts`
 
@@ -195,7 +195,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo registrar tramo de ruta. Para dividir cada recorrido en segmentos geográficos que puedan evaluarse de manera independiente.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-04 · **Caso de uso:** Registrar tramo de ruta
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -209,7 +209,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/segments-section.ts`, `frontend/src/app/admin/routes/domain/segment-form.ts`, `frontend/src/app/admin/routes/application/route-detail.store.ts`
 
@@ -219,7 +219,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo consultar tramos de ruta. Para revisar los segmentos en orden y conocer cómo se compone cada ruta.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-04 · **Caso de uso:** Consultar tramos de ruta
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -232,7 +232,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 - [x] El corredor ve los tramos de la ruta en orden en el detalle, con su nivel por franja (cubierto por pruebas unitarias; sin verificación manual).
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/segments-section.ts`, `frontend/src/app/admin/routes/presentation/route-detail.page.ts`, `frontend/src/app/admin/routes/domain/slot-safety.ts`, `frontend/src/app/routes/presentation/route-detail.page.ts`, `frontend/src/app/routes/domain/maps.ts`
@@ -243,7 +243,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo modificar tramo de ruta. Para corregir coordenadas, longitudes o el orden de los segmentos de un recorrido.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-04 · **Caso de uso:** Actualizar tramo de ruta
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -256,7 +256,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/segments-section.ts`, `frontend/src/app/admin/routes/application/route-detail.store.ts`
 
@@ -266,7 +266,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo eliminar tramo de ruta. Para retirar un segmento incorrecto y conservar el orden de los tramos restantes.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-04 · **Caso de uso:** Eliminar tramo de ruta
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -280,7 +280,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/segments-section.ts`, `frontend/src/app/admin/routes/application/route-detail.store.ts`, `backend/apps/routes/domain/reorder.py`
 

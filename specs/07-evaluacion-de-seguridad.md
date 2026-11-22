@@ -1,6 +1,6 @@
 # EP-07 — Evaluación de seguridad de rutas y zonas de riesgo
 
-> Spec de capacidad · Debe tener · **0/15 Hecha, 11 Parcial, 4 Pendiente**
+> Spec de capacidad · Debe tener · **11/15 Hecha, 0 Parcial, 4 Pendiente**
 
 | Campo | Valor |
 | --- | --- |
@@ -11,7 +11,7 @@
 | Prioridad | Debe tener |
 | Responsable | Jhordy Camacas |
 | Sprint planificado | Sprint 2 · Semana 6 / Sprint 3 · Semana 7 |
-| Sprint real | Sprint 2 (semana 6) para RF-07-1 a RF-07-11; Sprint 3 (semana 7) para las alertas de zona RF-07-12 a RF-07-15. Backend: 2026-11-13. Administración: 2026-11-16, verificada en navegador el 2026-11-17. |
+| Sprint real | Sprint 2 (semana 6) para RF-07-1 a RF-07-11; Sprint 3 (semana 7) para las alertas de zona RF-07-12 a RF-07-15. Backend: 2026-11-13. Administración: 2026-11-16, verificada en navegador el 2026-11-17; accesibilidad medida el 2026-11-22. |
 | Dependencias | [RF-05 · Catálogo de rutas y tramos](05-catalogo-de-rutas.md), [RF-17 · Reportes comunitarios](17-reportes-comunitarios.md) |
 
 ## Propósito
@@ -91,17 +91,17 @@ Códigos propios: `time-slot-not-found`, `time-slot-overlap`, `too-many-time-slo
 
 | ID | Historia | Actor | Sprint | Estado |
 | --- | --- | --- | --- | --- |
-| [RF-07-1](#rf-07-1--crear-franja-horaria) | Crear franja horaria | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-07-2](#rf-07-2--leer-franjas-horarias) | Leer franjas horarias | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-07-3](#rf-07-3--actualizar-franja-horaria) | Actualizar franja horaria | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-07-4](#rf-07-4--eliminar-franja-horaria) | Eliminar franja horaria | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-07-5](#rf-07-5--crear-factor-de-riesgo) | Crear factor de riesgo | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-07-6](#rf-07-6--leer-factores-de-riesgo) | Leer factores de riesgo | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-07-7](#rf-07-7--actualizar-factor-de-riesgo) | Actualizar factor de riesgo | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-07-8](#rf-07-8--eliminar-factor-de-riesgo) | Eliminar factor de riesgo | Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-07-9](#rf-07-9--crear-índice-de-seguridad-calcular) | Crear índice de seguridad (calcular) | Sistema | Sprint 2 · Semana 6 | Parcial |
-| [RF-07-10](#rf-07-10--leer-índices-de-seguridad) | Leer índices de seguridad | Corredor y Administrador | Sprint 2 · Semana 6 | Parcial |
-| [RF-07-11](#rf-07-11--actualizar-índice-de-seguridad-recalcular) | Actualizar índice de seguridad (recalcular) | Sistema | Sprint 2 · Semana 6 | Parcial |
+| [RF-07-1](#rf-07-1--crear-franja-horaria) | Crear franja horaria | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-07-2](#rf-07-2--leer-franjas-horarias) | Leer franjas horarias | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-07-3](#rf-07-3--actualizar-franja-horaria) | Actualizar franja horaria | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-07-4](#rf-07-4--eliminar-franja-horaria) | Eliminar franja horaria | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-07-5](#rf-07-5--crear-factor-de-riesgo) | Crear factor de riesgo | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-07-6](#rf-07-6--leer-factores-de-riesgo) | Leer factores de riesgo | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-07-7](#rf-07-7--actualizar-factor-de-riesgo) | Actualizar factor de riesgo | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-07-8](#rf-07-8--eliminar-factor-de-riesgo) | Eliminar factor de riesgo | Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-07-9](#rf-07-9--crear-índice-de-seguridad-calcular) | Crear índice de seguridad (calcular) | Sistema | Sprint 2 · Semana 6 | Hecha |
+| [RF-07-10](#rf-07-10--leer-índices-de-seguridad) | Leer índices de seguridad | Corredor y Administrador | Sprint 2 · Semana 6 | Hecha |
+| [RF-07-11](#rf-07-11--actualizar-índice-de-seguridad-recalcular) | Actualizar índice de seguridad (recalcular) | Sistema | Sprint 2 · Semana 6 | Hecha |
 | [RF-07-12](#rf-07-12--crear-alerta-de-zona-de-riesgo) | Crear alerta de zona de riesgo | Administrador | Sprint 3 · Semana 7 | Pendiente |
 | [RF-07-13](#rf-07-13--leer-alertas-de-zonas-de-riesgo) | Leer alertas de zonas de riesgo | Corredor | Sprint 3 · Semana 7 | Pendiente |
 | [RF-07-14](#rf-07-14--actualizar-alerta-de-zona-de-riesgo) | Actualizar alerta de zona de riesgo | Administrador | Sprint 3 · Semana 7 | Pendiente |
@@ -115,7 +115,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo registrar franja horaria. Para disponer de períodos definidos al comparar las condiciones de una ruta según el horario.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Registrar franja horaria
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -128,7 +128,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/time-slots-section.ts`, `frontend/src/app/admin/routes/domain/time-slot-form.ts`, `backend/apps/routes/domain/time.py`
 
@@ -138,7 +138,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo consultar franjas horarias. Para escoger una franja de entrenamiento con fechas válidas al evaluar un recorrido.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Consultar franjas horarias
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -150,7 +150,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/time-slots-section.ts`
 
@@ -160,7 +160,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo modificar franja horaria. Para corregir franjas que cambiaron de horario o de período de aplicación.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Actualizar franja horaria
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -173,7 +173,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/time-slots-section.ts`, `frontend/src/app/admin/routes/domain/time-slot-form.ts`
 
@@ -183,7 +183,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo eliminar franja horaria. Para retirar franjas que ya no deben intervenir en la evaluación de rutas.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Eliminar franja horaria
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -196,7 +196,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/time-slots-section.ts`, `frontend/src/app/admin/routes/application/route-detail.store.ts`
 
@@ -206,7 +206,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo registrar factor de riesgo. Para registrar el tipo de riesgo presente en un tramo y el horario en que corresponde considerarlo.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Registrar factor de riesgo
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -220,7 +220,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/risk-factors-section.ts`, `frontend/src/app/admin/routes/domain/risk-factor-form.ts`
 
@@ -230,7 +230,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo consultar factores de riesgo. Para identificar qué riesgos se han registrado en un segmento y cuándo se presentan.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Consultar factores de riesgo
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -242,7 +242,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/risk-factors-section.ts`
 
@@ -252,7 +252,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo modificar factor de riesgo. Para mantener actualizada la descripción de los riesgos y las horas en que aplican.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Actualizar factor de riesgo
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -265,7 +265,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/risk-factors-section.ts`, `frontend/src/app/admin/routes/application/route-detail.store.ts`
 
@@ -275,7 +275,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo eliminar factor de riesgo. Para dejar de considerar condiciones de riesgo que ya no existen o fueron registradas por error.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Eliminar factor de riesgo
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -288,7 +288,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/risk-factors-section.ts`, `frontend/src/app/admin/routes/application/route-detail.store.ts`
 
@@ -298,7 +298,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como sistema · Deseo calcular el índice de seguridad de cada tramo por franja horaria. Para obtener una valoración de las condiciones de una ruta por tramo y horario con base en datos disponibles.
 - **Actor:** Sistema · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Calcular índice de seguridad
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -312,7 +312,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `backend/apps/routes/domain/safety.py`, `backend/apps/routes/application/use_cases.py`, `frontend/src/app/admin/routes/domain/mappers.ts`
 
@@ -322,7 +322,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como corredor o administrador · Deseo consultar índices de seguridad. Para comparar niveles alto, medio o bajo del índice registrado sin asumir seguridad absoluta.
 - **Actor:** Corredor y Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Consultar índice de seguridad
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`. El mismo día, el detalle de ruta del corredor (`/app/rutas/:id`) mostró el mismo índice por franja que el administrador (Malecón del Río Zamora, 05:00–07:00: Medio, 65 de 100).
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -335,7 +335,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/presentation/safety-summary-section.ts`, `frontend/src/app/admin/routes/domain/slot-safety.ts`, `frontend/src/app/routes/presentation/safety-badge.ts`, `frontend/src/app/routes/presentation/factor-list.ts`, `frontend/src/app/routes/presentation/route-card.ts`, `frontend/src/app/routes/presentation/route-detail.page.ts`
 
@@ -345,7 +345,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como sistema · Deseo recalcular el índice de seguridad cuando cambian sus factores. Para reflejar cambios en incidentes, reportes y puntos de apoyo al recalcular la evaluación.
 - **Actor:** Sistema · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 2 · Semana 6 · **Dependencia:** RF-05, RF-17 · **Caso de uso:** Recalcular índice de seguridad
-- **Estado:** `Parcial` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Queda abierto un criterio de accesibilidad medida.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17, 22 de 22 pasos); commits `25b11c4`, `c7a98bb`, `517f5d5`, `31a162a`, `8b87d17`, corrección `646deb8`. Accesibilidad medida en Chrome el 2026-11-22 (360 px y 1492 px, tema claro y oscuro): todo control con etiqueta y 48 px de alto, texto con contraste 4,5:1 y sin scroll horizontal; corrección `abbc02c`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -358,7 +358,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
-- [ ] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
+- [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 
 **Implementación:** `frontend/src/app/admin/routes/application/route-detail.store.ts`, `backend/apps/routes/application/use_cases.py`
 
