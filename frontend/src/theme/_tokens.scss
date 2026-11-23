@@ -113,12 +113,20 @@ html {
   font-size: calc(100% * var(--rc-font-scale));
 }
 
+// `color-scheme` tells the browser which palette to use for what CSS does not paint: the list of a
+// native <select>, autofill suggestions, scrollbars and date pickers.
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
 @media (prefers-color-scheme: dark) {
   :root[data-theme='system'] {
     @include dark-colors;
+    color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
   @include dark-colors;
+  color-scheme: dark;
 }

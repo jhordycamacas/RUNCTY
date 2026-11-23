@@ -107,14 +107,14 @@
   --padding-bottom: 0;
 }
 
-// The primary action is a black pill (a light one in the dark theme); secondary actions are
-// white pills with a neutral outline. The fuchsia stays for the brand tile and active states.
+// The primary action is a neon fuchsia pill with near-black text; secondary actions are white
+// pills with a neutral outline.
 .area-admin ion-button.button-solid:not(.ion-color) {
-  --background: var(--rc-text);
-  --background-activated: var(--rc-text);
-  --background-focused: var(--rc-text);
-  --background-hover: var(--rc-text);
-  --color: var(--rc-surface-elevated);
+  --background: var(--rc-primary);
+  --background-activated: var(--rc-primary-pressed);
+  --background-focused: var(--rc-primary-pressed);
+  --background-hover: var(--rc-primary-pressed);
+  --color: var(--rc-on-primary);
   --box-shadow: none;
 }
 
@@ -161,6 +161,18 @@
   background: var(--rc-surface);
 }
 
+// Names in the lists are plain text; the underline appears only on hover and focus.
+.area-admin :is(ul.routes, ul.users, ul.roles, ul.groups) a {
+  color: var(--rc-text);
+  text-decoration: none;
+}
+
+.area-admin :is(ul.routes, ul.users, ul.roles, ul.groups) a:is(:hover, :focus-visible) {
+  text-decoration: underline;
+  text-decoration-color: var(--rc-primary-text);
+  text-underline-offset: 3px;
+}
+
 // Filters sit in a white rounded panel above the list.
 .area-admin ion-content .filters {
   padding: var(--rc-space-md);
@@ -170,7 +182,9 @@
 }
 
 // A clear focus ring on everything that takes the keyboard.
-.area-admin :is(a, button, select, input, textarea, [tabindex]:not([tabindex='-1'])):focus-visible {
+// `:where` keeps this rule's specificity at zero, so a field that draws its own focus border (a
+// select inside `.field`) can turn the ring off instead of showing two boxes.
+.area-admin :where(a, button, select, input, textarea, [tabindex]:not([tabindex='-1'])):focus-visible {
   outline: 2px solid var(--rc-primary-text);
   outline-offset: 2px;
 }

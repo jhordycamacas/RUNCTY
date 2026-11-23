@@ -222,15 +222,16 @@ const DESKTOP_QUERY = '(min-width: 768px)';
       color: var(--rc-text-muted);
     }
 
-    // The active section is a dark pill (a light one in the dark theme).
+    // The active section is a soft fuchsia tint with a bold label and a fuchsia icon.
     ion-item.active {
-      --background: var(--rc-text);
-      --color: var(--rc-surface-elevated);
-      border-radius: var(--rc-radius-pill);
+      --background: color-mix(in srgb, var(--rc-primary) 16%, transparent);
+      --color: var(--rc-text);
+      border-radius: var(--rc-radius-md);
+      font-weight: 700;
     }
 
     ion-item.active ion-icon {
-      color: var(--rc-surface-elevated);
+      color: var(--rc-primary-text);
     }
 
     // The signed-in user, as a soft card at the bottom of the sidebar.

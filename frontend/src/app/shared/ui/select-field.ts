@@ -57,6 +57,11 @@ let nextId = 0;
       border-radius: var(--rc-radius-sm);
     }
 
+    .field:focus-within {
+      border-color: var(--rc-primary-text);
+      box-shadow: 0 0 0 1px var(--rc-primary-text);
+    }
+
     .field.invalid {
       border-color: var(--rc-danger);
     }
@@ -73,6 +78,10 @@ let nextId = 0;
       background: transparent;
       color: var(--rc-text);
       font: inherit;
+    }
+
+    select:focus-visible {
+      outline: none;
     }
 
     .error {

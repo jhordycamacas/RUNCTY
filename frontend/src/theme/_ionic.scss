@@ -137,6 +137,21 @@ ion-textarea {
   font-size: var(--rc-font-size-body);
 }
 
+// Native selects and browser autofill paint their own list and field colors; pin them to the theme
+// so a dark page never gets black text on a black list.
+select option,
+select optgroup {
+  background-color: var(--rc-surface-elevated);
+  color: var(--rc-text);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--rc-text);
+  box-shadow: 0 0 0 100px var(--rc-surface) inset;
+  caret-color: var(--rc-text);
+}
+
 ion-checkbox {
   --border-color: var(--rc-control-border);
   --border-color-checked: var(--rc-primary);
