@@ -85,7 +85,6 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
           <section class="kpis" aria-label="Cifras principales">
             @if (summary.routes; as routes) {
               <app-kpi-tile
-                tone="fuchsia"
                 icon="trail-sign-outline"
                 label="Rutas activas"
                 [value]="routes.active"
@@ -94,7 +93,6 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
             }
             @if (summary.users; as users) {
               <app-kpi-tile
-                tone="neutral"
                 icon="people-outline"
                 label="Usuarios registrados"
                 [value]="users.total"
@@ -103,7 +101,6 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
             }
             @if (summary.routes; as routes) {
               <app-kpi-tile
-                tone="neutral"
                 icon="business-outline"
                 label="Ciudades con rutas"
                 [value]="routes.byCity.length"
@@ -112,7 +109,6 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
             }
             @if (summary.users; as users) {
               <app-kpi-tile
-                tone="neutral"
                 icon="barbell-outline"
                 label="Usuarios con perfil deportivo"
                 [value]="users.sportProfiles.completed"
@@ -293,7 +289,8 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
       }
     }
 
-    // White rounded panels on the warm gray frame, without heavy borders.
+    // Rounded panels on the frame with a very soft fuchsia tint, without heavy borders: the content
+    // is what stands out, not the background.
     .card {
       display: grid;
       align-content: start;
@@ -301,7 +298,7 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
       min-width: 0;
       padding: var(--rc-space-xl);
       border-radius: var(--rc-radius-lg);
-      background: var(--rc-surface-elevated);
+      background: color-mix(in srgb, var(--rc-primary) 6%, var(--rc-surface-elevated));
     }
 
     h2 {

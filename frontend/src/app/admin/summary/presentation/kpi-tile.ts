@@ -3,17 +3,15 @@ import { IonIcon } from '@ionic/angular';
 
 const NUMBER = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
 
-export type AccentTone = 'fuchsia' | 'neutral';
-
 /**
- * A headline figure on a white rounded tile (the whole tile in neon fuchsia for emphasis): an icon chip
- * and a label, a large thin number and a short hint.
+ * A headline figure on a rounded tile with a very soft fuchsia tint, so the number is what stands
+ * out and not the background: an icon chip and a label, a large thin number and a short hint.
  */
 @Component({
   selector: 'app-kpi-tile',
   imports: [IonIcon],
   template: `
-    <article class="tile" [class]="'tone-' + tone()">
+    <article class="tile">
       <span class="icon"><ion-icon [name]="icon()" aria-hidden="true" /></span>
       <p class="label">{{ label() }}</p>
       <p class="value">{{ shown() }}</p>
@@ -35,7 +33,7 @@ export type AccentTone = 'fuchsia' | 'neutral';
       height: 100%;
       padding: var(--rc-space-lg);
       border-radius: var(--rc-radius-md);
-      background: var(--rc-surface-elevated);
+      background: color-mix(in srgb, var(--rc-primary) 9%, var(--rc-surface-elevated));
       color: var(--rc-text);
     }
 
@@ -45,24 +43,9 @@ export type AccentTone = 'fuchsia' | 'neutral';
       width: 2rem;
       height: 2rem;
       border-radius: var(--rc-radius-pill);
-      background: var(--rc-surface);
+      background: color-mix(in srgb, var(--rc-primary) 18%, transparent);
       color: var(--rc-text);
       font-size: 1.05rem;
-    }
-
-    // The highlighted tile takes the neon brand color as a whole, with dark text (5.6:1).
-    .tone-fuchsia {
-      background: var(--rc-primary);
-      color: var(--rc-on-primary);
-    }
-
-    .tone-fuchsia .icon {
-      background: color-mix(in srgb, var(--rc-on-primary) 20%, transparent);
-      color: var(--rc-on-primary);
-    }
-
-    .tone-fuchsia :is(.label, .hint) {
-      color: var(--rc-on-primary);
     }
 
     p {
@@ -101,7 +84,6 @@ export class KpiTile {
   readonly icon = input.required<string>();
   readonly value = input<string | number>('');
   readonly hint = input<string>('');
-  readonly tone = input<AccentTone>('neutral');
 
   /** Numbers are written the Spanish way (`1.200`, `41,3`). */
   protected readonly shown = computed(() => {
