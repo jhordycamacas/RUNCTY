@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { ApiError } from '../../../core/errors/api-error';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog';
 import { ToastService } from '../../../shared/ui/toast.service';
 import { SettingsStore } from '../application/settings.store';
 import { SETTING_GROUPS } from '../domain/settings-fields';
-import { DEFAULT_SETTINGS, SettingsRepository } from '../domain/system-settings';
+import { DEFAULT_SETTINGS } from '../../../core/settings/system-settings';
+import { SettingsRepository } from '../domain/system-settings';
 import {
   FakeSettingsRepository,
   fakeSettingsRepository,
@@ -52,6 +54,7 @@ describe('SettingsPage', () => {
     confirm = vi.fn<ConfirmDialog['confirm']>().mockResolvedValue(true);
     TestBed.configureTestingModule({
       providers: [
+        provideRouter([]),
         SettingsStore,
         { provide: SettingsRepository, useValue: repository },
         { provide: ToastService, useValue: { success } },
@@ -71,6 +74,13 @@ describe('SettingsPage', () => {
     expect(root().querySelectorAll('app-text-field')).toHaveLength(26);
     expect(text()).toContain('Ejemplo: America/Guayaquil');
     expect(form().getRawValue().safeRouteDistanceTolerance).toBe('20');
+  });
+
+  it('offers the two screens of Configuración', async () => {
+    await create();
+
+    const links = [...root().querySelectorAll('nav a')].map((a) => a.textContent?.trim());
+    expect(links).toEqual(['Parámetros', 'Opciones del perfil deportivo']);
   });
 
   it('reads out the levels and follows the thresholds while they are typed', async () => {

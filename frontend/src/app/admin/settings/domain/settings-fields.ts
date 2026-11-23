@@ -1,4 +1,4 @@
-import { SettingKey } from './system-settings';
+import { SettingKey } from '../../../core/settings/system-settings';
 
 export interface SettingField {
   key: SettingKey;

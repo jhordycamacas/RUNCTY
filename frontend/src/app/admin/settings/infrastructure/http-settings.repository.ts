@@ -1,12 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../../../core/api/api-client';
-import {
-  SettingsRepository,
-  SettingsSaved,
-  SystemSettings,
-  toSystemSettings,
-} from '../domain/system-settings';
+import { SystemSettings, toSystemSettings } from '../../../core/settings/system-settings';
+import { SettingsRepository, SettingsSaved } from '../domain/system-settings';
 
 const count = (value: unknown): number => (typeof value === 'number' ? value : 0);
 

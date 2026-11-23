@@ -1,30 +1,12 @@
-export const SPORT_LEVELS = ['beginner', 'intermediate', 'advanced'] as const;
-export type SportLevel = (typeof SPORT_LEVELS)[number];
-
-export const SPORT_LEVEL_LABELS: Record<SportLevel, string> = {
-  beginner: 'Principiante',
-  intermediate: 'Intermedio',
-  advanced: 'Avanzado',
-};
-
-export const SPORT_GOALS = ['health', 'weightLoss', 'racePrep', 'pace', 'social'] as const;
-export type SportGoal = (typeof SPORT_GOALS)[number];
-
-export const SPORT_GOAL_LABELS: Record<SportGoal, string> = {
-  health: 'Salud',
-  weightLoss: 'Bajar de peso',
-  racePrep: 'Preparar una carrera',
-  pace: 'Mejorar mi ritmo',
-  social: 'Socializar',
-};
-
-const PACE_RANGE_SEC = { min: 150, max: 1200 } as const;
-const DISTANCE_RANGE_KM = { min: 1, max: 50 } as const;
+import { CatalogItem, activeItems } from '../../core/catalogs/catalog';
+import { SystemSettings } from '../../core/settings/system-settings';
 
 /** `users/{uid}/private/sportProfile` as the API answers it. */
 export interface SportProfile {
-  level: SportLevel;
-  goals: SportGoal[];
+  /** A code of the `sportLevels` catalog. */
+  level: string;
+  /** Codes of the `sportGoals` catalog. */
+  goals: string[];
   usualPaceSecPerKm: number;
   preferredDistanceKm: number;
 }
@@ -59,10 +41,30 @@ function parseDistance(value: string): number {
   return Number(value.trim().replace(',', '.'));
 }
 
-const isLevel = (value: string): value is SportLevel =>
-  (SPORT_LEVELS as readonly string[]).includes(value);
-const isGoal = (value: string): value is SportGoal =>
-  (SPORT_GOALS as readonly string[]).includes(value);
+/** What the form validates against: the options active now and the ranges the admin configured. */
+export interface SportProfileRules {
+  levels: readonly string[];
+  goals: readonly string[];
+  paceMinSecPerKm: number;
+  paceMaxSecPerKm: number;
+  distanceMinKm: number;
+  distanceMaxKm: number;
+}
+
+export function sportProfileRules(
+  levels: readonly CatalogItem[],
+  goals: readonly CatalogItem[],
+  settings: SystemSettings,
+): SportProfileRules {
+  return {
+    levels: activeItems(levels).map((item) => item.code),
+    goals: activeItems(goals).map((item) => item.code),
+    paceMinSecPerKm: settings.paceMinSecPerKm,
+    paceMaxSecPerKm: settings.paceMaxSecPerKm,
+    distanceMinKm: settings.distanceMinKm,
+    distanceMaxKm: settings.distanceMaxKm,
+  };
+}
 
 /** The form works with text: level, goals, pace as `min:seg` and distance in km. */
 export interface SportProfileForm {
@@ -86,42 +88,55 @@ export type SportProfileResult =
   | { profile?: undefined; errors: Partial<Record<SportProfileField, string>> };
 
 /** Validates the form values and converts them into the profile that is sent to the API. */
-export function parseSportProfileForm(form: SportProfileForm): SportProfileResult {
+export function parseSportProfileForm(
+  form: SportProfileForm,
+  rules: SportProfileRules,
+): SportProfileResult {
   const errors: Partial<Record<SportProfileField, string>> = {};
 
-  if (!isLevel(form.level)) errors.level = 'Selecciona tu nivel.';
+  const levelKnown = rules.levels.includes(form.level);
+  if (!levelKnown) errors.level = 'Selecciona tu nivel.';
   if (form.goals.length === 0) errors.goals = 'Elige al menos un objetivo.';
-  else if (!form.goals.every(isGoal)) errors.goals = 'Hay un objetivo no válido.';
+  else if (!form.goals.every((goal) => rules.goals.includes(goal))) {
+    errors.goals = 'Hay un objetivo no válido.';
+  }
 
   const pace = form.pace.trim();
   const paceSec = parsePace(pace);
   if (!PACE_PATTERN.test(pace)) errors.pace = 'Usa el formato min:seg, por ejemplo 6:30.';
-  else if (paceSec === null || paceSec < PACE_RANGE_SEC.min || paceSec > PACE_RANGE_SEC.max) {
-    errors.pace = `El ritmo debe estar entre ${formatPace(PACE_RANGE_SEC.min)} y ${formatPace(PACE_RANGE_SEC.max)} min/km.`;
+  else if (paceSec === null || paceSec < rules.paceMinSecPerKm || paceSec > rules.paceMaxSecPerKm) {
+    errors.pace = `El ritmo debe estar entre ${formatPace(rules.paceMinSecPerKm)} y ${formatPace(rules.paceMaxSecPerKm)} min/km.`;
   }
 
   const distance = form.distance.trim();
   const km = parseDistance(distance);
   if (!DISTANCE_PATTERN.test(distance)) errors.distance = 'Ingresa un número, por ejemplo 10.';
-  else if (km < DISTANCE_RANGE_KM.min || km > DISTANCE_RANGE_KM.max) {
-    errors.distance = `La distancia debe estar entre ${DISTANCE_RANGE_KM.min} y ${DISTANCE_RANGE_KM.max} km.`;
+  else if (km < rules.distanceMinKm || km > rules.distanceMaxKm) {
+    errors.distance = `La distancia debe estar entre ${rules.distanceMinKm} y ${rules.distanceMaxKm} km.`;
   }
 
-  if (Object.keys(errors).length > 0 || !isLevel(form.level) || paceSec === null) return { errors };
+  if (Object.keys(errors).length > 0 || paceSec === null) return { errors };
   return {
     profile: {
       level: form.level,
-      goals: form.goals.filter(isGoal),
+      goals: [...form.goals],
       usualPaceSecPerKm: paceSec,
       preferredDistanceKm: km,
     },
   };
 }
 
-export function toSportProfileForm(profile: SportProfile): SportProfileForm {
+/**
+ * Stored profile as form values. A stored choice that is no longer active is left out, so the user
+ * picks again instead of being stuck with an option the form cannot show.
+ */
+export function toSportProfileForm(
+  profile: SportProfile,
+  rules: SportProfileRules,
+): SportProfileForm {
   return {
-    level: profile.level,
-    goals: [...profile.goals],
+    level: rules.levels.includes(profile.level) ? profile.level : '',
+    goals: profile.goals.filter((goal) => rules.goals.includes(goal)),
     pace: formatPace(profile.usualPaceSecPerKm),
     distance: String(profile.preferredDistanceKm),
   };

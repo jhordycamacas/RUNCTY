@@ -3,6 +3,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { CatalogRepository } from '../../core/catalogs/catalog';
+import {
+  FakeCatalogRepository,
+  fakeCatalogRepository,
+} from '../../core/catalogs/testing/fake-catalog.repository';
+import { ApiError } from '../../core/errors/api-error';
+import { DEFAULT_SETTINGS, SystemSettings } from '../../core/settings/system-settings';
+import { SystemSettingsStore } from '../../core/settings/system-settings.store';
 import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { TextField } from '../../shared/ui/text-field';
 import { PreferencesStore } from '../../preferences/application/preferences.store';
@@ -25,12 +33,17 @@ describe('SportProfilePage', () => {
   let confirm: ReturnType<typeof vi.fn<ConfirmDialog['confirm']>>;
   let saveFailure: unknown;
   let preferences: ReturnType<typeof signal<Preferences>>;
+  let catalogs: FakeCatalogRepository;
+  let settings: ReturnType<typeof signal<SystemSettings>>;
 
   const text = () => fixture.nativeElement.textContent as string;
   const page = () => fixture.componentInstance;
   async function settle(): Promise<void> {
-    await fixture.whenStable();
-    fixture.detectChanges();
+    for (let i = 0; i < 4; i += 1) {
+      await new Promise((resolve) => setTimeout(resolve));
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
   }
   async function create(stored: SportProfile | null): Promise<void> {
     remote = stored;
@@ -49,6 +62,8 @@ describe('SportProfilePage', () => {
     removed = 0;
     saveFailure = null;
     preferences = signal(defaultPreferences());
+    catalogs = fakeCatalogRepository();
+    settings = signal({ ...DEFAULT_SETTINGS });
     confirm = vi.fn<ConfirmDialog['confirm']>().mockResolvedValue(true);
     const repository: SportProfileRepository = {
       get: async () => remote,
@@ -68,6 +83,8 @@ describe('SportProfilePage', () => {
         { provide: AuthService, useValue: { session: signal({ uid: 'u1' }) } },
         { provide: ConfirmDialog, useValue: { confirm } },
         { provide: PreferencesStore, useValue: { preferences } },
+        { provide: CatalogRepository, useValue: catalogs },
+        { provide: SystemSettingsStore, useValue: { settings, load: async () => undefined } },
       ],
     });
   });
@@ -183,5 +200,101 @@ describe('SportProfilePage', () => {
 
     expect(text()).toContain('Reintentar');
     expect(fixture.nativeElement.querySelector('form')).toBeNull();
+  });
+
+  it('offers the active options of the catalogs, with their labels', async () => {
+    catalogs.list.mockImplementation(async (id) =>
+      id === 'sportLevels'
+        ? [
+            { code: 'rookie', label: 'Novato', order: 1, active: true },
+            { code: 'old', label: 'Antiguo', order: 2, active: false },
+          ]
+        : [{ code: 'fun', label: 'Divertirme', order: 1, active: true }],
+    );
+
+    await create(null);
+
+    expect(text()).toContain('Novato');
+    expect(text()).toContain('Divertirme');
+    expect(text()).not.toContain('Antiguo');
+    expect(text()).not.toContain('Principiante');
+    expect(fixture.nativeElement.querySelectorAll('ion-radio')).toHaveLength(1);
+    expect(fixture.nativeElement.querySelectorAll('ion-checkbox')).toHaveLength(1);
+  });
+
+  it('saves a choice that comes from the catalog', async () => {
+    catalogs.list.mockImplementation(async (id) =>
+      id === 'sportLevels'
+        ? [{ code: 'rookie', label: 'Novato', order: 1, active: true }]
+        : [{ code: 'fun', label: 'Divertirme', order: 1, active: true }],
+    );
+    await create(null);
+
+    await submit({ level: 'rookie', goals: ['fun'], pace: '6:00', distance: '5' });
+
+    expect(saved).toEqual([
+      { level: 'rookie', goals: ['fun'], usualPaceSecPerKm: 360, preferredDistanceKm: 5 },
+    ]);
+  });
+
+  it('validates pace and distance against the ranges of the system settings', async () => {
+    settings.set({ ...DEFAULT_SETTINGS, paceMinSecPerKm: 180, distanceMaxKm: 42 });
+    await create(null);
+
+    await submit({ level: 'beginner', goals: ['health'], pace: '2:30', distance: '43' });
+
+    const fieldErrors = fixture.debugElement
+      .queryAll(By.directive(TextField))
+      .map((field) => field.componentInstance.error());
+    expect(fieldErrors).toEqual([
+      'El ritmo debe estar entre 3:00 y 20:00 min/km.',
+      'La distancia debe estar entre 1 y 42 km.',
+    ]);
+    expect(saved).toEqual([]);
+  });
+
+  it('labels a stored choice that is no longer active, or shows its raw code', async () => {
+    catalogs.list.mockImplementation(async (id) =>
+      id === 'sportLevels'
+        ? [{ code: 'old', label: 'Antiguo', order: 1, active: false }]
+        : [{ code: 'fun', label: 'Divertirme', order: 1, active: true }],
+    );
+
+    await create({ ...STORED, level: 'old', goals: ['fun', 'ghost'] });
+
+    expect(text()).toContain('Antiguo');
+    expect(text()).toContain('Divertirme');
+    expect(text()).toContain('ghost');
+  });
+
+  it('leaves out of the edit form the stored goal that is no longer active', async () => {
+    catalogs.list.mockImplementation(async (id) =>
+      id === 'sportLevels'
+        ? [{ code: 'intermediate', label: 'Intermedio', order: 1, active: true }]
+        : [{ code: 'pace', label: 'Mejorar mi ritmo', order: 1, active: true }],
+    );
+    await create(STORED);
+
+    (fixture.nativeElement.querySelector('.actions ion-button') as HTMLElement).click();
+    await settle();
+
+    expect(page()['form'].getRawValue().goals).toEqual(['pace']);
+    expect(page().hasUnsavedChanges()).toBe(false);
+  });
+
+  it('shows the catalog failure with a retry instead of a form that cannot be filled', async () => {
+    catalogs.list.mockRejectedValueOnce(new ApiError(0, 'network', 'No hay conexión.'));
+    await create(null);
+
+    expect(text()).toContain('No hay conexión.');
+    expect(fixture.nativeElement.querySelector('form')).toBeNull();
+
+    const retry = [...fixture.nativeElement.querySelectorAll('ion-button')].find(
+      (el) => (el as HTMLElement).textContent?.trim() === 'Reintentar',
+    ) as HTMLElement;
+    retry.click();
+    await settle();
+
+    expect(fixture.nativeElement.querySelector('form')).not.toBeNull();
   });
 });

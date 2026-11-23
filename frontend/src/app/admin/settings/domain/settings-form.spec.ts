@@ -7,7 +7,7 @@ import {
   serverErrors,
   toSettingsForm,
 } from './settings-form';
-import { DEFAULT_SETTINGS } from './system-settings';
+import { DEFAULT_SETTINGS } from '../../../core/settings/system-settings';
 
 const defaults = (): SettingsForm => toSettingsForm(DEFAULT_SETTINGS);
 const errorsOf = (changes: Partial<SettingsForm>) => parseSettingsForm({ ...defaults(), ...changes }).errors;

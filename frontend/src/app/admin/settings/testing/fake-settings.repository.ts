@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
-import { DEFAULT_SETTINGS, SettingsRepository } from '../domain/system-settings';
+import { DEFAULT_SETTINGS } from '../../../core/settings/system-settings';
+import { SettingsRepository } from '../domain/system-settings';
 
 /** Every port method as a mock, answering the defaults unless a test says otherwise. */
 export function fakeSettingsRepository() {

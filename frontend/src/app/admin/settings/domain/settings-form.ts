@@ -1,5 +1,5 @@
 import { SETTING_FIELDS, SettingField } from './settings-fields';
-import { SettingKey, SystemSettings } from './system-settings';
+import { SettingKey, SystemSettings } from '../../../core/settings/system-settings';
 
 /** The form works with text, so an empty or malformed number can be reported instead of lost. */
 export type SettingsForm = Record<SettingKey, string>;

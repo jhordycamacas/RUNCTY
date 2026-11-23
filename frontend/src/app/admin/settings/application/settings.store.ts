@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { userMessage } from '../../../core/errors/user-message';
-import { SettingsRepository, SystemSettings } from '../domain/system-settings';
+import { SystemSettings } from '../../../core/settings/system-settings';
+import { SettingsRepository } from '../domain/system-settings';
 
 /** The system parameters as the server has them, shared by the page and its actions. */
 @Injectable()

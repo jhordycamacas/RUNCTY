@@ -210,8 +210,8 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [x] `/app/cuenta/deportivo` ofrece crear el perfil cuando el corredor no tiene uno; pide nivel (Principiante, Intermedio, Avanzado), uno o más objetivos, ritmo habitual (`min:seg`) y distancia preferida.
-- [x] Cada campo inválido muestra su mensaje en español y no se guarda nada (nivel obligatorio, al menos un objetivo, ritmo de 2:30 a 20:00 min/km, distancia de 1 a 50 km).
+- [x] `/app/cuenta/deportivo` ofrece crear el perfil cuando el corredor no tiene uno; pide nivel, uno o más objetivos (las opciones activas de los catálogos `sportLevels` y `sportGoals`, que lee de `GET /catalogs/<id>`), ritmo habitual (`min:seg`) y distancia preferida.
+- [x] Cada campo inválido muestra su mensaje en español y no se guarda nada (nivel obligatorio, al menos un objetivo, ritmo y distancia dentro de los rangos de los parámetros del sistema, por defecto de 2:30 a 20:00 min/km y de 1 a 50 km).
 - [x] Al crear, se muestra el resumen del perfil con un aviso; un error del servidor se muestra junto al botón y se conserva el formulario.
 - [x] El perfil pertenece solo al corredor autenticado y la API rechaza campos desconocidos o fuera del esquema.
 - [ ] El ritmo habitual y la distancia preferida son opcionales, como dice el Excel (hoy son obligatorios).
@@ -234,7 +234,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 **Criterios de aceptación**
 
-- [x] El corredor ve su perfil deportivo guardado (nivel, objetivos, ritmo y distancia) y la distancia sigue su preferencia de unidades.
+- [x] El corredor ve su perfil deportivo guardado (nivel, objetivos, ritmo y distancia) y la distancia sigue su preferencia de unidades; un nivel u objetivo ya desactivado se sigue mostrando con su etiqueta, y al editar se deja de ofrecer.
 - [x] Un corredor sin perfil se trata como estado vacío («crear mi perfil»), no como error; un fallo de carga muestra un reintento en vez de un formulario vacío.
 - [x] Solo se lee el perfil propio: la API no acepta el uid de otro usuario y devuelve 404 `sport-profile-not-found` si no existe.
 - [ ] El perfil guardado personaliza las recomendaciones de rutas (hoy solo se muestra; la personalización llega con [EP-09](09-rutas-seguras.md)).

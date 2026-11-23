@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
-import { DEFAULT_SETTINGS } from '../domain/system-settings';
+import { DEFAULT_SETTINGS } from '../../../core/settings/system-settings';
 import { HttpSettingsRepository } from './http-settings.repository';
 
 describe('HttpSettingsRepository', () => {

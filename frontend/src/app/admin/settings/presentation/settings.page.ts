@@ -1,6 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { IonButton, IonContent, IonSpinner } from '@ionic/angular';
+import {
+  DEFAULT_SETTINGS,
+  SettingKey,
+  SystemSettings,
+} from '../../../core/settings/system-settings';
 import { ApiError } from '../../../core/errors/api-error';
 import { userMessage } from '../../../core/errors/user-message';
 import { formValues } from '../../../shared/forms/form-values';
@@ -20,12 +25,8 @@ import {
   serverErrors,
   toSettingsForm,
 } from '../domain/settings-form';
-import {
-  DEFAULT_SETTINGS,
-  SettingKey,
-  SystemSettings,
-  recalculatedMessage,
-} from '../domain/system-settings';
+import { recalculatedMessage } from '../domain/system-settings';
+import { SettingsTabs } from './settings-tabs';
 
 /**
  * The system parameters in one form: grouped panels, one save for all of them, a reset to the
@@ -33,10 +34,20 @@ import {
  */
 @Component({
   selector: 'app-settings-page',
-  imports: [AdminHeader, IonButton, IonContent, IonSpinner, Notice, ReactiveFormsModule, TextField],
+  imports: [
+    AdminHeader,
+    IonButton,
+    IonContent,
+    IonSpinner,
+    Notice,
+    ReactiveFormsModule,
+    SettingsTabs,
+    TextField,
+  ],
   template: `
     <app-admin-header title="Configuración" />
     <ion-content class="ion-padding">
+      <app-settings-tabs />
       @if (!ready()) {
         @if (store.error(); as failure) {
           <div class="state">

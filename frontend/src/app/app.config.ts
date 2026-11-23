@@ -9,6 +9,8 @@ import { RouteReuseStrategy, provideRouter } from '@angular/router';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular';
 import { apiErrorInterceptor } from './core/api/api-error.interceptor';
 import { bearerTokenInterceptor } from './core/api/bearer-token.interceptor';
+import { CatalogRepository } from './core/catalogs/catalog';
+import { HttpCatalogRepository } from './core/catalogs/http-catalog.repository';
 import { FirebaseAuthGateway } from './core/auth/firebase-auth.gateway';
 import { SdkFirebaseAuthGateway } from './core/auth/sdk-firebase-auth.gateway';
 import { routes } from './app.routes';
@@ -50,6 +52,7 @@ export const appConfig: ApplicationConfig = {
     { provide: ProfileRepository, useClass: HttpProfileRepository },
     { provide: AccountRepository, useClass: HttpAccountRepository },
     { provide: SportProfileRepository, useClass: HttpSportProfileRepository },
+    { provide: CatalogRepository, useClass: HttpCatalogRepository },
     { provide: RouteRepository, useClass: HttpRouteRepository },
     { provide: RiskZoneAlertRepository, useClass: HttpRiskZoneAlertRepository },
     { provide: PositionSource, useClass: CapacitorPositionSource },

@@ -87,7 +87,7 @@ Los servicios leen el documento una vez por petición y pasan el objeto de pará
 | [CFG-1](#cfg-1--leer-los-parámetros) | Leer los parámetros | Usuario con sesión | Parcial |
 | [CFG-2](#cfg-2--editar-los-parámetros) | Editar los parámetros | Administrador | Hecha |
 | [CFG-3](#cfg-3--recalcular-las-rutas) | Recalcular las rutas | Administrador | Hecha |
-| [CFG-4](#cfg-4--gestionar-los-catálogos-de-opciones) | Gestionar los catálogos de opciones | Administrador | Parcial |
+| [CFG-4](#cfg-4--gestionar-los-catálogos-de-opciones) | Gestionar los catálogos de opciones | Administrador | Hecha |
 
 ## Historias de usuario y criterios de aceptación
 
@@ -149,7 +149,7 @@ Los servicios leen el documento una vez por petición y pasan el objeto de pará
 ### CFG-4 — Gestionar los catálogos de opciones
 
 - **Historia de usuario:** Como administrador · Deseo definir los niveles y las metas deportivas que ofrece la aplicación. Para cambiar las opciones del corredor sin pedir un despliegue.
-- **Estado:** `Parcial` — 2026-11-22: API, dominio, semilla, perfil deportivo y reglas de Firestore con pruebas automáticas en el backend; faltan la pantalla del panel y los formularios del corredor que lean el catálogo (T4b).
+- **Estado:** `Hecha` — 2026-11-22: API, dominio, semilla, perfil deportivo y reglas de Firestore con pruebas automáticas en el backend; pantalla «Opciones del perfil deportivo» del panel y formulario del perfil deportivo del corredor que lee el catálogo y los rangos, con pruebas automáticas en el frontend (suite completa: 836 pruebas).
 
 **Contrato:** `GET /catalogs/<id>` (sesión iniciada) responde `200 {"id": "sportLevels", "items": [{"code", "label", "order", "active"}]}` ordenado por `order`, con los inactivos y su marca; `?active=true` deja solo los activos para los formularios del corredor. `PUT /catalogs/<id>` (`settings.manage`) recibe `{"items": [...]}`, reemplaza la lista y responde igual. Catálogos (cerrados en el código): `sportLevels` (`beginner` Principiante, `intermediate` Intermedio, `advanced` Avanzado) y `sportGoals` (`health` Salud, `weightLoss` Bajar de peso, `racePrep` Preparar una carrera, `pace` Mejorar el ritmo, `social` Correr en compañía). Un id desconocido responde `404 catalog-not-found`.
 
@@ -162,11 +162,12 @@ Los servicios leen el documento una vez por petición y pasan el objeto de pará
 - [x] Sin documento guardado se responden los valores por defecto; la semilla los guarda solo si faltan y no pisa lo que el administrador cambió.
 - [x] El perfil deportivo valida nivel y metas contra los códigos activos de los catálogos al guardar (rechaza un código desconocido o desactivado con `invalid-choice`) y lee sin error un perfil guardado con un código luego desactivado.
 - [x] Las reglas de Firestore niegan todo acceso directo a `catalogs` y ya no listan los niveles ni las metas.
-- [ ] Sección del panel para editar los catálogos y formularios del corredor que ofrecen solo los ítems activos (T4b).
+- [x] El panel tiene la pantalla `/admin/configuracion/opciones` (segunda pestaña de «Configuración», con `settings.manage`): una lista editable por catálogo con nombre (1 a 60), código (editable solo en las opciones nuevas y sugerido desde el nombre en camelCase ASCII), posición con botones subir/bajar e interruptor «Activa». «Agregar opción» añade una fila, no hay borrar (se desactiva) y queda al menos una opción activa; un solo «Guardar cambios» por catálogo con aviso «Opciones guardadas.» y los errores de la API (`items.N.code|label`, `items`) traducidos junto a cada fila.
+- [x] El formulario del perfil deportivo del corredor ofrece solo las opciones activas de `GET /catalogs/<id>`, muestra la etiqueta del catálogo para un código guardado aunque esté desactivado (o el código si el catálogo no lo conoce) y valida ritmo y distancia con los rangos de `GET /settings` (por defecto 150 a 1200 s/km y 1 a 50 km si la llamada falla).
 
-**Implementación:** `backend/apps/catalogs`, `backend/apps/users/domain/models.py` (`PerfilDeportivo.parse`), `backend/apps/users/application/use_cases.py` (`save_sport_profile`), `backend/apps/seed/application/use_cases.py`, `firestore.rules`
+**Implementación:** `backend/apps/catalogs`, `backend/apps/users/domain/models.py` (`PerfilDeportivo.parse`), `backend/apps/users/application/use_cases.py` (`save_sport_profile`), `backend/apps/seed/application/use_cases.py`, `firestore.rules`; frontend: `frontend/src/app/core/catalogs`, `frontend/src/app/core/settings`, `frontend/src/app/admin/settings/catalogs`, `frontend/src/app/sport-profile`
 
-**Pruebas:** `backend/tests/test_catalogs_domain.py`, `backend/tests/test_catalogs_use_cases.py`, `backend/tests/test_catalogs_api.py`, `backend/tests/test_users_domain.py`, `backend/tests/test_seed.py`
+**Pruebas:** `backend/tests/test_catalogs_domain.py`, `backend/tests/test_catalogs_use_cases.py`, `backend/tests/test_catalogs_api.py`, `backend/tests/test_users_domain.py`, `backend/tests/test_seed.py`, `frontend/src/app/core/catalogs/*.spec.ts`, `frontend/src/app/core/settings/system-settings.store.spec.ts`, `frontend/src/app/admin/settings/catalogs/**/*.spec.ts`, `frontend/src/app/sport-profile/**/*.spec.ts`
 
 ## Dependencias
 

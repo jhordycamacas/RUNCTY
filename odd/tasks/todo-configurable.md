@@ -64,8 +64,20 @@ frontend and `firestore.rules`).
         only the default items inside `catalogs`). Stored profiles keep any code
         (`from_document` skips the catalog check). Deny-all rule for `catalogs`; the level and
         goals `in [...]` lists left `isValidSportProfile`. Route: single writer (delegated).
-  - [ ] T4b Frontend: admin section to edit the catalogs + runner/profile forms read
+  - [x] T4b Frontend: admin section to edit the catalogs + runner/profile forms read
         `GET /catalogs/<id>?active=true` instead of their constants
+        Evidence: sub-route `/admin/configuracion/opciones` (second tab "Opciones del perfil
+        deportivo" next to "Parámetros", `settings.manage`): editable list per catalog (name,
+        code fixed once saved and suggested in camelCase from the name, up/down, active toggle,
+        add, no delete), one save per catalog, domain + API field-reason mapping. Runner sport
+        profile reads the catalogs and `GET /settings` ranges (defaults if the call fails; shared
+        `SystemSettings` moved to `core/settings`, `CatalogRepository` in `core/catalogs`);
+        `SPORT_LEVELS`, `SPORT_GOALS`, their label maps, `PACE_RANGE_SEC` and the distance range
+        constants are gone (grep clean). RED observed first (missing modules/exports compile
+        errors) for core, catalog domain, store, page and sport-profile specs. Full frontend suite
+        836 passed in 115 files, both tsc clean, `ng lint` clean. Deviation: the runner makes one
+        unfiltered `GET /catalogs/<id>` per catalog (not `?active=true`) so inactive codes can
+        still be labelled; the active filter is applied client-side. Route: single writer.
 - [ ] T5 Remove every leftover duplicate list (frontend constants, firestore.rules `in [...]`),
       specs, README, CONTEXTO, traceability; final grep proving nothing hardcoded remains outside
       the structural list above

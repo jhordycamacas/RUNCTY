@@ -17,13 +17,10 @@ import { SubpageHeader } from '../../shared/ui/subpage-header';
 import { TextField } from '../../shared/ui/text-field';
 import { PreferencesStore } from '../../preferences/application/preferences.store';
 import { formatDistance } from '../../preferences/domain/units';
+import { SportOptionsStore } from '../application/sport-options.store';
 import { SportProfileStore } from '../application/sport-profile.store';
 import {
   EMPTY_SPORT_PROFILE_FORM,
-  SPORT_GOALS,
-  SPORT_GOAL_LABELS,
-  SPORT_LEVELS,
-  SPORT_LEVEL_LABELS,
   SportProfileField,
   SportProfileForm,
   formatPace,
@@ -63,7 +60,16 @@ import {
           <app-notice tone="success" [message]="notice()" />
           <app-notice [message]="store.error()" />
 
-          @if (showForm()) {
+          @if (showForm() && !options.ready()) {
+            @if (options.error(); as failure) {
+              <app-notice [message]="failure" />
+              <ion-button fill="outline" (click)="options.load()">Reintentar</ion-button>
+            } @else {
+              <p class="state" role="status">
+                <ion-spinner name="crescent" /> Cargando las opciones…
+              </p>
+            }
+          } @else if (showForm()) {
             @if (store.status() === 'empty') {
               <app-notice
                 tone="info"
@@ -74,8 +80,8 @@ import {
               <fieldset>
                 <legend>Nivel</legend>
                 <ion-radio-group formControlName="level">
-                  @for (level of levels; track level.value) {
-                    <ion-radio [value]="level.value" labelPlacement="end" justify="start">{{
+                  @for (level of options.levels(); track level.code) {
+                    <ion-radio [value]="level.code" labelPlacement="end" justify="start">{{
                       level.label
                     }}</ion-radio>
                   }
@@ -87,12 +93,12 @@ import {
 
               <fieldset>
                 <legend>Objetivos <small>Puedes elegir varios.</small></legend>
-                @for (goal of goals; track goal.value) {
+                @for (goal of options.goals(); track goal.code) {
                   <ion-checkbox
                     labelPlacement="end"
                     justify="start"
-                    [checked]="selectedGoals().includes(goal.value)"
-                    (ionChange)="toggleGoal(goal.value, $event.detail.checked)"
+                    [checked]="selectedGoals().includes(goal.code)"
+                    (ionChange)="toggleGoal(goal.code, $event.detail.checked)"
                     >{{ goal.label }}</ion-checkbox
                   >
                 }
@@ -144,13 +150,13 @@ import {
               </div>
               <div>
                 <dt>Nivel</dt>
-                <dd>{{ levelLabels[profile.level] }}</dd>
+                <dd>{{ options.levelLabel(profile.level) }}</dd>
               </div>
             </dl>
             <h2>Objetivos</h2>
             <ul class="goals">
               @for (goal of profile.goals; track goal) {
-                <li>{{ goalLabels[goal] }}</li>
+                <li>{{ options.goalLabel(goal) }}</li>
               }
             </ul>
 
@@ -266,16 +272,7 @@ export class SportProfilePage implements HasUnsavedChanges {
   private readonly dialog = inject(ConfirmDialog);
   private readonly preferences = inject(PreferencesStore).preferences;
 
-  protected readonly levels = SPORT_LEVELS.map((value) => ({
-    value,
-    label: SPORT_LEVEL_LABELS[value],
-  }));
-  protected readonly goals = SPORT_GOALS.map((value) => ({
-    value,
-    label: SPORT_GOAL_LABELS[value],
-  }));
-  protected readonly levelLabels = SPORT_LEVEL_LABELS;
-  protected readonly goalLabels = SPORT_GOAL_LABELS;
+  protected readonly options = inject(SportOptionsStore);
   protected readonly pace = formatPace;
   /** Distances follow the unit preference (RF-01-13). */
   protected readonly distance = (km: number) => formatDistance(km, this.preferences().units);
@@ -288,7 +285,7 @@ export class SportProfilePage implements HasUnsavedChanges {
   });
   private readonly values = formValues(this.form);
   private readonly errors = computed(() => {
-    const result = parseSportProfileForm(this.values());
+    const result = parseSportProfileForm(this.values(), this.options.rules());
     return result.errors ?? {};
   });
   private readonly baseline = signal<SportProfileForm>(EMPTY_SPORT_PROFILE_FORM);
@@ -303,6 +300,7 @@ export class SportProfilePage implements HasUnsavedChanges {
 
   constructor() {
     void this.store.load();
+    void this.options.load();
   }
 
   hasUnsavedChanges(): boolean {
@@ -329,7 +327,7 @@ export class SportProfilePage implements HasUnsavedChanges {
   protected startEdit(): void {
     const profile = this.store.profile();
     this.notice.set(null);
-    this.open(profile ? toSportProfileForm(profile) : EMPTY_SPORT_PROFILE_FORM);
+    this.open(profile ? toSportProfileForm(profile, this.options.rules()) : EMPTY_SPORT_PROFILE_FORM);
     this.editing.set(true);
   }
 
@@ -343,13 +341,13 @@ export class SportProfilePage implements HasUnsavedChanges {
     this.submitted.set(true);
     this.notice.set(null);
     this.error.set(null);
-    const result = parseSportProfileForm(this.form.getRawValue());
+    const result = parseSportProfileForm(this.form.getRawValue(), this.options.rules());
     if (!result.profile) return;
 
     this.saving.set(true);
     try {
       await this.store.save(result.profile);
-      this.open(toSportProfileForm(result.profile));
+      this.open(toSportProfileForm(result.profile, this.options.rules()));
       this.editing.set(false);
       this.notice.set('Perfil deportivo guardado.');
     } catch (error) {

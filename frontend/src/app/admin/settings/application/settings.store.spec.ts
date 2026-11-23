@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ApiError } from '../../../core/errors/api-error';
-import { DEFAULT_SETTINGS, SettingsRepository } from '../domain/system-settings';
+import { DEFAULT_SETTINGS } from '../../../core/settings/system-settings';
+import { SettingsRepository } from '../domain/system-settings';
 import {
   FakeSettingsRepository,
   fakeSettingsRepository,
