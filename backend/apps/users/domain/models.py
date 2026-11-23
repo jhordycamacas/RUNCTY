@@ -5,12 +5,14 @@
 already stored and never raises.
 """
 
+import math
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from datetime import date
 
 from apps.shared.domain.errors import DomainError, invalid_fields
+from apps.system_settings.domain.models import SystemSettings
 
 _MAX_NAME = 60
 _MAX_CITY_ID = 64
@@ -152,13 +154,14 @@ def _personal_data(
 
 SPORT_LEVELS = ("beginner", "intermediate", "advanced")
 SPORT_GOALS = ("health", "weightLoss", "racePrep", "pace", "social")
-_PACE_SEC_PER_KM = (150, 1200)
-_DISTANCE_KM = (1, 50)
 
 
-def _number_reason(value: object, limits: tuple[int, int]) -> str | None:
+def _number_reason(value: object, limits: tuple[float, float] | None) -> str | None:
+    """`limits` is None when reading a stored profile: the ranges apply when it is saved."""
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return "invalid"
+    if limits is None:
+        return None if math.isfinite(value) else "invalid"
     # Written so that NaN, which compares false to everything, is rejected.
     return None if limits[0] <= value <= limits[1] else "out-of-range"
 
@@ -183,12 +186,17 @@ class PerfilDeportivo:
     preferred_distance_km: float
 
     @classmethod
-    def parse(cls, raw: Mapping[str, object]) -> "PerfilDeportivo":
+    def parse(cls, raw: Mapping[str, object], settings: SystemSettings | None) -> "PerfilDeportivo":
+        """Validated profile. `settings` gives the pace and distance ranges; None skips them."""
+        pace = distance = None
+        if settings is not None:
+            pace = (settings.pace_min_sec_per_km, settings.pace_max_sec_per_km)
+            distance = (settings.distance_min_km, settings.distance_max_km)
         reasons = {
             "level": None if raw.get("level") in SPORT_LEVELS else "invalid-choice",
             "goals": _goals_reason(raw.get("goals")),
-            "usualPaceSecPerKm": _number_reason(raw.get("usualPaceSecPerKm"), _PACE_SEC_PER_KM),
-            "preferredDistanceKm": _number_reason(raw.get("preferredDistanceKm"), _DISTANCE_KM),
+            "usualPaceSecPerKm": _number_reason(raw.get("usualPaceSecPerKm"), pace),
+            "preferredDistanceKm": _number_reason(raw.get("preferredDistanceKm"), distance),
         }
         errors = {name: reason for name, reason in reasons.items() if reason}
         if errors:
@@ -202,9 +210,12 @@ class PerfilDeportivo:
 
     @classmethod
     def from_document(cls, data: Mapping[str, object]) -> "PerfilDeportivo | None":
-        """A stored profile that no longer matches the schema is treated as missing."""
+        """A stored profile that no longer matches the schema is treated as missing.
+
+        The ranges of the system settings are not applied: narrowing them never hides a profile.
+        """
         try:
-            return cls.parse(data)
+            return cls.parse(data, None)
         except DomainError:
             return None
 

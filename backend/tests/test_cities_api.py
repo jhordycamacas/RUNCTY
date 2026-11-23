@@ -5,8 +5,8 @@ from tests.conftest import bearer
 
 CITIES = "/api/v1/cities"
 LOJA_URL = f"{CITIES}/loja"
-LOJA = Ciudad("loja", "Loja", "Loja", "city", -3.99, -79.2, "active")
-ZONE = Ciudad("loja-centro", "Centro", "Loja", "zone", -3.99, -79.2, "planned", "loja")
+LOJA = Ciudad("loja", "Loja", "Loja", "city", -3.99, -79.2, "active", None, "EC")
+ZONE = Ciudad("loja-centro", "Centro", "Loja", "zone", -3.99, -79.2, "planned", "loja", "EC")
 NEW_CITY = {
     "id": "quito",
     "name": "Quito",
@@ -149,7 +149,7 @@ class TestUpdateCity:
 
 class TestDeleteCity:
     def test_removes_a_free_city(self, client, firebase):
-        firebase.cities["quito"] = Ciudad.parse(NEW_CITY)
+        firebase.cities["quito"] = Ciudad.parse(NEW_CITY, "EC")
 
         response = client.delete(f"{CITIES}/quito", **bearer("cataloguer-token"))
 

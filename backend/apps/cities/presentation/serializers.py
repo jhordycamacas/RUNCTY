@@ -28,7 +28,7 @@ class CitySerializer(serializers.Serializer):
     id = serializers.CharField()
     name = serializers.CharField()
     province = serializers.CharField()
-    country = serializers.ReadOnlyField(default="EC")
+    country = serializers.CharField()
     type = serializers.CharField()
     parentCityId = serializers.CharField(source="parent_city_id", allow_null=True)
     location = serializers.SerializerMethodField()

@@ -242,6 +242,12 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // System parameters (`systemSettings/global`): only the Django API reads
+    // and writes them (Admin SDK), applying `settings.manage` for changes.
+    match /systemSettings/{settingId} {
+      allow read, write: if false;
+    }
+
     // Everything else is denied by default (no matching rule).
   }
 }

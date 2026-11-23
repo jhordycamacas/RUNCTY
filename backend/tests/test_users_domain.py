@@ -9,6 +9,7 @@ from apps.users.domain.models import (
     PreferenciaUsuario,
     Usuario,
 )
+from tests.fakes import SETTINGS
 
 TODAY = date(2026, 11, 12)
 SIGN_UP = {
@@ -177,7 +178,7 @@ SPORT_PROFILE = {
 
 class TestPerfilDeportivo:
     def test_parses_a_valid_profile(self):
-        profile = PerfilDeportivo.parse(SPORT_PROFILE)
+        profile = PerfilDeportivo.parse(SPORT_PROFILE, SETTINGS)
 
         assert profile == PerfilDeportivo("intermediate", ("health", "pace"), 390, 10.5)
         assert profile.to_document() == SPORT_PROFILE
@@ -200,17 +201,22 @@ class TestPerfilDeportivo:
         ],
     )
     def test_rejects_values_outside_the_schema(self, change, fields):
-        assert fields_of(PerfilDeportivo.parse, {**SPORT_PROFILE, **change}) == fields
+        assert (
+            fields_of(lambda raw: PerfilDeportivo.parse(raw, SETTINGS), {**SPORT_PROFILE, **change})
+            == fields
+        )
 
     def test_accepts_the_limits(self):
         limits = {**SPORT_PROFILE, "usualPaceSecPerKm": 150, "preferredDistanceKm": 50}
 
-        assert PerfilDeportivo.parse(limits).usual_pace_sec_per_km == 150
+        assert PerfilDeportivo.parse(limits, SETTINGS).usual_pace_sec_per_km == 150
 
     def test_reads_a_stored_document_ignoring_its_timestamp(self):
         stored = {**SPORT_PROFILE, "updatedAt": object()}
 
-        assert PerfilDeportivo.from_document(stored) == PerfilDeportivo.parse(SPORT_PROFILE)
+        assert PerfilDeportivo.from_document(stored) == PerfilDeportivo.parse(
+            SPORT_PROFILE, SETTINGS
+        )
 
     def test_a_stored_document_that_no_longer_matches_is_treated_as_missing(self):
         assert PerfilDeportivo.from_document({**SPORT_PROFILE, "level": "pro"}) is None

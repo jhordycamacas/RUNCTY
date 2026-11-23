@@ -10,6 +10,7 @@ from apps.routes.domain.models import parse_doc_id
 from apps.safe_routes.application.ports import SafeRouteRequestRepository
 from apps.safe_routes.domain.models import RutaRecomendada, SolicitudRutaSegura, recommend
 from apps.shared.domain.errors import DomainError, ErrorKind
+from apps.system_settings.domain.models import SystemSettings
 
 
 @dataclass(frozen=True, slots=True)
@@ -17,6 +18,7 @@ class SafeRoutesDeps:
     requests: SafeRouteRequestRepository
     routes: RouteRepository
     cities: CityRepository
+    settings: SystemSettings
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,7 +28,8 @@ class RecommendationResult:
 
 
 def _recommendation(request: SolicitudRutaSegura, deps: SafeRoutesDeps) -> RecommendationResult:
-    return RecommendationResult(request, recommend(deps.routes.list(request.city_id), request))
+    routes = deps.routes.list(request.city_id)
+    return RecommendationResult(request, recommend(routes, request, deps.settings))
 
 
 def _require_own(
@@ -48,7 +51,7 @@ def create_request(
     raw: object, uid: str, now: datetime, deps: SafeRoutesDeps
 ) -> RecommendationResult:
     """RF-09-1: the city must be enabled (active coverage) and the distance above zero."""
-    request = SolicitudRutaSegura.parse(raw, deps.requests.new_id(), uid, now)
+    request = SolicitudRutaSegura.parse(raw, deps.requests.new_id(), uid, now, deps.settings)
     city = deps.cities.get(request.city_id)
     if city is None:
         raise DomainError(

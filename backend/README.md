@@ -33,8 +33,9 @@ Firebase project.
 `manage.py seed` loads the demo data into the Firebase emulators: the city Loja, the system
 roles (`runner`, `admin`, `club_rep`), the admin account `admin@runcty.dev` / `Admin123!` with
 its claims, and five sample routes in Loja with segments, time slots, risk factors and the
-computed safety index. It is idempotent: a re-run updates the same documents and rewrites each
-sample route from scratch.
+computed safety index, plus the default system settings (saved once: a re-run keeps what an
+admin changed). It is idempotent: a re-run updates the same documents and rewrites each sample
+route from scratch.
 
 ```bash
 # Emulators running (repo root: `npm run emulators`), then from backend/:
@@ -99,6 +100,9 @@ gunicorn as a non-root user and contains no configuration or credentials.
 | `POST /api/v1/routes/{id}/segments`, `PUT`, `DELETE .../segments/{sid}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `name`, `coordinates` (`[{lat, lng}]`), `order?` |
 | `POST /api/v1/routes/{id}/time-slots`, `PUT`, `DELETE .../time-slots/{slotId}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `startTime`, `endTime`, `label?`, `validFrom?`, `validTo?` |
 | `POST /api/v1/routes/{id}/segments/{sid}/risk-factors`, `PUT`, `DELETE .../risk-factors/{fid}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `type`, `severity`, `description`, `startTime?`, `endTime?` |
+| `GET /api/v1/settings` | signed in | `{"settings": {...}}` with every system parameter (defaults when none were saved) |
+| `PUT /api/v1/settings` | `settings.manage` | `{"settings": {...}, "recalculated": n}`. Body: any subset of the parameters |
+| `POST /api/v1/admin/recalculate-routes` | `settings.manage` | `{"recalculated": n}`: recomputes the stored safety of every route |
 
 JSON only, camelCase keys. Every error has the same shape; clients branch on `reason` and
 translate it, `message` is for developers:
@@ -189,6 +193,25 @@ with `city-has-routes` while a route references the city and `city-has-zones` wh
 has zones. A zone's parent must be an existing city, not another zone. `GET` needs no token
 (the sign-up form lists the cities), but a token that is sent and bad is still a 401.
 
+### System settings
+
+`systemSettings/global` holds the numbers that used to be constants: penalty per severity,
+level thresholds, incident window and margin, time zone, radii, route limits, sport profile
+ranges, safe route tolerance and country. `SystemSettings` (`apps/system_settings/domain`)
+validates each one with its type and bounds (`400 invalid-argument` with the reason per field in
+`error.fields`: `required`, `invalid`, `out-of-range`, `invalid-time-zone`,
+`invalid-country-code`, `must-not-be-below-previous`, `must-be-below-high`,
+`must-exceed-min`) and reads a stored document tolerantly: a missing or invalid field is its
+default. The views read the settings once per request (`current_settings()`) and pass the object
+to the use cases and to the pure domain functions (`level_for_score`, `incident_penalties`,
+`Ruta.parse`, `local_now`...); only the field defaults of `SystemSettings` hold the values.
+
+`PUT /settings` merges its body over the stored values. When a penalty, a threshold, the
+incident window or margin, or the time zone changes, every route is recalculated in the same
+request and the response reports `recalculated`. The Firestore rules deny every client access to
+the collection; the seed saves the defaults only when none exist. `tzdata` must be installed for
+`zoneinfo` on systems without an IANA database.
+
 ### Routes and the safety index
 
 Reason codes are the ones the route callables used: `invalid-route-id`, `invalid-segment-id`,
@@ -199,7 +222,8 @@ Reason codes are the ones the route callables used: `invalid-route-id`, `invalid
 `invalid-start-time`, `invalid-end-time`, `invalid-time-range`, `invalid-valid-from`,
 `invalid-valid-to`, `invalid-date-range`, `invalid-factor-type`, `invalid-severity`,
 `invalid-factor-description` (400); `time-slot-overlap`, `too-many-segments` (50),
-`too-many-time-slots` (12), `too-many-risk-factors` (20 per segment) (400); `route-not-found`,
+`too-many-time-slots` (12), `too-many-risk-factors` (20 per segment) (400), all limits being
+system settings with those defaults; `route-not-found`,
 `segment-not-found`, `time-slot-not-found`, `risk-factor-not-found`, `city-not-found` (404).
 
 - **Validation.** The serializers only reject unknown fields; the domain checks every type and
@@ -211,8 +235,9 @@ Reason codes are the ones the route callables used: `invalid-route-id`, `invalid
   `routes.manage`; the computed `safety` of the route and of each segment is public to signed-in
   users because the app shows it.
 - **Safety index (RF-07).** Each segment starts at 100 points per time slot; every risk factor
-  whose window overlaps the slot (no window means all day) subtracts 10 (`low`), 20 (`medium`)
-  or 35 (`high`), down to 0. Levels: `high` from 70, `medium` 40-69, `low` below 40. A route takes
+  whose window overlaps the slot (no window means all day) subtracts a penalty by severity
+  (`low` 10, `medium` 20, `high` 35 by default), down to 0. Levels: `high` from 70, `medium`
+  from 40, `low` below (defaults; penalties and thresholds are system settings). A route takes
   the level of its worst segment per slot (ties: the first in route order) and keeps the factors
   that explain it. `CalculadoraIndiceSeguridad` accepts `extra_penalties` for later sources such
   as community reports. Slot windows are half-open (`06:00-09:00` and `09:00-12:00` do not
@@ -292,6 +317,8 @@ apps/
   routes/                    Ruta, Tramo, FranjaHoraria, FactorDeRiesgo, IndiceSeguridad and
                              CalculadoraIndiceSeguridad: routes, segments, time slots, risk
                              factors and the safety index
+  system_settings/           SystemSettings: the system parameters (`systemSettings/global`),
+                             `GET`/`PUT /settings` and the bulk route recalculation
   seed/                      `manage.py seed`: demo data for the Firebase emulators
 tests/                       pytest suite with in-memory adapters
 ```

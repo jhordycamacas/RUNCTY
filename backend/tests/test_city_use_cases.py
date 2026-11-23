@@ -9,7 +9,7 @@ from apps.cities.application.use_cases import (
 )
 from apps.cities.domain.models import Ciudad
 from apps.shared.domain.errors import DomainError, ErrorKind
-from tests.fakes import InMemoryCityRepository, InMemoryCityUsage
+from tests.fakes import SETTINGS, InMemoryCityRepository, InMemoryCityUsage
 
 LOJA = Ciudad("loja", "Loja", "Loja", "city", -3.99, -79.2, "active")
 ZONE = Ciudad("loja-centro", "Centro", "Loja", "zone", -3.99, -79.2, "planned", "loja")
@@ -26,7 +26,7 @@ NEW_CITY = {
 @pytest.fixture
 def deps(firebase) -> CitiesDeps:
     firebase.cities.update(loja=LOJA)
-    return CitiesDeps(cities=InMemoryCityRepository(), usage=InMemoryCityUsage())
+    return CitiesDeps(cities=InMemoryCityRepository(), usage=InMemoryCityUsage(), settings=SETTINGS)
 
 
 def failure(call) -> DomainError:
@@ -111,7 +111,7 @@ class TestDeleteCity:
     """RF-04-4: ported from `deleteCity.test.ts`."""
 
     def test_deletes_a_city_without_routes_or_zones(self, firebase, deps):
-        firebase.cities["quito"] = Ciudad.parse(NEW_CITY)
+        firebase.cities["quito"] = Ciudad.parse(NEW_CITY, "EC")
 
         delete_city("quito", deps)
 

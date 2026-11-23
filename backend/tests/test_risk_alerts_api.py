@@ -8,10 +8,11 @@ from apps.cities.domain.models import Ciudad
 from apps.risk_alerts.domain.models import AlertaZonaRiesgo
 from apps.routes.domain.time import local_now
 from tests.conftest import bearer
+from tests.fakes import SETTINGS
 
 ROUTES = "/api/v1/routes"
 ALERTS = "/api/v1/risk-zone-alerts"
-TODAY = local_now().date()
+TODAY = local_now(SETTINGS).date()
 ALERT = {
     "type": "Robos frecuentes",
     "severity": "media",
@@ -173,7 +174,7 @@ class TestAlerts:
 
 class TestInForce:
     ALL_DAY = AlertaZonaRiesgo.parse(
-        {**ALERT, "validFrom": "2026-11-20", "validTo": "2026-11-22"}, "a1"
+        {**ALERT, "validFrom": "2026-11-20", "validTo": "2026-11-22"}, "a1", SETTINGS
     )
     NIGHT = AlertaZonaRiesgo.parse(
         {
@@ -184,6 +185,7 @@ class TestInForce:
             "endTime": "22:00",
         },
         "a2",
+        SETTINGS,
     )
 
     @pytest.mark.parametrize(

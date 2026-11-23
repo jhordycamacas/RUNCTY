@@ -7,6 +7,7 @@ import pytest
 from apps.cities.domain.models import Ciudad
 from apps.routes.domain.time import local_now
 from tests.conftest import bearer
+from tests.fakes import SETTINGS
 
 ROUTES = "/api/v1/routes"
 SOURCES = "/api/v1/information-sources"
@@ -27,7 +28,7 @@ SEGMENT = {
 }
 SLOT = {"label": "Night", "startTime": "19:00", "endTime": "23:00"}
 SOURCE = {"entity": "ECU 911", "dataType": "Robos reportados", "data": "csv"}
-YESTERDAY = (local_now() - timedelta(days=1)).date().isoformat()
+YESTERDAY = (local_now(SETTINGS) - timedelta(days=1)).date().isoformat()
 
 ADMIN = bearer("admin-token")
 MANAGER = bearer("club-rep-token")
@@ -116,7 +117,7 @@ class TestAuthorization:
 
 class TestSources:
     def test_creates_reads_and_lists_a_source_with_its_load_date(self, client, source_id):
-        today = local_now().date().isoformat()
+        today = local_now(SETTINGS).date().isoformat()
         expected = {"id": source_id, **SOURCE, "loadedAt": today}
 
         assert client.get(f"{SOURCES}/{source_id}", **ADMIN).json() == expected
@@ -156,7 +157,7 @@ class TestSources:
         assert response.status_code == 204
         stored = client.get(f"{SOURCES}/{source_id}", **ADMIN).json()
         assert stored["entity"] == "Policía Nacional"
-        assert stored["loadedAt"] == local_now().date().isoformat()
+        assert stored["loadedAt"] == local_now(SETTINGS).date().isoformat()
         assert stored["data"] is None
 
     def test_an_update_cannot_copy_another_source(self, client, source_id):
@@ -223,7 +224,7 @@ class TestIncidents:
         assert night_score(client, route) == 80
 
     def test_an_incident_older_than_twelve_months_does_not_count(self, client, route, source_id):
-        old = (local_now() - timedelta(days=400)).date().isoformat()
+        old = (local_now(SETTINGS) - timedelta(days=400)).date().isoformat()
         create(client, INCIDENTS, incident(route, source_id, date=old))
 
         assert night_score(client, route) == 100
@@ -306,7 +307,7 @@ class TestIncidents:
         assert error_of(response)["reason"] == "incident-not-found"
 
     def test_filters_by_route_segment_type_and_dates(self, client, route, source_id):
-        old = (local_now() - timedelta(days=30)).date().isoformat()
+        old = (local_now(SETTINGS) - timedelta(days=30)).date().isoformat()
         robbery = create(client, INCIDENTS, incident(route, source_id))
         harassment = create(
             client,

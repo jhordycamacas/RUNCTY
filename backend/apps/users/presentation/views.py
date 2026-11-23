@@ -10,6 +10,7 @@ from apps.shared.presentation.adapters import adapter
 from apps.shared.presentation.permissions import HasPermission, IsAuthenticated
 from apps.shared.presentation.serializers import validated_body, validated_query
 from apps.shared.presentation.throttles import SENSITIVE_THROTTLES
+from apps.system_settings.presentation.current import current_settings
 from apps.users.application.use_cases import (
     delete_account,
     get_preferences,
@@ -102,6 +103,7 @@ class OwnSportProfileView(APIView):
             request.user.uid,
             validated_body(SportProfileSerializer, request),
             adapter("SPORT_PROFILE_REPOSITORY"),
+            current_settings(),
         )
         return Response(profile.to_document())
 

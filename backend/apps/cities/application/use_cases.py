@@ -11,12 +11,14 @@ from apps.cities.application.ports import CityRepository, CityUsage
 from apps.cities.domain.models import Ciudad, parse_city_id, parse_coverage
 from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.shared.domain.text import sort_key
+from apps.system_settings.domain.models import SystemSettings
 
 
 @dataclass(frozen=True, slots=True)
 class CitiesDeps:
     cities: CityRepository
     usage: CityUsage
+    settings: SystemSettings
 
 
 def _existing_city(city_id: str, cities: CityRepository) -> Ciudad:
@@ -48,7 +50,7 @@ def list_cities(coverage: object, cities: CityRepository) -> list[Ciudad]:
 
 
 def create_city(raw: Mapping[str, object], deps: CitiesDeps) -> Ciudad:
-    city = Ciudad.parse(raw)
+    city = Ciudad.parse(raw, deps.settings.country_code)
     _assert_valid_parent(city, deps.cities)
     if not deps.cities.create(city):
         raise DomainError(

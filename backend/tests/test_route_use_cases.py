@@ -8,9 +8,6 @@ import pytest
 from apps.cities.domain.models import Ciudad
 from apps.routes.application.ports import DELETE_FIELD, SERVER_TIMESTAMP, WriteOp
 from apps.routes.application.use_cases import (
-    MAX_FACTORS_PER_SEGMENT,
-    MAX_SEGMENTS,
-    MAX_TIME_SLOTS,
     RoutesDeps,
     create_risk_factor,
     create_route,
@@ -28,7 +25,7 @@ from apps.routes.application.use_cases import (
 from apps.routes.domain.geo import LatLng
 from apps.routes.domain.models import FactorDeRiesgo, FranjaHoraria, RouteState, Ruta, Tramo
 from apps.shared.domain.errors import DomainError, ErrorKind
-from tests.fakes import InMemoryCityRepository
+from tests.fakes import SETTINGS, InMemoryCityRepository
 
 TS = SERVER_TIMESTAMP
 DEL = DELETE_FIELD
@@ -74,7 +71,7 @@ class RecordingRoutes:
         return f"new-{self._next}"
 
     def get(self, route_id: str):
-        return None if self.state is None else Ruta.parse(route_input(), route_id)
+        return None if self.state is None else Ruta.parse(route_input(), route_id, SETTINGS)
 
     def commit(self, ops: list[WriteOp]) -> None:
         self.commits += 1
@@ -97,7 +94,7 @@ def make(
     state: RouteState | None = None, *, existing: bool = True
 ) -> tuple[RoutesDeps, RecordingRoutes]:
     routes = RecordingRoutes(sample_state() if state is None and existing else state)
-    return RoutesDeps(routes=routes, cities=InMemoryCityRepository()), routes
+    return RoutesDeps(routes=routes, cities=InMemoryCityRepository(), settings=SETTINGS), routes
 
 
 def route_input(**overrides) -> dict:
@@ -268,7 +265,9 @@ class TestCreateSegment:
 
     def test_caps_the_number_of_segments_per_route(self):
         state = empty_state()
-        state.segments.extend(Tramo(f"s{i}", f"S{i}", i, POINTS, 1) for i in range(MAX_SEGMENTS))
+        state.segments.extend(
+            Tramo(f"s{i}", f"S{i}", i, POINTS, 1) for i in range(SETTINGS.max_segments_per_route)
+        )
         deps, _ = make(state)
 
         error = failure(
@@ -466,7 +465,8 @@ class TestTimeSlots:
     def test_caps_the_number_of_slots_per_route(self):
         state = empty_state()
         state.slots.extend(
-            FranjaHoraria(f"t{i}", f"{i:02d}:00", f"{i:02d}:30") for i in range(MAX_TIME_SLOTS)
+            FranjaHoraria(f"t{i}", f"{i:02d}:00", f"{i:02d}:30")
+            for i in range(SETTINGS.max_time_slots_per_route)
         )
         deps, _ = make(state)
 
@@ -578,7 +578,8 @@ class TestRiskFactors:
     def test_caps_the_number_of_factors_per_segment(self):
         state = sample_state()
         state.factors["a"] = [
-            FactorDeRiesgo(f"f{i}", "other", "low", "x") for i in range(MAX_FACTORS_PER_SEGMENT)
+            FactorDeRiesgo(f"f{i}", "other", "low", "x")
+            for i in range(SETTINGS.max_risk_factors_per_segment)
         ]
         deps, _ = make(state)
 

@@ -16,6 +16,7 @@ from apps.safe_routes.presentation.serializers import (
 )
 from apps.shared.presentation.adapters import adapter
 from apps.shared.presentation.serializers import validated_body
+from apps.system_settings.presentation.current import current_settings
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ def _deps() -> SafeRoutesDeps:
         requests=adapter("SAFE_ROUTE_REQUEST_REPOSITORY"),
         routes=adapter("ROUTE_REPOSITORY"),
         cities=adapter("CITY_REPOSITORY"),
+        settings=current_settings(),
     )
 
 
@@ -35,7 +37,8 @@ class SafeRouteRequestsView(APIView):
 
     def post(self, request) -> Response:
         body = validated_body(RequestBodySerializer, request)
-        result = use_cases.create_request(body, request.user.uid, local_now(), _deps())
+        deps = _deps()
+        result = use_cases.create_request(body, request.user.uid, local_now(deps.settings), deps)
         logger.info("Safe route request %s created by %s", result.request.id, request.user.uid)
         # Extends the usual `201 {id}` with the recommendation, saving a second call.
         return Response(

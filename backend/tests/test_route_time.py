@@ -1,15 +1,19 @@
 """Ported from `functions/src/routes/domain/time.test.ts`."""
 
+from datetime import timedelta
+
 import pytest
 
 from apps.routes.domain.time import (
     DAY_MINUTES,
     TimeWindow,
     is_iso_date,
+    local_now,
     parse_time,
     time_windows_overlap,
     to_window,
 )
+from apps.system_settings.domain.models import SystemSettings
 
 
 class TestParseTime:
@@ -58,3 +62,12 @@ def test_is_iso_date_accepts_real_calendar_dates_only():
     assert not is_iso_date("2026-13-01")
     assert not is_iso_date("2026-1-01")
     assert not is_iso_date(20261102)
+
+
+class TestLocalNow:
+    def test_follows_the_time_zone_of_the_settings(self):
+        guayaquil = local_now(SystemSettings.defaults())
+        tokyo = local_now(SystemSettings.defaults().with_changes({"timeZone": "Asia/Tokyo"}))
+
+        assert guayaquil.utcoffset() == timedelta(hours=-5)
+        assert tokyo.utcoffset() == timedelta(hours=9)

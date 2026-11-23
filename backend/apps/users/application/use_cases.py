@@ -12,6 +12,7 @@ from apps.shared.application.ports import AuthGateway, AuthUserNotFound
 from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.shared.domain.models import Principal
 from apps.shared.domain.permissions import ADMIN_ROLE
+from apps.system_settings.domain.models import SystemSettings
 from apps.users.application.ports import (
     PreferencesRepository,
     SportProfileRepository,
@@ -102,9 +103,12 @@ def get_sport_profile(uid: str, profiles: SportProfileRepository) -> PerfilDepor
 
 
 def save_sport_profile(
-    uid: str, data: Mapping[str, object], profiles: SportProfileRepository
+    uid: str,
+    data: Mapping[str, object],
+    profiles: SportProfileRepository,
+    settings: SystemSettings,
 ) -> PerfilDeportivo:
-    profile = PerfilDeportivo.parse(data)
+    profile = PerfilDeportivo.parse(data, settings)
     profiles.save(uid, profile)
     return profile
 

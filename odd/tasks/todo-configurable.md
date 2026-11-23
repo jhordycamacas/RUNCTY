@@ -33,9 +33,17 @@ frontend and `firestore.rules`).
       Incidents carry `severity` (stored without it reads as `medium`); `from_document` keeps any
       stored type text. Incident/support point/alert admin UI does not exist yet (Sprint 3), so
       only the API, seed and risk factor form changed. Route: delegated writer.
-- [ ] T2 `settings` backend app: system parameters (domain, ports, Firestore, API with
+- [x] T2 `settings` backend app: system parameters (domain, ports, Firestore, API with
       `settings.manage`, defaults seeded and as code fallback) and injection into the safety
       calculation, incident window, radii and limits; bulk recalculation of all routes
+      Evidence: app `backend/apps/system_settings` (24 numeric parameters + time zone + country,
+      validated in the domain); `GET`/`PUT /settings`, `POST /admin/recalculate-routes`
+      (`settings.manage`); settings injected as a parameter into safety, incidents, radii, limits,
+      sport profile, safe routes, cities and the seed; old module constants removed (grep clean);
+      deny-all rule for `systemSettings`. Backend 1092 passed + ruff clean (was 992 passed). A
+      penalty change recalculates the stored index (65 -> 50 with `penaltyHigh` 35 -> 50). Domain
+      tests observed RED (import error) first; the rest were written after the code and passed.
+      Route: single writer (delegated).
 - [ ] T3 Admin "Configuración" section (permission `settings.manage` in backend, frontend and
       functions; parameters form with validation and a "recalcular rutas" result)
 - [ ] T4 Sport profile catalog (levels, goals) managed by the admin + runner/profile forms read it

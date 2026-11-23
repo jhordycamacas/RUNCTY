@@ -30,13 +30,21 @@ from apps.shared.infrastructure.firebase.collections import (
     SAFE_ROUTE_REQUESTS,
     SAFETY_INCIDENTS,
     SUPPORT_POINTS,
+    SYSTEM_SETTINGS,
 )
 from apps.summary.domain.metrics import UserRecord
 from apps.support_points.infrastructure.document_repositories import (
     FirestoreGuardedTrailRepository,
     FirestoreSupportPointRepository,
 )
+from apps.system_settings.domain.models import SystemSettings
+from apps.system_settings.infrastructure.firestore_settings_repository import (
+    FirestoreSettingsRepository,
+)
 from apps.users.domain.models import PerfilDeportivo, PreferenciaUsuario, Usuario
+
+# The parameters every test runs with: the defaults of the system settings.
+SETTINGS = SystemSettings.defaults()
 
 RUNNER = Principal(
     uid="runner-1", email="runner@example.com", email_verified=True, role="runner", perms=()
@@ -562,3 +570,8 @@ class InMemoryRiskZoneAlertRepository(FirestoreRiskZoneAlertRepository):
 class InMemorySafeRouteRequestRepository(FirestoreSafeRouteRequestRepository):
     def __init__(self, firebase: FakeFirebase | None = None) -> None:
         super().__init__(InMemoryDocumentStore(SAFE_ROUTE_REQUESTS, firebase))
+
+
+class InMemorySettingsRepository(FirestoreSettingsRepository):
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        super().__init__(InMemoryDocumentStore(SYSTEM_SETTINGS, firebase))

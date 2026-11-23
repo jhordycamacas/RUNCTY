@@ -15,6 +15,7 @@ from apps.risk_alerts.domain.models import ALERT_SEVERITIES, AlertaZonaRiesgo
 from apps.routes.application.ports import RouteRepository
 from apps.routes.domain.models import parse_doc_id
 from apps.shared.domain.errors import DomainError, ErrorKind
+from apps.system_settings.domain.models import SystemSettings
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,6 +23,7 @@ class RiskAlertsDeps:
     alerts: RiskZoneAlertRepository
     cities: CityRepository
     routes: RouteRepository
+    settings: SystemSettings
 
 
 def _not_found(reason: str, message: str) -> DomainError:
@@ -67,14 +69,14 @@ def _save(alert: AlertaZonaRiesgo, deps: RiskAlertsDeps) -> None:
 
 
 def create_alert(raw: object, deps: RiskAlertsDeps) -> str:
-    alert = AlertaZonaRiesgo.parse(raw, deps.alerts.new_id())
+    alert = AlertaZonaRiesgo.parse(raw, deps.alerts.new_id(), deps.settings)
     _save(alert, deps)
     return alert.id
 
 
 def update_alert(raw_id: object, raw: object, deps: RiskAlertsDeps) -> None:
     current = _require_alert(raw_id, deps.alerts)
-    _save(AlertaZonaRiesgo.parse(raw, current.id), deps)
+    _save(AlertaZonaRiesgo.parse(raw, current.id, deps.settings), deps)
 
 
 def delete_alert(raw_id: object, alerts: RiskZoneAlertRepository) -> None:

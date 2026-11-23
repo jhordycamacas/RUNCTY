@@ -1,6 +1,6 @@
 # Specs de RUNCTY (SDD)
 
-Las specs describen **qué** debe hacer RUNCTY antes de escribir código. Están agrupadas por **capacidad** (una por épica del backlog), no por sprint: cada spec reúne todos los sub-requisitos `RF-XX-N` de su capacidad. Hoy hay 26 specs de capacidad y 4 transversales que cubren los 153 sub-requisitos del backlog: **28 Hecha, 38 Parcial y 87 Pendiente**.
+Las specs describen **qué** debe hacer RUNCTY antes de escribir código. Están agrupadas por **capacidad** (una por épica del backlog), no por sprint: cada spec reúne todos los sub-requisitos `RF-XX-N` de su capacidad. Hoy hay 26 specs de capacidad, una de [configuración del sistema](27-configuracion-del-sistema.md) (sin épica del backlog, **Parcial**: backend hecho, pantalla de administración pendiente) y 4 transversales que cubren los 153 sub-requisitos del backlog: **28 Hecha, 38 Parcial y 87 Pendiente**.
 
 ## Flujo SDD en este repositorio
 

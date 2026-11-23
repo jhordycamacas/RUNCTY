@@ -21,12 +21,9 @@ from apps.routes.domain.safety import SEVERITIES, ExtraPenalty
 from apps.routes.domain.time import DAY_MINUTES, is_iso_date, parse_time
 from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.shared.domain.text import sort_key
+from apps.system_settings.domain.models import SystemSettings
 
 INCIDENT_PENALTY_SOURCE = "incident"
-# An incident penalizes the time slots that cover its hour, plus or minus this margin.
-_PENALTY_MARGIN_MINUTES = 60
-# Only the incidents of the last 12 months count in the index.
-_COUNTED_DAYS = 365
 
 _MAX_ENTITY = 80
 _MAX_TYPE = 40
@@ -188,16 +185,18 @@ class IncidenteSeguridad:
             "sourceDeleted": self.source_deleted,
         }
 
-    def counts_on(self, today: date) -> bool:
-        """It counts in the index: its source exists and it is from the last 12 months."""
+    def counts_on(self, today: date, settings: SystemSettings) -> bool:
+        """It counts in the index: its source exists and it is inside the incident window."""
         happened = date.fromisoformat(self.date)
-        return not self.source_deleted and today - timedelta(days=_COUNTED_DAYS) <= happened
+        window = timedelta(days=settings.incident_window_days)
+        return not self.source_deleted and today - window <= happened
 
-    def penalty(self) -> ExtraPenalty:
-        """The index penalty: by its severity, in the window of its hour plus or minus one hour."""
+    def penalty(self, settings: SystemSettings) -> ExtraPenalty:
+        """The index penalty: by its severity, in its hour plus or minus the margin window."""
         minutes = parse_time(self.time) or 0
-        start = max(0, minutes - _PENALTY_MARGIN_MINUTES)
-        end = min(DAY_MINUTES, minutes + _PENALTY_MARGIN_MINUTES)
+        margin = settings.incident_margin_minutes
+        start = max(0, minutes - margin)
+        end = min(DAY_MINUTES, minutes + margin)
         return ExtraPenalty(
             source=INCIDENT_PENALTY_SOURCE,
             type=self.type,
@@ -209,11 +208,11 @@ class IncidenteSeguridad:
 
 
 def incident_penalties(
-    incidents: Iterable[IncidenteSeguridad], segment_id: str, today: date
+    incidents: Iterable[IncidenteSeguridad], segment_id: str, today: date, settings: SystemSettings
 ) -> list[ExtraPenalty]:
     """The penalties of a segment: its incidents and those registered on the whole route."""
     return [
-        incident.penalty()
+        incident.penalty(settings)
         for incident in incidents
-        if incident.segment_id in (None, segment_id) and incident.counts_on(today)
+        if incident.segment_id in (None, segment_id) and incident.counts_on(today, settings)
     ]

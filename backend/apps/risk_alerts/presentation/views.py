@@ -14,6 +14,7 @@ from apps.routes.domain.time import local_now
 from apps.routes.presentation.views import ReadSignedInWriteManage, changed, created
 from apps.shared.presentation.adapters import adapter
 from apps.shared.presentation.serializers import validated_body, validated_query
+from apps.system_settings.presentation.current import current_settings
 
 
 def _deps() -> RiskAlertsDeps:
@@ -21,13 +22,16 @@ def _deps() -> RiskAlertsDeps:
         alerts=adapter("RISK_ZONE_ALERT_REPOSITORY"),
         cities=adapter("CITY_REPOSITORY"),
         routes=adapter("ROUTE_REPOSITORY"),
+        settings=current_settings(),
     )
 
 
 class RiskZoneAlertsView(ReadSignedInWriteManage, APIView):
     def get(self, request) -> Response:
         query = validated_query(AlertQuerySerializer, request)
-        alerts = use_cases.list_alerts(query, local_now(), adapter("RISK_ZONE_ALERT_REPOSITORY"))
+        alerts = use_cases.list_alerts(
+            query, local_now(current_settings()), adapter("RISK_ZONE_ALERT_REPOSITORY")
+        )
         return Response({"alerts": AlertSerializer(alerts, many=True).data})
 
     def post(self, request) -> Response:

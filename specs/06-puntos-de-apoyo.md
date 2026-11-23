@@ -290,7 +290,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 Tomadas para implementar el Sprint 3 sin bloquearlo; se revisan con Gacelas en la demo.
 
-- **Ubicación:** `{lat, lng}` y `cityId`. «Cercano» a una ruta o al corredor = a 500 m o menos (distancia de haversine al punto o a cualquier punto de los tramos).
+- **Ubicación:** `{lat, lng}` y `cityId`. «Cercano» a una ruta o al corredor = a 500 m o menos (distancia de haversine al punto o a cualquier punto de los tramos). El radio de «cercano» (`nearbyRadiusM`, 500 m) y el radio máximo de la búsqueda por ubicación (`maxSearchRadiusM`, 50 000 m) son parámetros del sistema ([configuración](27-configuracion-del-sistema.md)).
 - **Horario de atención:** texto libre opcional (por ejemplo «Lun–Sáb 06:00–20:00»).
 - **Resguardo policial:** `routeId`, `segmentId` opcional (vacío = toda la ruta), `days` (lunes a domingo, al menos uno), `startTime` y `endTime`. No se permiten dos resguardos del mismo tramo que compartan día y se solapen en horario.
 - **Efecto en el índice:** en el Sprint 3 los puntos de apoyo y los resguardos **solo se muestran** al corredor; no cambian el puntaje, porque la fórmula de RF-07 solo resta. Se revisa con Gacelas si deben sumar.

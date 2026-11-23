@@ -17,7 +17,6 @@ _MAX_TEXT = 80
 
 COVERAGES = ("active", "planned", "suspended")
 CITY_TYPES = ("city", "zone")
-COUNTRY = "EC"
 
 
 def _invalid(reason: str, message: str) -> DomainError:
@@ -83,9 +82,11 @@ class Ciudad:
     lng: float
     coverage: str
     parent_city_id: str | None = None
+    # ISO country code stamped from the system settings when the city is created.
+    country: str = ""
 
     @classmethod
-    def parse(cls, raw: Mapping[str, object]) -> "Ciudad":
+    def parse(cls, raw: Mapping[str, object], country: str) -> "Ciudad":
         """Validates client input. A parent city must also exist: see `use_cases`."""
         city_id = parse_city_id(raw.get("id"))
         name = _text(raw.get("name"), "invalid-city-name", "City name")
@@ -103,7 +104,7 @@ class Ciudad:
         if city_type == "zone":
             if parse_parent_id(parent) == city_id:
                 raise _invalid("invalid-parent-city", "A zone cannot belong to itself.")
-        return cls(city_id, name, province, city_type, lat, lng, coverage, parent)
+        return cls(city_id, name, province, city_type, lat, lng, coverage, parent, country)
 
     def with_changes(self, changes: Mapping[str, object]) -> "Ciudad":
         """This city with some editable fields replaced. Identity and type are immutable."""
@@ -115,7 +116,7 @@ class Ciudad:
             "parentCityId": self.parent_city_id,
             **changes,
         }
-        return self.parse({**merged, "id": self.id, "type": self.type})
+        return self.parse({**merged, "id": self.id, "type": self.type}, self.country)
 
     @classmethod
     def from_document(cls, city_id: str, data: Mapping[str, object]) -> "Ciudad":
@@ -133,13 +134,14 @@ class Ciudad:
             lng=_stored_number(point.get("lng")),
             coverage=coverage if coverage in COVERAGES else "planned",
             parent_city_id=parent if isinstance(parent, str) else None,
+            country=_stored_text(data.get("country"), ""),
         )
 
     def to_document(self) -> dict[str, object]:
         document: dict[str, object] = {
             "name": self.name,
             "province": self.province,
-            "country": COUNTRY,
+            "country": self.country,
             "type": self.type,
             "location": {"lat": self.lat, "lng": self.lng},
             "coverage": self.coverage,

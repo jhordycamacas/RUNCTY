@@ -158,7 +158,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 Tomadas para implementar el Sprint 3 sin bloquearlo; se revisan con Gacelas en la demo.
 
 - **Solicitud:** `cityId`, `distanceKm` (> 0) y la franja como `startTime`/`endTime`. Se guarda por corredor como historial.
-- **Recomendación:** rutas activas de la ciudad cuya distancia esté dentro de ±20 % de la pedida, ordenadas por el puntaje de la franja que se solapa con la pedida (mayor primero), después por cercanía a la distancia pedida; las rutas sin índice para esa franja van al final. La regla pasa al servidor; el cliente deja de ordenar por su cuenta.
+- **Recomendación:** rutas activas de la ciudad cuya distancia esté dentro de ±20 % de la pedida (tolerancia `safeRouteDistanceTolerance` y distancia máxima pedida `safeRouteMaxDistanceKm`, parámetros del sistema: [configuración](27-configuracion-del-sistema.md)), ordenadas por el puntaje de la franja que se solapa con la pedida (mayor primero), después por cercanía a la distancia pedida; las rutas sin índice para esa franja van al final. La regla pasa al servidor; el cliente deja de ordenar por su cuenta.
 - **API:** `POST /safe-route-requests` responde `201 {id, routes}` (extiende el `201 {id}` habitual para no hacer una segunda llamada); `GET /safe-route-requests` (las del corredor), `GET /safe-route-requests/{id}` (recalcula la recomendación al momento), `DELETE /safe-route-requests/{id}` (solo el dueño).
 - **Generar frente a recomendar:** en el piloto se recomiendan rutas del catálogo; no se trazan rutas nuevas (sin proveedor de mapas).
 

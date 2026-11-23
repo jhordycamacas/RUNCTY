@@ -16,12 +16,12 @@ from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.shared.domain.text import sort_key
 from apps.support_points.application.ports import GuardedTrailRepository, SupportPointRepository
 from apps.support_points.domain.models import (
-    NEARBY_RADIUS_M,
     PuntoApoyo,
     ResguardoPolicial,
     is_near,
     parse_search_area,
 )
+from apps.system_settings.domain.models import SystemSettings
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,6 +30,7 @@ class SupportPointsDeps:
     trails: GuardedTrailRepository
     routes: RouteRepository
     cities: CityRepository
+    settings: SystemSettings
 
 
 def _not_found(reason: str, message: str) -> DomainError:
@@ -59,8 +60,8 @@ def list_support_points(query: Mapping[str, object], deps: SupportPointsDeps) ->
     route_id = query.get("routeId")
     if route_id is not None:
         places = _route_places(parse_doc_id(route_id, "invalid-route-id"), deps.routes)
-        points = [p for p in points if is_near(p.location, places, NEARBY_RADIUS_M)]
-    area = parse_search_area(query)
+        points = [p for p in points if is_near(p.location, places, deps.settings.nearby_radius_m)]
+    area = parse_search_area(query, deps.settings)
     if area is not None:
         center, radius_m = area
         points = [p for p in points if is_near(p.location, [center], radius_m)]

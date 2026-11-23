@@ -1,0 +1,154 @@
+# Configuración del sistema
+
+> Spec de capacidad · Decisión del producto (2026-11-22): «nada hardcodeado, todo configurable» · **Parcial**: backend hecho, pantalla de administración pendiente (T3)
+
+| Campo | Valor |
+| --- | --- |
+| Épica | Sin épica del backlog: transversal a EP-04, EP-05, EP-06, EP-07, EP-08, EP-09, EP-01 y EP-26 |
+| Requisitos | Ninguno del Excel; sale de la decisión del dueño del producto (`odd/tasks/todo-configurable.md`) |
+| Prioridad | Debe tener |
+| Permiso | `settings.manage` (lo incluye el rol del sistema `admin`) |
+| Estado | `Parcial`: API, dominio, semilla y reglas de Firestore listos; falta la sección «Configuración» del panel (T3) |
+| Dependencias | [EP-07](07-evaluacion-de-seguridad.md), [EP-08](08-incidentes-y-fuentes.md), [EP-06](06-puntos-de-apoyo.md), [EP-09](09-rutas-seguras.md), [EP-05](05-catalogo-de-rutas.md), [EP-04](04-ciudades-y-zonas.md), [EP-01](01-gestion-de-usuarios.md) |
+
+## Propósito
+
+Los números que gobiernan los cálculos (penalización por severidad, umbrales de nivel, ventana de incidentes, radios, límites de una ruta, rangos del perfil deportivo, tolerancia de distancia, zona horaria y país) viven en un único documento editable por el administrador, no en constantes del código. Cambiar uno se aplica sin desplegar. Cambiar lo que afecta al índice de seguridad recalcula todas las rutas.
+
+## Alcance
+
+**Incluye**
+
+- Un documento `systemSettings/global` con todos los parámetros, validados en el dominio con tipo y límites.
+- `GET /settings` (cualquier usuario con sesión) y `PUT /settings` (`settings.manage`).
+- Recalcular el índice de todas las rutas al guardar parámetros que lo afectan y bajo demanda (`POST /admin/recalculate-routes`).
+- Valores por defecto en el código (respaldo) y en la semilla.
+
+**No incluye**
+
+- La sección «Configuración» del panel (T3).
+- Los catálogos que elige el corredor (nivel y metas deportivas): T4.
+- Lo estructural que se queda en código a propósito: claves de severidad `low`/`medium`/`high` (tienen orden), claves de nivel, tipo de ciudad `city`/`zone`, claves de cobertura, días de la semana, el catálogo de permisos y la estructura de las preferencias.
+- Los límites de texto de 40 caracteres de las clasificaciones libres, la longitud de etiquetas y el mínimo de 2 puntos por tramo (una polilínea necesita dos puntos).
+
+## Reglas de negocio
+
+- Todo parámetro tiene tipo, valor por defecto y límites; el dominio rechaza lo que no cumple con `400 invalid-argument` y el motivo de cada campo en `error.fields`.
+- Motivos por campo: `required`, `invalid` (tipo), `out-of-range`, `invalid-time-zone`, `invalid-country-code`, `must-not-be-below-previous` (penalizaciones), `must-be-below-high` (umbral medio), `must-exceed-min` (rangos de ritmo y de distancia).
+- Penalizaciones: enteros de 0 a 100 con `baja ≤ media ≤ alta`. Umbrales: `0 < medio < alto ≤ 100`.
+- Un documento guardado con campos ausentes o inválidos se lee con el valor por defecto de cada uno; un grupo incoherente (penalizaciones, umbrales, ritmos o distancias) vuelve entero a sus valores por defecto.
+- El perfil deportivo ya guardado no se oculta si el administrador estrecha los rangos: los rangos se aplican al guardar.
+- Cambiar una penalización, un umbral, la ventana o el margen de los incidentes, o la zona horaria recalcula el índice de todas las rutas dentro de la misma petición; la respuesta informa cuántas.
+- Los demás cambios (radios, límites, rangos, tolerancia, país) no recalculan: se aplican en la siguiente petición.
+- El país se estampa en las ciudades que se crean después del cambio; las existentes conservan el suyo.
+
+## Modelo de datos y contrato de API
+
+**Estado: backend implementado** (código en `backend/apps/system_settings`; la sección del panel está pendiente).
+
+| Endpoint | Permiso | Descripción |
+| --- | --- | --- |
+| `GET /settings` | sesión iniciada | `200 {"settings": {...}}` con todos los parámetros; los valores por defecto si nadie guardó. |
+| `PUT /settings` | `settings.manage` | Cuerpo: cualquier subconjunto de los parámetros (el resto se conserva). `200 {"settings": {...}, "recalculated": n}`; `n` es 0 si no hizo falta recalcular. |
+| `POST /admin/recalculate-routes` | `settings.manage` | Recalcula el índice de todas las rutas con los parámetros vigentes. `200 {"recalculated": n}`. |
+
+Parámetros (claves camelCase del JSON y del documento `systemSettings/global`):
+
+| Clave | Tipo y límites | Defecto | Qué gobierna |
+| --- | --- | --- | --- |
+| `penaltyLow`, `penaltyMedium`, `penaltyHigh` | entero 0–100, orden no decreciente | 10, 20, 35 | Puntos que resta cada factor o incidente por severidad |
+| `thresholdHigh`, `thresholdMedium` | entero 1–100, `medio < alto` | 70, 40 | Nivel Alto desde `thresholdHigh`, Medio desde `thresholdMedium` |
+| `incidentWindowDays` | entero 1–3650 | 365 | Días que cuenta un incidente |
+| `incidentMarginMinutes` | entero 0–720 | 60 | Margen alrededor de la hora del incidente |
+| `timeZone` | id IANA válido | `America/Guayaquil` | Reloj local de las franjas, las alertas y los incidentes |
+| `nearbyRadiusM` | entero 1–10 000 | 500 | «Cercano» a una ruta (puntos de apoyo) |
+| `maxSearchRadiusM` | entero 1–200 000 | 50 000 | Radio máximo de la búsqueda por ubicación |
+| `maxAlertRadiusM` | entero 1–50 000 | 5000 | Radio máximo de una alerta de zona |
+| `maxTimeSlotsPerRoute` | entero 1–48 | 12 | Franjas por ruta |
+| `maxSegmentsPerRoute` | entero 1–100 | 50 | Tramos por ruta |
+| `maxRiskFactorsPerSegment` | entero 1–100 | 20 | Factores por tramo |
+| `routeNameMaxLength` | entero 10–200 | 80 | Largo del nombre de una ruta y de un tramo |
+| `routeDescriptionMaxLength` | entero 50–2000 | 500 | Largo de la descripción de una ruta |
+| `routeMaxDistanceKm` | entero 1–1000 | 500 | Distancia máxima de una ruta |
+| `routeMaxElevationM` | entero 1–20 000 | 10 000 | Desnivel máximo de una ruta |
+| `segmentMaxPoints` | entero 2–2000 | 500 | Puntos máximos de un tramo |
+| `paceMinSecPerKm`, `paceMaxSecPerKm` | entero 30–3600 y 30–7200, `máx > mín` | 150, 1200 | Rango del ritmo habitual del perfil deportivo |
+| `distanceMinKm`, `distanceMaxKm` | número 0,1–500 y 0,1–1000, `máx > mín` | 1, 50 | Rango de la distancia preferida del perfil deportivo |
+| `safeRouteDistanceTolerance` | número 0,01–1 | 0,2 | Tolerancia de distancia de la ruta segura (±20 %) |
+| `safeRouteMaxDistanceKm` | entero 1–1000 | 500 | Distancia máxima pedida en una ruta segura |
+| `countryCode` | dos letras mayúsculas | `EC` | País que se estampa en las ciudades nuevas |
+
+Los servicios leen el documento una vez por petición y pasan el objeto de parámetros a los casos de uso y a las funciones puras del dominio; no hay constantes de negocio en el código fuera de los valores por defecto.
+
+## Historias
+
+| ID | Historia | Actor | Estado |
+| --- | --- | --- | --- |
+| [CFG-1](#cfg-1--leer-los-parámetros) | Leer los parámetros | Usuario con sesión | Parcial |
+| [CFG-2](#cfg-2--editar-los-parámetros) | Editar los parámetros | Administrador | Parcial |
+| [CFG-3](#cfg-3--recalcular-las-rutas) | Recalcular las rutas | Administrador | Parcial |
+
+## Historias de usuario y criterios de aceptación
+
+### CFG-1 — Leer los parámetros
+
+- **Historia de usuario:** Como corredor o administrador · Deseo que la aplicación conozca los límites vigentes (rangos del perfil, radios, distancias). Para validar los formularios con las mismas reglas que el servidor.
+- **Estado:** `Parcial` — 2026-11-22: API y pruebas automáticas en el backend; los formularios del cliente aún no leen los parámetros (T3 y T5).
+
+**Criterios de aceptación**
+
+- [x] `GET /settings` exige sesión (`401` sin token) y responde `200 {"settings": {...}}` para cualquier usuario.
+- [x] Sin documento guardado, responde los valores por defecto.
+- [x] Un documento parcial o con valores inválidos se completa con los valores por defecto.
+- [ ] Los formularios del cliente (perfil deportivo, rutas, alertas) validan con estos valores en lugar de números propios.
+
+**Implementación:** `backend/apps/system_settings/presentation/views.py`, `backend/apps/system_settings/domain/models.py`
+
+**Pruebas:** `backend/tests/test_system_settings_api.py`, `backend/tests/test_system_settings_domain.py`, `backend/tests/test_firestore_settings_adapter.py`
+
+### CFG-2 — Editar los parámetros
+
+- **Historia de usuario:** Como administrador · Deseo cambiar los números que gobiernan los cálculos desde el panel. Para ajustarlos sin pedir un despliegue.
+- **Estado:** `Parcial` — 2026-11-22: API y pruebas automáticas en el backend; falta la sección «Configuración» del panel (T3).
+
+**Criterios de aceptación**
+
+- [x] `PUT /settings` exige `settings.manage`: `401` sin token, `403 missing-permission` para corredor, representante de club y catalogador.
+- [x] Acepta un subconjunto de campos y conserva el resto; responde todos los parámetros y `recalculated`.
+- [x] Rechaza con `400` y el motivo por campo: tipo, límites, orden de penalizaciones, umbrales, rangos, zona horaria, país y campos desconocidos; no guarda nada.
+- [x] Los parámetros se aplican en la siguiente petición: límite de tramos, largo del nombre de la ruta, país de las ciudades nuevas y rango del perfil deportivo.
+- [x] La semilla guarda los valores por defecto una sola vez y no pisa lo que el administrador cambió.
+- [x] Las reglas de Firestore niegan todo acceso directo a `systemSettings`.
+- [ ] Sección «Configuración» del panel con formulario, validación y mensajes en español (T3).
+
+**Implementación:** `backend/apps/system_settings`, `backend/apps/shared/domain/permissions.py`, `backend/apps/seed/application/use_cases.py`, `firestore.rules`
+
+**Pruebas:** `backend/tests/test_system_settings_api.py`, `backend/tests/test_system_settings_domain.py`, `backend/tests/test_system_settings_use_cases.py`, `backend/tests/test_seed.py`
+
+### CFG-3 — Recalcular las rutas
+
+- **Historia de usuario:** Como administrador · Deseo que al cambiar la penalización, los umbrales, la ventana o el margen se recalculen todas las rutas. Para que el índice que ven el panel y el corredor coincida con los parámetros.
+- **Estado:** `Parcial` — 2026-11-22: API y pruebas automáticas en el backend; falta mostrar el resultado en el panel (T3).
+
+**Criterios de aceptación**
+
+- [x] Guardar una penalización, un umbral, la ventana, el margen o la zona horaria distintos recalcula el índice almacenado de cada ruta y responde cuántas (`recalculated`).
+- [x] Cambiar la penalización alta de 35 a 50 baja de 65 a 50 el índice almacenado de una ruta con un factor alto.
+- [x] Un cambio que no afecta al índice responde `recalculated: 0` y no toca las rutas.
+- [x] `POST /admin/recalculate-routes` (`settings.manage`) recalcula todas las rutas con los parámetros vigentes y responde `{"recalculated": n}`.
+- [ ] El panel muestra el resultado de «Recalcular rutas» (T3).
+
+**Implementación:** `backend/apps/system_settings/application/use_cases.py`, `backend/apps/routes/application/use_cases.py` (`recalculate_all_routes`)
+
+**Pruebas:** `backend/tests/test_system_settings_use_cases.py`, `backend/tests/test_system_settings_api.py`
+
+## Dependencias
+
+- **Depende de:** [EP-02](02-roles-y-permisos.md) (el permiso `settings.manage` viaja en el token).
+- **Alimenta a:** las especificaciones de seguridad, incidentes, puntos de apoyo, rutas seguras, ciudades y perfil deportivo.
+
+## Supuestos por validar
+
+- Los límites de cada parámetro son decisión del equipo (no salen del Excel); se revisan con Gacelas.
+- Cambiar la zona horaria recalcula las rutas porque «hoy» decide qué incidentes caen dentro de la ventana.
+- Si el volumen de rutas crece, el recálculo masivo deberá pasar a un trabajo en segundo plano; hoy corre en la misma petición.

@@ -22,6 +22,7 @@ from apps.shared.presentation.adapters import adapter
 from apps.shared.presentation.permissions import HasPermission
 from apps.shared.presentation.serializers import validated_body, validated_query
 from apps.shared.presentation.throttles import SENSITIVE_THROTTLES, SensitiveWritesMixin
+from apps.system_settings.presentation.current import current_settings
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,11 @@ CanManageCities = HasPermission("cities.manage")
 
 
 def _deps() -> CitiesDeps:
-    return CitiesDeps(cities=adapter("CITY_REPOSITORY"), usage=adapter("CITY_USAGE"))
+    return CitiesDeps(
+        cities=adapter("CITY_REPOSITORY"),
+        usage=adapter("CITY_USAGE"),
+        settings=current_settings(),
+    )
 
 
 class CitiesView(SensitiveWritesMixin, APIView):

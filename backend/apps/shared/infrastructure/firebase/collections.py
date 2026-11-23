@@ -16,3 +16,5 @@ GUARDED_TRAILS = "guardedTrails"
 RISK_ZONE_ALERTS = "riskZoneAlerts"
 # EP-09. Each request keeps the `uid` of the runner who made it.
 SAFE_ROUTE_REQUESTS = "safeRouteRequests"
+# System parameters: the single document `systemSettings/global` (`settings.manage`).
+SYSTEM_SETTINGS = "systemSettings"

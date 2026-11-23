@@ -1,9 +1,10 @@
 """RF-07: safety index per segment ("tramo") and time slot ("franja").
 
 Each segment starts at 100 points per slot. Every penalty active in the slot (its window
-overlaps the slot window) subtracts by severity (low -10, medium -20, high -35), floored at 0.
-Levels: high >= 70, medium 40-69, low < 40. A route takes its worst segment per slot. The
-factors explaining each result are always kept.
+overlaps the slot window) subtracts by severity, floored at 0. The penalty per severity and the
+level thresholds are system parameters (`SystemSettings`, defaults: low -10, medium -20, high
+-35; high >= 70, medium >= 40, low below). A route takes its worst segment per slot. The factors
+explaining each result are always kept.
 
 Penalty sources are pluggable: risk factors, plus `extra_penalties` tagged with their `source`:
 safety incidents (EP-08, `source="incident"`) and later community reports (RF-17).
@@ -14,11 +15,11 @@ from dataclasses import dataclass, replace
 from typing import Protocol
 
 from apps.routes.domain.time import time_windows_overlap, to_window
+from apps.system_settings.domain.models import SystemSettings
 
 SEVERITIES = ("low", "medium", "high")
 
 _MAX_SCORE = 100
-_SEVERITY_PENALTY = {"low": 10, "medium": 20, "high": 35}
 _SEVERITY_RANK = {"high": 0, "medium": 1, "low": 2}
 
 
@@ -120,10 +121,10 @@ class TramoEvaluado:
 _FULL_SCORE = IndiceSeguridad("high", _MAX_SCORE, ())
 
 
-def level_for_score(score: int) -> str:
-    if score >= 70:
+def level_for_score(score: int, settings: SystemSettings) -> str:
+    if score >= settings.threshold_high:
         return "high"
-    if score >= 40:
+    if score >= settings.threshold_medium:
         return "medium"
     return "low"
 
@@ -142,6 +143,7 @@ class CalculadoraIndiceSeguridad:
 
     @staticmethod
     def segment_safety(
+        settings: SystemSettings,
         slots: Sequence[SafetySlot],
         factors: Sequence[Penalty],
         extra_penalties: Sequence[ExtraPenalty] = (),
@@ -155,15 +157,17 @@ class CalculadoraIndiceSeguridad:
                 for penalty in penalties
                 if time_windows_overlap(window, to_window(penalty.start_time, penalty.end_time))
             ]
-            penalty_points = sum(_SEVERITY_PENALTY[penalty.severity] for penalty in active)
+            penalty_points = sum(settings.penalty_for(penalty.severity) for penalty in active)
             score = max(0, _MAX_SCORE - penalty_points)
             explained = sorted((_evaluated(penalty) for penalty in active), key=_by_severity)
-            result[slot.id] = IndiceSeguridad(level_for_score(score), score, tuple(explained))
+            result[slot.id] = IndiceSeguridad(
+                level_for_score(score, settings), score, tuple(explained)
+            )
         return result
 
     @staticmethod
     def route_safety(
-        slots: Sequence[SafetySlot], segments: Sequence[TramoEvaluado]
+        settings: SystemSettings, slots: Sequence[SafetySlot], segments: Sequence[TramoEvaluado]
     ) -> dict[str, IndiceSeguridadRuta]:
         """Route level per slot = worst segment (ties: first in route order)."""
         if not segments:
@@ -183,7 +187,7 @@ class CalculadoraIndiceSeguridad:
                 )
             score = worst.safety.get(slot.id, _FULL_SCORE).score
             result[slot.id] = IndiceSeguridadRuta(
-                level=level_for_score(score),
+                level=level_for_score(score, settings),
                 score=score,
                 # The sort is stable: route order is kept within the same severity.
                 factors=tuple(sorted(factors, key=_by_severity)),

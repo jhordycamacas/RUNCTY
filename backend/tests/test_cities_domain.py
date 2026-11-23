@@ -22,10 +22,14 @@ def reason_of(call) -> str:
 
 class TestParse:
     def test_trims_and_returns_a_city(self):
-        assert Ciudad.parse(LOJA) == Ciudad("loja", "Loja", "Loja", "city", -3.99, -79.2, "active")
+        assert Ciudad.parse(LOJA, "EC") == Ciudad(
+            "loja", "Loja", "Loja", "city", -3.99, -79.2, "active", None, "EC"
+        )
 
     def test_a_zone_names_its_parent_city(self):
-        zone = Ciudad.parse({**LOJA, "id": "loja-centro", "type": "zone", "parentCityId": "loja"})
+        zone = Ciudad.parse(
+            {**LOJA, "id": "loja-centro", "type": "zone", "parentCityId": "loja"}, "EC"
+        )
 
         assert zone.type == "zone"
         assert zone.parent_city_id == "loja"
@@ -54,19 +58,21 @@ class TestParse:
         ],
     )
     def test_rejects_broken_input(self, override, reason):
-        assert reason_of(lambda: Ciudad.parse({**LOJA, **override})) == reason
+        assert reason_of(lambda: Ciudad.parse({**LOJA, **override}, "EC")) == reason
 
     def test_requires_every_field(self):
-        assert reason_of(lambda: Ciudad.parse({})) == "invalid-city-id"
+        assert reason_of(lambda: Ciudad.parse({}, "EC")) == "invalid-city-id"
 
 
 class TestWithChanges:
-    ZONE = Ciudad("loja-centro", "Centro", "Loja", "zone", -3.99, -79.2, "planned", "loja")
+    ZONE = Ciudad("loja-centro", "Centro", "Loja", "zone", -3.99, -79.2, "planned", "loja", "EC")
 
     def test_replaces_only_the_given_fields(self):
         changed = self.ZONE.with_changes({"coverage": "active", "location": {"lat": 1, "lng": 2}})
 
-        assert changed == Ciudad("loja-centro", "Centro", "Loja", "zone", 1, 2, "active", "loja")
+        assert changed == Ciudad(
+            "loja-centro", "Centro", "Loja", "zone", 1, 2, "active", "loja", "EC"
+        )
 
     def test_validates_the_result(self):
         assert reason_of(lambda: self.ZONE.with_changes({"name": ""})) == "invalid-city-name"
@@ -75,7 +81,7 @@ class TestWithChanges:
         )
 
     def test_a_city_cannot_get_a_parent(self):
-        city = Ciudad.parse(LOJA)
+        city = Ciudad.parse(LOJA, "EC")
 
         assert reason_of(lambda: city.with_changes({"parentCityId": "quito"})) == (
             "invalid-parent-city"
@@ -89,7 +95,7 @@ class TestStoredDocuments:
         assert city == Ciudad("old", "old", "", "city", 0, 0, "planned")
 
     def test_round_trips_the_stored_fields(self):
-        zone = Ciudad("loja-centro", "Centro", "Loja", "zone", -3.99, -79.2, "active", "loja")
+        zone = Ciudad("loja-centro", "Centro", "Loja", "zone", -3.99, -79.2, "active", "loja", "EC")
 
         document = zone.to_document()
 
@@ -105,7 +111,7 @@ class TestStoredDocuments:
         assert Ciudad.from_document("loja-centro", document) == zone
 
     def test_a_city_has_no_parent_field(self):
-        assert "parentCityId" not in Ciudad.parse(LOJA).to_document()
+        assert "parentCityId" not in Ciudad.parse(LOJA, "EC").to_document()
 
 
 def test_parse_city_id_and_coverage():

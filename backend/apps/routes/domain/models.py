@@ -15,6 +15,7 @@ from apps.routes.domain.geo import LatLng
 from apps.routes.domain.safety import SEVERITIES
 from apps.routes.domain.time import is_iso_date, parse_time
 from apps.shared.domain.errors import DomainError, ErrorKind
+from apps.system_settings.domain.models import SystemSettings
 
 if TYPE_CHECKING:  # The incident model imports this module.
     from apps.safety_data.domain.models import IncidenteSeguridad
@@ -22,16 +23,12 @@ if TYPE_CHECKING:  # The incident model imports this module.
 
 # Firestore auto ids (20 chars) and slugs used by the seed.
 _DOC_ID = re.compile(r"[A-Za-z0-9_-]{1,64}")
-_MAX_NAME = 80
 _MAX_LABEL = 80
-_MAX_DESCRIPTION = 500
 _MAX_FACTOR_DESCRIPTION = 200
 _MAX_SLOT_LABEL = 40
 _MAX_CATEGORY = 40
-_MAX_DISTANCE_KM = 500
-_MAX_ELEVATION_M = 10000
+# A polyline needs two points; the upper bound is a system parameter.
 _MIN_POINTS = 2
-_MAX_POINTS = 500
 _NO_ORDER = 2**53 - 1  # a stored segment without `order` goes last
 
 _MISSING = object()
@@ -154,36 +151,40 @@ class Ruta:
     safety: Mapping[str, object] = field(default_factory=dict)
 
     @classmethod
-    def parse(cls, raw: object, route_id: str) -> "Ruta":
+    def parse(cls, raw: object, route_id: str, settings: SystemSettings) -> "Ruta":
         route_id = parse_doc_id(route_id, "invalid-route-id")
         data = as_mapping(raw)
+        max_name = settings.route_name_max_length
+        max_description = settings.route_description_max_length
+        max_distance = settings.route_max_distance_km
+        max_elevation = settings.route_max_elevation_m
         name = required_text(
             data.get("name"),
-            _MAX_NAME,
+            max_name,
             "invalid-route-name",
-            f"Route name is required (max {_MAX_NAME} chars).",
+            f"Route name is required (max {max_name} chars).",
         )
         city_id = parse_city_id(data.get("cityId"))
         description = optional_text(
             data.get("description"),
-            _MAX_DESCRIPTION,
+            max_description,
             "invalid-route-description",
-            f"Description must be text (max {_MAX_DESCRIPTION} chars).",
+            f"Description must be text (max {max_description} chars).",
         )
         start = PuntoRuta.parse(data.get("start"), "invalid-route-start")
         end = PuntoRuta.parse(data.get("end"), "invalid-route-end")
 
         distance = data.get("distanceKm")
-        if not is_number(distance) or not 0 < distance <= _MAX_DISTANCE_KM:
+        if not is_number(distance) or not 0 < distance <= max_distance:
             raise _invalid(
                 "invalid-distance",
-                f"Distance must be greater than 0 and at most {_MAX_DISTANCE_KM} km.",
+                f"Distance must be greater than 0 and at most {max_distance} km.",
             )
         elevation = data.get("elevationGainM")
-        if not is_number(elevation) or not 0 <= elevation <= _MAX_ELEVATION_M:
+        if not is_number(elevation) or not 0 <= elevation <= max_elevation:
             raise _invalid(
                 "invalid-elevation-gain",
-                f"Elevation gain must be between 0 and {_MAX_ELEVATION_M} m.",
+                f"Elevation gain must be between 0 and {max_elevation} m.",
             )
         surface = required_text(
             data.get("surface"),
@@ -259,20 +260,22 @@ class TramoInput:
     order: int | None
 
     @classmethod
-    def parse(cls, raw: object) -> "TramoInput":
+    def parse(cls, raw: object, settings: SystemSettings) -> "TramoInput":
         data = as_mapping(raw)
+        max_name = settings.route_name_max_length
+        max_points = settings.segment_max_points
         name = required_text(
             data.get("name"),
-            _MAX_NAME,
+            max_name,
             "invalid-segment-name",
-            f"Segment name is required (max {_MAX_NAME} chars).",
+            f"Segment name is required (max {max_name} chars).",
         )
         coordinates = data.get("coordinates")
         points = [parse_lat_lng(p) for p in coordinates] if isinstance(coordinates, list) else []
-        if not _MIN_POINTS <= len(points) <= _MAX_POINTS or None in points:
+        if not _MIN_POINTS <= len(points) <= max_points or None in points:
             raise _invalid(
                 "invalid-coordinates",
-                f"A segment needs {_MIN_POINTS}-{_MAX_POINTS} valid coordinates.",
+                f"A segment needs {_MIN_POINTS}-{max_points} valid coordinates.",
             )
         order = data.get("order", _MISSING)
         if order is _MISSING:

@@ -21,10 +21,7 @@ from apps.routes.domain.models import (
 from apps.routes.domain.time import parse_time, time_windows_overlap, to_window
 from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.shared.domain.text import sort_key
-
-# Routes within plus or minus 20 % of the requested distance (design decisions of EP-09).
-DISTANCE_TOLERANCE = 0.2
-MAX_DISTANCE_KM = 500
+from apps.system_settings.domain.models import SystemSettings
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,16 +36,19 @@ class SolicitudRutaSegura:
     created_at: str
 
     @classmethod
-    def parse(cls, raw: object, request_id: str, uid: str, now: datetime) -> "SolicitudRutaSegura":
+    def parse(
+        cls, raw: object, request_id: str, uid: str, now: datetime, settings: SystemSettings
+    ) -> "SolicitudRutaSegura":
         request_id = parse_doc_id(request_id, "invalid-request-id")
         data = as_mapping(raw)
         city_id = parse_city_id(data.get("cityId"))
         distance = data.get("distanceKm")
-        if not is_number(distance) or not 0 < distance <= MAX_DISTANCE_KM:
+        max_distance = settings.safe_route_max_distance_km
+        if not is_number(distance) or not 0 < distance <= max_distance:
             raise DomainError(
                 ErrorKind.INVALID_ARGUMENT,
                 "invalid-distance",
-                f"Distance must be greater than 0 and at most {MAX_DISTANCE_KM} km.",
+                f"Distance must be greater than 0 and at most {max_distance} km.",
             )
         start_time, end_time = parse_window(data, required=True)
         return cls(
@@ -127,11 +127,14 @@ def _slot_safety(route: Ruta, start_time: str, end_time: str) -> SeguridadEnFran
     return min(overlapping, key=lambda s: (s.score, s.slot_id), default=None)
 
 
-def recommend(routes: Iterable[Ruta], request: SolicitudRutaSegura) -> list[RutaRecomendada]:
+def recommend(
+    routes: Iterable[Ruta], request: SolicitudRutaSegura, settings: SystemSettings
+) -> list[RutaRecomendada]:
     """Active routes of the city within the distance tolerance; the highest score in the
     requested window first, then the closest distance; routes without an index go last."""
-    low = request.distance_km * (1 - DISTANCE_TOLERANCE)
-    high = request.distance_km * (1 + DISTANCE_TOLERANCE)
+    tolerance = settings.safe_route_distance_tolerance
+    low = request.distance_km * (1 - tolerance)
+    high = request.distance_km * (1 + tolerance)
     matches = [
         RutaRecomendada(route, _slot_safety(route, request.start_time, request.end_time))
         for route in routes

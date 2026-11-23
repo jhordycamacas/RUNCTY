@@ -64,13 +64,14 @@ Del Excel (hoja MODULOS), por operación:
 
 Decididas por el equipo o derivadas de otros documentos:
 
-- Índice: cada tramo parte de 100 puntos por franja; cada factor activo en esa franja resta 10 (baja), 20 (media) o 35 (alta), con mínimo 0.
-- Niveles: **Alto ≥ 70, Medio 40–69, Bajo < 40**. La ruta toma el nivel de su **peor tramo** y siempre se muestran los factores que lo explican.
+- Índice: cada tramo parte de 100 puntos por franja; cada factor activo en esa franja resta 10 (baja), 20 (media) o 35 (alta), con mínimo 0. Estos valores son los **parámetros por defecto** del sistema (`penaltyLow`, `penaltyMedium`, `penaltyHigh`); el administrador los edita en la [configuración del sistema](27-configuracion-del-sistema.md) y al guardar se recalculan todas las rutas.
+- Niveles: **Alto ≥ 70, Medio 40–69, Bajo < 40** (umbrales `thresholdHigh` y `thresholdMedium`, también configurables). La ruta toma el nivel de su **peor tramo** y siempre se muestran los factores que lo explican.
 - Las franjas de una ruta no se solapan (`time-slot-overlap`); las fechas de vigencia (`validFrom`, `validTo`) son de las franjas, no de los factores.
 - Un factor tiene tipo (texto libre de 1 a 40 caracteres, `invalid-factor-type`), severidad, descripción y una ventana diaria opcional (`startTime` y `endTime`, ambas o ninguna = todo el día).
 - El cliente nunca calcula el puntaje: el servidor recalcula en la misma transacción de cada cambio y el cliente recarga `GET /routes/{id}`. No hay endpoint del índice.
 - El índice se actualiza en ≤ 24 h tras un cambio (RNF-14); hoy es inmediato.
 - Franjas de entrenamiento de referencia: 05:00–07:00 y 18:00–20:00.
+- El radio máximo de una alerta de zona (5000 m por defecto), el máximo de franjas por ruta (12), de tramos (50) y de factores por tramo (20), y la zona horaria (`America/Guayaquil`) son parámetros del sistema ([configuración](27-configuracion-del-sistema.md)).
 
 ## Modelo de datos y contrato de API
 
@@ -308,6 +309,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - [x] El servidor calcula el índice por tramo y franja: parte de 100 puntos y cada factor activo en la franja resta 10 (severidad baja), 20 (media) o 35 (alta).
 - [x] Niveles: Alto ≥ 70, Medio 40–69, Bajo < 40. La ruta toma el nivel de su peor tramo.
+- [x] La penalización por severidad y los umbrales salen de los parámetros del sistema; cambiarlos recalcula el índice almacenado de todas las rutas (`backend/tests/test_system_settings_api.py`, `backend/tests/test_route_safety.py`).
 - [x] El cliente nunca calcula el índice: lo lee de `GET /routes/{id}`.
 - [x] Requiere el permiso `routes.manage`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.

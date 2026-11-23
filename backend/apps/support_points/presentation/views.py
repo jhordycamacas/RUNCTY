@@ -16,6 +16,7 @@ from apps.support_points.presentation.serializers import (
     SupportPointQuerySerializer,
     SupportPointSerializer,
 )
+from apps.system_settings.presentation.current import current_settings
 
 
 def _deps() -> SupportPointsDeps:
@@ -24,6 +25,7 @@ def _deps() -> SupportPointsDeps:
         trails=adapter("GUARDED_TRAIL_REPOSITORY"),
         routes=adapter("ROUTE_REPOSITORY"),
         cities=adapter("CITY_REPOSITORY"),
+        settings=current_settings(),
     )
 
 

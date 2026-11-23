@@ -7,7 +7,10 @@ import pytest
 from apps.cities.domain.models import Ciudad
 from apps.routes.domain.models import PuntoRuta, Ruta
 from apps.safe_routes.domain.models import SolicitudRutaSegura, recommend
+from apps.shared.domain.errors import DomainError
+from apps.system_settings.domain.models import SystemSettings
 from tests.conftest import bearer
+from tests.fakes import SETTINGS
 
 REQUESTS = "/api/v1/safe-route-requests"
 RUNNER = bearer("runner-token")
@@ -41,7 +44,7 @@ def route(route_id: str, distance_km: float, safety: dict, **changes) -> Ruta:
 
 def request(**changes) -> SolicitudRutaSegura:
     return SolicitudRutaSegura.parse(
-        {**BODY, **changes}, "q1", "runner-1", datetime(2026, 11, 22, 8, 0)
+        {**BODY, **changes}, "q1", "runner-1", datetime(2026, 11, 22, 8, 0), SETTINGS
     )
 
 
@@ -56,7 +59,7 @@ class TestRecommendation:
             route("quito", 5.0, {}, city_id="quito"),
         ]
 
-        ids = [match.route.id for match in recommend(routes, request())]
+        ids = [match.route.id for match in recommend(routes, request(), SETTINGS)]
 
         assert sorted(ids) == ["in-high", "in-low"]
 
@@ -69,7 +72,7 @@ class TestRecommendation:
             route("high-near", 5.1, {"evening": slot("19:00", "21:00", 90)}),
         ]
 
-        matches = recommend(routes, request())
+        matches = recommend(routes, request(), SETTINGS)
 
         assert [m.route.id for m in matches] == [
             "high-near",
@@ -88,7 +91,7 @@ class TestRecommendation:
             "broken": {"startTime": "x", "score": 0},
         }
 
-        (match,) = recommend([route("r", 5.0, safety)], request())
+        (match,) = recommend([route("r", 5.0, safety)], request(), SETTINGS)
 
         assert (match.safety.slot_id, match.safety.level) == ("late", "low")
 
@@ -196,3 +199,24 @@ class TestApi:
         assert client.delete(f"{REQUESTS}/{request_id}", **RUNNER).status_code == 204
         assert f"safeRouteRequests/{request_id}" not in firebase.docs
         assert client.delete(f"{REQUESTS}/{request_id}", **RUNNER).status_code == 404
+
+
+class TestWithOtherSettings:
+    def test_the_distance_tolerance_follows_the_settings(self):
+        wide = SystemSettings.defaults().with_changes({"safeRouteDistanceTolerance": 0.5})
+        routes = [route("far", 7.0, {}), route("near", 5.5, {})]
+
+        assert [m.route.id for m in recommend(routes, request(), SETTINGS)] == ["near"]
+        assert sorted(m.route.id for m in recommend(routes, request(), wide)) == ["far", "near"]
+
+    def test_the_maximum_distance_follows_the_settings(self):
+        small = SystemSettings.defaults().with_changes({"safeRouteMaxDistanceKm": 10})
+        body = {**BODY, "distanceKm": 11}
+
+        with pytest.raises(DomainError) as error:
+            SolicitudRutaSegura.parse(body, "q1", "runner-1", datetime(2026, 11, 22, 8), small)
+
+        assert error.value.reason == "invalid-distance"
+        assert SolicitudRutaSegura.parse(
+            body, "q1", "runner-1", datetime(2026, 11, 22, 8), SETTINGS
+        )

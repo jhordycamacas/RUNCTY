@@ -7,11 +7,11 @@ overlap.
 
 import re
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
+
+from apps.system_settings.domain.models import SystemSettings
 
 DAY_MINUTES = 24 * 60
-# Ecuador (America/Guayaquil) is UTC-5 all year, without daylight saving time.
-LOCAL_TIMEZONE = timezone(timedelta(hours=-5), "America/Guayaquil")
 
 _TIME = re.compile(r"([01][0-9]|2[0-4]):([0-5][0-9])")
 _DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
@@ -43,13 +43,9 @@ def time_windows_overlap(a: TimeWindow, b: TimeWindow) -> bool:
     return a.start < b.end and b.start < a.end
 
 
-def to_local(moment: datetime) -> datetime:
-    """`moment` (timezone-aware) on the wall clock of the pilot cities."""
-    return moment.astimezone(LOCAL_TIMEZONE)
-
-
-def local_now() -> datetime:
-    return to_local(datetime.now(timezone.utc))
+def local_now(settings: SystemSettings) -> datetime:
+    """The current wall clock of the system time zone."""
+    return datetime.now(timezone.utc).astimezone(settings.zone())
 
 
 def minutes_of_day(moment: datetime) -> int:

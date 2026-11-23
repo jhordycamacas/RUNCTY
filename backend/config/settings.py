@@ -78,6 +78,9 @@ GUARDED_TRAIL_REPOSITORY = (
 RISK_ZONE_ALERT_REPOSITORY = (
     "apps.risk_alerts.infrastructure.document_repositories.FirestoreRiskZoneAlertRepository"
 )
+SETTINGS_REPOSITORY = (
+    "apps.system_settings.infrastructure.firestore_settings_repository.FirestoreSettingsRepository"
+)
 SAFE_ROUTE_REQUEST_REPOSITORY = (
     "apps.safe_routes.infrastructure.document_repositories.FirestoreSafeRouteRequestRepository"
 )

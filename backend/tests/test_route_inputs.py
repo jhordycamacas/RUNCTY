@@ -12,6 +12,7 @@ from apps.routes.domain.models import (
     parse_doc_id,
 )
 from apps.shared.domain.errors import DomainError, ErrorKind
+from tests.fakes import SETTINGS
 
 
 def reason_of(call) -> str:
@@ -48,7 +49,7 @@ class TestParseDocId:
 
 class TestParseRoute:
     def test_trims_and_returns_a_valid_route(self):
-        route = Ruta.parse(valid_route(), "r1")
+        route = Ruta.parse(valid_route(), "r1", SETTINGS)
 
         assert route == Ruta(
             id="r1",
@@ -65,7 +66,7 @@ class TestParseRoute:
         )
 
     def test_surface_and_difficulty_are_trimmed_free_text(self):
-        route = Ruta.parse(valid_route(surface="  Adoquín ", difficulty="Media"), "r1")
+        route = Ruta.parse(valid_route(surface="  Adoquín ", difficulty="Media"), "r1", SETTINGS)
 
         assert (route.surface, route.difficulty) == ("Adoquín", "Media")
 
@@ -73,7 +74,7 @@ class TestParseRoute:
         raw = valid_route()
         del raw["description"], raw["active"]
 
-        route = Ruta.parse(raw, "r1")
+        route = Ruta.parse(raw, "r1", SETTINGS)
 
         assert (route.description, route.active) == ("", True)
 
@@ -105,16 +106,16 @@ class TestParseRoute:
         ],
     )
     def test_rejects_broken_input(self, override, reason):
-        assert reason_of(lambda: Ruta.parse(valid_route(**override), "r1")) == reason
+        assert reason_of(lambda: Ruta.parse(valid_route(**override), "r1", SETTINGS)) == reason
 
     def test_a_null_description_counts_as_empty(self):
-        assert Ruta.parse(valid_route(description=None), "r1").description == ""
+        assert Ruta.parse(valid_route(description=None), "r1", SETTINGS).description == ""
 
     def test_rejects_a_malformed_route_id(self):
-        assert reason_of(lambda: Ruta.parse(valid_route(), "a/b")) == "invalid-route-id"
+        assert reason_of(lambda: Ruta.parse(valid_route(), "a/b", SETTINGS)) == "invalid-route-id"
 
     def test_rejects_a_non_object_payload(self):
-        assert reason_of(lambda: Ruta.parse(None, "r1")) == "invalid-route-name"
+        assert reason_of(lambda: Ruta.parse(None, "r1", SETTINGS)) == "invalid-route-name"
 
 
 class TestParseSegment:
@@ -123,23 +124,28 @@ class TestParseSegment:
 
     def test_returns_name_coordinates_and_the_optional_order(self):
         with_order = TramoInput.parse(
-            {"name": " Bridge ", "coordinates": self.COORDINATES, "order": 2}
+            {"name": " Bridge ", "coordinates": self.COORDINATES, "order": 2}, SETTINGS
         )
-        without_order = TramoInput.parse({"name": "Bridge", "coordinates": self.COORDINATES})
+        without_order = TramoInput.parse(
+            {"name": "Bridge", "coordinates": self.COORDINATES}, SETTINGS
+        )
 
         assert with_order == TramoInput("Bridge", self.POINTS, 2)
         assert without_order == TramoInput("Bridge", self.POINTS, None)
 
     def test_drops_extra_keys_from_coordinates(self):
         parsed = TramoInput.parse(
-            {"name": "A", "coordinates": [{"lat": 1, "lng": 2, "x": 3}, {"lat": 1, "lng": 3}]}
+            {"name": "A", "coordinates": [{"lat": 1, "lng": 2, "x": 3}, {"lat": 1, "lng": 3}]},
+            SETTINGS,
         )
 
         assert parsed.coordinates[0] == LatLng(1, 2)
 
     def test_accepts_a_whole_number_sent_as_a_float(self):
         assert (
-            TramoInput.parse({"name": "A", "coordinates": self.COORDINATES, "order": 2.0}).order
+            TramoInput.parse(
+                {"name": "A", "coordinates": self.COORDINATES, "order": 2.0}, SETTINGS
+            ).order
             == 2
         )
 
@@ -163,7 +169,7 @@ class TestParseSegment:
     def test_rejects_broken_input(self, override, reason):
         raw = {"name": "A", "coordinates": self.COORDINATES, **override}
 
-        assert reason_of(lambda: TramoInput.parse(raw)) == reason
+        assert reason_of(lambda: TramoInput.parse(raw, SETTINGS)) == reason
 
 
 class TestParseTimeSlot:
@@ -314,7 +320,7 @@ class TestStoredDocuments:
         assert route.safety == {}
 
     def test_a_route_keeps_the_computed_fields(self):
-        stored = Ruta.parse(valid_route(), "r1").to_document()
+        stored = Ruta.parse(valid_route(), "r1", SETTINGS).to_document()
 
         route = Ruta.from_document(
             "r1", {**stored, "segmentCount": 3, "safety": {"morning": {"score": 90}}}

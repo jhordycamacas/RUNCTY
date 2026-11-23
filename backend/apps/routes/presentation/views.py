@@ -20,6 +20,7 @@ from apps.shared.presentation.adapters import adapter
 from apps.shared.presentation.permissions import HasPermission, IsAuthenticated
 from apps.shared.presentation.serializers import validated_body, validated_query
 from apps.shared.presentation.throttles import SENSITIVE_THROTTLES, SensitiveWritesMixin
+from apps.system_settings.presentation.current import current_settings
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,11 @@ CanManageRoutes = HasPermission(ROUTES_MANAGE)
 
 
 def _deps() -> RoutesDeps:
-    return RoutesDeps(routes=adapter("ROUTE_REPOSITORY"), cities=adapter("CITY_REPOSITORY"))
+    return RoutesDeps(
+        routes=adapter("ROUTE_REPOSITORY"),
+        cities=adapter("CITY_REPOSITORY"),
+        settings=current_settings(),
+    )
 
 
 def _can_manage(request) -> bool:

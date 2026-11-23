@@ -13,6 +13,7 @@ so they are checked without reading Firestore. Each entry gates one admin area.
 | reports.validate | Validate community reports              |
 | ads.manage       | Manage advertisers and campaigns        |
 | clubs.manage     | Manage clubs and memberships            |
+| settings.manage  | Edit the system parameters              |
 """
 
 ALL_PERMISSIONS = (
@@ -24,6 +25,7 @@ ALL_PERMISSIONS = (
     "reports.validate",
     "ads.manage",
     "clubs.manage",
+    "settings.manage",
 )
 
 ADMIN_ROLE = "admin"

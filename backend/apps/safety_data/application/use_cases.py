@@ -11,13 +11,14 @@ from datetime import date, datetime
 from typing import Literal
 
 from apps.routes.application.ports import SERVER_TIMESTAMP, RouteRepository, WriteOp
-from apps.routes.application.use_cases import with_recalc
+from apps.routes.application.use_cases import recalculate_route, with_recalc
 from apps.routes.domain.models import RouteState, parse_doc_id
 from apps.routes.domain.time import is_iso_date
 from apps.safety_data.application.ports import IncidentRepository, SourceRepository
 from apps.safety_data.domain.models import FuenteInformacion, IncidenteSeguridad
 from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.shared.domain.text import sort_key
+from apps.system_settings.domain.models import SystemSettings
 
 
 @dataclass(frozen=True, slots=True)
@@ -25,6 +26,7 @@ class SafetyDataDeps:
     sources: SourceRepository
     incidents: IncidentRepository
     routes: RouteRepository
+    settings: SystemSettings
 
 
 def _incident_path(incident_id: str) -> str:
@@ -97,7 +99,9 @@ def update_source(raw_id: object, raw: object, today: date, sources: SourceRepos
     sources.save(source)
 
 
-def _retire_source_on_route(route_id: str, incident_ids: set[str], routes: RouteRepository):
+def _retire_source_on_route(
+    route_id: str, incident_ids: set[str], routes: RouteRepository, settings: SystemSettings
+):
     """Flags the incidents of a deleted source and recalculates their route."""
 
     def plan(state: RouteState | None) -> list[WriteOp]:
@@ -115,7 +119,7 @@ def _retire_source_on_route(route_id: str, incident_ids: set[str], routes: Route
             replace(incident, source_deleted=True) if incident.id in incident_ids else incident
             for incident in state.incidents
         ]
-        return with_recalc(route_id, replace(state, incidents=incidents), flags)
+        return with_recalc(route_id, replace(state, incidents=incidents), flags, settings)
 
     routes.mutate(route_id, plan)
 
@@ -127,7 +131,7 @@ def delete_source(raw_id: object, deps: SafetyDataDeps) -> None:
     affected = deps.incidents.of_source(source_id)
     for route_id in sorted({incident.route_id for incident in affected}):
         ids = {incident.id for incident in affected if incident.route_id == route_id}
-        _retire_source_on_route(route_id, ids, deps.routes)
+        _retire_source_on_route(route_id, ids, deps.routes, deps.settings)
     deps.sources.delete(source_id)
 
 
@@ -170,7 +174,10 @@ def get_incident(raw_id: object, incidents: IncidentRepository) -> IncidenteSegu
 
 
 def _save_on_route(
-    incident: IncidenteSeguridad, op: Literal["set", "update"], routes: RouteRepository
+    incident: IncidenteSeguridad,
+    op: Literal["set", "update"],
+    routes: RouteRepository,
+    settings: SystemSettings,
 ) -> None:
     """Writes the incident and the recalculated index of its route in one transaction."""
     route_id = incident.route_id
@@ -188,20 +195,18 @@ def _save_on_route(
             stamps["createdAt"] = SERVER_TIMESTAMP
         write = WriteOp(op, _incident_path(incident.id), {**incident.to_document(), **stamps})
         others = [i for i in state.incidents if i.id != incident.id]
-        return with_recalc(route_id, replace(state, incidents=[*others, incident]), [write])
+        return with_recalc(
+            route_id, replace(state, incidents=[*others, incident]), [write], settings
+        )
 
     routes.mutate(route_id, plan)
-
-
-def _recalculate(route_id: str, routes: RouteRepository) -> None:
-    routes.mutate(route_id, lambda state: [] if state is None else with_recalc(route_id, state, []))
 
 
 def create_incident(raw: object, now: datetime, deps: SafetyDataDeps) -> str:
     """RF-08-1. `now` is the local wall clock."""
     incident = IncidenteSeguridad.parse(raw, deps.incidents.new_id(), now)
     _require_source(incident.source_id, deps.sources)
-    _save_on_route(incident, "set", deps.routes)
+    _save_on_route(incident, "set", deps.routes, deps.settings)
     return incident.id
 
 
@@ -210,9 +215,9 @@ def update_incident(raw_id: object, raw: object, now: datetime, deps: SafetyData
     current = _require_incident(raw_id, deps.incidents)
     incident = IncidenteSeguridad.parse(raw, current.id, now)
     _require_source(incident.source_id, deps.sources)
-    _save_on_route(incident, "update", deps.routes)
+    _save_on_route(incident, "update", deps.routes, deps.settings)
     if current.route_id != incident.route_id:
-        _recalculate(current.route_id, deps.routes)
+        recalculate_route(current.route_id, deps.routes, deps.settings)
 
 
 def delete_incident(raw_id: object, deps: SafetyDataDeps) -> None:
@@ -225,6 +230,6 @@ def delete_incident(raw_id: object, deps: SafetyDataDeps) -> None:
         if state is None:  # The route was deleted: only the history remains.
             return [delete]
         remaining = [i for i in state.incidents if i.id != incident.id]
-        return with_recalc(route_id, replace(state, incidents=remaining), [delete])
+        return with_recalc(route_id, replace(state, incidents=remaining), [delete], deps.settings)
 
     deps.routes.mutate(route_id, plan)

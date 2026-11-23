@@ -1,8 +1,9 @@
 """Seeds the local Firebase emulators with the minimum data for development: the pilot city,
 the system roles, an admin account, sample routes with segments, time slots, risk factors,
 incidents and the safety index, and the sources, support points, guarded trails and risk zone
-alerts of Sprint 3. Every step is idempotent, so running it again the same day leaves the same
-data (incident and alert dates are relative to the day it runs)."""
+alerts of Sprint 3, and the system settings (only when none were saved: an admin's edits stay).
+Every step is idempotent, so running it again the same day leaves the same data (incident and
+alert dates are relative to the day it runs)."""
 
 import math
 from collections.abc import Callable
@@ -32,6 +33,8 @@ from apps.shared.application.ports import AuthGateway
 from apps.shared.domain.permissions import ADMIN_ROLE, ALL_PERMISSIONS
 from apps.support_points.application.ports import GuardedTrailRepository, SupportPointRepository
 from apps.support_points.domain.models import PuntoApoyo, ResguardoPolicial
+from apps.system_settings.application.ports import SettingsRepository
+from apps.system_settings.domain.models import SystemSettings
 
 _LEVEL_LABELS = {"high": "Alto", "medium": "Medio", "low": "Bajo"}
 
@@ -47,21 +50,37 @@ class SeedDeps:
     support_points: SupportPointRepository
     guarded_trails: GuardedTrailRepository
     alerts: RiskZoneAlertRepository
+    settings: SettingsRepository
 
 
 def run_seed(deps: SeedDeps, report: Callable[[str], None]) -> None:
-    now = local_now()
-    _seed_city(deps.cities, report)
+    settings = _seed_settings(deps.settings, report)
+    now = local_now(settings)
+    _seed_city(deps.cities, settings, report)
     _seed_roles(deps.roles, report)
     _seed_admin(deps, report)
     _seed_sources(deps.sources, now.date(), report)
-    _seed_routes(deps.routes, now, report)
+    _seed_routes(deps.routes, now, settings, report)
     _seed_support_points(deps, report)
-    _seed_alerts(deps.alerts, now.date(), report)
+    _seed_alerts(deps.alerts, now.date(), settings, report)
 
 
-def _seed_city(cities: CityRepository, report: Callable[[str], None]) -> None:
-    city = Ciudad.parse(data.CITY)
+def _seed_settings(repository: SettingsRepository, report: Callable[[str], None]) -> SystemSettings:
+    """Saves the defaults once; later runs keep what an admin changed. Returns the ones in force."""
+    stored = repository.get()
+    if stored is not None:
+        report("System settings kept: systemSettings/global")
+        return stored
+    defaults = SystemSettings.defaults()
+    repository.save(defaults)
+    report("System settings seeded: systemSettings/global")
+    return defaults
+
+
+def _seed_city(
+    cities: CityRepository, settings: SystemSettings, report: Callable[[str], None]
+) -> None:
+    city = Ciudad.parse(data.CITY, settings.country_code)
     if not cities.create(city):
         cities.update(city)
     report(f"City seeded: cities/{city.id}")
@@ -100,19 +119,27 @@ def _seed_sources(sources: SourceRepository, today: date, report: Callable[[str]
     report(f"Sources seeded: {', '.join(raw['id'] for raw in data.SEED_SOURCES)}")
 
 
-def _seed_routes(routes: RouteRepository, now: datetime, report: Callable[[str], None]) -> None:
+def _seed_routes(
+    routes: RouteRepository,
+    now: datetime,
+    settings: SystemSettings,
+    report: Callable[[str], None],
+) -> None:
     """Rewrites each sample route from scratch under its fixed id: route, segments, time slots,
     risk factors and incidents, with lengths and the safety index computed like the endpoints
     do."""
     for spec in data.SEED_ROUTES:
         # Drops the segments or factors left by an older version of the seed.
         routes.delete_tree(spec.id)
-        ops, summary = _route_writes(spec, _seed_incidents(spec.id, now), now.date())
+        incidents = _seed_incidents(spec.id, now, settings)
+        ops, summary = _route_writes(spec, incidents, now.date(), settings)
         routes.commit(ops)
         report(f"Route seeded: routes/{spec.id} — {summary}")
 
 
-def _seed_incidents(route_id: str, now: datetime) -> list[IncidenteSeguridad]:
+def _seed_incidents(
+    route_id: str, now: datetime, settings: SystemSettings
+) -> list[IncidenteSeguridad]:
     return [
         IncidenteSeguridad.parse(
             {
@@ -144,7 +171,10 @@ def _seed_support_points(deps: SeedDeps, report: Callable[[str], None]) -> None:
 
 
 def _seed_alerts(
-    alerts: RiskZoneAlertRepository, today: date, report: Callable[[str], None]
+    alerts: RiskZoneAlertRepository,
+    today: date,
+    settings: SystemSettings,
+    report: Callable[[str], None],
 ) -> None:
     """Alerts in force from a few days ago to some days ahead, so the runner sees them."""
     for alert in data.SEED_ALERTS:
@@ -152,7 +182,7 @@ def _seed_alerts(
             "validFrom": (today - timedelta(days=alert.days_before)).isoformat(),
             "validTo": (today + timedelta(days=alert.days_after)).isoformat(),
         }
-        alerts.save(AlertaZonaRiesgo.parse({**alert.body, **valid}, alert.id))
+        alerts.save(AlertaZonaRiesgo.parse({**alert.body, **valid}, alert.id, settings))
     report(f"Risk zone alerts seeded: {', '.join(alert.id for alert in data.SEED_ALERTS)}")
 
 
@@ -161,7 +191,7 @@ def _timestamps() -> dict[str, object]:
 
 
 def _route_writes(
-    spec: data.SeedRoute, incidents: list[IncidenteSeguridad], today: date
+    spec: data.SeedRoute, incidents: list[IncidenteSeguridad], today: date, settings: SystemSettings
 ) -> tuple[list[WriteOp], str]:
     base = f"routes/{spec.id}"
     slots = [FranjaHoraria.parse(raw, raw["id"]) for raw in data.SEED_SLOTS]
@@ -172,7 +202,7 @@ def _route_writes(
     for order, segment in enumerate(spec.segments):
         segment_id = f"seg-{order + 1}"
         coordinates = TramoInput.parse(
-            {"name": segment.name, "coordinates": segment.coordinates}
+            {"name": segment.name, "coordinates": segment.coordinates}, settings
         ).coordinates
         factors = [
             FactorDeRiesgo.parse(raw, f"factor-{number}")
@@ -180,7 +210,7 @@ def _route_writes(
         ]
         length_m = path_length_m(coordinates)
         safety = CalculadoraIndiceSeguridad.segment_safety(
-            slots, factors, incident_penalties(incidents, segment_id, today)
+            settings, slots, factors, incident_penalties(incidents, segment_id, today, settings)
         )
         evaluated.append(TramoEvaluado(segment_id, segment.name, order, safety))
         lengths.append(length_m)
@@ -217,7 +247,7 @@ def _route_writes(
         for incident in incidents
     )
 
-    route_safety = CalculadoraIndiceSeguridad.route_safety(slots, evaluated)
+    route_safety = CalculadoraIndiceSeguridad.route_safety(settings, slots, evaluated)
     # Round half up like the TypeScript seed did, not half to even.
     distance_km = math.floor(sum(lengths) / 1000 * spec.repeats * 10 + 0.5) / 10
     route = Ruta.parse(
@@ -234,6 +264,7 @@ def _route_writes(
             "active": True,
         },
         spec.id,
+        settings,
     )
     route_op = WriteOp(
         "set",

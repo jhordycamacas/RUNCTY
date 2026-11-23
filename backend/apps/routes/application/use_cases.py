@@ -34,17 +34,14 @@ from apps.routes.domain.time import local_now, time_windows_overlap, to_window
 from apps.safety_data.domain.models import incident_penalties
 from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.shared.domain.text import sort_key
-
-# Bounds that keep each write plan well under the 500-writes limit.
-MAX_SEGMENTS = 50
-MAX_TIME_SLOTS = 12
-MAX_FACTORS_PER_SEGMENT = 20
+from apps.system_settings.domain.models import SystemSettings
 
 
 @dataclass(frozen=True, slots=True)
 class RoutesDeps:
     routes: RouteRepository
     cities: CityRepository
+    settings: SystemSettings
 
 
 @dataclass(frozen=True, slots=True)
@@ -126,21 +123,23 @@ def with_recalc(
     route_id: str,
     state: RouteState,
     writes: list[WriteOp],
+    settings: SystemSettings,
     segment_writes: dict[str, _SegmentWrite] | None = None,
 ) -> list[WriteOp]:
     """`writes` followed by the recalculated safety of every segment (merged into its pending
     write) and of the route (RF-07-11). Risk factors and recent incidents (EP-08) penalize."""
     segment_writes = segment_writes or {}
-    today = local_now().date()
+    today = local_now(settings).date()
     evaluated = [
         TramoEvaluado(
             segment.id,
             segment.name,
             segment.order,
             CalculadoraIndiceSeguridad.segment_safety(
+                settings,
                 state.slots,
                 state.factors.get(segment.id, []),
-                incident_penalties(state.incidents, segment.id, today),
+                incident_penalties(state.incidents, segment.id, today, settings),
             ),
         )
         for segment in state.segments
@@ -156,7 +155,7 @@ def with_recalc(
                 {**write.data, "safety": safety},
             )
         )
-    route_safety = CalculadoraIndiceSeguridad.route_safety(state.slots, evaluated)
+    route_safety = CalculadoraIndiceSeguridad.route_safety(settings, state.slots, evaluated)
     ops.append(
         WriteOp(
             "update",
@@ -170,6 +169,21 @@ def with_recalc(
         )
     )
     return ops
+
+
+def recalculate_route(route_id: str, routes: RouteRepository, settings: SystemSettings) -> None:
+    """Rewrites the stored safety of one route with `settings` (nothing if it is gone)."""
+    routes.mutate(
+        route_id, lambda state: [] if state is None else with_recalc(route_id, state, [], settings)
+    )
+
+
+def recalculate_all_routes(routes: RouteRepository, settings: SystemSettings) -> int:
+    """Rewrites the stored safety of every route with `settings`; returns how many routes."""
+    route_ids = [route.id for route in routes.list()]
+    for route_id in route_ids:
+        recalculate_route(route_id, routes, settings)
+    return len(route_ids)
 
 
 # ---------- Reading ----------
@@ -200,7 +214,7 @@ def get_route(raw_route_id: object, can_manage: bool, routes: RouteRepository) -
 
 
 def create_route(raw: object, deps: RoutesDeps) -> str:
-    route = Ruta.parse(raw, deps.routes.new_id())
+    route = Ruta.parse(raw, deps.routes.new_id(), deps.settings)
     _require_city(deps.cities, route.city_id)
     deps.routes.commit(
         [
@@ -223,7 +237,7 @@ def create_route(raw: object, deps: RoutesDeps) -> str:
 
 def update_route(raw: object, deps: RoutesDeps) -> None:
     route_id = parse_doc_id(_as_mapping(raw).get("id"), "invalid-route-id")
-    route = Ruta.parse(raw, route_id)
+    route = Ruta.parse(raw, route_id, deps.settings)
     _require_city(deps.cities, route.city_id)
 
     def plan(state: RouteState | None) -> list[WriteOp]:
@@ -248,14 +262,15 @@ def delete_route(raw: object, deps: RoutesDeps) -> None:
 def create_segment(raw: object, deps: RoutesDeps) -> str:
     data = _as_mapping(raw)
     route_id = parse_doc_id(data.get("routeId"), "invalid-route-id")
-    segment = TramoInput.parse(raw)
+    segment = TramoInput.parse(raw, deps.settings)
     segment_id = deps.routes.new_id()
 
     def plan(current: RouteState | None) -> list[WriteOp]:
         state = _require_state(current, route_id)
-        if len(state.segments) >= MAX_SEGMENTS:
+        max_segments = deps.settings.max_segments_per_route
+        if len(state.segments) >= max_segments:
             raise _precondition(
-                "too-many-segments", f"A route can have at most {MAX_SEGMENTS} segments."
+                "too-many-segments", f"A route can have at most {max_segments} segments."
             )
         length_m = path_length_m(segment.coordinates)
         writes = {
@@ -273,7 +288,7 @@ def create_segment(raw: object, deps: RoutesDeps) -> str:
         record = Tramo(segment_id, segment.name, -1, segment.coordinates, length_m)
         ids = insert_at(ordered_ids(state.segments), segment_id, segment.order)
         segments = _apply_order([*state.segments, record], ids, writes)
-        return with_recalc(route_id, replace(state, segments=segments), [], writes)
+        return with_recalc(route_id, replace(state, segments=segments), [], deps.settings, writes)
 
     deps.routes.mutate(route_id, plan)
     return segment_id
@@ -283,7 +298,7 @@ def update_segment(raw: object, deps: RoutesDeps) -> None:
     data = _as_mapping(raw)
     route_id = parse_doc_id(data.get("routeId"), "invalid-route-id")
     segment_id = parse_doc_id(data.get("segmentId"), "invalid-segment-id")
-    input_ = TramoInput.parse(raw)
+    input_ = TramoInput.parse(raw, deps.settings)
 
     def plan(current: RouteState | None) -> list[WriteOp]:
         state = _require_state(current, route_id)
@@ -309,7 +324,7 @@ def update_segment(raw: object, deps: RoutesDeps) -> None:
         updated = [changed if s.id == segment_id else s for s in state.segments]
         segments = _apply_order(updated, ids, writes)
         write.data["order"] = ids.index(segment_id)
-        return with_recalc(route_id, replace(state, segments=segments), [], writes)
+        return with_recalc(route_id, replace(state, segments=segments), [], deps.settings, writes)
 
     deps.routes.mutate(route_id, plan)
 
@@ -335,7 +350,11 @@ def delete_segment(raw: object, deps: RoutesDeps) -> None:
         )
         factors = {key: value for key, value in state.factors.items() if key != segment_id}
         return with_recalc(
-            route_id, replace(state, segments=segments, factors=factors), deletes, writes
+            route_id,
+            replace(state, segments=segments, factors=factors),
+            deletes,
+            deps.settings,
+            writes,
         )
 
     deps.routes.mutate(route_id, plan)
@@ -367,9 +386,10 @@ def create_time_slot(raw: object, deps: RoutesDeps) -> str:
 
     def plan(current: RouteState | None) -> list[WriteOp]:
         state = _require_state(current, route_id)
-        if len(state.slots) >= MAX_TIME_SLOTS:
+        max_slots = deps.settings.max_time_slots_per_route
+        if len(state.slots) >= max_slots:
             raise _precondition(
-                "too-many-time-slots", f"A route can have at most {MAX_TIME_SLOTS} time slots."
+                "too-many-time-slots", f"A route can have at most {max_slots} time slots."
             )
         _assert_no_overlap(state.slots, slot)
         write = WriteOp(
@@ -377,7 +397,9 @@ def create_time_slot(raw: object, deps: RoutesDeps) -> str:
             _slot_path(route_id, slot.id),
             {**slot.to_document(), "createdAt": SERVER_TIMESTAMP, "updatedAt": SERVER_TIMESTAMP},
         )
-        return with_recalc(route_id, replace(state, slots=[*state.slots, slot]), [write])
+        return with_recalc(
+            route_id, replace(state, slots=[*state.slots, slot]), [write], deps.settings
+        )
 
     deps.routes.mutate(route_id, plan)
     return slot.id
@@ -405,7 +427,7 @@ def update_time_slot(raw: object, deps: RoutesDeps) -> None:
             },
         )
         slots = [slot if s.id == slot.id else s for s in state.slots]
-        return with_recalc(route_id, replace(state, slots=slots), [write])
+        return with_recalc(route_id, replace(state, slots=slots), [write], deps.settings)
 
     deps.routes.mutate(route_id, plan)
 
@@ -420,7 +442,7 @@ def delete_time_slot(raw: object, deps: RoutesDeps) -> None:
         _require_slot(state, slot_id)
         slots = [s for s in state.slots if s.id != slot_id]
         delete = WriteOp("delete", _slot_path(route_id, slot_id))
-        return with_recalc(route_id, replace(state, slots=slots), [delete])
+        return with_recalc(route_id, replace(state, slots=slots), [delete], deps.settings)
 
     deps.routes.mutate(route_id, plan)
 
@@ -449,10 +471,11 @@ def create_risk_factor(raw: object, deps: RoutesDeps) -> str:
         state = _require_state(current, route_id)
         _require_segment(state, segment_id)
         existing = state.factors.get(segment_id, [])
-        if len(existing) >= MAX_FACTORS_PER_SEGMENT:
+        max_factors = deps.settings.max_risk_factors_per_segment
+        if len(existing) >= max_factors:
             raise _precondition(
                 "too-many-risk-factors",
-                f"A segment can have at most {MAX_FACTORS_PER_SEGMENT} risk factors.",
+                f"A segment can have at most {max_factors} risk factors.",
             )
         write = WriteOp(
             "set",
@@ -460,7 +483,7 @@ def create_risk_factor(raw: object, deps: RoutesDeps) -> str:
             {**factor.to_document(), "createdAt": SERVER_TIMESTAMP, "updatedAt": SERVER_TIMESTAMP},
         )
         factors = {**state.factors, segment_id: [*existing, factor]}
-        return with_recalc(route_id, replace(state, factors=factors), [write])
+        return with_recalc(route_id, replace(state, factors=factors), [write], deps.settings)
 
     deps.routes.mutate(route_id, plan)
     return factor.id
@@ -488,7 +511,10 @@ def update_risk_factor(raw: object, deps: RoutesDeps) -> None:
         )
         updated = [factor if f.id == factor.id else f for f in state.factors[segment_id]]
         return with_recalc(
-            route_id, replace(state, factors={**state.factors, segment_id: updated}), [write]
+            route_id,
+            replace(state, factors={**state.factors, segment_id: updated}),
+            [write],
+            deps.settings,
         )
 
     deps.routes.mutate(route_id, plan)
@@ -505,7 +531,10 @@ def delete_risk_factor(raw: object, deps: RoutesDeps) -> None:
         remaining = [f for f in state.factors[segment_id] if f.id != factor_id]
         delete = WriteOp("delete", _factor_path(route_id, segment_id, factor_id))
         return with_recalc(
-            route_id, replace(state, factors={**state.factors, segment_id: remaining}), [delete]
+            route_id,
+            replace(state, factors={**state.factors, segment_id: remaining}),
+            [delete],
+            deps.settings,
         )
 
     deps.routes.mutate(route_id, plan)

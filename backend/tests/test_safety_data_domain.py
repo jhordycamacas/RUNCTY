@@ -7,6 +7,8 @@ import pytest
 from apps.routes.domain.safety import ExtraPenalty
 from apps.safety_data.domain.models import IncidenteSeguridad, incident_penalties
 from apps.shared.domain.errors import DomainError
+from apps.system_settings.domain.models import SystemSettings
+from tests.fakes import SETTINGS
 
 NOW = datetime(2026, 11, 22, 18, 30)
 TODAY = NOW.date()
@@ -44,11 +46,11 @@ def test_an_incident_can_be_earlier_today_but_not_later():
 
 @pytest.mark.parametrize("severity", ["low", "medium", "high"])
 def test_the_penalty_severity_is_the_one_chosen_for_the_incident(severity):
-    assert incident(type="Hurto", severity=severity).penalty().severity == severity
+    assert incident(type="Hurto", severity=severity).penalty(SETTINGS).severity == severity
 
 
 def test_the_penalty_covers_one_hour_around_the_incident():
-    assert incident().penalty() == ExtraPenalty(
+    assert incident().penalty(SETTINGS) == ExtraPenalty(
         "incident",
         "robbery",
         "high",
@@ -62,21 +64,21 @@ def test_the_penalty_covers_one_hour_around_the_incident():
     ("time", "window"), [("00:20", ("00:00", "01:20")), ("23:40", ("22:40", "24:00"))]
 )
 def test_the_penalty_window_stays_within_the_day(time, window):
-    penalty = incident(time=time).penalty()
+    penalty = incident(time=time).penalty(SETTINGS)
 
     assert (penalty.start_time, penalty.end_time) == window
 
 
 def test_only_recent_incidents_with_a_source_count():
-    assert incident(date="2025-11-22").counts_on(TODAY)
-    assert not incident(date="2025-11-21").counts_on(TODAY)
-    assert not incident(source_deleted=True).counts_on(TODAY)
+    assert incident(date="2025-11-22").counts_on(TODAY, SETTINGS)
+    assert not incident(date="2025-11-21").counts_on(TODAY, SETTINGS)
+    assert not incident(source_deleted=True).counts_on(TODAY, SETTINGS)
 
 
 def test_a_segment_gets_its_incidents_and_those_of_the_whole_route():
     own, whole, other = incident(), incident(id="i2", segment_id=None), incident(segment_id="s2")
 
-    penalties = incident_penalties([own, whole, other], "s1", TODAY)
+    penalties = incident_penalties([own, whole, other], "s1", TODAY, SETTINGS)
 
     assert len(penalties) == 2
 
@@ -100,3 +102,14 @@ def test_a_stored_incident_keeps_its_text_and_defaults_a_missing_severity_to_med
     assert legacy is not None and (legacy.type, legacy.severity) == ("fire", "medium")
     assert chosen is not None and (chosen.type, chosen.severity) == ("Robo", "high")
     assert unknown is not None and unknown.severity == "medium"
+
+
+def test_the_window_and_the_margin_follow_the_settings():
+    short = SystemSettings.defaults().with_changes(
+        {"incidentWindowDays": 30, "incidentMarginMinutes": 15}
+    )
+
+    assert incident(date="2026-11-01").counts_on(TODAY, short)
+    assert not incident(date="2026-10-01").counts_on(TODAY, short)
+    penalty = incident().penalty(short)
+    assert (penalty.start_time, penalty.end_time) == ("20:15", "20:45")

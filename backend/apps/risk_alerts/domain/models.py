@@ -23,9 +23,9 @@ from apps.routes.domain.models import (
 )
 from apps.routes.domain.time import is_iso_date, minutes_of_day, to_window
 from apps.shared.domain.errors import DomainError, ErrorKind
+from apps.system_settings.domain.models import SystemSettings
 
 ALERT_SEVERITIES = ("alta", "media", "baja")
-MAX_ALERT_RADIUS_M = 5000
 
 _MAX_TYPE = 40
 _MAX_DESCRIPTION = 200
@@ -51,7 +51,7 @@ class AlertaZonaRiesgo:
     end_time: str | None = None
 
     @classmethod
-    def parse(cls, raw: object, alert_id: str) -> "AlertaZonaRiesgo":
+    def parse(cls, raw: object, alert_id: str, settings: SystemSettings) -> "AlertaZonaRiesgo":
         alert_id = parse_doc_id(alert_id, "invalid-alert-id")
         data = as_mapping(raw)
         alert_type = required_text(
@@ -75,10 +75,11 @@ class AlertaZonaRiesgo:
                 "invalid-location", "Location needs a lat in -90..90 and lng in -180..180."
             )
         radius = data.get("radiusM")
-        if not is_number(radius) or not 0 < radius <= MAX_ALERT_RADIUS_M:
+        max_radius = settings.max_alert_radius_m
+        if not is_number(radius) or not 0 < radius <= max_radius:
             raise _invalid(
                 "invalid-alert-radius",
-                f"radiusM must be greater than 0 and at most {MAX_ALERT_RADIUS_M} m.",
+                f"radiusM must be greater than 0 and at most {max_radius} m.",
             )
         city_id = parse_city_id(data.get("cityId"))
         route = data.get("routeId")

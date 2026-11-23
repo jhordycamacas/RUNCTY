@@ -23,11 +23,9 @@ from apps.routes.domain.models import (
 )
 from apps.routes.domain.time import time_windows_overlap, to_window
 from apps.shared.domain.errors import DomainError, ErrorKind
+from apps.system_settings.domain.models import SystemSettings
 
 WEEK_DAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
-# "Near" a route or a runner (design decisions of EP-06).
-NEARBY_RADIUS_M = 500
-MAX_SEARCH_RADIUS_M = 50_000
 
 _MAX_NAME = 80
 _MAX_TYPE = 40
@@ -43,7 +41,9 @@ def is_near(point: LatLng, places: Iterable[LatLng], radius_m: float) -> bool:
     return any(distance_m(point, place) <= radius_m for place in places)
 
 
-def parse_search_area(query: Mapping[str, object]) -> tuple[LatLng, float] | None:
+def parse_search_area(
+    query: Mapping[str, object], settings: SystemSettings
+) -> tuple[LatLng, float] | None:
     """The `lat`, `lng` and `radiusM` filter: all three or none."""
     lat, lng, radius = query.get("lat"), query.get("lng"), query.get("radiusM")
     if lat is None and lng is None and radius is None:
@@ -51,10 +51,11 @@ def parse_search_area(query: Mapping[str, object]) -> tuple[LatLng, float] | Non
     center = parse_lat_lng({"lat": lat, "lng": lng})
     if center is None:
         raise _invalid("invalid-search-location", "Provide a valid lat and lng with radiusM.")
-    if not isinstance(radius, (int, float)) or not 0 < radius <= MAX_SEARCH_RADIUS_M:
+    max_radius = settings.max_search_radius_m
+    if not isinstance(radius, (int, float)) or not 0 < radius <= max_radius:
         raise _invalid(
             "invalid-search-radius",
-            f"radiusM must be greater than 0 and at most {MAX_SEARCH_RADIUS_M} m.",
+            f"radiusM must be greater than 0 and at most {max_radius} m.",
         )
     return center, radius
 

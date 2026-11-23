@@ -10,7 +10,7 @@ from apps.seed.application.use_cases import SeedDeps, run_seed
 from apps.seed.domain.data import ADMIN_EMAIL, SEED_ROUTES
 from apps.shared.domain.permissions import ALL_PERMISSIONS
 from tests import fakes
-from tests.fakes import FIREBASE
+from tests.fakes import FIREBASE, SETTINGS
 
 ROUTE_IDS = [
     "loja-jipiro",
@@ -32,6 +32,7 @@ def deps() -> SeedDeps:
         support_points=fakes.InMemorySupportPointRepository(),
         guarded_trails=fakes.InMemoryGuardedTrailRepository(),
         alerts=fakes.InMemoryRiskZoneAlertRepository(),
+        settings=fakes.InMemorySettingsRepository(),
     )
 
 
@@ -63,6 +64,20 @@ def test_seeds_the_pilot_city():
         "active",
     )
     assert (loja.lat, loja.lng) == (-3.99313, -79.20422)
+
+
+def test_seeds_the_default_system_settings():
+    seed([])
+    assert FIREBASE.docs["systemSettings/global"] == SETTINGS.to_document()
+
+
+def test_a_rerun_keeps_the_system_settings_an_admin_changed():
+    seed([])
+    FIREBASE.docs["systemSettings/global"]["penaltyHigh"] = 50
+    report: list[str] = []
+    seed(report)
+    assert FIREBASE.docs["systemSettings/global"]["penaltyHigh"] == 50
+    assert report[0] == "System settings kept: systemSettings/global"
 
 
 def test_seeds_the_system_roles_with_sorted_permissions():
@@ -171,7 +186,7 @@ def test_seeds_support_points_a_guarded_trail_and_alerts_in_force():
     assert children("guardedTrails")["resguardo-puear"]["days"] == ["sat", "sun"]
     alerts = fakes.InMemoryRiskZoneAlertRepository().list("loja")
     assert sorted(alert.id for alert in alerts) == ["alerta-centro-obras", "alerta-malecon-robos"]
-    assert all(alert.is_active(local_now()) for alert in alerts)
+    assert all(alert.is_active(local_now(SETTINGS)) for alert in alerts)
 
 
 def test_route_documents_have_the_expected_fields():
@@ -228,9 +243,10 @@ def test_a_rerun_keeps_the_admin_account_and_restores_its_claims():
 
 def test_reports_what_it_seeded(report):
     seed(report)
-    assert report[0] == "City seeded: cities/loja"
-    assert report[1] == "Roles seeded: runner, admin, club_rep"
-    assert report[2].startswith(f"Admin seeded: {ADMIN_EMAIL} (uid ")
+    assert report[0] == "System settings seeded: systemSettings/global"
+    assert report[1] == "City seeded: cities/loja"
+    assert report[2] == "Roles seeded: runner, admin, club_rep"
+    assert report[3].startswith(f"Admin seeded: {ADMIN_EMAIL} (uid ")
     routes = [line for line in report if line.startswith("Route seeded: routes/")]
     assert len(routes) == 5
     assert routes[0].startswith("Route seeded: routes/loja-jipiro — Parque Recreacional Jipiro, ")
