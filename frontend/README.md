@@ -9,7 +9,7 @@ One Angular 22 + Ionic 9 + Capacitor 8 app for the web (browser) and Android (AP
 ```
 src/app/
   core/          API client, interceptors, error mapping, auth service (+ Firebase gateway port), permissions, guards, system settings (`GET /settings`: the limits the forms validate against) and option catalogs
-  shared/        base UI (text field, birth date, notice, confirm dialog, choice chips), map view (Leaflet + OpenStreetMap behind a renderer port), form helpers, pages (403, 404)
+  shared/        base UI (text field, birth date, notice, confirm dialog, choice chips), map view (Google Maps or Leaflet + OpenStreetMap behind a renderer port), form helpers, pages (403, 404)
   auth/          sign in, sign up, password reset, email verification banner
   account/       profile, personal data, password change, account deletion
   sport-profile/ sport profile (create, edit, delete)
@@ -31,7 +31,7 @@ Each feature folder is layered: `domain` (types, rules, ports as abstract classe
 
 ### Routes and safety wording
 
-`GET /routes?cityId=` and `GET /routes/{id}` feed the Rutas tab and the Home section. The safety level of a route is shown per time slot as Alto, Medio or Bajo with the risk factors that explain it, and always with the notice that it is an estimate; the UI never calls a route "segura" or "insegura". "Abrir en Google Maps" is a plain `https://www.google.com/maps/search/?api=1&query=lat,lng` link (`target="_blank"`); the in-app maps use Leaflet with OpenStreetMap tiles until the Google Maps key is available. There is no on-screen SOS button: the panic trigger with the volume buttons arrives in Sprint 4 (spec 15).
+`GET /routes?cityId=` and `GET /routes/{id}` feed the Rutas tab and the Home section. The safety level of a route is shown per time slot as Alto, Medio or Bajo with the risk factors that explain it, and always with the notice that it is an estimate; the UI never calls a route "segura" or "insegura". "Abrir en Google Maps" is a plain `https://www.google.com/maps/search/?api=1&query=lat,lng` link (`target="_blank"`); the in-app maps follow the renderer rules in the Maps section below. There is no on-screen SOS button: the panic trigger with the volume buttons arrives in Sprint 4 (spec 15).
 
 ### Preferences and themes
 
@@ -55,9 +55,19 @@ The development environment points at the API and the Auth emulator on the host 
 
 Backend for development (from the repo root): `firebase emulators:start`, then `python manage.py seed` and `python manage.py runserver` in `backend/` (or `docker compose up`). The API is at `http://localhost:8000/api/v1`.
 
+## Maps
+
+`<app-map-view>` draws lines (colored by safety level) and markers through the `MapRenderer` port (`src/app/shared/map`). `provideMapRenderer(environment.googleMapsApiKey)` in `app.config.ts` picks the provider once at start-up:
+
+- `googleMapsApiKey` set: Google Maps (Maps JavaScript API, loaded lazily and once by `GoogleMapsLoader`, `language=es`, dark style built from the theme tokens).
+- `googleMapsApiKey: null` (the default in every environment): Leaflet with OpenStreetMap tiles. It is also the real fallback when the Google script fails or the key is refused (`gm_authFailure`), with an inline notice, so a map is never blank.
+
+To enable Google, create a browser key restricted by API (Maps JavaScript API) and HTTP referrer, then paste it in `googleMapsApiKey` of `environment.real.ts` / `environment.prod.ts`. The referrers to allow, including the Android app, are listed in `../specs/05-catalogo-de-rutas.md` (section "Mapa de la ruta"). Positions of other runners in real time are a later sprint (EP-16). More frontend context: `CONTEXTO-FRONTEND.md`.
+
 ## Environments
 
 - `environment.ts`: development. Project `demo-runcty`, fake API key, Auth emulator on port 9099.
+- `environment.real.ts`: the real Firebase project with the local API (`npm run start:real`).
 - `environment.prod.ts`: production build (`npm run build`). Only placeholders; replace them at deployment time. No secrets belong in git.
 
 ## Android (Capacitor)

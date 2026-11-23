@@ -49,6 +49,7 @@ Del Excel (hoja MODULOS), por operación:
 Decididas por el equipo o derivadas de otros documentos:
 
 - La ubicación en tiempo real solo la ven los contactos seleccionados y únicamente mientras dure la sesión compartida (RNF-05).
+- Las posiciones de los otros corredores se dibujarán sobre el mapa existente con el puerto `MapRenderer` (Google Maps o Leaflet, ver [EP-05](05-catalogo-de-rutas.md#mapa-de-la-ruta)); hoy el mapa solo muestra la posición propia en la pestaña Correr.
 - La sesión pertenece a un entrenamiento del propio corredor ([EP-12](12-registro-de-entrenamientos.md)).
 - La preferencia de privacidad de la ubicación ([EP-26](26-preferencias-de-usuario.md)) puede apagar el uso compartido.
 

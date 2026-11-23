@@ -34,9 +34,31 @@ Entradas, proceso y salidas del requisito padre en el Excel (RF-05):
 
 **No incluye**
 
-- Mapa dentro de la app y proveedor de mapas (`MapProvider`): pendiente; las coordenadas se cargan a mano.
+- Posiciones en tiempo real de otros corredores sobre el mapa: llegan con la ubicación compartida ([EP-16](16-ubicacion-compartida.md)).
 - Evaluación de seguridad de la ruta: [EP-07](07-evaluacion-de-seguridad.md).
 - Rutas propuestas por clubes: [EP-11](11-rutas-de-clubes.md).
+
+## Mapa de la ruta
+
+El mapa dibuja cada tramo con el color de su nivel de seguridad, los marcadores de inicio y fin, y se encuadra solo sobre la ruta. Aparece en el detalle de la ruta del administrador (incluida la pestaña «Tramos y factores»), en el detalle del corredor y, con la posición en vivo, en la pestaña Correr. La información de la ruta sigue disponible como texto junto al mapa y el mapa tiene nombre accesible.
+
+El proveedor se elige al arrancar la app, detrás del puerto `MapRenderer` (`frontend/src/app/shared/map/map-renderer.ts`):
+
+- Con `googleMapsApiKey` en el entorno: **Google Maps** (Maps JavaScript API, estilo oscuro derivado de los tokens del tema).
+- Sin clave: **OpenStreetMap con Leaflet**, que es el respaldo real, no código muerto.
+- Si Google no carga (sin red, script bloqueado, tiempo agotado) o rechaza la clave (`gm_authFailure`), el mapa pasa a Leaflet en caliente y muestra el aviso «No pudimos cargar Google Maps; mostramos el mapa de OpenStreetMap.». Nunca queda en blanco.
+
+**Habilitar Google Maps (a cargo del responsable del proyecto)**
+
+1. En https://console.cloud.google.com/apis/credentials crear una clave de API y habilitar **Maps JavaScript API** en el proyecto.
+2. Restringir la clave por API (solo Maps JavaScript API) y por referente HTTP:
+   - `http://127.0.0.1:4200/*` y `http://localhost:4200/*` (desarrollo en el navegador y APK con recarga en vivo mediante `adb reverse`, cuya URL es `http://localhost:4200`).
+   - `https://runcty-73d70.web.app/*` y `https://runcty-73d70.firebaseapp.com/*` (producción).
+   - `https://localhost/*` para el APK instalado: Capacitor 8 sirve los archivos empaquetados desde `https://localhost` (`androidScheme` por defecto `https`; `capacitor.config.ts` no define `server`).
+   - Recarga en vivo desde el teléfono sin `adb reverse` (`ionic cap run android -l --external`): el origen es `http://<IP-de-la-PC>:4200`; añadir ese referente exacto (ej. `http://192.168.1.20:4200/*`).
+3. Pegar la clave en `frontend/src/environments/environment.real.ts` y `environment.prod.ts` en `googleMapsApiKey` (en `null` por defecto; la clave de navegador es pública por diseño, pero la restricción por referente es obligatoria y no se versiona una clave sin restringir).
+
+Fuera de alcance: las posiciones de otros corredores en tiempo real (ubicación compartida, EP-16, Sprint 4). El mapa ya actualiza la posición propia en vivo en la pestaña Correr.
 
 ## Reglas de negocio
 
@@ -235,9 +257,9 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
 - [x] El corredor ve los tramos de la ruta en orden en el detalle, con su nivel por franja (cubierto por pruebas unitarias; sin verificación manual).
 
-**Implementación:** `frontend/src/app/admin/routes/presentation/segments-section.ts`, `frontend/src/app/admin/routes/presentation/route-detail.page.ts`, `frontend/src/app/admin/routes/domain/slot-safety.ts`, `frontend/src/app/routes/presentation/route-detail.page.ts`, `frontend/src/app/routes/domain/maps.ts`
+**Implementación:** `frontend/src/app/admin/routes/presentation/segments-section.ts`, `frontend/src/app/admin/routes/presentation/route-detail.page.ts`, `frontend/src/app/admin/routes/domain/slot-safety.ts`, `frontend/src/app/routes/presentation/route-detail.page.ts`, `frontend/src/app/routes/domain/maps.ts`, `frontend/src/app/shared/map/map-renderer-provider.ts`, `frontend/src/app/shared/map/google-map-renderer.ts`
 
-**Pruebas:** `frontend/src/app/admin/routes/presentation/route-detail.page.spec.ts`, `frontend/src/app/admin/routes/domain/slot-safety.spec.ts`, `frontend/src/app/routes/presentation/route-detail.page.spec.ts`, `frontend/src/app/routes/domain/maps.spec.ts`, `backend/tests/test_routes_api.py`
+**Pruebas:** `frontend/src/app/admin/routes/presentation/route-detail.page.spec.ts`, `frontend/src/app/admin/routes/domain/slot-safety.spec.ts`, `frontend/src/app/routes/presentation/route-detail.page.spec.ts`, `frontend/src/app/routes/domain/maps.spec.ts`, `frontend/src/app/shared/map/google-map-renderer.spec.ts`, `frontend/src/app/shared/map/google-maps-loader.spec.ts`, `frontend/src/app/shared/map/map-renderer-provider.spec.ts`, `backend/tests/test_routes_api.py`
 
 ### RF-05-7 — Actualizar tramo de ruta
 
