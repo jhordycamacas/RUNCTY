@@ -14,7 +14,7 @@ import { MAP_RENDERER, MapLine, MapMarker, MountedMap } from './map-renderer';
 
 /**
  * An interactive map that draws `lines` and `markers` (the map port, `map-renderer.ts`). The map
- * library loads on demand the first time the component renders. Not encapsulated: the provider
+ * provider (Google Maps or the Leaflet fallback) loads on demand the first time the component renders. Not encapsulated: the provider
  * draws its own DOM, and the classes below give its lines and markers the theme colors.
  */
 @Component({
@@ -25,6 +25,9 @@ import { MAP_RENDERER, MapLine, MapMarker, MountedMap } from './map-renderer';
     <div #canvas class="rc-map-canvas"></div>
     @if (failed()) {
       <p class="rc-map-failed">No pudimos cargar el mapa. Revisa tu conexión.</p>
+    }
+    @if (notice(); as text) {
+      <p class="rc-map-notice" role="status">{{ text }}</p>
     }
   `,
   styles: `
@@ -53,6 +56,18 @@ import { MAP_RENDERER, MapLine, MapMarker, MountedMap } from './map-renderer';
       color: var(--rc-text-muted);
       font-size: var(--rc-font-size-label);
       text-align: center;
+    }
+
+    // Says which map stands in for Google; over the map panes (Leaflet's go up to 1000).
+    app-map-view .rc-map-notice {
+      position: absolute;
+      inset: auto 0 0 0;
+      z-index: 1001;
+      margin: 0;
+      padding: var(--rc-space-xs) var(--rc-space-sm);
+      background: var(--rc-surface);
+      color: var(--rc-text-muted);
+      font-size: var(--rc-font-size-label);
     }
 
     // Zoom buttons with the 48px touch target.
@@ -104,6 +119,7 @@ export class MapView {
   private readonly canvas = viewChild.required<ElementRef<HTMLElement>>('canvas');
   private readonly mounted = signal<MountedMap | null>(null);
   protected readonly failed = signal(false);
+  protected readonly notice = signal<string | null>(null);
 
   constructor() {
     let destroyed = false;
@@ -115,7 +131,12 @@ export class MapView {
     afterNextRender(() => {
       this.loadRenderer().then(
         (renderer) => {
-          if (!destroyed) this.mounted.set(renderer.mount(this.canvas().nativeElement));
+          if (!destroyed)
+            this.mounted.set(
+              renderer.mount(this.canvas().nativeElement, {
+                notice: (text) => this.notice.set(text),
+              }),
+            );
         },
         () => this.failed.set(true),
       );

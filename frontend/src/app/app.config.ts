@@ -13,6 +13,7 @@ import { CatalogRepository } from './core/catalogs/catalog';
 import { HttpCatalogRepository } from './core/catalogs/http-catalog.repository';
 import { FirebaseAuthGateway } from './core/auth/firebase-auth.gateway';
 import { SdkFirebaseAuthGateway } from './core/auth/sdk-firebase-auth.gateway';
+import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import { AccountRepository, ProfileRepository } from './account/domain/profile';
 import { HttpAccountRepository } from './account/infrastructure/http-account.repository';
@@ -36,6 +37,7 @@ import { RouteRepository } from './routes/domain/route';
 import { HttpRouteRepository } from './routes/infrastructure/http-route.repository';
 import { PositionSource } from './run/domain/position-source';
 import { CapacitorPositionSource } from './run/infrastructure/capacitor-position-source';
+import { provideMapRenderer } from './shared/map/map-renderer-provider';
 import { SportProfileRepository } from './sport-profile/domain/sport-profile';
 import { HttpSportProfileRepository } from './sport-profile/infrastructure/http-sport-profile.repository';
 
@@ -59,6 +61,7 @@ export const appConfig: ApplicationConfig = {
     { provide: PreferencesRepository, useClass: HttpPreferencesRepository },
     { provide: PreferencesCache, useClass: LocalStoragePreferencesCache },
     { provide: PreferencesDisplay, useClass: DocumentPreferencesDisplay },
+    provideMapRenderer(environment.googleMapsApiKey),
     // Applies the appearance and font size as soon as the user is known, on any screen.
     provideAppInitializer(() => {
       inject(PreferencesStore);

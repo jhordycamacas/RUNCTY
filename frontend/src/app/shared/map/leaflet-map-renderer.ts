@@ -1,5 +1,5 @@
 import * as L from 'leaflet';
-import { MapRenderer, MapScene, MountedMap } from './map-renderer';
+import { MapHooks, MapRenderer, MapScene, MountedMap } from './map-renderer';
 
 /** OpenStreetMap's standard tiles; the tile usage policy requires the attribution on the map. */
 const TILES_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -25,12 +25,19 @@ function ensureStylesheet(): void {
 }
 
 /**
- * The map port with Leaflet and OpenStreetMap. Lines and markers are SVG paths whose colors come
- * from the theme tokens through their CSS classes (see `map-view.ts`), so they follow the theme.
+ * The map port with Leaflet and OpenStreetMap: the real fallback of the app when there is no
+ * Google Maps key or Google cannot load (`map-renderer-provider.ts`). Lines and markers are SVG
+ * paths whose colors come from the theme tokens through their CSS classes (see `map-view.ts`), so
+ * they follow the theme. `notice` is shown over the map when it stands in for Google.
  */
 export class LeafletMapRenderer extends MapRenderer {
-  mount(host: HTMLElement): MountedMap {
+  constructor(readonly notice: string | null = null) {
+    super();
+  }
+
+  mount(host: HTMLElement, hooks?: MapHooks): MountedMap {
     ensureStylesheet();
+    hooks?.notice(this.notice);
     const map = L.map(host, { zoomControl: true }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
     L.tileLayer(TILES_URL, { maxZoom: MAX_ZOOM, attribution: ATTRIBUTION }).addTo(map);
     const layers = L.layerGroup().addTo(map);

@@ -16,4 +16,5 @@ export const environment: Environment = {
     projectId: 'demo-runcty',
   },
   authEmulatorUrl: `http://${host}:9099`,
+  googleMapsApiKey: null,
 };

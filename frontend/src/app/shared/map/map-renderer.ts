@@ -1,9 +1,10 @@
 import { InjectionToken } from '@angular/core';
 
 /**
- * The map port: what the screens ask a map to show, independent of the map provider. Leaflet with
- * OpenStreetMap tiles implements it today (`leaflet-map-renderer.ts`); Google Maps can replace it
- * by providing another `MAP_RENDERER` once there is an API key.
+ * The map port: what the screens ask a map to show, independent of the map provider. Google Maps
+ * implements it when the environment has `googleMapsApiKey` (`google-map-renderer.ts`); Leaflet with
+ * OpenStreetMap tiles is the fallback with no key, or when Google cannot load (`leaflet-map-renderer.ts`).
+ * `provideMapRenderer` (`map-renderer-provider.ts`) picks one.
  */
 export interface MapPoint {
   lat: number;
@@ -41,16 +42,19 @@ export interface MountedMap {
   destroy(): void;
 }
 
+/** What a renderer can tell the screen that hosts the map. */
+export interface MapHooks {
+  /** A short message to show over the map (e.g. «mostramos OpenStreetMap»), or null to clear it. */
+  notice(text: string | null): void;
+}
+
 export abstract class MapRenderer {
-  abstract mount(host: HTMLElement): MountedMap;
+  abstract mount(host: HTMLElement, hooks?: MapHooks): MountedMap;
 }
 
 /**
- * Loads the renderer on demand, so the map library only reaches the screens that show a map.
- * Unit tests replace it (see `testing/fake-map-renderer.ts`): a real map needs a laid-out DOM.
+ * Loads the renderer on demand, so the map library only reaches the screens that show a map. The
+ * app provides it with `provideMapRenderer`; unit tests replace it (see
+ * `testing/fake-map-renderer.ts`): a real map needs a laid-out DOM.
  */
-export const MAP_RENDERER = new InjectionToken<() => Promise<MapRenderer>>('MAP_RENDERER', {
-  providedIn: 'root',
-  factory: () => () =>
-    import('./leaflet-map-renderer').then((module) => new module.LeafletMapRenderer()),
-});
+export const MAP_RENDERER = new InjectionToken<() => Promise<MapRenderer>>('MAP_RENDERER');

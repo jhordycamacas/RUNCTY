@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { MAP_RENDERER, MapLine } from './map-renderer';
+import { MAP_RENDERER, MapLine, MapRenderer } from './map-renderer';
 import { MapView } from './map-view';
 import { FakeMapRenderer, provideFakeMapRenderer } from './testing/fake-map-renderer';
 
@@ -69,5 +69,25 @@ describe('MapView', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(
       'No pudimos cargar el mapa',
     );
+  });
+
+  it('shows the notice a renderer gives, and clears it', async () => {
+    let hooks: { notice(text: string | null): void } | undefined;
+    const renderer: MapRenderer = {
+      mount: (_host, given) => {
+        hooks = given;
+        return { show: () => undefined, destroy: () => undefined };
+      },
+    };
+    const { fixture } = await render(renderer as unknown as FakeMapRenderer);
+    const element = fixture.nativeElement as HTMLElement;
+
+    hooks?.notice('Mostramos el mapa de OpenStreetMap.');
+    fixture.detectChanges();
+    expect(element.querySelector('[role="status"]')?.textContent).toContain('OpenStreetMap');
+
+    hooks?.notice(null);
+    fixture.detectChanges();
+    expect(element.querySelector('[role="status"]')).toBeNull();
   });
 });

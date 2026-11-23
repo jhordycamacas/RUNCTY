@@ -14,4 +14,5 @@ export const environment: Environment = {
     appId: '1:979173368114:web:d8d899ea670db82217b72b',
   },
   authEmulatorUrl: null,
+  googleMapsApiKey: null,
 };
