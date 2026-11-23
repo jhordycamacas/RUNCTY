@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Same near-black as the app page (the page color of the dark theme), so nothing white shows
+         behind the WebView or the transparent system bars. -->
+    <color name="windowBackground">#0B0B0F</color>
+</resources>
