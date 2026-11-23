@@ -62,12 +62,14 @@ Catálogo de permisos (`backend/apps/shared/domain/permissions.py`):
 | --- | --- |
 | `admin.access` | Entrar al panel y ver el Resumen |
 | `users.read` | Buscar y leer perfiles de usuario |
+| `users.manage` | Editar los datos y el perfil deportivo de otros usuarios y eliminar cuentas |
 | `roles.manage` | CRUD de roles y asignarlos a usuarios |
 | `cities.manage` | CRUD de ciudades y zonas |
 | `routes.manage` | CRUD de rutas, tramos, franjas y factores de riesgo |
 | `reports.validate` | Validar reportes comunitarios (reservado para [EP-17](../17-reportes-comunitarios.md)) |
 | `ads.manage` | Gestionar anunciantes y campañas (reservado para [EP-24](../24-publicidad.md)) |
 | `clubs.manage` | Gestionar clubes y membresías (reservado para [EP-19](../19-clubes-y-membresias.md)) |
+| `settings.manage` | Editar los parámetros del sistema y los catálogos de opciones ([spec 27](../27-configuracion-del-sistema.md)) |
 
 Roles del sistema: `runner`, `admin` y `club_rep` (no se pueden eliminar). Solo un administrador asigna el rol `admin` o concede `roles.manage`; nadie concede permisos que no tiene (`permission-escalation`); no se puede dejar al sistema sin administradores (`last-admin`) ni quitarse el acceso a uno mismo (`self-lockout`).
 
