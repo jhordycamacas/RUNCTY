@@ -37,14 +37,25 @@ hierarchy between admins (only the self and last-admin rules apply), the role of
 - [x] B4 Docs: `specs/01` (EXT-01-3), `specs/02`, `backend/README.md`, `backend/CONTEXTO-BACKEND.md`
 
 ## Frontend tasks
-(the frontend writer adds their section here)
+- [x] F1 Permission `users.manage` (`core/permissions`), role editor label «Editar y eliminar usuarios» and groups «Usuarios» / «Roles»; message `cannot-delete-self`
+- [x] F2 Port + HTTP repository (`PATCH`, `PUT`, `DELETE`), domain `user-edit.ts` (reuses `validatePersonalData`/`parseSportProfileForm`), store methods that patch the shown detail
+- [x] F3 Page: pencils (only with `users.manage`), `UserPersonalEdit`, `UserSportEdit`, delete zone with `confirmAction`, self-delete disabled
+- [x] F4 Docs: `specs/01` (EXT-01-3), `frontend/CONTEXTO-FRONTEND.md`
+- [ ] F5 Check in a real browser against the local stack (not done: no ng serve/docker here)
+
+Route: inline (one writer, no delegation). Test-first note: the page specs and the missing-module
+compile error were observed RED; domain, repository, store and role specs were written together
+with their implementation and first run green.
 
 ## Verification (backend)
 - `pytest tests -q`: 1376 passed; `ruff check apps tests` and `ruff format --check apps tests`: clean.
 - Test fixtures: new principal `USER_MANAGER` (`user-manager-token`) in `tests/fakes.py`; the
   summary tests count one more user because of it.
 
+## Verification (frontend)
+- `npx ng test --watch=false`: 126 files, 985 tests passed; `tsc --noEmit` (app and spec),
+  `npm run lint` and `npx ng build -c real`: clean.
+
 ## Next step
-Frontend: edit form, sport-profile form and delete confirmation on the user detail page, and the
-Spanish label of `users.manage`. Also add `users.manage` to the permission catalogue table of
+Browser check of the detail page (edit, clear, delete). Also add `users.manage` to the permission catalogue table of
 `specs/transversal/arquitectura.md` (outside the backend writer's edit surface).

@@ -33,6 +33,7 @@ export abstract class RoleAdminRepository {
 export const PERMISSION_LABELS: Record<Permission, string> = {
   'admin.access': 'Entrar al panel de administración',
   'users.read': 'Consultar usuarios',
+  'users.manage': 'Editar y eliminar usuarios',
   'roles.manage': 'Gestionar roles y asignarlos',
   'cities.manage': 'Gestionar ciudades y zonas',
   'routes.manage': 'Gestionar rutas, franjas y factores de riesgo',
@@ -50,9 +51,13 @@ export interface PermissionGroup {
 /** The catalogue grouped by area, for the checklist of the role form. */
 export const PERMISSION_GROUPS: readonly PermissionGroup[] = [
   { label: 'Acceso', permissions: ['admin.access'] },
-  { label: 'Cuentas y roles', permissions: ['users.read', 'roles.manage'] },
+  { label: 'Usuarios', permissions: ['users.read', 'users.manage'] },
+  { label: 'Roles', permissions: ['roles.manage'] },
   { label: 'Ciudades y rutas', permissions: ['cities.manage', 'routes.manage'] },
-  { label: 'Comunidad y alianzas', permissions: ['reports.validate', 'clubs.manage', 'ads.manage'] },
+  {
+    label: 'Comunidad y alianzas',
+    permissions: ['reports.validate', 'clubs.manage', 'ads.manage'],
+  },
   { label: 'Sistema', permissions: ['settings.manage'] },
 ];
 
@@ -64,7 +69,9 @@ export const sortPermissions = (permissions: readonly Permission[]): Permission[
 export function toRole(raw: unknown): Role {
   const data = (raw ?? {}) as Record<string, unknown>;
   const id = typeof data['id'] === 'string' ? data['id'] : '';
-  const permissions = Array.isArray(data['permissions']) ? data['permissions'].filter(isPermission) : [];
+  const permissions = Array.isArray(data['permissions'])
+    ? data['permissions'].filter(isPermission)
+    : [];
   return {
     id,
     name: typeof data['name'] === 'string' && data['name'] ? data['name'] : id,

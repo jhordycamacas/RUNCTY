@@ -353,7 +353,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como administrador · Deseo corregir los datos personales y el perfil deportivo de un usuario y eliminar su cuenta. Para atender solicitudes de soporte sin pedirle al usuario que lo haga.
 - **Actor:** Administrador con `users.manage` · **Prioridad:** Debe tener · **Sprint planificado:** fuera del plan (pedido del dueño, 2026-11-22) · **Dependencia:** EXT-01-2, RF-02 (el permiso) · **Caso de uso:** Actualizar y eliminar usuarios
-- **Estado:** `Parcial` — Backend hecho y con pruebas automáticas; la pantalla del panel está pendiente. Seguimiento en `odd/tasks/usuarios-editar-eliminar.md`.
+- **Estado:** `Parcial` — Backend y pantalla del panel hechos con pruebas automáticas; falta verificarlo en un navegador contra el stack local. Seguimiento en `odd/tasks/usuarios-editar-eliminar.md`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -367,12 +367,14 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Eliminar una cuenta borra su perfil, documentos privados (incluida la foto) y credenciales; un administrador no puede eliminarse a sí mismo (`cannot-delete-self`, 409) ni eliminar al último administrador (`last-admin`).
 - [x] Una cuenta inexistente responde 404 `user-not-found` en los cuatro endpoints y no se devuelve más información de otros usuarios que la de la ficha.
 - [x] El permiso `users.manage` está en el catálogo y el rol de sistema `admin` lo recibe; las cuentas de administrador ya abiertas necesitan renovar el token (cerrar sesión y entrar, o esperar la renovación) para que el claim `perms` lo incluya.
-- [ ] Pantalla del panel: editar los datos y el perfil deportivo, y eliminar con confirmación (pendiente, frontend).
+- [x] Pantalla del panel (`/admin/usuarios/:uid`): quien tiene `users.manage` ve un lápiz («Editar perfil personal», «Editar perfil deportivo») en cada panel. El lápiz personal abre un formulario en el mismo panel (nombres, apellidos, fecha de nacimiento, cédula y ciudad, con las mismas reglas del formulario del corredor; el correo se muestra sin poder cambiarse) con Guardar y Cancelar y el aviso «Datos actualizados.»; los errores por campo de la API salen bajo cada campo. El lápiz deportivo edita nivel (opciones activas más el nivel actual aunque esté inactivo), objetivos, ritmo y distancia dentro de los rangos de los parámetros del sistema, con «Borrar perfil deportivo» (confirmación) y el aviso «Perfil deportivo actualizado.». Al final de la ficha, «Eliminar usuario» pide confirmación (se borran cuenta, perfil, perfil deportivo y foto; no se puede deshacer), avisa «Usuario eliminado.» y vuelve a la lista; está deshabilitado en la propia cuenta del administrador y los rechazos (`cannot-delete-self`, `last-admin`, `user-not-found`) salen en español. Tras cada guardado la ficha se actualiza sin recargar. La lista no tiene acción de eliminar.
 - [ ] Verificado en un navegador contra el stack local.
 
 **Implementación:** `backend/apps/users/application/use_cases.py`, `backend/apps/users/presentation/views.py`, `backend/apps/users/presentation/urls.py`, `backend/apps/shared/domain/permissions.py`, `backend/apps/shared/domain/errors.py`, `backend/apps/shared/presentation/errors.py`
 
-**Pruebas:** `backend/tests/test_admin_user_management.py`
+**Implementación (frontend):** `frontend/src/app/admin/users/presentation/user-detail.page.ts`, `frontend/src/app/admin/users/presentation/user-personal-edit.ts`, `frontend/src/app/admin/users/presentation/user-sport-edit.ts`, `frontend/src/app/admin/users/application/user-detail.store.ts`, `frontend/src/app/admin/users/domain/user-edit.ts`, `frontend/src/app/admin/users/infrastructure/http-user-admin.repository.ts`, `frontend/src/app/admin/roles/domain/role.ts`, `frontend/src/app/core/permissions/permissions.ts`
+
+**Pruebas:** `backend/tests/test_admin_user_management.py`, `frontend/src/app/admin/users/presentation/user-detail.page.spec.ts`, `frontend/src/app/admin/users/application/user-detail.store.spec.ts`, `frontend/src/app/admin/users/domain/user-edit.spec.ts`, `frontend/src/app/admin/users/infrastructure/http-user-admin.repository.spec.ts`
 
 ## Dependencias
 

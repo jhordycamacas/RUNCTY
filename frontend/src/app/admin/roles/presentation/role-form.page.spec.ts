@@ -95,12 +95,13 @@ describe('RoleFormPage', () => {
     );
     expect(groups).toEqual([
       'Acceso',
-      'Cuentas y roles',
+      'Usuarios',
+      'Roles',
       'Ciudades y rutas',
       'Comunidad y alianzas',
       'Sistema',
     ]);
-    expect(root().querySelectorAll('input[type="checkbox"]')).toHaveLength(9);
+    expect(root().querySelectorAll('input[type="checkbox"]')).toHaveLength(10);
   });
 
   it('shows the field messages in Spanish and sends nothing when the input is invalid', async () => {
@@ -151,9 +152,7 @@ describe('RoleFormPage', () => {
       description: 'Apoya a los clubes',
       permissions: ['admin.access'],
     });
-    expect(success).toHaveBeenCalledWith(
-      'Rol actualizado. Se actualizó el acceso de 2 usuarios.',
-    );
+    expect(success).toHaveBeenCalledWith('Rol actualizado. Se actualizó el acceso de 2 usuarios.');
     expect(navigate).toHaveBeenCalledWith('/admin/roles');
   });
 

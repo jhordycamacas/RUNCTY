@@ -46,13 +46,16 @@ const optionalText = (value: unknown): string | null =>
 const optionalNumber = (value: unknown): number | null =>
   typeof value === 'number' && Number.isFinite(value) ? value : null;
 
-function toSportProfile(raw: unknown): UserSportProfile | null {
+/** Tolerant read of a sport profile; `null` when the API sends none. */
+export function toSportProfile(raw: unknown): UserSportProfile | null {
   const data = record(raw);
   if (data === null) return null;
   const goals = data['goals'];
   return {
     level: typeof data['level'] === 'string' ? data['level'] : '',
-    goals: Array.isArray(goals) ? goals.filter((goal): goal is string => typeof goal === 'string') : [],
+    goals: Array.isArray(goals)
+      ? goals.filter((goal): goal is string => typeof goal === 'string')
+      : [],
     usualPaceSecPerKm: optionalNumber(data['usualPaceSecPerKm']),
     preferredDistanceKm: optionalNumber(data['preferredDistanceKm']),
   };
@@ -66,17 +69,22 @@ function toRating(raw: unknown): UserRating | null {
   return { average: Math.min(Math.max(average, 0), MAX_RATING), count: Math.floor(count) };
 }
 
+/** Tolerant read of the `user` of `GET /users/{uid}` and `PATCH /users/{uid}`. */
+export function toUserProfile(raw: unknown): UserProfile {
+  const user = record(raw) ?? {};
+  return {
+    ...toManagedUser(user),
+    idNumber: optionalText(user['idNumber']),
+    emailVerified: typeof user['emailVerified'] === 'boolean' ? user['emailVerified'] : null,
+    createdAt: optionalText(user['createdAt']),
+  };
+}
+
 /** Tolerant read of `GET /users/{uid}`. */
 export function toUserDetail(raw: unknown): UserDetail {
   const data = record(raw) ?? {};
-  const user = record(data['user']) ?? {};
   return {
-    user: {
-      ...toManagedUser(user),
-      idNumber: optionalText(user['idNumber']),
-      emailVerified: typeof user['emailVerified'] === 'boolean' ? user['emailVerified'] : null,
-      createdAt: optionalText(user['createdAt']),
-    },
+    user: toUserProfile(data['user']),
     sportProfile: toSportProfile(data['sportProfile']),
     rating: toRating(data['rating']),
   };

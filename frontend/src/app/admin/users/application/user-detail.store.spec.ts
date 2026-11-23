@@ -80,4 +80,105 @@ describe('UserDetailStore', () => {
 
     expect(store.detail()?.user.uid).toBe('fast');
   });
+
+  describe('edits', () => {
+    const personal = {
+      firstName: 'Anita',
+      lastName: 'Pérez',
+      birthDate: '1995-04-23',
+      cityId: 'loja',
+      idNumber: '',
+    };
+    const sport = {
+      level: 'advanced',
+      goals: ['pace'],
+      usualPaceSecPerKm: 300,
+      preferredDistanceKm: 21,
+    };
+
+    it('saves the personal data and shows the answer without reloading', async () => {
+      await store.load('u1');
+      repository.updatePersonalData.mockResolvedValueOnce({
+        ...userDetail('u1').user,
+        ...personal,
+        idNumber: null,
+      });
+
+      await store.savePersonalData(personal);
+
+      expect(repository.updatePersonalData).toHaveBeenCalledWith('u1', personal);
+      expect(store.detail()?.user.firstName).toBe('Anita');
+      expect(store.detail()?.user.idNumber).toBeNull();
+      expect(store.detail()?.sportProfile).not.toBeNull();
+      expect(repository.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects a failed save and keeps what was shown', async () => {
+      await store.load('u1');
+      repository.updatePersonalData.mockRejectedValueOnce(
+        new ApiError(400, 'invalid-argument', 'Los datos enviados no son válidos.', {
+          firstName: 'required',
+        }),
+      );
+
+      await expect(store.savePersonalData(personal)).rejects.toMatchObject({
+        fields: { firstName: 'required' },
+      });
+
+      expect(store.detail()?.user.firstName).toBe('Ana');
+    });
+
+    it('saves and clears the sport profile', async () => {
+      await store.load('u1');
+
+      await store.saveSportProfile(sport);
+      expect(repository.saveSportProfile).toHaveBeenCalledWith('u1', sport);
+      expect(store.detail()?.sportProfile).toEqual(sport);
+
+      await store.clearSportProfile();
+      expect(repository.clearSportProfile).toHaveBeenCalledWith('u1');
+      expect(store.detail()?.sportProfile).toBeNull();
+      expect(store.detail()?.user.uid).toBe('u1');
+    });
+
+    it('keeps the sport profile when clearing it fails', async () => {
+      await store.load('u1');
+      repository.clearSportProfile.mockRejectedValueOnce(
+        new ApiError(0, 'network', 'Sin conexión.'),
+      );
+
+      await expect(store.clearSportProfile()).rejects.toBeInstanceOf(ApiError);
+
+      expect(store.detail()?.sportProfile).not.toBeNull();
+    });
+
+    it('deletes the user and forgets the detail', async () => {
+      await store.load('u1');
+
+      await store.remove();
+
+      expect(repository.remove).toHaveBeenCalledWith('u1');
+      expect(store.detail()).toBeNull();
+    });
+
+    it('keeps the user when the deletion is refused', async () => {
+      await store.load('u1');
+      repository.remove.mockRejectedValueOnce(
+        new ApiError(
+          409,
+          'cannot-delete-self',
+          'No puedes eliminar tu propia cuenta desde el panel.',
+        ),
+      );
+
+      await expect(store.remove()).rejects.toMatchObject({ reason: 'cannot-delete-self' });
+
+      expect(store.detail()?.user.uid).toBe('u1');
+    });
+
+    it('does nothing without a loaded user', async () => {
+      await expect(store.remove()).rejects.toThrow();
+      expect(repository.remove).not.toHaveBeenCalled();
+    });
+  });
 });

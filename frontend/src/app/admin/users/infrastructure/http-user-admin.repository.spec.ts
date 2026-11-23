@@ -4,7 +4,7 @@ import { ApiClient } from '../../../core/api/api-client';
 import { HttpUserAdminRepository } from './http-user-admin.repository';
 
 describe('HttpUserAdminRepository', () => {
-  const api = { get: vi.fn() };
+  const api = { get: vi.fn(), patch: vi.fn(), put: vi.fn(), delete: vi.fn() };
   let repository: HttpUserAdminRepository;
 
   beforeEach(() => {
@@ -48,7 +48,15 @@ describe('HttpUserAdminRepository', () => {
         cityId: 'loja',
         role: 'admin',
       },
-      { uid: 'u2', email: 'luis@mail.com', firstName: '', lastName: '', birthDate: '', cityId: '', role: null },
+      {
+        uid: 'u2',
+        email: 'luis@mail.com',
+        firstName: '',
+        lastName: '',
+        birthDate: '',
+        cityId: '',
+        role: null,
+      },
     ]);
   });
 
@@ -76,5 +84,57 @@ describe('HttpUserAdminRepository', () => {
     expect(detail.user).toMatchObject({ uid: 'u1', idNumber: '1710034065', emailVerified: false });
     expect(detail.sportProfile).toBeNull();
     expect(detail.rating).toEqual({ average: 4, count: 3 });
+  });
+
+  it('patches the personal data and maps the user of the answer', async () => {
+    api.patch.mockReturnValue(
+      of({ user: { uid: 'u1', email: 'ana@mail.com', firstName: 'Ana', idNumber: '1710034065' } }),
+    );
+    const data = {
+      firstName: 'Ana',
+      lastName: 'Pérez',
+      birthDate: '1995-04-23',
+      cityId: 'loja',
+      idNumber: '1710034065',
+    };
+
+    const updated = await repository.updatePersonalData('u 1', data);
+
+    expect(api.patch).toHaveBeenCalledWith('/users/u%201', data);
+    expect(updated).toMatchObject({ uid: 'u1', firstName: 'Ana', idNumber: '1710034065' });
+  });
+
+  it('puts the sport profile and maps the profile of the answer', async () => {
+    api.put.mockReturnValue(
+      of({
+        sportProfile: {
+          level: 'beginner',
+          goals: ['health'],
+          usualPaceSecPerKm: 390,
+          preferredDistanceKm: 10,
+        },
+      }),
+    );
+    const profile = {
+      level: 'beginner',
+      goals: ['health'],
+      usualPaceSecPerKm: 390,
+      preferredDistanceKm: 10,
+    };
+
+    const saved = await repository.saveSportProfile('u1', profile);
+
+    expect(api.put).toHaveBeenCalledWith('/users/u1/sport-profile', profile);
+    expect(saved).toEqual(profile);
+  });
+
+  it('clears the sport profile and deletes the user', async () => {
+    api.delete.mockReturnValue(of(undefined));
+
+    await repository.clearSportProfile('u 1');
+    await repository.remove('u 1');
+
+    expect(api.delete).toHaveBeenNthCalledWith(1, '/users/u%201/sport-profile');
+    expect(api.delete).toHaveBeenNthCalledWith(2, '/users/u%201');
   });
 });

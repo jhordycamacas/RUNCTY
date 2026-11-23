@@ -1,4 +1,6 @@
-import { UserDetail } from './user-detail';
+import { PersonalData } from '../../../auth/domain/personal-data';
+import { SportProfile } from '../../../sport-profile/domain/sport-profile';
+import { UserDetail, UserProfile, UserSportProfile } from './user-detail';
 
 /** A user as the admin list shows it; the API leaves the id number out (data minimization). */
 export interface ManagedUser {
@@ -23,6 +25,13 @@ export abstract class UserAdminRepository {
   abstract search(query: string, cursor: string | null): Promise<UserPage>;
   /** The user with their sport profile and rating; rejects with `user-not-found` (404). */
   abstract get(uid: string): Promise<UserDetail>;
+  /** Replaces the personal data of the user (`users.manage`); the e-mail is not editable. */
+  abstract updatePersonalData(uid: string, data: PersonalData): Promise<UserProfile>;
+  /** Creates or replaces the sport profile of the user. */
+  abstract saveSportProfile(uid: string, profile: SportProfile): Promise<UserSportProfile>;
+  abstract clearSportProfile(uid: string): Promise<void>;
+  /** Deletes the account with its profile, sport profile and photo; cannot be undone. */
+  abstract remove(uid: string): Promise<void>;
 }
 
 const text = (value: unknown): string => (typeof value === 'string' ? value : '');

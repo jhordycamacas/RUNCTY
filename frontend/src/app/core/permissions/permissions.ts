@@ -2,6 +2,7 @@
 export const PERMISSIONS = [
   'admin.access',
   'users.read',
+  'users.manage',
   'roles.manage',
   'cities.manage',
   'routes.manage',

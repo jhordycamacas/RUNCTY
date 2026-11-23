@@ -17,7 +17,8 @@ const REASON_MESSAGES: Record<string, string> = {
   'missing-permission': NO_PERMISSION,
   'admin-only': 'Solo un administrador puede realizar esta acción.',
   'permission-escalation': 'No puedes asignar permisos que tú no tienes.',
-  'recent-sign-in-required': 'Por seguridad, cierra sesión, vuelve a ingresar e inténtalo de nuevo.',
+  'recent-sign-in-required':
+    'Por seguridad, cierra sesión, vuelve a ingresar e inténtalo de nuevo.',
   // Generic request errors.
   'invalid-argument': 'Los datos enviados no son válidos.',
   'failed-precondition': 'La operación no se puede realizar en este momento.',
@@ -27,6 +28,7 @@ const REASON_MESSAGES: Record<string, string> = {
   internal: UNEXPECTED_ERROR_MESSAGE,
   // Users, profile, sport profile and preferences.
   'user-not-found': 'El usuario no existe.',
+  'cannot-delete-self': 'No puedes eliminar tu propia cuenta desde el panel.',
   'profile-not-found': 'El perfil no existe.',
   'profile-missing': 'El perfil no existe.',
   'user-profile-missing': 'El perfil no existe.',
@@ -46,7 +48,8 @@ const REASON_MESSAGES: Record<string, string> = {
   'role-not-found': 'El rol no existe.',
   'admin-permissions': 'El rol Administrador debe conservar todos los permisos.',
   'system-role': 'Los roles del sistema no se pueden eliminar.',
-  'role-has-users': 'No se puede eliminar: el rol tiene usuarios asignados. Cámbiales el rol primero.',
+  'role-has-users':
+    'No se puede eliminar: el rol tiene usuarios asignados. Cámbiales el rol primero.',
   'self-lockout': 'No puedes quitarte tu propio rol de administrador.',
   'last-admin': 'Debe quedar al menos un administrador.',
   // Cities and zones.
@@ -65,8 +68,10 @@ const REASON_MESSAGES: Record<string, string> = {
   'invalid-route-id': 'El identificador de la ruta no es válido.',
   'invalid-route-name': 'El nombre de la ruta es obligatorio (máximo 80 caracteres).',
   'invalid-route-description': 'La descripción de la ruta admite máximo 500 caracteres.',
-  'invalid-route-start': 'Revisa el punto de inicio: necesita nombre (máximo 80 caracteres) y coordenadas válidas.',
-  'invalid-route-end': 'Revisa el punto de llegada: necesita nombre (máximo 80 caracteres) y coordenadas válidas.',
+  'invalid-route-start':
+    'Revisa el punto de inicio: necesita nombre (máximo 80 caracteres) y coordenadas válidas.',
+  'invalid-route-end':
+    'Revisa el punto de llegada: necesita nombre (máximo 80 caracteres) y coordenadas válidas.',
   'invalid-distance': 'La distancia debe ser mayor que 0 y máximo 500 km.',
   'invalid-elevation-gain': 'El desnivel debe estar entre 0 y 10000 m.',
   'invalid-surface': 'La superficie es obligatoria y admite máximo 40 caracteres.',

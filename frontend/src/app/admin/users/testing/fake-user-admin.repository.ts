@@ -8,6 +8,16 @@ export function fakeUserAdminRepository() {
       .fn<UserAdminRepository['search']>()
       .mockResolvedValue({ users: [], nextCursor: null }),
     get: vi.fn<UserAdminRepository['get']>().mockResolvedValue(userDetail('u1')),
+    updatePersonalData: vi
+      .fn<UserAdminRepository['updatePersonalData']>()
+      .mockImplementation(async (uid, data) => ({ ...userDetail(uid).user, ...data })),
+    saveSportProfile: vi
+      .fn<UserAdminRepository['saveSportProfile']>()
+      .mockImplementation(async (_uid, profile) => profile),
+    clearSportProfile: vi
+      .fn<UserAdminRepository['clearSportProfile']>()
+      .mockResolvedValue(undefined),
+    remove: vi.fn<UserAdminRepository['remove']>().mockResolvedValue(undefined),
   };
 }
 
