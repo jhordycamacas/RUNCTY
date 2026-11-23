@@ -1,87 +1,73 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { IonIcon } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { moonOutline, sunnyOutline } from 'ionicons/icons';
 import { userMessage } from '../core/errors/user-message';
 import { PreferencesStore } from '../preferences/application/preferences.store';
-import { APPEARANCES, APPEARANCE_LABELS, Appearance } from '../preferences/domain/preferences';
 import { ToastService } from '../shared/ui/toast.service';
 
+addIcons({ moonOutline, sunnyOutline });
+
 /**
- * Light, dark or system theme for the admin. It saves through the preferences of the user, which
- * the store applies to the screen at once, so the choice also follows the user to the next visit.
+ * One icon button that flips the admin between the light and the dark theme: a sun on the dark
+ * theme (press for light), a moon on the light one (press for dark). The «system» appearance is
+ * resolved to what the device shows, so the first press always lands on the opposite theme. It
+ * saves through the preferences of the user, which the store applies to the screen at once.
  */
 @Component({
   selector: 'app-theme-selector',
+  imports: [IonIcon],
   template: `
-    <label class="field" [class.compact]="compact()">
-      <span class="label">Tema</span>
-      <select [value]="store.preferences().appearance" (change)="choose($event)">
-        @for (option of options; track option.value) {
-          <option [value]="option.value" [selected]="option.value === store.preferences().appearance">
-            {{ option.label }}
-          </option>
-        }
-      </select>
-    </label>
+    <button type="button" class="toggle" [attr.aria-label]="label()" (click)="toggle()">
+      <ion-icon [name]="dark() ? 'sunny-outline' : 'moon-outline'" aria-hidden="true" />
+    </button>
   `,
   styles: `
     :host {
-      display: block;
+      display: inline-block;
     }
 
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: var(--rc-space-xs);
-    }
-
-    .compact {
-      flex-direction: row;
-      align-items: center;
-      gap: var(--rc-space-sm);
-    }
-
-    // In the top bar the select is a white pill, like the other actions there.
-    .compact select {
-      width: auto;
-      padding: 0 var(--rc-space-lg);
-      border-radius: var(--rc-radius-pill);
-    }
-
-    .label {
-      color: var(--label-color, var(--rc-text-muted));
-      font-size: var(--rc-font-size-caption);
-    }
-
-    select {
-      width: 100%;
-      min-height: var(--rc-min-touch-target);
-      padding: 0 var(--rc-space-md);
+    .toggle {
+      display: grid;
+      place-items: center;
+      width: var(--rc-min-touch-target);
+      height: var(--rc-min-touch-target);
+      padding: 0;
       border: 1px solid var(--rc-control-border);
-      border-radius: var(--rc-radius-sm);
+      border-radius: var(--rc-radius-pill);
       background: var(--rc-surface-elevated);
       color: var(--rc-text);
-      font: inherit;
+      font-size: 1.25rem;
+      cursor: pointer;
+    }
+
+    .toggle:hover {
+      background: var(--rc-surface);
     }
   `,
 })
 export class ThemeSelector {
-  /** One row with the label beside the select, for a top bar. */
-  readonly compact = input(false);
-
   protected readonly store = inject(PreferencesStore);
   private readonly toast = inject(ToastService);
 
-  protected readonly options = APPEARANCES.map((value) => ({
-    value,
-    label: APPEARANCE_LABELS[value],
-  }));
+  /** What the screen shows now: the system appearance follows the device. */
+  protected readonly dark = computed(() => {
+    const appearance = this.store.preferences().appearance;
+    if (appearance === 'system') return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return appearance === 'dark';
+  });
 
-  protected async choose(event: Event): Promise<void> {
-    const select = event.target as HTMLSelectElement;
-    const preferences = this.store.preferences();
+  protected readonly label = computed(() =>
+    this.dark() ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro',
+  );
+
+  protected async toggle(): Promise<void> {
     try {
-      await this.store.save({ ...preferences, appearance: select.value as Appearance });
+      await this.store.save({
+        ...this.store.preferences(),
+        appearance: this.dark() ? 'light' : 'dark',
+      });
     } catch (error) {
-      select.value = preferences.appearance;
       await this.toast.error(userMessage(error));
     }
   }

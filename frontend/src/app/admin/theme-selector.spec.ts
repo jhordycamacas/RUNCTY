@@ -11,11 +11,15 @@ describe('ThemeSelector', () => {
   let save: ReturnType<typeof vi.fn<PreferencesStore['save']>>;
   let error: ReturnType<typeof vi.fn<ToastService['error']>>;
 
-  const select = () => fixture.nativeElement.querySelector('select') as HTMLSelectElement;
-  const choose = async (value: string) => {
-    select().value = value;
-    select().dispatchEvent(new Event('change'));
+  const button = () => fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+  const icon = () => (button().querySelector('ion-icon') as unknown as { name: string }).name;
+  const press = async () => {
+    button().click();
     await fixture.whenStable();
+    fixture.detectChanges();
+  };
+  const appearance = (value: Preferences['appearance']) => {
+    current.set({ ...defaultPreferences(), appearance: value });
     fixture.detectChanges();
   };
 
@@ -33,35 +37,46 @@ describe('ThemeSelector', () => {
     fixture.detectChanges();
   });
 
-  it('offers the three appearances with a label, showing the saved one', () => {
-    expect(fixture.nativeElement.querySelector('label')?.textContent).toContain('Tema');
-    expect([...select().options].map((option) => option.text.trim())).toEqual([
-      'Según el sistema',
-      'Claro',
-      'Oscuro',
-    ]);
-    expect(select().value).toBe('dark');
+  it('is one icon button: a sun on the dark theme, a moon on the light one', () => {
+    expect(icon()).toBe('sunny-outline');
+    appearance('light');
+    expect(icon()).toBe('moon-outline');
   });
 
-  it('saves the chosen appearance keeping the rest of the preferences', async () => {
-    await choose('light');
-
-    expect(save).toHaveBeenCalledWith({ ...defaultPreferences(), appearance: 'light' });
+  it('names the action for assistive technology, not the current theme', () => {
+    expect(button().getAttribute('aria-label')).toBe('Cambiar a tema claro');
+    appearance('light');
+    expect(button().getAttribute('aria-label')).toBe('Cambiar a tema oscuro');
   });
 
-  it('follows the stored preference', () => {
-    current.set({ ...defaultPreferences(), appearance: 'system' });
-    fixture.detectChanges();
+  it('switches to the opposite theme keeping the rest of the preferences', async () => {
+    await press();
+    expect(save).toHaveBeenLastCalledWith({ ...defaultPreferences(), appearance: 'light' });
 
-    expect(select().value).toBe('system');
+    appearance('light');
+    await press();
+    expect(save).toHaveBeenLastCalledWith({ ...defaultPreferences(), appearance: 'dark' });
   });
 
-  it('tells the failure and goes back to the saved appearance', async () => {
+  it('resolves the system appearance to what the device shows before switching', async () => {
+    const original = window.matchMedia;
+    window.matchMedia = ((query: string) => ({ matches: query.includes('dark') })) as never;
+    try {
+      appearance('system');
+      expect(icon()).toBe('sunny-outline');
+      await press();
+      expect(save).toHaveBeenLastCalledWith({ ...defaultPreferences(), appearance: 'light' });
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+
+  it('tells the failure and keeps the saved theme', async () => {
     save.mockRejectedValueOnce(new Error('boom'));
 
-    await choose('light');
+    await press();
 
     expect(error).toHaveBeenCalledTimes(1);
-    expect(select().value).toBe('dark');
+    expect(icon()).toBe('sunny-outline');
   });
 });

@@ -127,7 +127,7 @@ const DESKTOP_QUERY = '(min-width: 768px)';
     </ion-split-pane>
 
     <ng-template #topbarActions>
-      <app-theme-selector [compact]="true" />
+      <app-theme-selector />
       <span class="user"
         ><span class="avatar" aria-hidden="true">{{ initial() }}</span
         ><span class="user-email">{{ email() }}</span></span
