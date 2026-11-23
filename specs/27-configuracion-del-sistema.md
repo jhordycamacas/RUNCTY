@@ -1,6 +1,6 @@
 # Configuración del sistema
 
-> Spec de capacidad · Decisión del producto (2026-11-22): «nada hardcodeado, todo configurable» · **Parcial**: backend y pantalla de administración hechos; faltan los formularios del cliente que leen los parámetros (T5)
+> Spec de capacidad · Decisión del producto (2026-11-22): «nada hardcodeado, todo configurable» · **Hecha**: backend, pantalla de administración y formularios del cliente que leen los parámetros
 
 | Campo | Valor |
 | --- | --- |
@@ -8,7 +8,7 @@
 | Requisitos | Ninguno del Excel; sale de la decisión del dueño del producto (`odd/tasks/todo-configurable.md`) |
 | Prioridad | Debe tener |
 | Permiso | `settings.manage` (lo incluye el rol del sistema `admin`) |
-| Estado | `Parcial`: API, dominio, semilla, reglas de Firestore y la sección «Configuración» del panel listos; falta que los formularios del cliente lean los parámetros (T5) |
+| Estado | `Hecha`: API, dominio, semilla, reglas de Firestore, la sección «Configuración» del panel y los formularios del cliente que leen los parámetros |
 | Dependencias | [EP-07](07-evaluacion-de-seguridad.md), [EP-08](08-incidentes-y-fuentes.md), [EP-06](06-puntos-de-apoyo.md), [EP-09](09-rutas-seguras.md), [EP-05](05-catalogo-de-rutas.md), [EP-04](04-ciudades-y-zonas.md), [EP-01](01-gestion-de-usuarios.md) |
 
 ## Propósito
@@ -94,18 +94,19 @@ Los servicios leen el documento una vez por petición y pasan el objeto de pará
 ### CFG-1 — Leer los parámetros
 
 - **Historia de usuario:** Como corredor o administrador · Deseo que la aplicación conozca los límites vigentes (rangos del perfil, radios, distancias). Para validar los formularios con las mismas reglas que el servidor.
-- **Estado:** `Parcial` — 2026-11-22: API y pruebas automáticas en el backend; los formularios del cliente aún no leen los parámetros (T3 y T5).
+- **Estado:** `Hecha` — 2026-11-22: API y pruebas automáticas en el backend; el perfil deportivo y los formularios de ruta, tramo, franja y factor leen los parámetros y, si la lectura falla, usan los valores por defecto.
 
 **Criterios de aceptación**
 
 - [x] `GET /settings` exige sesión (`401` sin token) y responde `200 {"settings": {...}}` para cualquier usuario.
 - [x] Sin documento guardado, responde los valores por defecto.
 - [x] Un documento parcial o con valores inválidos se completa con los valores por defecto.
-- [ ] Los formularios del cliente (perfil deportivo, rutas, alertas) validan con estos valores en lugar de números propios.
+- [x] Los formularios del cliente validan con estos valores en lugar de números propios: el perfil deportivo (ritmo y distancia), la ruta (nombre, descripción, distancia máxima y desnivel máximo), el tramo (nombre y puntos), y el límite de tramos por ruta, de franjas por ruta y de factores por tramo (el botón «Agregar» se desactiva al llegar al máximo y lo explica). Los formularios de alertas llegan con su pantalla (Sprint 3).
+- [x] La franja que el catálogo del corredor abre por defecto sale de las franjas que definió el administrador (la que está en curso, si no la siguiente del día, si no la primera); ya no hay un horario fijo en la aplicación.
 
-**Implementación:** `backend/apps/system_settings/presentation/views.py`, `backend/apps/system_settings/domain/models.py`
+**Implementación:** `backend/apps/system_settings/presentation/views.py`, `backend/apps/system_settings/domain/models.py`, `frontend/src/app/core/settings`, `frontend/src/app/admin/routes/domain/route-form.ts`, `frontend/src/app/admin/routes/domain/segment-form.ts`, `frontend/src/app/admin/routes/presentation`, `frontend/src/app/routes/domain/catalog.ts`
 
-**Pruebas:** `backend/tests/test_system_settings_api.py`, `backend/tests/test_system_settings_domain.py`, `backend/tests/test_firestore_settings_adapter.py`
+**Pruebas:** `backend/tests/test_system_settings_api.py`, `backend/tests/test_system_settings_domain.py`, `backend/tests/test_firestore_settings_adapter.py`, `frontend/src/app/admin/routes/**/*.spec.ts`, `frontend/src/app/routes/domain/catalog.spec.ts`
 
 ### CFG-2 — Editar los parámetros
 
@@ -168,6 +169,32 @@ Los servicios leen el documento una vez por petición y pasan el objeto de pará
 **Implementación:** `backend/apps/catalogs`, `backend/apps/users/domain/models.py` (`PerfilDeportivo.parse`), `backend/apps/users/application/use_cases.py` (`save_sport_profile`), `backend/apps/seed/application/use_cases.py`, `firestore.rules`; frontend: `frontend/src/app/core/catalogs`, `frontend/src/app/core/settings`, `frontend/src/app/admin/settings/catalogs`, `frontend/src/app/sport-profile`
 
 **Pruebas:** `backend/tests/test_catalogs_domain.py`, `backend/tests/test_catalogs_use_cases.py`, `backend/tests/test_catalogs_api.py`, `backend/tests/test_users_domain.py`, `backend/tests/test_seed.py`, `frontend/src/app/core/catalogs/*.spec.ts`, `frontend/src/app/core/settings/system-settings.store.spec.ts`, `frontend/src/app/admin/settings/catalogs/**/*.spec.ts`, `frontend/src/app/sport-profile/**/*.spec.ts`
+
+## Valores que se quedan en el código (a propósito)
+
+Criterio: se queda en el código lo que tiene **estructura o comportamiento** (el código ramifica por esa clave), lo que es **forma de un dato** (el largo de un texto, el formato de una hora) o lo que es **mecánica de la plataforma**. Todo número o lista que un administrador querría cambiar para ajustar el negocio está en «Configuración» o en un catálogo.
+
+| Valor | Dónde vive | Por qué se queda |
+| --- | --- | --- |
+| Claves de severidad `low`/`medium`/`high` y de nivel `high`/`medium`/`low` | `routes/domain/safety.py`, `frontend/src/app/routes/domain/route.ts` | Tienen orden y el cálculo ramifica por ellas; sus etiquetas («Baja», «Alto») son texto de la interfaz |
+| Severidad de las alertas `alta`/`media`/`baja` | `risk_alerts/domain/models.py`, `frontend/src/app/alerts` | Es una escala ordenada igual que la anterior |
+| Tipo de ciudad `city`/`zone` y cobertura `active`/`planned`/`suspended` | `cities/domain/models.py`, `firestore.rules` | Cada clave activa un comportamiento (una zona depende de una ciudad, una ciudad suspendida se oculta) |
+| Días de la semana `mon`…`sun` | `support_points/domain/models.py` | Estructura del horario de un punto de apoyo |
+| Catálogo de permisos y claves de los roles del sistema | `shared/domain/permissions.py`, `roles/domain/system_roles.py` | Cada permiso lo hace cumplir el código; los roles que crea el administrador sí son datos |
+| Estructura de las preferencias: idioma, unidades, tamaño de letra, apariencia, privacidad de ubicación y banderas de notificación | `users/domain/models.py`, `frontend/src/app/preferences` | Cada opción cambia el comportamiento de la app; no son opciones de negocio |
+| Largo máximo de los textos de clasificación (superficie, dificultad, tipos de factor, incidente, punto de apoyo y alerta: 40), de la etiqueta de un punto (80), de una franja (40), de la descripción de un factor y de una alerta (200), y de los nombres de ciudad y rol | `routes/domain/models.py`, `risk_alerts`, `safety_data`, `support_points`, `cities`, `roles` | Forma del dato: acotan lo que se guarda en Firestore; los largos que sí afectan al negocio (nombre y descripción de ruta, puntos por tramo) son parámetros |
+| Mínimo de 2 puntos por tramo, formato `HH:MM` entre `00:00` y `24:00`, formato de fecha | `routes/domain/models.py`, `routes/domain/time.py` | Una polilínea necesita dos puntos y el formato de una hora es parte del contrato de la API |
+| Latitud entre −90 y 90 y longitud entre −180 y 180 | formularios y dominio | Geometría, no negocio |
+| Edad entre 5 y 110 años, cédula de 10 dígitos, contraseña de 8 caracteres o más | `users/domain/models.py`, `frontend/src/app/auth` | Reglas de validación de datos personales; cambiarlas es una decisión legal o de producto, no un ajuste de operación |
+| Reautenticación reciente (5 minutos) y tasas de peticiones por minuto | `users/domain/account_deletion.py`, `config/settings.py` (variables de entorno) | Seguridad y despliegue: las tasas ya se cambian por entorno |
+| Semanas del gráfico de registros (8), rutas más largas del resumen (8) y topes de lectura del resumen (5000 y 2000) | `summary/domain/metrics.py`, `summary/application/use_cases.py` | Forma del tablero y protección de rendimiento, no un valor de negocio |
+| Centro y zoom iniciales del mapa (Ecuador), teselas y zoom máximo | `frontend/src/app/shared/map` | Es la vista de reserva del mapa; el país del sistema (`countryCode`) no trae coordenadas |
+| Tramos de distancia del filtro del catálogo (hasta 5 km, 5–10 km, más de 10 km) | `frontend/src/app/routes/domain/catalog.ts` | Filtro de presentación; las distancias de las rutas sí son datos |
+| Etiquetas de rol del resumen (`runner`, `admin`, `none`) | `frontend/src/app/admin/summary/domain/labels.ts` | Solo etiquetan los roles del sistema; un rol creado por el administrador se muestra con su identificador (pendiente: mostrar su nombre) |
+| Límite de 30 opciones por catálogo, de 60 caracteres por etiqueta y de 40 por código | `catalogs/domain/models.py` | Forma del dato del catálogo |
+| Nombres de colecciones, identificadores de documento y textos de la semilla | `shared/infrastructure/firebase/collections.py`, `seed` | Mecánica de la plataforma y datos de demostración |
+
+Las reglas de Firestore ya no repiten rangos de negocio: el perfil deportivo solo valida su forma (nivel, objetivos, ritmo y distancia numéricos) y el país de una ciudad solo debe ser un código de dos letras; los rangos, los códigos de los catálogos y el país los valida la API con los parámetros vigentes.
 
 ## Dependencias
 

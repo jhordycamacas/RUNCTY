@@ -214,6 +214,13 @@ request and the response reports `recalculated`. The Firestore rules deny every 
 the collection; the seed saves the defaults only when none exist. `tzdata` must be installed for
 `zoneinfo` on systems without an IANA database.
 
+Nothing else in the apps holds a business number or list: the severity and level keys, the city
+type and coverage keys, the weekdays, the permission catalogue, the preference structure and the
+text-length caps are structural and stay in code on purpose (the list, with the reason of each, is
+in `specs/27-configuracion-del-sistema.md`). The Firestore rules check only the shape of the
+sport profile and the length of a country code; the API validates the ranges, the catalog codes
+and the country with the current settings.
+
 ### Option catalogs
 
 `catalogs/{id}` holds the choices a runner picks from (`sportLevels`, `sportGoals`: a closed set

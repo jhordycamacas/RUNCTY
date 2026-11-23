@@ -70,7 +70,7 @@ Decididas por el equipo o derivadas de otros documentos:
 - Un factor tiene tipo (texto libre de 1 a 40 caracteres, `invalid-factor-type`), severidad, descripción y una ventana diaria opcional (`startTime` y `endTime`, ambas o ninguna = todo el día).
 - El cliente nunca calcula el puntaje: el servidor recalcula en la misma transacción de cada cambio y el cliente recarga `GET /routes/{id}`. No hay endpoint del índice.
 - El índice se actualiza en ≤ 24 h tras un cambio (RNF-14); hoy es inmediato.
-- Franjas de entrenamiento de referencia: 05:00–07:00 y 18:00–20:00.
+- Franjas de entrenamiento de referencia del negocio: 05:00–07:00 y 18:00–20:00. La aplicación no las fija: las franjas de cada ruta las define el administrador y el catálogo del corredor abre en la que está en curso (o la siguiente).
 - El radio máximo de una alerta de zona (5000 m por defecto), el máximo de franjas por ruta (12), de tramos (50) y de factores por tramo (20), y la zona horaria (`America/Guayaquil`) son parámetros del sistema ([configuración](27-configuracion-del-sistema.md)).
 
 ## Modelo de datos y contrato de API

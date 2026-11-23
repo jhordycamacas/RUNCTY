@@ -32,7 +32,7 @@ Riesgos identificados en Loja:
 
 Factores que aumentan la seguridad: presencia de gente, iluminación, que la zona no sea solitaria y resguardo policial.
 
-**Franjas de entrenamiento:** 05:00–07:00 y 18:00–20:00.
+**Franjas de entrenamiento de referencia:** 05:00–07:00 y 18:00–20:00 (la aplicación no las fija: las define el administrador en cada ruta).
 
 **Principio clave:** nunca declarar una ruta "segura" o "insegura" de forma absoluta. Se muestra un **índice o nivel de seguridad (Alto / Medio / Bajo) por franja horaria**, junto con los factores que lo explican.
 
@@ -844,3 +844,20 @@ Totales de las specs: 28 `Hecha`, 38 `Parcial` y 87 `Pendiente` (153).
 2. Sprint 3: pantallas de administración (incidentes, fuentes, puntos de apoyo, senderos con resguardo, alertas) y del corredor (puntos de apoyo, senderos, solicitud de ruta segura).
 3. EP-10 (valoraciones con estrellas, opiniones y favoritas) y EP-11 (rutas verificadas por clubes).
 4. Resto del Sprint 4: contactos de confianza, botón de pánico con los botones de volumen, ubicación compartida y registro de entrenamientos.
+
+## 19. Todo configurable (2026-11-22)
+
+Decisión del dueño del producto: nada de negocio queda escrito en el código. Detalle y criterios en `specs/27-configuracion-del-sistema.md` y `odd/tasks/todo-configurable.md`.
+
+**Configurable desde el panel de administración**
+
+- **Clasificaciones que el administrador escribe** (texto libre de 1 a 40 caracteres): superficie y dificultad de la ruta, tipo de factor de riesgo, de incidente, de punto de apoyo, de alerta y de fuente de información. La severidad de un incidente la elige el administrador.
+- **Parámetros del sistema** («Configuración», `settings.manage`): penalización por severidad, umbrales de nivel, ventana y margen de los incidentes, zona horaria, radios, límites de franjas, tramos y factores por ruta, largo de nombre y descripción, distancia y desnivel máximos, puntos por tramo, rangos de ritmo y de distancia del perfil, tolerancia de las rutas seguras y país. Cambiar una penalización, un umbral, la ventana, el margen o la zona horaria recalcula todas las rutas. Los formularios del panel y del corredor leen estos valores de `GET /settings` y usan los de por defecto solo si la llamada falla.
+- **Catálogos del perfil deportivo** (nivel y objetivos): el administrador los edita en `/admin/configuracion/opciones`; desactivar no borra, los perfiles guardados conservan su valor.
+- **Franjas horarias**: son datos de cada ruta. El catálogo del corredor abre en la que está en curso (o la siguiente); se eliminó el horario fijo `TRAINING_SLOTS` del frontend.
+
+**Se queda en el código, a propósito:** las claves con orden o comportamiento (severidad, nivel, tipo y cobertura de ciudad, días de la semana, permisos, estructura de las preferencias), la forma de los datos (largo de textos, formato `HH:MM`, coordenadas), reglas de datos personales (edad, cédula, contraseña), seguridad y despliegue (reautenticación, tasas por entorno), topes del resumen y la vista de reserva del mapa. La tabla con el motivo de cada uno está en la spec 27.
+
+**Reglas de Firestore:** ya no repiten rangos de negocio. El perfil deportivo solo valida su forma y el país de una ciudad solo debe tener dos letras; la API valida el resto con los parámetros vigentes. Las pruebas de reglas de `functions/test/rules` (código heredado) todavía esperan los rangos antiguos.
+
+**Pendiente:** mostrar el nombre de un rol creado por el administrador en el resumen (hoy se ve su identificador) y revisar con Gacelas los límites de cada parámetro.

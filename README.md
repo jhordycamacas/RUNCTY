@@ -216,7 +216,7 @@ npm run admin:build                        # build de producción del panel
   - preferencias de tamaño de letra, modo oscuro, unidades, notificaciones y privacidad de ubicación;
   - diseño oscuro con el fucsia neón del club (fuentes Outfit y Oswald; Geist en el admin) y pestañas Inicio, Rutas, Correr (GPS en vivo con mapa de OpenStreetMap), Clubes y Cuenta;
   - campana con las alertas de zona de riesgo vigentes en la ciudad del corredor;
-  - inicio con la próxima franja de entrenamiento y las rutas recomendadas para ella;
+  - inicio con las rutas recomendadas para la franja en curso o la siguiente que definió el administrador;
   - catálogo de rutas de la ciudad del corredor, con filtros por franja, distancia y dificultad;
   - detalle de cada ruta con mapa y su nivel de seguridad (Alto, Medio o Bajo) por franja, los factores que lo explican y los tramos.
 - **Panel de administración:**

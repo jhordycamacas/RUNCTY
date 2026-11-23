@@ -8,7 +8,7 @@ One Angular 22 + Ionic 9 + Capacitor 8 app for the web (browser) and Android (AP
 
 ```
 src/app/
-  core/          API client, interceptors, error mapping, auth service (+ Firebase gateway port), permissions, guards
+  core/          API client, interceptors, error mapping, auth service (+ Firebase gateway port), permissions, guards, system settings (`GET /settings`: the limits the forms validate against) and option catalogs
   shared/        base UI (text field, birth date, notice, confirm dialog, choice chips), map view (Leaflet + OpenStreetMap behind a renderer port), form helpers, pages (403, 404)
   auth/          sign in, sign up, password reset, email verification banner
   account/       profile, personal data, password change, account deletion
@@ -19,7 +19,6 @@ src/app/
   run/           Correr tab: live GPS position on the map
   alerts/        risk-zone alerts page opened from the bell (`GET /risk-zone-alerts`)
   clubs/         Clubes tab placeholder (EP-19)
-  training/      the fixed recommended training slots (05:00-07:00, 18:00-20:00)
   runner/        /app    runner area shell and Home (mobile-first; bottom tabs Inicio, Rutas, Correr, Clubes, Cuenta)
   admin/         /admin  admin area, desktop-first, side menu (ion-split-pane)
 src/theme/   design tokens (CSS variables), Ionic mapping, per-area overrides, Outfit (runner), Oswald (display) and Geist (admin) variable fonts from @fontsource-variable

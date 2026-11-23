@@ -78,9 +78,24 @@ frontend and `firestore.rules`).
         836 passed in 115 files, both tsc clean, `ng lint` clean. Deviation: the runner makes one
         unfiltered `GET /catalogs/<id>` per catalog (not `?active=true`) so inactive codes can
         still be labelled; the active filter is applied client-side. Route: single writer.
-- [ ] T5 Remove every leftover duplicate list (frontend constants, firestore.rules `in [...]`),
+- [x] T5 Remove every leftover duplicate list (frontend constants, firestore.rules `in [...]`),
       specs, README, CONTEXTO, traceability; final grep proving nothing hardcoded remains outside
       the structural list above
+      Evidence: audit of backend/apps, backend/config, frontend/src/app, firestore.rules,
+      storage.rules and specs. Fixed: the route, segment, time slot and risk factor forms read the
+      limits from `SystemSettingsStore` (name and description length, distance, elevation, points
+      per segment, plus the maximum of segments per route, slots per route and factors per segment
+      that disable the "Agregar" button); `TRAINING_SLOTS` (a fixed 05-07 / 18-20 schedule, only
+      used to pick the catalog default window) was deleted: the default window is now the one in
+      progress, else the next one to start, else the first of the admin-defined slots; the pace,
+      distance and country values left `firestore.rules`. Structural list with a reason per value:
+      section "Valores que se quedan en el código (a propósito)" in
+      `specs/27-configuracion-del-sistema.md`; summary in CONTEXTO.md section 19. RED observed first
+      (3 catalog cases, 6 page cases, 4 form compile errors). Final: backend 1184 passed + ruff
+      clean; frontend 835 passed in 114 files, both tsc clean, `npm run lint` clean; grep of every
+      old constant name in backend/apps, frontend/src and the rules: 0 matches. Known leftovers:
+      legacy `functions/test/rules` still expects the old rule ranges; the summary role labels only
+      cover the system roles. Route: single writer (delegated).
 
 ## Acceptance
 - Grep for the old tuples/constants (`RISK_FACTOR_TYPES`, `INCIDENT_TYPES`, `SUPPORT_POINT_TYPES`,
