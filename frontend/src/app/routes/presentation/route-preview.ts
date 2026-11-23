@@ -73,7 +73,7 @@ const PADDING = 14;
     }
 
     .tone-none {
-      --line: var(--rc-primary);
+      --line: var(--rc-text-muted);
     }
 
     .grid {

@@ -25,6 +25,9 @@ function fakeCodec(
         calls.push({ ...crop, size, quality });
         return `data:image/jpeg;base64,${'A'.repeat(Math.ceil(bytesFor(size, quality) / 3) * 4)}`;
       },
+      encodeFit: () => {
+        throw new Error('The square resize never fits the whole picture');
+      },
       close,
     })),
   };

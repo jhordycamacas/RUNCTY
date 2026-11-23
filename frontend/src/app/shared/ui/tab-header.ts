@@ -9,7 +9,7 @@ addIcons({ notificationsOutline });
 
 /**
  * Header of a runner tab: a clean bar on the page color (see `_areas.scss`) with the club logo, a
- * large left-aligned title and, on the right, the bell that opens the alerts. The logo is
+ * large left-aligned title and, on the right, the bell that opens the notifications. The logo is
  * decorative; the title names the screen.
  */
 @Component({
@@ -21,7 +21,7 @@ addIcons({ notificationsOutline });
         <app-brand-logo slot="start" size="2.25rem" />
         <ion-title>{{ title() }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button class="bell" routerLink="/app/alertas" aria-label="Alertas">
+          <ion-button class="bell" routerLink="/app/notificaciones" aria-label="Notificaciones">
             <ion-icon slot="icon-only" name="notifications-outline" aria-hidden="true" />
           </ion-button>
         </ion-buttons>

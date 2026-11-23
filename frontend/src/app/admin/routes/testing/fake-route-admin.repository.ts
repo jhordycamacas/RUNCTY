@@ -11,6 +11,8 @@ export function fakeRouteAdminRepository() {
     createRoute: vi.fn<RouteAdminRepository['createRoute']>().mockResolvedValue('new-id'),
     updateRoute: vi.fn<RouteAdminRepository['updateRoute']>().mockResolvedValue(undefined),
     deleteRoute: vi.fn<RouteAdminRepository['deleteRoute']>().mockResolvedValue(undefined),
+    setImage: vi.fn<RouteAdminRepository['setImage']>().mockResolvedValue(undefined),
+    removeImage: vi.fn<RouteAdminRepository['removeImage']>().mockResolvedValue(undefined),
     createSegment: vi.fn<RouteAdminRepository['createSegment']>().mockResolvedValue('new-id'),
     updateSegment: vi.fn<RouteAdminRepository['updateSegment']>().mockResolvedValue(undefined),
     deleteSegment: vi.fn<RouteAdminRepository['deleteSegment']>().mockResolvedValue(undefined),

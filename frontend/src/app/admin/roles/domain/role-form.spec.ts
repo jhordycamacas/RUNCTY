@@ -63,6 +63,11 @@ describe('role form', () => {
         permissions: ['admin.access'],
         system: false,
       }),
-    ).toEqual({ id: 'coach', name: 'Entrenador', description: 'Apoya', permissions: ['admin.access'] });
+    ).toEqual({
+      id: 'coach',
+      name: 'Entrenador',
+      description: 'Apoya',
+      permissions: ['admin.access'],
+    });
   });
 });

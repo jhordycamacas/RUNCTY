@@ -31,7 +31,7 @@ export const RUNNER_ROUTES: Routes = [
         loadComponent: () => import('../clubs/presentation/clubs.page').then((m) => m.ClubsPage),
       },
       {
-        path: 'alertas',
+        path: 'notificaciones',
         loadComponent: () =>
           import('../alerts/presentation/alerts.page').then((m) => m.AlertsPage),
       },
@@ -50,6 +50,11 @@ export const RUNNER_ROUTES: Routes = [
               import('../account/presentation/edit-personal-data.page').then(
                 (m) => m.EditPersonalDataPage,
               ),
+          },
+          {
+            path: 'amigos',
+            loadComponent: () =>
+              import('../friends/presentation/friends.page').then((m) => m.FriendsPage),
           },
           {
             path: 'deportivo',

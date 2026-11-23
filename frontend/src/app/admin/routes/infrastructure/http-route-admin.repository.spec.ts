@@ -54,6 +54,16 @@ describe('HttpRouteAdminRepository', () => {
     expect(all[0]).toMatchObject({ id: 'r1', name: 'Jipiro', active: false });
   });
 
+  it('sets and removes the custom image of a route, encoding the id', async () => {
+    const image = { image: 'data:image/jpeg;base64,AAAA', thumbnail: 'data:image/jpeg;base64,BB' };
+
+    await repository.setImage('a/b', image);
+    await repository.removeImage('a/b');
+
+    expect(api.put).toHaveBeenCalledWith('/routes/a%2Fb/image', image);
+    expect(api.delete).toHaveBeenCalledWith('/routes/a%2Fb/image');
+  });
+
   it('tolerates a response without the routes list', async () => {
     api.get.mockReturnValue(of({}));
 

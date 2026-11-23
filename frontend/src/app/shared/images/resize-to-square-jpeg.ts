@@ -1,5 +1,5 @@
 import { browserImageCodec } from './browser-image-codec';
-import { ImageCodec } from './image-codec';
+import { DecodedImage, ImageCodec } from './image-codec';
 
 /** A picture that cannot be used; its message is Spanish text that is safe to show. */
 export class ImageFileError extends Error {
@@ -12,16 +12,26 @@ export class ImageFileError extends Error {
 /** Largest file read from the device; bigger pictures are refused before decoding them. */
 export const MAX_INPUT_BYTES = 15 * 1024 * 1024;
 
-const QUALITIES = [0.9, 0.8, 0.7, 0.6, 0.5];
+export const QUALITIES = [0.9, 0.8, 0.7, 0.6, 0.5];
 /** Each retry at the lowest quality shrinks the side by this factor. */
-const SHRINK_FACTOR = 0.8;
-const MIN_SIDE_PX = 32;
+export const SHRINK_FACTOR = 0.8;
+export const MIN_SIDE_PX = 32;
 
 /** Size in bytes of the payload of a `data:...;base64,` URL. */
 export function dataUrlBytes(dataUrl: string): number {
   const payload = dataUrl.slice(dataUrl.indexOf(',') + 1);
   const padding = payload.endsWith('==') ? 2 : payload.endsWith('=') ? 1 : 0;
   return Math.floor((payload.length * 3) / 4) - padding;
+}
+
+/** Decodes a picked file, rejecting with an `ImageFileError` when it cannot be used. */
+export async function decodeImageFile(file: Blob, codec: ImageCodec): Promise<DecodedImage> {
+  if (!file.type.startsWith('image/')) throw new ImageFileError('El archivo no es una imagen.');
+  if (file.size > MAX_INPUT_BYTES) throw new ImageFileError('La imagen pesa demasiado. Elige una de menos de 15 MB.');
+
+  return codec.decode(file).catch(() => {
+    throw new ImageFileError('No pudimos leer la imagen. Prueba con otra.');
+  });
 }
 
 /**
@@ -35,12 +45,7 @@ export async function resizeToSquareJpeg(
   maxKb: number,
   codec: ImageCodec = browserImageCodec,
 ): Promise<string> {
-  if (!file.type.startsWith('image/')) throw new ImageFileError('El archivo no es una imagen.');
-  if (file.size > MAX_INPUT_BYTES) throw new ImageFileError('La imagen pesa demasiado. Elige una de menos de 15 MB.');
-
-  const image = await codec.decode(file).catch(() => {
-    throw new ImageFileError('No pudimos leer la imagen. Prueba con otra.');
-  });
+  const image = await decodeImageFile(file, codec);
   try {
     const side = Math.min(image.width, image.height);
     const crop = {

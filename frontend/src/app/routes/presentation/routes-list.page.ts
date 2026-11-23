@@ -244,15 +244,20 @@ const SKELETONS = [0, 1, 2];
       gap: var(--rc-space-sm);
       min-height: var(--rc-min-touch-target);
       padding: 0 var(--rc-space-md);
-      border: 1px solid var(--rc-control-border);
+      border: 1px solid color-mix(in srgb, var(--rc-text) 32%, transparent);
       border-radius: var(--rc-radius-pill);
-      background: var(--rc-surface-elevated);
+      background: color-mix(in srgb, var(--rc-text) 10%, var(--rc-surface-elevated));
       color: var(--rc-text);
       font: inherit;
       font-size: var(--rc-font-size-label);
       font-weight: 600;
       white-space: nowrap;
       transition: transform 120ms ease-out;
+    }
+
+    .tool ion-icon {
+      color: var(--rc-text-muted);
+      font-size: 1.125rem;
     }
 
     .tool:active {

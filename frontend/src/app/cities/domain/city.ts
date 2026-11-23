@@ -1,3 +1,7 @@
+/** A place belongs to a parent city when it is a zone, whatever its free-text type says. */
+export const isZoneRecord = (record: CityRecord): boolean =>
+  typeof record.parentCityId === 'string' && record.parentCityId !== '';
+
 /** A city as the pickers need it. */
 export interface City {
   id: string;
@@ -10,7 +14,9 @@ export interface CityRecord {
   id: string;
   name?: unknown;
   province?: unknown;
+  /** Free text typed by the admin; only `parentCityId` tells a zone from a city. */
   type?: unknown;
+  parentCityId?: unknown;
 }
 
 export abstract class CityRepository {
@@ -19,12 +25,12 @@ export abstract class CityRepository {
 }
 
 /**
- * Sign-up and profile pickers list cities only: zones are subdivisions used by routes.
- * Records without `type` predate zones and are cities.
+ * Sign-up and profile pickers list cities only: zones (places with a parent city) are
+ * subdivisions used by routes.
  */
 export function toPickerCities(records: CityRecord[]): City[] {
   return records
-    .filter((record) => record.type !== 'zone')
+    .filter((record) => !isZoneRecord(record))
     .map((record) => ({
       id: record.id,
       name: typeof record.name === 'string' && record.name.length > 0 ? record.name : record.id,

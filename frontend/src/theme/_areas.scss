@@ -2,7 +2,7 @@
 // changes. The runner is mobile-first and roomy; the admin is desktop-first and compact.
 
 // ---------------------------------------------------------------------------------------------
-// Runner: dark first (near-black page, dark gray rounded cards, one neon accent). The header is
+// Runner: dark first (near-black page, dark gray rounded cards, one magenta-violet accent). The header is
 // a clean bar with the club logo and a large left-aligned title.
 
 // The type scale is tuned for a 360–400px phone; tablets get the roomier base scale back.
@@ -52,7 +52,7 @@
   box-shadow: var(--rc-shadow-sm);
 }
 
-// Bottom bar on the page color; inactive tabs in the muted gray (4.5:1), the active one in neon.
+// Bottom bar on the page color; inactive tabs in the muted gray (4.5:1), the active one in the brand violet.
 // The height is the content box: Ionic adds `--ion-safe-area-bottom` as padding below it, so the
 // bar color also fills the area behind the gesture bar. It is tall enough to hold the «Correr»
 // circle with its label, so nothing has to stick out of the (clipping) tab buttons.
@@ -107,7 +107,7 @@
   --padding-bottom: 0;
 }
 
-// The primary action is a neon fuchsia pill with near-black text; secondary actions are white
+// The primary action is a magenta-violet pill with white text; secondary actions are white
 // pills with a neutral outline.
 .area-admin ion-button.button-solid:not(.ion-color) {
   --background: var(--rc-primary);

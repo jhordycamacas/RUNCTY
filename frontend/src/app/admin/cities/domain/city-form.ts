@@ -1,26 +1,21 @@
 import { parseDecimal } from '../../routes/domain/form-parsing';
-import {
-  CITY_TYPES,
-  COVERAGES,
-  CityCreateInput,
-  CityType,
-  Coverage,
-  ManagedCity,
-} from './managed-city';
+import { CityCreateInput, ManagedCity } from './managed-city';
 
 const MAX_TEXT = 80;
+const MAX_TYPE = 40;
+const MAX_COVERAGE = 60;
 const CITY_ID = /^[a-z0-9][a-z0-9-]{1,63}$/;
 
-/** The form works with text. `type` and `coverage` are empty until the admin chooses. */
+/** The form works with text. `parentCityId` is empty for a top-level city. */
 export interface CityForm {
-  type: CityType | '';
+  type: string;
   id: string;
   name: string;
   province: string;
   parentCityId: string;
   lat: string;
   lng: string;
-  coverage: Coverage | '';
+  coverage: string;
 }
 
 export type CityFormField = keyof CityForm;
@@ -41,14 +36,10 @@ export type CityFormResult =
   | { input: CityCreateInput; errors?: undefined }
   | { input?: undefined; errors: CityFormErrors };
 
-const isType = (value: string): value is CityType => (CITY_TYPES as readonly string[]).includes(value);
-const isCoverage = (value: string): value is Coverage =>
-  (COVERAGES as readonly string[]).includes(value);
-
-function requiredText(value: string, missing: string, tooLong: string) {
+function requiredText(value: string, missing: string, tooLong: string, max = MAX_TEXT) {
   const text = value.trim();
   if (!text) return { text, error: missing };
-  return { text, error: text.length > MAX_TEXT ? tooLong : undefined };
+  return { text, error: text.length > max ? tooLong : undefined };
 }
 
 function coordinate(value: string, limit: number, missing: string, outOfRange: string) {
@@ -58,8 +49,8 @@ function coordinate(value: string, limit: number, missing: string, outOfRange: s
 }
 
 /**
- * Validates the form with the limits of the API. The id and the type of a stored city never
- * change, so they are only checked when it is new.
+ * Validates the form with the limits of the API. The id of a stored city never changes, so it is
+ * only checked when the city is new.
  */
 export function parseCityForm(form: CityForm, editing: boolean): CityFormResult {
   const name = requiredText(
@@ -71,6 +62,18 @@ export function parseCityForm(form: CityForm, editing: boolean): CityFormResult 
     form.province,
     'La provincia es obligatoria.',
     `La provincia admite máximo ${MAX_TEXT} caracteres.`,
+  );
+  const type = requiredText(
+    form.type,
+    'El tipo es obligatorio.',
+    `El tipo admite máximo ${MAX_TYPE} caracteres.`,
+    MAX_TYPE,
+  );
+  const coverage = requiredText(
+    form.coverage,
+    'La cobertura es obligatoria.',
+    `La cobertura admite máximo ${MAX_COVERAGE} caracteres.`,
+    MAX_COVERAGE,
   );
   const lat = coordinate(
     form.lat,
@@ -86,42 +89,33 @@ export function parseCityForm(form: CityForm, editing: boolean): CityFormResult 
   );
 
   const candidates: CityFormErrors = {
-    type: editing || isType(form.type) ? undefined : 'Elige si es una ciudad o una zona.',
+    type: type.error,
     id:
       editing || CITY_ID.test(form.id)
         ? undefined
         : 'Usa de 2 a 64 caracteres: minúsculas, números y guion, sin empezar por guion.',
     name: name.error,
     province: province.error,
-    parentCityId:
-      form.type === 'zone' && !form.parentCityId
-        ? 'Elige la ciudad a la que pertenece la zona.'
-        : undefined,
     lat: lat.error,
     lng: lng.error,
-    coverage: isCoverage(form.coverage) ? undefined : 'Elige la cobertura.',
+    coverage: coverage.error,
   };
   const errors = Object.fromEntries(
     Object.entries(candidates).filter(([, message]) => message !== undefined),
   ) as CityFormErrors;
 
-  if (
-    Object.keys(errors).length > 0 ||
-    lat.number === null ||
-    lng.number === null ||
-    !isCoverage(form.coverage)
-  ) {
+  if (Object.keys(errors).length > 0 || lat.number === null || lng.number === null) {
     return { errors };
   }
   return {
     input: {
       id: form.id,
-      type: isType(form.type) ? form.type : 'city',
+      type: type.text,
       name: name.text,
       province: province.text,
       location: { lat: lat.number, lng: lng.number },
-      coverage: form.coverage,
-      ...(form.type === 'zone' ? { parentCityId: form.parentCityId } : {}),
+      coverage: coverage.text,
+      parentCityId: form.parentCityId || null,
     },
   };
 }

@@ -31,6 +31,7 @@ export const route = (id: string, overrides: Partial<Route> = {}): Route => ({
   active: true,
   segmentCount: 1,
   preview: [],
+  imageThumb: null,
   safety: [],
   ...overrides,
 });

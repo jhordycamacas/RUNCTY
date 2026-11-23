@@ -4,7 +4,7 @@ import { IonIcon } from '@ionic/angular';
 const NUMBER = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
 
 /**
- * A headline figure on a rounded tile with a very soft fuchsia tint, so the number is what stands
+ * A headline figure on a rounded tile with a very soft slate-teal tint, so the number is what stands
  * out and not the background: an icon chip and a label, a large thin number and a short hint.
  */
 @Component({
@@ -33,7 +33,7 @@ const NUMBER = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
       height: 100%;
       padding: var(--rc-space-lg);
       border-radius: var(--rc-radius-md);
-      background: color-mix(in srgb, var(--rc-primary) 9%, var(--rc-surface-elevated));
+      background: var(--rc-tile-tint);
       color: var(--rc-text);
     }
 
@@ -43,7 +43,7 @@ const NUMBER = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
       width: 2rem;
       height: 2rem;
       border-radius: var(--rc-radius-pill);
-      background: color-mix(in srgb, var(--rc-primary) 18%, transparent);
+      background: color-mix(in srgb, var(--rc-chart-accent) 22%, transparent);
       color: var(--rc-text);
       font-size: 1.05rem;
     }

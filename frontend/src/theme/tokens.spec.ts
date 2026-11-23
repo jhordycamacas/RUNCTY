@@ -34,6 +34,15 @@ function luminance(hex: string): number {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
+/** Hue in degrees (0-360) of a `#rrggbb` color. */
+function hueOf(hex: string): number {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b);
+  const delta = max - Math.min(r, g, b);
+  const sector = max === r ? ((g - b) / delta) % 6 : max === g ? (b - r) / delta + 2 : (r - g) / delta + 4;
+  return (sector * 60 + 360) % 360;
+}
+
 function contrast(a: string, b: string): number {
   const [lighter, darker] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (lighter + 0.05) / (darker + 0.05);
@@ -65,19 +74,29 @@ describe.each(['light-colors', 'dark-colors'] as const)('design tokens (%s)', (m
     expect(contrast(colors['primary'], colors['background'])).toBeGreaterThanOrEqual(3);
   });
 
-  it('keeps the dark text readable on the neon fill (white on neon would fail)', () => {
+  it('keeps the text readable on the primary fill and on its pressed state (4.5:1)', () => {
     expect(contrast(colors['on-primary'], colors['primary'])).toBeGreaterThanOrEqual(4.5);
-    expect(contrast('#ffffff', colors['primary'])).toBeLessThan(4.5);
+    expect(contrast(colors['on-primary'], colors['primary-pressed'])).toBeGreaterThanOrEqual(4.5);
   });
 
-  it('keeps the neon visible as text on the near-black page of the dark theme', () => {
-    if (mixin === 'dark-colors') {
-      expect(contrast(colors['primary'], colors['background'])).toBeGreaterThanOrEqual(4.5);
-    }
+  it('keeps the primary a true fuchsia: neither the neon pink nor a violet', () => {
+    const hue = hueOf(colors['primary']);
+    expect(hue).toBeGreaterThanOrEqual(315);
+    expect(hue).toBeLessThanOrEqual(340);
+    expect(colors['primary'].toLowerCase()).not.toBe('#ff2d95');
+    expect(hueOf(colors['primary-pressed'])).toBeGreaterThanOrEqual(315);
+    expect(hueOf(colors['primary-text'])).toBeLessThanOrEqual(340);
   });
 
   it('keeps every chart color visible (3:1) on the raised surface', () => {
-    const chartColors = ['primary', 'chart-ink', 'chart-slate', 'chart-silver', 'chart-rose'];
+    const chartColors = [
+      'primary',
+      'chart-ink',
+      'chart-slate',
+      'chart-silver',
+      'chart-indigo',
+      'chart-accent',
+    ];
     for (const token of [...chartColors, 'success', 'warning', 'danger']) {
       expect(colors[token]).toBeDefined();
       expect(contrast(colors[token], colors['surface-elevated'])).toBeGreaterThanOrEqual(3);
@@ -86,6 +105,11 @@ describe.each(['light-colors', 'dark-colors'] as const)('design tokens (%s)', (m
 
   it('keeps the progress fill visible (3:1) on the raised surface', () => {
     expect(contrast(colors['progress'], colors['surface-elevated'])).toBeGreaterThanOrEqual(3);
+  });
+
+  it('keeps the text at 4.5:1 or more on the soft tile tint', () => {
+    expect(contrast(colors['text'], colors['tile-tint'])).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(colors['text-muted'], colors['tile-tint'])).toBeGreaterThanOrEqual(4.5);
   });
 
   it('keeps the text at 4.5:1 or more on the gray sidebar and on the content backdrop', () => {

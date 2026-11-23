@@ -45,8 +45,8 @@ addIcons({ peopleOutline });
       width: 4rem;
       height: 4rem;
       border-radius: var(--rc-radius-pill);
-      background: var(--rc-primary);
-      color: var(--rc-on-primary);
+      background: var(--rc-primary-tint);
+      color: var(--rc-text-muted);
       font-size: 2rem;
     }
 

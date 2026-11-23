@@ -71,7 +71,8 @@ export class AdminUsersStore {
   /** Reflects a role assignment in the list without asking the API again. */
   setRole(uid: string, roleId: string): void {
     this.list.update(
-      (users) => users?.map((user) => (user.uid === uid ? { ...user, role: roleId } : user)) ?? null,
+      (users) =>
+        users?.map((user) => (user.uid === uid ? { ...user, role: roleId } : user)) ?? null,
     );
   }
 }

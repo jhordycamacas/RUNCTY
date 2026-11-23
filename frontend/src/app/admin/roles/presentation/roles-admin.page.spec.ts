@@ -32,7 +32,8 @@ describe('RolesAdminPage', () => {
 
   const root = () => fixture.nativeElement as HTMLElement;
   const text = () => root().textContent ?? '';
-  const names = () => [...root().querySelectorAll('.role-name')].map((el) => el.textContent?.trim());
+  const names = () =>
+    [...root().querySelectorAll('.role-name')].map((el) => el.textContent?.trim());
   const button = (label: string, scope: Element = root()) =>
     [...scope.querySelectorAll('ion-button')].find((el) => el.textContent?.trim() === label);
   const row = (name: string) =>
@@ -80,7 +81,9 @@ describe('RolesAdminPage', () => {
     expect(text()).toContain('Personal de Gacelas');
     expect(row('Administrador').textContent).toContain('Entrar al panel de administración');
     expect(row('Administrador').textContent).toContain('Consultar usuarios');
-    expect(row('Entrenador').textContent).toContain('Gestionar rutas, franjas y factores de riesgo');
+    expect(row('Entrenador').textContent).toContain(
+      'Gestionar rutas, franjas y factores de riesgo',
+    );
     expect(row('Corredor').textContent).toContain('Sin permisos');
     expect(text()).not.toContain('routes.manage');
   });

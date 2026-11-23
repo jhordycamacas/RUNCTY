@@ -1,41 +1,30 @@
-export const CITY_TYPES = ['city', 'zone'] as const;
-export type CityType = (typeof CITY_TYPES)[number];
-
-export const COVERAGES = ['active', 'planned', 'suspended'] as const;
-export type Coverage = (typeof COVERAGES)[number];
-
-export const CITY_TYPE_LABELS: Record<CityType, string> = { city: 'Ciudad', zone: 'Zona' };
-export const COVERAGE_LABELS: Record<Coverage, string> = {
-  active: 'Activa',
-  planned: 'Planificada',
-  suspended: 'Suspendida',
-};
-
-/** A city, or a zone of a city, as `GET /cities` answers it. */
+/**
+ * A city, or a zone of a city, as `GET /cities` answers it. `type` and `coverage` are free text
+ * the admin typed; a place is a zone when it has a parent city, whatever its type says.
+ */
 export interface ManagedCity {
   id: string;
   name: string;
   province: string;
-  type: CityType;
-  /** Only a zone has a parent city. */
+  type: string;
   parentCityId: string | null;
   lat: number;
   lng: number;
-  coverage: Coverage;
+  coverage: string;
 }
 
-/** The editable fields; a city sends no `parentCityId`. Identity and type never change. */
+/** The editable fields; `parentCityId` is `null` for a top-level city. The id never changes. */
 export interface CityInput {
   name: string;
   province: string;
+  type: string;
   location: { lat: number; lng: number };
-  coverage: Coverage;
-  parentCityId?: string;
+  coverage: string;
+  parentCityId: string | null;
 }
 
 export interface CityCreateInput extends CityInput {
   id: string;
-  type: CityType;
 }
 
 export abstract class CityAdminRepository {
@@ -45,10 +34,10 @@ export abstract class CityAdminRepository {
   abstract delete(cityId: string): Promise<void>;
 }
 
-const isCoverage = (value: unknown): value is Coverage =>
-  (COVERAGES as readonly unknown[]).includes(value);
-
 const num = (value: unknown): number => (typeof value === 'number' ? value : 0);
+
+const text = (value: unknown, fallback: string): string =>
+  typeof value === 'string' && value ? value : fallback;
 
 /** Tolerant read of one entry of `GET /cities`; a record without `type` predates zones. */
 export function toManagedCity(raw: unknown): ManagedCity {
@@ -60,11 +49,11 @@ export function toManagedCity(raw: unknown): ManagedCity {
     id,
     name: typeof data['name'] === 'string' && data['name'] ? data['name'] : id,
     province: typeof data['province'] === 'string' ? data['province'] : '',
-    type: data['type'] === 'zone' ? 'zone' : 'city',
+    type: text(data['type'], 'city'),
     parentCityId: typeof parent === 'string' && parent ? parent : null,
     lat: num(location['lat']),
     lng: num(location['lng']),
-    coverage: isCoverage(data['coverage']) ? data['coverage'] : 'planned',
+    coverage: text(data['coverage'], 'planned'),
   };
 }
 
@@ -76,11 +65,11 @@ export interface CityGroup {
 
 export function groupCities(cities: readonly ManagedCity[]): CityGroup[] {
   const byName = (a: ManagedCity, b: ManagedCity) => a.name.localeCompare(b.name, 'es');
-  const roots = cities.filter((city) => city.type === 'city');
+  const roots = cities.filter((city) => city.parentCityId === null);
   const known = new Set(roots.map((city) => city.id));
   const zonesOf = (id: string) => cities.filter((city) => city.parentCityId === id).sort(byName);
   const orphans = cities.filter(
-    (city) => city.type === 'zone' && (city.parentCityId === null || !known.has(city.parentCityId)),
+    (city) => city.parentCityId !== null && !known.has(city.parentCityId),
   );
   return [
     ...roots.sort(byName).map((city) => ({ city, zones: zonesOf(city.id) })),

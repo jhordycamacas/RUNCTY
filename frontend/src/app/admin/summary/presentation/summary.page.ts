@@ -1,20 +1,41 @@
 import { Component, computed, inject } from '@angular/core';
 import { IonButton, IonContent, ViewWillEnter } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { barbellOutline, businessOutline, peopleOutline, trailSignOutline } from 'ionicons/icons';
+import {
+  alertCircleOutline,
+  barbellOutline,
+  businessOutline,
+  peopleOutline,
+  shieldCheckmarkOutline,
+  trailSignOutline,
+  trendingUpOutline,
+  warningOutline,
+} from 'ionicons/icons';
 import { Notice } from '../../../shared/ui/notice';
-import { SummaryStore } from '../application/summary.store';
-import { greeting, weekLabel } from '../domain/labels';
-import { CityComparison, RouteDistance, UsersSummary, WeekCount } from '../domain/summary';
 import { AdminHeader } from '../../admin-header';
+import { SummaryStore } from '../application/summary.store';
+import { greeting } from '../domain/labels';
+import { CityComparison, RouteDistance, UsersSummary } from '../domain/summary';
+import { AcquisitionChart } from './acquisition-chart';
 import { Bar, BarChart } from './bar-chart';
 import { BarItem, BarList } from './bar-list';
 import { ChartColor } from './chart-math';
 import { DonutChart, DonutSlice } from './donut-chart';
 import { BarGroup, BarSeries, GroupedBars } from './grouped-bars';
 import { KpiTile } from './kpi-tile';
+import { LatestUsers } from './latest-users';
+import { PanelHead } from './panel-head';
 
-addIcons({ barbellOutline, businessOutline, peopleOutline, trailSignOutline });
+addIcons({
+  alertCircleOutline,
+  barbellOutline,
+  businessOutline,
+  peopleOutline,
+  shieldCheckmarkOutline,
+  trailSignOutline,
+  trendingUpOutline,
+  warningOutline,
+});
 
 const DATE_FORMAT = new Intl.DateTimeFormat('es', {
   weekday: 'long',
@@ -29,6 +50,7 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
 @Component({
   selector: 'app-summary-page',
   imports: [
+    AcquisitionChart,
     AdminHeader,
     BarChart,
     BarList,
@@ -37,7 +59,9 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
     IonButton,
     IonContent,
     KpiTile,
+    LatestUsers,
     Notice,
+    PanelHead,
   ],
   template: `
     <app-admin-header title="Resumen" />
@@ -117,17 +141,36 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
                 "
               />
             }
+            @if (summary.safety; as safety) {
+              <app-kpi-tile
+                icon="warning-outline"
+                label="Alertas de zona activas"
+                [value]="safety.activeAlerts"
+                hint="vigentes ahora mismo"
+              />
+              <app-kpi-tile
+                icon="alert-circle-outline"
+                label="Incidentes en 30 días"
+                [value]="safety.incidentsLast30Days"
+                hint="registrados en el último mes"
+              />
+            }
           </section>
+
+          @if (summary.users; as users) {
+            <app-acquisition-chart [signups]="users.signups" />
+          }
 
           @if (summary.byCity || summary.users) {
             <div class="row wide">
               @if (summary.byCity; as cities) {
                 <section class="card" aria-labelledby="city-title">
-                  <h2 id="city-title">Rutas y usuarios por ciudad</h2>
-                  <p class="note">
-                    Cuántas rutas hay y cuántos usuarios viven en cada ciudad (las 8 con más
-                    usuarios).
-                  </p>
+                  <app-panel-head
+                    icon="business-outline"
+                    titleId="city-title"
+                    title="Rutas y usuarios por ciudad"
+                    note="Cuántas rutas hay y cuántos usuarios viven en cada ciudad (las 8 con más usuarios)."
+                  />
                   <app-grouped-bars
                     subject="Rutas y usuarios por ciudad"
                     [series]="citySeries"
@@ -136,38 +179,36 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
                 </section>
               }
               @if (summary.users; as users) {
-                <section class="card" aria-labelledby="level-title">
-                  <h2 id="level-title">Usuarios por nivel deportivo</h2>
-                  <p class="note">Cuántos usuarios eligieron cada nivel en su perfil deportivo.</p>
-                  <app-bar-list label="Usuarios por nivel deportivo" [items]="levelItems(users)" />
-                </section>
+                <app-latest-users [users]="users.latest" [cityNames]="store.cityNames()" />
               }
             </div>
           }
 
           @if (summary.users || summary.routes) {
             <div class="row wide">
+              @if (summary.users; as users) {
+                <section class="card" aria-labelledby="level-title">
+                  <app-panel-head
+                    icon="barbell-outline"
+                    titleId="level-title"
+                    title="Usuarios por nivel deportivo"
+                    note="Cuántos usuarios eligieron cada nivel en su perfil deportivo."
+                  />
+                  <app-bar-list label="Usuarios por nivel deportivo" [items]="levelItems(users)" />
+                </section>
+              }
               @if (summary.routes; as routes) {
                 <section class="card" aria-labelledby="safety-title">
-                  <h2 id="safety-title">Qué tan seguras son las rutas</h2>
-                  <p class="note">
-                    Cada ruta cuenta una vez, con el nivel más bajo de sus franjas.
-                  </p>
+                  <app-panel-head
+                    icon="shield-checkmark-outline"
+                    titleId="safety-title"
+                    title="Qué tan seguras son las rutas"
+                    note="Cada ruta cuenta una vez, con el nivel más bajo de sus franjas."
+                  />
                   <app-donut-chart
                     subject="Rutas por nivel de seguridad"
                     centerLabel="Rutas"
                     [slices]="safetySlices(routes.safetyLevels)"
-                  />
-                </section>
-              }
-              @if (summary.users; as users) {
-                <section class="card" aria-labelledby="weekly-title">
-                  <h2 id="weekly-title">Usuarios nuevos por semana</h2>
-                  <p class="note">Cuentas creadas en cada una de las últimas 8 semanas.</p>
-                  <app-bar-chart
-                    subject="Usuarios nuevos por semana"
-                    [bars]="weeks(users.registrationsByWeek)"
-                    [highlightLast]="true"
                   />
                 </section>
               }
@@ -178,8 +219,12 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
             <details class="details">
               <summary>Más detalles</summary>
               <section class="card" aria-labelledby="distance-title">
-                <h2 id="distance-title">Rutas más largas</h2>
-                <p class="note">Las 6 rutas con más kilómetros.</p>
+                <app-panel-head
+                  icon="trail-sign-outline"
+                  titleId="distance-title"
+                  title="Rutas más largas"
+                  note="Las 6 rutas con más kilómetros."
+                />
                 <app-bar-chart
                   subject="Kilómetros de cada ruta"
                   unit="km"
@@ -199,15 +244,23 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
         } @else if (!store.error()) {
           <div class="skeleton" role="status" aria-busy="true">
             <span class="sr-only">Cargando el resumen…</span>
-            @for (block of skeletonBlocks; track block) {
-              <div class="block" aria-hidden="true"></div>
-            }
+            <div class="tiles" aria-hidden="true">
+              @for (block of skeletonTiles; track block) {
+                <div class="block"></div>
+              }
+            </div>
+            <div class="block chart" aria-hidden="true"></div>
           </div>
         }
       </div>
     </ion-content>
   `,
   styles: `
+    // The dashboard draws its «primary» series in the calm chart accent, not in the brand rose.
+    :host {
+      --rc-primary: var(--rc-chart-accent);
+    }
+
     // Full width inside the frame, one gutter on every side and between every block, so the
     // edges line up with the page title above.
     .page {
@@ -228,7 +281,7 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
       margin: 0;
       font-size: var(--rc-font-size-label);
       font-weight: 500;
-      color: var(--rc-primary-text);
+      color: var(--rc-text-muted);
     }
 
     .lead,
@@ -258,10 +311,32 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
       color: var(--rc-text-muted);
     }
 
-    .kpis {
+    // Six compact number cards: 2 columns on a phone, 3 on a tablet, a single row on a desktop.
+    .kpis,
+    .skeleton .tiles {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--rc-admin-gutter);
+    }
+
+    @media (min-width: 40rem) {
+      .kpis,
+      .skeleton .tiles {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 80rem) {
+      .kpis,
+      .skeleton .tiles {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 40rem) {
+      .kpis > :last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+      }
     }
 
     .row {
@@ -289,28 +364,16 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
       }
     }
 
-    // Rounded panels on the frame with a very soft fuchsia tint, without heavy borders: the content
-    // is what stands out, not the background.
+    // Plain white panels with a thin border: only the number cards above carry the soft tint.
     .card {
       display: grid;
       align-content: start;
       gap: var(--rc-space-md);
       min-width: 0;
       padding: var(--rc-space-xl);
+      border: 1px solid var(--rc-border);
       border-radius: var(--rc-radius-lg);
-      background: color-mix(in srgb, var(--rc-primary) 6%, var(--rc-surface-elevated));
-    }
-
-    h2 {
-      margin: 0;
-      font-size: var(--rc-font-size-subtitle);
-      font-weight: 500;
-    }
-
-    @media (max-width: 40rem) {
-      .kpis > :last-child:nth-child(odd) {
-        grid-column: 1 / -1;
-      }
+      background: var(--rc-surface-elevated);
     }
 
     .details {
@@ -331,8 +394,7 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
 
     .skeleton {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr));
-      gap: var(--rc-space-lg);
+      gap: var(--rc-admin-gutter);
     }
 
     .block {
@@ -340,6 +402,10 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
       border-radius: var(--rc-radius-md);
       background: var(--rc-surface-elevated);
       animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    .block.chart {
+      height: 20rem;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -358,7 +424,7 @@ const KM = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
 export class SummaryPage implements ViewWillEnter {
   protected readonly store = inject(SummaryStore);
 
-  protected readonly skeletonBlocks = [1, 2, 3, 4];
+  protected readonly skeletonTiles = [1, 2, 3, 4, 5, 6];
   protected readonly today = computed(() => DATE_FORMAT.format(new Date()));
   protected readonly greeting = computed(() => greeting(new Date().getHours()));
   protected readonly updated = computed(() => {
@@ -402,10 +468,6 @@ export class SummaryPage implements ViewWillEnter {
         value: Math.max(0, users.total - users.sportProfiles.completed),
       },
     ];
-  }
-
-  protected weeks(weeks: readonly WeekCount[]): Bar[] {
-    return weeks.map((week) => ({ label: weekLabel(week.weekStart), value: week.count }));
   }
 
   protected distanceBars(routes: readonly RouteDistance[]): Bar[] {

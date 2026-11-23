@@ -47,11 +47,12 @@ describe('HttpCityAdminRepository', () => {
     api.post.mockReturnValue(of({}));
     const input = {
       id: 'cuenca',
-      type: 'city' as const,
+      type: 'Región',
       name: 'Cuenca',
       province: 'Azuay',
       location: { lat: -2.9, lng: -79 },
-      coverage: 'planned' as const,
+      coverage: 'En estudio',
+      parentCityId: null,
     };
 
     await repository.create(input);
@@ -64,8 +65,10 @@ describe('HttpCityAdminRepository', () => {
     const changes = {
       name: 'Centro',
       province: 'Loja',
+      type: 'Zona',
       location: { lat: 1, lng: 2 },
-      coverage: 'active' as const,
+      coverage: 'active',
+      parentCityId: 'loja',
     };
 
     await repository.update('loja centro', changes);

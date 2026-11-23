@@ -35,6 +35,8 @@ import { ProfilePhotoRepository } from './account/domain/profile-photo';
 import { HttpProfilePhotoRepository } from './account/infrastructure/http-profile-photo.repository';
 import { RiskZoneAlertRepository } from './alerts/domain/risk-zone-alert';
 import { HttpRiskZoneAlertRepository } from './alerts/infrastructure/http-risk-zone-alert.repository';
+import { FriendRepository } from './friends/domain/friend';
+import { HttpFriendRepository } from './friends/infrastructure/http-friend.repository';
 import { RouteRepository } from './routes/domain/route';
 import { HttpRouteRepository } from './routes/infrastructure/http-route.repository';
 import { PositionSource } from './run/domain/position-source';
@@ -60,6 +62,7 @@ export const appConfig: ApplicationConfig = {
     { provide: CatalogRepository, useClass: HttpCatalogRepository },
     { provide: RouteRepository, useClass: HttpRouteRepository },
     { provide: RiskZoneAlertRepository, useClass: HttpRiskZoneAlertRepository },
+    { provide: FriendRepository, useClass: HttpFriendRepository },
     { provide: PositionSource, useClass: CapacitorPositionSource },
     { provide: PreferencesRepository, useClass: HttpPreferencesRepository },
     { provide: PreferencesCache, useClass: LocalStoragePreferencesCache },

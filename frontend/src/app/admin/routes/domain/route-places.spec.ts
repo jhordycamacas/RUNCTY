@@ -5,7 +5,7 @@ describe('toRoutePlaces', () => {
     expect(
       toRoutePlaces([
         { id: 'quito', name: 'Quito', type: 'city' },
-        { id: 'loja-sur', name: 'Sur', type: 'zone' },
+        { id: 'loja-sur', name: 'Sur', type: 'Barrio', parentCityId: 'loja' },
         { id: 'loja', name: 'Loja' },
         { id: 'azogues', name: 'Ázogues', type: 'city' },
       ]),

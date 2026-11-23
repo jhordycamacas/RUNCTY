@@ -91,6 +91,23 @@ describe('RouteCard', () => {
     expect(fixture.nativeElement.querySelector('app-route-preview ion-icon')).not.toBeNull();
   });
 
+  it('shows the image a manager uploaded instead of the generated shape', () => {
+    const thumb = 'data:image/jpeg;base64,AAAA';
+    render({ ...jipiro, imageThumb: thumb }, '05:00-07:00');
+
+    const image = fixture.nativeElement.querySelector('a.card img') as HTMLImageElement;
+    expect(image.getAttribute('src')).toBe(thumb);
+    expect(image.alt).toBe(`Imagen de ${jipiro.name}`);
+    expect(fixture.nativeElement.querySelector('app-route-preview')).toBeNull();
+  });
+
+  it('falls back to the generated shape when the route has no image', () => {
+    render({ ...jipiro, imageThumb: null }, '05:00-07:00');
+
+    expect(fixture.nativeElement.querySelector('img')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-route-preview svg')).not.toBeNull();
+  });
+
   it('keeps the preview inside the link, so tapping it opens the detail', () => {
     render(jipiro, '05:00-07:00');
 

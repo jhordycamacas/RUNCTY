@@ -189,7 +189,6 @@ const STATUS_LABELS = {
 
     .time .figure {
       font-size: 4.75rem;
-      color: var(--rc-primary-text);
     }
 
     .figure small {

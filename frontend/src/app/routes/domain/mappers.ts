@@ -110,6 +110,10 @@ function toSegmentSlotSafety(value: unknown): SegmentSlotSafety | null {
   return { level, score: asNumber(data['score']), factors: toList(data['factors'], toFactor) };
 }
 
+/** An image data URL as the API stores it; anything else (a link, text) is dropped. */
+export const toImageUrl = (value: unknown): string | null =>
+  typeof value === 'string' && /^data:image\/(?:jpeg|png|webp);base64,/.test(value) ? value : null;
+
 export function toRoute(raw: unknown): Route {
   const data = asRecord(raw);
   const id = asString(data['id']);
@@ -132,6 +136,7 @@ export function toRoute(raw: unknown): Route {
     active: data['active'] === true,
     segmentCount: asNumber(data['segmentCount']),
     preview: toList(data['preview'], toPair),
+    imageThumb: toImageUrl(data['imageThumb']),
     safety,
   };
 }

@@ -26,7 +26,7 @@ export const city = (id: string, overrides: Partial<ManagedCity> = {}): ManagedC
 });
 
 export const zone = (id: string, parentCityId: string, overrides: Partial<ManagedCity> = {}) =>
-  city(id, { type: 'zone', parentCityId, ...overrides });
+  city(id, { type: 'Zona', parentCityId, ...overrides });
 
 /** Lets pending promises and the renders they trigger settle. */
 export async function settle(fixture: { detectChanges(): void }): Promise<void> {

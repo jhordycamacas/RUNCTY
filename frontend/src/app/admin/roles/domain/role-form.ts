@@ -18,8 +18,7 @@ type RoleFormErrors = Partial<Record<RoleFormField, string>>;
 export const EMPTY_ROLE_FORM: RoleForm = { id: '', name: '', description: '', permissions: [] };
 
 export type RoleFormResult =
-  | { input: RoleCreateInput; errors?: undefined }
-  | { input?: undefined; errors: RoleFormErrors };
+  { input: RoleCreateInput; errors?: undefined } | { input?: undefined; errors: RoleFormErrors };
 
 /**
  * Validates the form with the limits of the API. A stored role keeps its id, so the id is only

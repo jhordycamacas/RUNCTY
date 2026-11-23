@@ -78,6 +78,7 @@ describe('EditPersonalDataPage', () => {
                 width: 300,
                 height: 300,
                 encode: () => NEW_PHOTO,
+                encodeFit: () => NEW_PHOTO,
                 close: () => undefined,
               }) satisfies DecodedImage,
           },

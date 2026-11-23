@@ -20,21 +20,18 @@ describe('city form', () => {
       province: 'Azuay',
       location: { lat: -2.9, lng: -79 },
       coverage: 'planned',
+      parentCityId: null,
     });
   });
 
-  it('builds the request of a zone with its parent city', () => {
+  it('keeps the type and coverage the admin typed, trimmed', () => {
     const { input } = parseCityForm(
-      { ...VALID, type: 'zone', id: 'cuenca-centro', parentCityId: 'cuenca' },
+      { ...VALID, type: ' Barrio ', coverage: ' En estudio ', parentCityId: 'cuenca' },
       false,
     );
 
-    expect(input).toEqual(expect.objectContaining({ type: 'zone', parentCityId: 'cuenca' }));
-  });
-
-  it('drops a leftover parent when the type is city', () => {
-    expect(parseCityForm({ ...VALID, parentCityId: 'loja' }, false).input).not.toHaveProperty(
-      'parentCityId',
+    expect(input).toEqual(
+      expect.objectContaining({ type: 'Barrio', coverage: 'En estudio', parentCityId: 'cuenca' }),
     );
   });
 
@@ -44,21 +41,29 @@ describe('city form', () => {
     expect(input).toBeUndefined();
     expect(errors).toEqual(
       expect.objectContaining({
-        type: 'Elige si es una ciudad o una zona.',
+        type: 'El tipo es obligatorio.',
         id: expect.stringContaining('minúsculas'),
         name: 'El nombre es obligatorio.',
         province: 'La provincia es obligatoria.',
         lat: expect.stringContaining('latitud'),
         lng: expect.stringContaining('longitud'),
-        coverage: 'Elige la cobertura.',
+        coverage: 'La cobertura es obligatoria.',
       }),
     );
   });
 
-  it('asks for the parent city of a zone', () => {
-    expect(parseCityForm({ ...VALID, type: 'zone', id: 'z1' }, false).errors?.parentCityId).toBe(
-      'Elige la ciudad a la que pertenece la zona.',
+  it('does not require a parent city, whatever the type', () => {
+    expect(parseCityForm({ ...VALID, type: 'zone', id: 'z1' }, false).errors).toBeUndefined();
+  });
+
+  it('limits the type to 40 characters and the coverage to 60', () => {
+    const { errors } = parseCityForm(
+      { ...VALID, type: 'x'.repeat(41), coverage: 'y'.repeat(61) },
+      false,
     );
+
+    expect(errors?.type).toContain('40');
+    expect(errors?.coverage).toContain('60');
   });
 
   it('checks the coordinate ranges', () => {
@@ -86,8 +91,8 @@ describe('city form', () => {
     expect(errors?.province).toContain('80');
   });
 
-  it('does not validate the identity of a stored city being edited', () => {
-    expect(parseCityForm({ ...VALID, id: 'Legacy Id', type: '' as never }, true).errors).toBeUndefined();
+  it('does not validate the id of a stored city being edited', () => {
+    expect(parseCityForm({ ...VALID, id: 'Legacy Id' }, true).errors).toBeUndefined();
   });
 
   it('fills the form from a stored zone', () => {
@@ -96,14 +101,14 @@ describe('city form', () => {
         id: 'z',
         name: 'Centro',
         province: 'Loja',
-        type: 'zone',
+        type: 'Zona',
         parentCityId: 'loja',
         lat: -3.99,
         lng: -79.2,
         coverage: 'active',
       }),
     ).toEqual({
-      type: 'zone',
+      type: 'Zona',
       id: 'z',
       name: 'Centro',
       province: 'Loja',

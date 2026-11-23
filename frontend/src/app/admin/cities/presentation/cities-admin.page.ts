@@ -11,7 +11,7 @@ import { ConfirmDialog } from '../../../shared/ui/confirm-dialog';
 import { Notice } from '../../../shared/ui/notice';
 import { ToastService } from '../../../shared/ui/toast.service';
 import { AdminCitiesStore } from '../application/admin-cities.store';
-import { CITY_TYPE_LABELS, COVERAGE_LABELS, ManagedCity } from '../domain/managed-city';
+import { ManagedCity } from '../domain/managed-city';
 import { AdminHeader } from '../../admin-header';
 
 /** RF-04-2 and RF-04-4: the cities with their zones and coverage, and the deletion of a place. */
@@ -76,15 +76,15 @@ import { AdminHeader } from '../../admin-header';
           <div class="summary">
             <h2>
               <span class="place-name">{{ item.name }}</span>
-              <span class="badge">{{ typeLabel(item) }}</span>
+              <span class="badge">{{ item.type }}</span>
             </h2>
             <p class="meta">
               <span>{{ item.province }}</span>
-              <span class="coverage" [class]="item.coverage">{{ coverageLabel(item) }}</span>
+              <span class="coverage">{{ item.coverage }}</span>
             </p>
           </div>
           <div class="actions">
-            @if (item.type === 'city') {
+            @if (item.parentCityId === null) {
               <ion-button
                 fill="clear"
                 [routerLink]="['/admin/ciudades/nueva']"
@@ -199,14 +199,6 @@ import { AdminHeader } from '../../admin-header';
       font-weight: 600;
     }
 
-    .coverage.active {
-      color: var(--rc-success);
-    }
-
-    .coverage.suspended {
-      color: var(--rc-danger);
-    }
-
     .actions {
       display: flex;
       flex-wrap: wrap;
@@ -225,16 +217,8 @@ export class CitiesAdminPage implements ViewWillEnter {
     void this.store.load();
   }
 
-  protected typeLabel(item: ManagedCity): string {
-    return CITY_TYPE_LABELS[item.type];
-  }
-
-  protected coverageLabel(item: ManagedCity): string {
-    return COVERAGE_LABELS[item.coverage];
-  }
-
   protected async remove(item: ManagedCity): Promise<void> {
-    const isCity = item.type === 'city';
+    const isCity = item.parentCityId === null;
     const deleted = await this.dialog.confirmAction({
       header: isCity ? 'Eliminar ciudad' : 'Eliminar zona',
       message: `Se eliminará "${item.name}". Solo se puede eliminar si no tiene rutas asociadas${isCity ? ' ni zonas' : ''}. Esta acción no se puede deshacer.`,

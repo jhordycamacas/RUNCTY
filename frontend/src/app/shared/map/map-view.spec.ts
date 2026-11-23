@@ -48,6 +48,32 @@ describe('MapView', () => {
     });
   });
 
+  it('reports the clicks on the map only when it is interactive', async () => {
+    const { fixture, renderer } = await render();
+    const clicks: unknown[] = [];
+    fixture.componentInstance.mapClick.subscribe((point) => clicks.push(point));
+
+    renderer.click({ lat: -3.9, lng: -79.2 });
+    expect(clicks).toEqual([]);
+
+    fixture.componentRef.setInput('interactive', true);
+    fixture.detectChanges();
+    renderer.click({ lat: -3.9, lng: -79.2 });
+    expect(clicks).toEqual([{ lat: -3.9, lng: -79.2 }]);
+    expect((fixture.nativeElement as HTMLElement).classList).toContain('rc-map-interactive');
+  });
+
+  it('passes the initial view to the map', async () => {
+    const { fixture, renderer } = await render();
+    const view = { center: { lat: -3.99, lng: -79.2 }, zoom: 13 };
+
+    fixture.componentRef.setInput('view', view);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(renderer.scene?.view).toEqual(view);
+  });
+
   it('removes the map with the component', async () => {
     const { fixture, renderer } = await render();
 

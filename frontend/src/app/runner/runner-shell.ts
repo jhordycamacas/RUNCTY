@@ -13,7 +13,7 @@ addIcons({ homeOutline, peopleOutline, personCircleOutline, play, trailSignOutli
 
 /**
  * Runner area layout: mobile-first, navigation in a bottom tab bar of five tabs with «Correr» as
- * the neon circle in the middle. The alerts open from the bell of each tab header. The panic alert
+ * the violet circle in the middle. The notifications open from the bell of each tab header. The panic alert
  * (EP-15) is triggered with a hardware button, so there is no on-screen emergency button here.
  */
 @Component({
@@ -56,7 +56,7 @@ addIcons({ homeOutline, peopleOutline, personCircleOutline, play, trailSignOutli
       font-size: var(--rc-font-size-caption);
     }
 
-    // «Correr» stands out: a neon circle (dark icon on it, 5.6:1) inside the bar, which is tall
+    // «Correr» stands out: a violet circle (white icon on it, 5.5:1) inside the bar, which is tall
     // enough for it (see _areas.scss). Lifting it with a negative margin would get it clipped by
     // the tab button's native element (overflow: hidden in its shadow DOM), so the glow is a
     // thin ring that stays inside the button too.

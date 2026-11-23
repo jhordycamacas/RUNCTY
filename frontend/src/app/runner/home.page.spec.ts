@@ -1,4 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RiskZoneAlertRepository } from '../alerts/domain/risk-zone-alert';
+import {
+  FakeRiskZoneAlertRepository,
+  riskZoneAlert,
+} from '../alerts/testing/fake-risk-zone-alert.repository';
 import { ApiError } from '../core/errors/api-error';
 import { route, slot } from '../routes/domain/testing/fixtures';
 import {
@@ -14,6 +19,7 @@ import { RunnerHomePage } from './home.page';
 describe('RunnerHomePage recommended routes', () => {
   let fixture: ComponentFixture<RunnerHomePage>;
   let backend: FakeBackend;
+  let alerts: FakeRiskZoneAlertRepository;
 
   const root = () => fixture.nativeElement as HTMLElement;
   const text = () =>
@@ -28,7 +34,12 @@ describe('RunnerHomePage recommended routes', () => {
     );
 
   async function create(): Promise<void> {
-    TestBed.configureTestingModule({ providers: provideFakeBackend(backend) });
+    TestBed.configureTestingModule({
+      providers: [
+        ...provideFakeBackend(backend),
+        { provide: RiskZoneAlertRepository, useValue: alerts },
+      ],
+    });
     fixture = TestBed.createComponent(RunnerHomePage);
     fixture.detectChanges();
     await settle(fixture);
@@ -36,6 +47,7 @@ describe('RunnerHomePage recommended routes', () => {
 
   beforeEach(() => {
     backend = fakeBackend(catalogRoutes());
+    alerts = new FakeRiskZoneAlertRepository();
   });
 
   it('greets the runner and shows the routes ordered by safety for the next slot', async () => {
@@ -54,19 +66,51 @@ describe('RunnerHomePage recommended routes', () => {
       expect(text()).toContain('Tu ciudad: Loja');
       expect(text()).toContain('Nivel de seguridad para la franja de 05:00 – 07:00');
       expect(names()).toEqual(['Ruta 90', 'Ruta 70', 'Ruta 60']);
-      expect(text()).toContain('4 rutas disponibles');
-      expect(root().querySelector('.stats .name')?.textContent?.trim()).toBe('Ruta 90');
+      expect(text()).not.toContain('rutas disponibles');
     } finally {
       vi.useRealTimers();
     }
   });
 
-  it('offers a big «Empezar a correr» that goes to the Correr tab', async () => {
+  it('offers a modest «Correr» shortcut instead of the big «Empezar a correr» hero', async () => {
     await create();
 
-    const cta = root().querySelector('a.cta');
-    expect(cta?.textContent).toContain('Empezar a correr');
-    expect(cta?.getAttribute('href')).toBe('/app/correr');
+    const shortcut = root().querySelector('a.run-shortcut');
+    expect(shortcut?.textContent?.trim()).toBe('Correr');
+    expect(shortcut?.getAttribute('href')).toBe('/app/correr');
+    expect(text()).not.toContain('Empezar a correr');
+  });
+
+  it('shows a «Novedades» block with the zone alerts and the safest route', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 10, 2, 6, 0));
+    backend.routes = [route('r1', { name: 'Ruta 90', safety: [slot('m', '05:00', '07:00', 90)] })];
+    alerts.alerts = [riskZoneAlert(), riskZoneAlert({ id: 'a2', type: 'Obras en la vía' })];
+    try {
+      await create();
+
+      const novedades = root().querySelector('section[aria-labelledby="news-title"]');
+      expect(novedades?.querySelector('h2')?.textContent).toContain('Novedades');
+      const cards = [...(novedades?.querySelectorAll('a.news-card') ?? [])];
+      expect(cards.map((card) => card.getAttribute('href'))).toEqual([
+        '/app/notificaciones',
+        '/app/notificaciones',
+        '/app/rutas/r1',
+      ]);
+      expect(novedades?.textContent).toContain('Robos frecuentes');
+      expect(novedades?.textContent).toContain('Obras en la vía');
+      expect(novedades?.textContent).toContain('Ruta 90');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('leaves out the «Novedades» block when there is nothing new', async () => {
+    backend.routes = [];
+
+    await create();
+
+    expect(root().querySelector('section[aria-labelledby="news-title"]')).toBeNull();
   });
 
   it('orders by the evening slot when that is the next window to start', async () => {

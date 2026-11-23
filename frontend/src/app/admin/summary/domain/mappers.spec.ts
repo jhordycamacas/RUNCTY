@@ -9,7 +9,24 @@ describe('toSummary', () => {
         total: 4,
         registeredLast7Days: 2,
         registeredLast30Days: 3,
-        registrationsByWeek: [{ weekStart: '2026-11-16', count: 2 }],
+        signups: {
+          daily: [{ start: '2026-11-17', count: 2 }, { start: 'soon', count: 1 }, 7],
+          weekly: [{ start: '2026-11-16', count: 2 }],
+          monthly: [{ start: '2026-11-01' }],
+          before: { daily: 3, weekly: 'many' },
+        },
+        latest: [
+          {
+            uid: 'u1',
+            firstName: 'Ana',
+            lastName: 'Mora',
+            cityId: 'loja',
+            createdAt: '2026-11-17T17:00:00Z',
+          },
+          { uid: 'u2', firstName: 7, cityId: '', createdAt: '2026-11-16T10:00:00Z' },
+          { uid: 'u3', createdAt: 'yesterday' },
+          { firstName: 'Sin uid', createdAt: '2026-11-16T10:00:00Z' },
+        ],
         sportProfiles: { completed: 1, percentage: 25 },
         bySportLevel: [{ level: 'beginner', users: 1 }, { level: 7 }, { users: 2 }],
       },
@@ -23,6 +40,7 @@ describe('toSummary', () => {
         distances: [{ name: 'Jipiro', distanceKm: 3.6 }, { name: 7 }],
       },
       cities: { cities: 1, zones: 2 },
+      safety: { activeAlerts: 2, incidentsLast30Days: 'x' },
       byCity: [
         { cityId: 'loja', name: 'Loja', routes: 2, users: 3 },
         { cityId: 'x' },
@@ -36,7 +54,23 @@ describe('toSummary', () => {
       { cityId: 'loja', name: 'Loja', routes: 2, users: 3 },
       { cityId: 'x', name: 'x', routes: 0, users: 0 },
     ]);
-    expect(summary.users?.registrationsByWeek).toEqual([{ weekStart: '2026-11-16', count: 2 }]);
+    expect(summary.users?.signups).toEqual({
+      daily: [{ start: '2026-11-17', count: 2 }],
+      weekly: [{ start: '2026-11-16', count: 2 }],
+      monthly: [{ start: '2026-11-01', count: 0 }],
+      before: { daily: 3, weekly: 0, monthly: 0 },
+    });
+    expect(summary.users?.latest).toEqual([
+      {
+        uid: 'u1',
+        firstName: 'Ana',
+        lastName: 'Mora',
+        cityId: 'loja',
+        createdAt: '2026-11-17T17:00:00Z',
+      },
+      { uid: 'u2', firstName: '', lastName: '', cityId: null, createdAt: '2026-11-16T10:00:00Z' },
+    ]);
+    expect(summary.safety).toEqual({ activeAlerts: 2, incidentsLast30Days: 0 });
     expect(summary.routes?.byCity[0]).toEqual({ cityId: 'loja', cityName: 'Loja', count: 2 });
     expect(summary.routes?.safetyLevels.low).toBe(1);
     expect(summary.routes?.distances).toEqual([{ name: 'Jipiro', distanceKm: 3.6 }]);
@@ -50,6 +84,7 @@ describe('toSummary', () => {
     expect(summary.byCity).toBeNull();
     expect(summary.routes).toBeNull();
     expect(summary.cities).toBeNull();
+    expect(summary.safety).toBeNull();
     expect(summary.truncated).toBe(false);
   });
 
@@ -57,12 +92,12 @@ describe('toSummary', () => {
     const summary = toSummary({
       users: {
         total: 'many',
-        registrationsByWeek: [{ weekStart: 'soon', count: 1 }, { weekStart: '2026-11-16' }, 7],
+        signups: { weekly: [{ start: 'soon', count: 1 }, { start: '2026-11-16' }, 7] },
       },
     });
 
     expect(summary.users?.total).toBe(0);
-    expect(summary.users?.registrationsByWeek).toEqual([{ weekStart: '2026-11-16', count: 0 }]);
+    expect(summary.users?.signups.weekly).toEqual([{ start: '2026-11-16', count: 0 }]);
     expect(summary.users?.sportProfiles).toEqual({ completed: 0, percentage: 0 });
   });
 
@@ -73,6 +108,14 @@ describe('toSummary', () => {
     });
 
     expect(summary.users?.bySportLevel).toEqual([]);
+    expect(summary.users?.signups).toEqual({
+      daily: [],
+      weekly: [],
+      monthly: [],
+      before: { daily: 0, weekly: 0, monthly: 0 },
+    });
+    expect(summary.users?.latest).toEqual([]);
+    expect(summary.safety).toBeNull();
     expect(summary.byCity).toBeNull();
     expect(summary.routes?.byCity).toEqual([]);
   });

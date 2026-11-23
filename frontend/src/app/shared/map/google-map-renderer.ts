@@ -75,7 +75,7 @@ export class GoogleMapRenderer extends MapRenderer {
   }
 
   mount(host: HTMLElement, hooks?: MapHooks): MountedMap {
-    let active = this.mountGoogle(host);
+    let active = this.mountGoogle(host, hooks);
     let latest: MapScene | null = null;
     let destroyed = false;
 
@@ -102,7 +102,7 @@ export class GoogleMapRenderer extends MapRenderer {
     };
   }
 
-  private mountGoogle(host: HTMLElement): MountedMap {
+  private mountGoogle(host: HTMLElement, hooks?: MapHooks): MountedMap {
     const maps = this.maps;
     const map = new maps.Map(host, {
       center: DEFAULT_CENTER,
@@ -111,6 +111,9 @@ export class GoogleMapRenderer extends MapRenderer {
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
+    });
+    map.addListener('click', (event: google.maps.MapMouseEvent) => {
+      if (event.latLng) hooks?.click?.({ lat: event.latLng.lat(), lng: event.latLng.lng() });
     });
     let overlays: (google.maps.Polyline | google.maps.Marker)[] = [];
     let dark = false;
@@ -191,6 +194,10 @@ export class GoogleMapRenderer extends MapRenderer {
           pendingFrame = bounds;
           framed = true;
           frame();
+        } else if (!framed && scene.view) {
+          map.setCenter(scene.view.center);
+          map.setZoom(scene.view.zoom);
+          framed = true;
         }
       },
       destroy: (): void => {

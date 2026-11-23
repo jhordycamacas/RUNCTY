@@ -4,6 +4,7 @@ import { userMessage } from '../../../core/errors/user-message';
 import { Route } from '../../../routes/domain/route';
 import { RouteAdminRepository, RouteInput } from '../domain/managed-route';
 import { filterRoutesByText } from '../domain/route-form';
+import { RouteImageChange } from '../domain/route-image';
 import { RoutePlace, toRoutePlaces } from '../domain/route-places';
 
 /**
@@ -94,6 +95,12 @@ export class AdminRoutesStore {
       this.list.set(null);
     }
     return id;
+  }
+
+  /** Sets or removes the custom image of an existing route. */
+  async applyImage(routeId: string, change: RouteImageChange): Promise<void> {
+    if (change.kind === 'set') await this.repository.setImage(routeId, change.input);
+    else await this.repository.removeImage(routeId);
   }
 
   /** Deletes a route (cascading to its segments, slots and factors) and drops it from the list. */

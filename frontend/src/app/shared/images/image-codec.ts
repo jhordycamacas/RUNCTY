@@ -11,6 +11,8 @@ export interface DecodedImage {
   height: number;
   /** Draws the crop scaled to `size` x `size` and returns it as a JPEG data URL. */
   encode(crop: SquareCrop, size: number, quality: number): string;
+  /** Draws the whole picture scaled to `width` x `height` and returns it as a JPEG data URL. */
+  encodeFit(width: number, height: number, quality: number): string;
   /** Frees the decoded pixels; the picture is not usable afterwards. */
   close(): void;
 }

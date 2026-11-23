@@ -86,6 +86,17 @@ const isDetailTab = (value: string | null): value is DetailTab =>
           }
         </section>
 
+        @if (routeMap(); as scene) {
+          <app-map-view
+            class="route-map"
+            label="Mapa de la ruta"
+            [lines]="scene.lines"
+            [markers]="scene.markers"
+          />
+        } @else {
+          <p class="no-map muted">Esta ruta aún no tiene puntos para mostrar en el mapa.</p>
+        }
+
         <div class="tabs" role="tablist" aria-label="Partes de la ruta">
           @for (tab of tabs; track tab.id) {
             <button
@@ -137,14 +148,6 @@ const isDetailTab = (value: string | null): value is DetailTab =>
           aria-labelledby="route-tab-tramos"
           [hidden]="activeTab() !== 'tramos'"
         >
-          @if (routeMap(); as scene) {
-            <app-map-view
-              class="route-map"
-              label="Mapa de la ruta"
-              [lines]="scene.lines"
-              [markers]="scene.markers"
-            />
-          }
           <app-segments-section />
         </div>
       } @else if (store.error(); as failure) {
@@ -264,6 +267,10 @@ const isDetailTab = (value: string | null): value is DetailTab =>
       margin-bottom: var(--rc-space-lg);
     }
 
+    .no-map {
+      margin: 0 0 var(--rc-space-lg);
+    }
+
     app-safety-summary-section,
     app-time-slots-section,
     app-segments-section {
@@ -302,13 +309,25 @@ export class RouteDetailPage implements ViewWillEnter, HasUnsavedChanges {
     const detail = this.store.detail();
     return detail ? routeSlotLevels(detail.route) : [];
   });
-  /** The segments in order on the map, in neon: the levels per slot are listed below it. */
+  /**
+   * The route on the map: its start and end points (the segment ends when it has none) and the
+   * segments in order, in neon; the levels per slot are listed below. Null when there is nothing
+   * to draw.
+   */
   protected readonly routeMap = computed(() => {
-    const segments = this.store.detail()?.segments ?? [];
+    const detail = this.store.detail();
+    if (!detail) return null;
+    const { start, end } = detail.route;
     const scene = routeMapScene(
-      segments.map((segment) => ({ coordinates: segment.coordinates, level: null })),
+      detail.segments.map((segment) => ({ coordinates: segment.coordinates, level: null })),
     );
-    return scene.lines.length > 0 ? scene : null;
+    const markers = start || end
+      ? [
+          ...(start ? [{ kind: 'start' as const, at: { lat: start.lat, lng: start.lng } }] : []),
+          ...(end ? [{ kind: 'end' as const, at: { lat: end.lat, lng: end.lng } }] : []),
+        ]
+      : scene.markers;
+    return scene.lines.length > 0 || markers.length > 0 ? { lines: scene.lines, markers } : null;
   });
   protected readonly meta = computed(() => {
     const route = this.store.detail()?.route;

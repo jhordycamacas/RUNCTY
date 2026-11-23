@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { CityRepository } from '../../../cities/domain/city';
 import { CatalogRepository } from '../../../core/catalogs/catalog';
 import { fakeCatalogRepository } from '../../../core/catalogs/testing/fake-catalog.repository';
 import { ApiError } from '../../../core/errors/api-error';
@@ -18,6 +19,7 @@ describe('SummaryPage', () => {
         SummaryStore,
         { provide: SummaryRepository, useValue: { get } },
         { provide: CatalogRepository, useValue: fakeCatalogRepository() },
+        { provide: CityRepository, useValue: { list: async () => [{ id: 'loja', name: 'Loja' }] } },
       ],
     });
     const fixture = TestBed.createComponent(SummaryPage);
@@ -36,7 +38,7 @@ describe('SummaryPage', () => {
       (el) => el.querySelector('h2')?.textContent?.trim() === title,
     ) as HTMLElement;
 
-  it('opens with four plain-worded number cards from the figures the endpoint returned', async () => {
+  it('opens with six plain-worded number cards from the figures the endpoint returned', async () => {
     const page = await open();
     const cards = Array.from(page.querySelectorAll('.kpis app-kpi-tile')).map((tile) => ({
       label: tile.querySelector('.label')?.textContent?.trim(),
@@ -49,6 +51,8 @@ describe('SummaryPage', () => {
       { label: 'Usuarios registrados', value: '12', hint: '9 nuevos en los últimos 30 días' },
       { label: 'Ciudades con rutas', value: '1', hint: 'de 1 ciudad registrada' },
       { label: 'Usuarios con perfil deportivo', value: '6', hint: 'de 12 usuarios (50 %)' },
+      { label: 'Alertas de zona activas', value: '2', hint: 'vigentes ahora mismo' },
+      { label: 'Incidentes en 30 días', value: '7', hint: 'registrados en el último mes' },
     ]);
     expect(page.textContent).not.toMatch(/KPI|pipeline|slice/i);
   });
@@ -57,7 +61,7 @@ describe('SummaryPage', () => {
     const card = section(await open(), 'Rutas y usuarios por ciudad');
 
     expect(card.querySelector('.note')?.textContent).toContain('ciudad');
-    expect(card.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(
+    expect(card.querySelector('[role="img"][aria-label]')?.getAttribute('aria-label')).toBe(
       'Rutas y usuarios por ciudad. Loja: Rutas 4, Usuarios 9. Quito: Rutas 1, Usuarios 3',
     );
   });
@@ -77,14 +81,60 @@ describe('SummaryPage', () => {
     ]);
   });
 
-  it('words the safety levels and the weekly sign-ups plainly, never as "segura"', async () => {
+  it('words the safety levels plainly, never as "segura"', async () => {
     const page = await open();
     const safety = section(page, 'Qué tan seguras son las rutas');
 
     const legend = Array.from(safety.querySelectorAll('.legend .name')).map((el) => el.textContent);
     expect(legend).toEqual(['Alta', 'Media', 'Baja', 'Sin evaluar']);
-    expect(section(page, 'Usuarios nuevos por semana')).toBeTruthy();
     expect(page.textContent).not.toMatch(/\bsegura\b|\binsegura\b/i);
+  });
+
+  it('puts the acquisition histogram right under the number cards, as the main chart', async () => {
+    const page = await open();
+    const blocks = Array.from(page.querySelectorAll('.page > *')).map((el) => el.tagName);
+    const hero = page.querySelector('app-acquisition-chart') as HTMLElement;
+
+    expect(blocks.indexOf('APP-ACQUISITION-CHART')).toBe(blocks.indexOf('SECTION') + 1);
+    expect(hero.querySelector('h2')?.textContent?.trim()).toBe('Adquisición de nuevos usuarios');
+    expect(hero.querySelectorAll('g.column')).toHaveLength(3);
+    expect(page.textContent).not.toContain('Usuarios nuevos por semana');
+  });
+
+  it('lists the newest accounts next to the city comparison, with the name of their city', async () => {
+    const page = await open();
+    const latest = section(page, 'Últimos usuarios registrados');
+
+    expect(latest.querySelector('.note')).not.toBeNull();
+    expect(
+      Array.from(latest.querySelectorAll('li .name')).map((el) => el.textContent?.trim()),
+    ).toEqual(['Ana Mora', 'Luis Paz']);
+    expect(latest.querySelector('li .city')?.textContent?.trim()).toBe('Loja');
+    expect(latest.querySelector('a')?.getAttribute('href')).toBe('/admin/usuarios/u1');
+    expect(latest.closest('.row')).toBe(
+      section(page, 'Rutas y usuarios por ciudad').closest('.row'),
+    );
+  });
+
+  it('tints only the number cards: no tile inside a panel', async () => {
+    const page = await open();
+
+    expect(page.querySelectorAll('.kpis app-kpi-tile')).toHaveLength(6);
+    expect(page.querySelector('.card app-kpi-tile')).toBeNull();
+  });
+
+  it('gives every panel a header with an icon, a title and a one-line explanation', async () => {
+    const page = await open();
+
+    for (const title of [
+      'Rutas y usuarios por ciudad',
+      'Usuarios por nivel deportivo',
+      'Qué tan seguras son las rutas',
+    ]) {
+      const card = section(page, title);
+      expect(card.querySelector('ion-icon')).not.toBeNull();
+      expect(card.querySelector('.note')?.textContent?.trim()).not.toBe('');
+    }
   });
 
   it('keeps the longest routes under a collapsed "Más detalles"', async () => {
@@ -123,8 +173,42 @@ describe('SummaryPage', () => {
 
     const page = await open();
 
-    expect(page.textContent).not.toContain('Usuarios nuevos por semana');
+    expect(page.querySelector('app-acquisition-chart')).toBeNull();
+    expect(page.textContent).not.toContain('Últimos usuarios registrados');
     expect(page.textContent).toContain('Rutas activas');
+  });
+
+  it('leaves out the safety tiles for a caller without route management', async () => {
+    get.mockResolvedValue(summaryFixture({ routes: null, safety: null }));
+
+    const page = await open();
+
+    const labels = Array.from(page.querySelectorAll('.kpis .label')).map((el) => el.textContent);
+    expect(labels).toEqual(['Usuarios registrados', 'Usuarios con perfil deportivo']);
+  });
+
+  it('does not crash when the sign-ups and the latest accounts are missing from an older answer', async () => {
+    const old = summaryFixture();
+    get.mockResolvedValue({
+      ...old,
+      safety: null,
+      users: old.users && {
+        ...old.users,
+        signups: {
+          daily: [],
+          weekly: [],
+          monthly: [],
+          before: { daily: 0, weekly: 0, monthly: 0 },
+        },
+        latest: [],
+      },
+    });
+
+    const page = await open();
+
+    expect(page.textContent).toContain('Todavía no hay usuarios registrados');
+    expect(page.textContent).toContain('Rutas activas');
+    expect(page.querySelectorAll('.kpis app-kpi-tile')).toHaveLength(4);
   });
 
   it('says so when the caller may see no block', async () => {
@@ -163,6 +247,7 @@ describe('SummaryPage', () => {
         SummaryStore,
         { provide: SummaryRepository, useValue: { get } },
         { provide: CatalogRepository, useValue: fakeCatalogRepository() },
+        { provide: CityRepository, useValue: { list: async () => [] } },
       ],
     });
     const fixture = TestBed.createComponent(SummaryPage);

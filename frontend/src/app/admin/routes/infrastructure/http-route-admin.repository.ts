@@ -12,6 +12,7 @@ import {
   SegmentInput,
   TimeSlotInput,
 } from '../domain/managed-route';
+import { RouteImageInput } from '../domain/route-image';
 
 const encode = encodeURIComponent;
 const routePath = (routeId: string) => `/routes/${encode(routeId)}`;
@@ -49,6 +50,14 @@ export class HttpRouteAdminRepository extends RouteAdminRepository {
 
   deleteRoute(routeId: string): Promise<void> {
     return this.done(this.api.delete(routePath(routeId)));
+  }
+
+  setImage(routeId: string, input: RouteImageInput): Promise<void> {
+    return this.done(this.api.put(`${routePath(routeId)}/image`, input));
+  }
+
+  removeImage(routeId: string): Promise<void> {
+    return this.done(this.api.delete(`${routePath(routeId)}/image`));
   }
 
   createSegment(routeId: string, input: SegmentInput): Promise<string> {

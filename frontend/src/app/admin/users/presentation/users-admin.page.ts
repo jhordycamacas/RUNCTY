@@ -18,15 +18,7 @@ import { AdminHeader } from '../../admin-header';
  */
 @Component({
   selector: 'app-users-admin-page',
-  imports: [
-    AdminHeader,
-    IonButton,
-    IonContent,
-    IonInput,
-    IonSpinner,
-    Notice,
-    RouterLink,
-  ],
+  imports: [AdminHeader, IonButton, IonContent, IonInput, IonSpinner, Notice, RouterLink],
   template: `
     <app-admin-header title="Usuarios" />
     <ion-content class="ion-padding">
@@ -102,7 +94,11 @@ import { AdminHeader } from '../../admin-header';
           </ul>
           @if (store.hasMore()) {
             <div class="more">
-              <ion-button fill="outline" [disabled]="store.loadingMore()" (click)="store.loadMore()">
+              <ion-button
+                fill="outline"
+                [disabled]="store.loadingMore()"
+                (click)="store.loadMore()"
+              >
                 @if (store.loadingMore()) {
                   <ion-spinner name="crescent" aria-label="Cargando" />
                 } @else {
@@ -247,7 +243,10 @@ export class UsersAdminPage implements ViewWillEnter {
 
   /** The catalogue, plus the current role when it was deleted from it. */
   protected roleOptions(user: ManagedUser): SelectOption[] {
-    const options = (this.roles.roles() ?? []).map((role) => ({ value: role.id, label: role.name }));
+    const options = (this.roles.roles() ?? []).map((role) => ({
+      value: role.id,
+      label: role.name,
+    }));
     if (user.role !== null && !options.some((option) => option.value === user.role)) {
       options.push({ value: user.role, label: user.role });
     }

@@ -42,7 +42,7 @@ addIcons({ lockClosedOutline, mapOutline, shieldOutline });
 
     ion-icon {
       font-size: 3.5rem;
-      color: var(--rc-primary-text);
+      color: var(--rc-text-muted);
     }
 
     h1 {

@@ -13,6 +13,10 @@ export class FakeGoogleMap {
     readonly host: HTMLElement,
     readonly options: Record<string, unknown>,
   ) {}
+  readonly listeners: Record<string, (event: unknown) => void> = {};
+  addListener(name: string, listener: (event: unknown) => void): void {
+    this.listeners[name] = listener;
+  }
   setCenter(center: Latlng): void {
     this.center = center;
   }

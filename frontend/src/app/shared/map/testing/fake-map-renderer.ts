@@ -1,5 +1,12 @@
 import { Provider } from '@angular/core';
-import { MAP_RENDERER, MapRenderer, MapScene, MountedMap } from '../map-renderer';
+import {
+  MAP_RENDERER,
+  MapHooks,
+  MapPoint,
+  MapRenderer,
+  MapScene,
+  MountedMap,
+} from '../map-renderer';
 
 /** Records what the screens ask the map to show, without a real map (it needs a laid-out DOM). */
 export class FakeMapRenderer extends MapRenderer {
@@ -12,7 +19,15 @@ export class FakeMapRenderer extends MapRenderer {
     return this.scenes.at(-1);
   }
 
-  mount(): MountedMap {
+  private hooks: MapHooks | undefined;
+
+  /** Simulates a click on the map. */
+  click(point: MapPoint): void {
+    this.hooks?.click?.(point);
+  }
+
+  mount(_host?: HTMLElement, hooks?: MapHooks): MountedMap {
+    this.hooks = hooks;
     this.mounts++;
     return {
       show: (scene) => this.scenes.push(scene),

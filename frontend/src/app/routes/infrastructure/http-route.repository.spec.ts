@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ApiClient } from '../../core/api/api-client';
+import { ApiError } from '../../core/errors/api-error';
 import { HttpRouteRepository } from './http-route.repository';
 
 describe('HttpRouteRepository', () => {
@@ -39,5 +40,47 @@ describe('HttpRouteRepository', () => {
     expect(get).toHaveBeenCalledWith('/routes/a%2Fb');
     expect(detail.route.id).toBe('a/b');
     expect(detail.segments.map((s) => s.id)).toEqual(['s1']);
+  });
+
+  it('keeps the thumbnail of a route only when it is an image data URL', async () => {
+    const thumb = 'data:image/jpeg;base64,AAAA';
+    get.mockReturnValue(
+      of({
+        routes: [
+          { id: 'a', imageThumb: thumb },
+          { id: 'b', imageThumb: 'https://example.com/x.jpg' },
+          { id: 'c', imageThumb: null },
+          { id: 'd' },
+        ],
+      }),
+    );
+
+    const routes = await repository.listByCity('loja');
+
+    expect(routes.map((route) => route.imageThumb)).toEqual([thumb, null, null, null]);
+  });
+
+  it('reads the full image of a route, encoding the id', async () => {
+    get.mockReturnValue(of({ image: 'data:image/png;base64,AAAA' }));
+
+    expect(await repository.getImage('a/b')).toBe('data:image/png;base64,AAAA');
+    expect(get).toHaveBeenCalledWith('/routes/a%2Fb/image');
+  });
+
+  it('answers null when the route has no image, but not for other failures', async () => {
+    get.mockReturnValueOnce(
+      throwError(() => new ApiError(404, 'route-image-not-found', 'Sin imagen.')),
+    );
+    expect(await repository.getImage('r1')).toBeNull();
+
+    const failure = new ApiError(0, 'network', 'sin conexión');
+    get.mockReturnValueOnce(throwError(() => failure));
+    await expect(repository.getImage('r1')).rejects.toBe(failure);
+  });
+
+  it('ignores an image that is not a data URL', async () => {
+    get.mockReturnValue(of({ image: 'javascript:alert(1)' }));
+
+    expect(await repository.getImage('r1')).toBeNull();
   });
 });

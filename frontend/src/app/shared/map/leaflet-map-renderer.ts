@@ -41,6 +41,11 @@ export class LeafletMapRenderer extends MapRenderer {
     const map = L.map(host, { zoomControl: true }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
     L.tileLayer(TILES_URL, { maxZoom: MAX_ZOOM, attribution: ATTRIBUTION }).addTo(map);
     const layers = L.layerGroup().addTo(map);
+    map.on('click', (event: L.LeafletMouseEvent) => {
+      // Panning across the world copies makes longitudes beyond ±180: bring them back.
+      const { lat, lng } = event.latlng.wrap();
+      hooks?.click?.({ lat, lng });
+    });
     let framed = false;
     // What to frame once the map has a size: a hidden tab or a page still in its transition is
     // 0×0, and fitting then would pick a wrong zoom.
@@ -90,6 +95,10 @@ export class LeafletMapRenderer extends MapRenderer {
           pendingFrame = L.latLngBounds(points);
           framed = true;
           frame();
+        } else if (!framed && scene.view) {
+          const { center, zoom } = scene.view;
+          map.setView([center.lat, center.lng], zoom);
+          framed = true;
         }
       },
       destroy(): void {

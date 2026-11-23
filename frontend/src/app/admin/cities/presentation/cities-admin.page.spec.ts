@@ -15,10 +15,10 @@ import {
 import { CitiesAdminPage } from './cities-admin.page';
 
 const CITIES = [
-  city('loja', { name: 'Loja', province: 'Loja', coverage: 'active' }),
-  zone('loja-centro', 'loja', { name: 'Centro', coverage: 'planned' }),
-  zone('loja-norte', 'loja', { name: 'Norte', coverage: 'suspended' }),
-  city('quito', { name: 'Quito', province: 'Pichincha', coverage: 'planned' }),
+  city('loja', { name: 'Loja', province: 'Loja', coverage: 'Activa' }),
+  zone('loja-centro', 'loja', { name: 'Centro', coverage: 'Planificada' }),
+  zone('loja-norte', 'loja', { name: 'Norte', coverage: 'Suspendida' }),
+  city('quito', { name: 'Quito', province: 'Pichincha', coverage: 'Planificada' }),
   zone('huerfana', 'gone', { name: 'Zona huérfana' }),
 ];
 
@@ -80,8 +80,17 @@ describe('CitiesAdminPage', () => {
     expect(row('Quito').textContent).toContain('Planificada');
     expect(row('Norte').textContent).toContain('Suspendida');
     expect(row('Centro').textContent).toContain('Zona');
+    expect(row('Loja').textContent).toContain('city');
     expect(root().querySelectorAll('li.group')).toHaveLength(3);
     expect(root().querySelector('li.group ul .place-name')?.textContent?.trim()).toBe('Centro');
+  });
+
+  it('shows the type the admin typed, as typed', async () => {
+    repository.list.mockResolvedValue([city('x', { name: 'Equis', type: 'Región amazónica' })]);
+
+    await create();
+
+    expect(row('Equis').textContent).toContain('Región amazónica');
   });
 
   it('shows a loading state while the catalogue arrives', async () => {

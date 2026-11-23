@@ -11,6 +11,7 @@ import {
   Segment,
   Severity,
 } from '../../../routes/domain/route';
+import { RouteImageInput } from './route-image';
 
 /** A window of the day the index is computed for. `endTime` may be `24:00` (midnight). */
 export interface TimeSlot {
@@ -97,6 +98,10 @@ export abstract class RouteAdminRepository {
   abstract updateRoute(routeId: string, input: RouteInput): Promise<void>;
   /** Cascades to segments, risk factors and time slots. */
   abstract deleteRoute(routeId: string): Promise<void>;
+  /** Replaces the custom image of the route (the full picture and its thumbnail). */
+  abstract setImage(routeId: string, input: RouteImageInput): Promise<void>;
+  /** Idempotent: removing a missing image is not an error. */
+  abstract removeImage(routeId: string): Promise<void>;
   abstract createSegment(routeId: string, input: SegmentInput): Promise<string>;
   abstract updateSegment(routeId: string, segmentId: string, input: SegmentInput): Promise<void>;
   /** Also deletes the segment's risk factors. */

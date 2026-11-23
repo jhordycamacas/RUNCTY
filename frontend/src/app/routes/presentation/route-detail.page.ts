@@ -65,6 +65,9 @@ addIcons({ helpCircleOutline, mapOutline });
         }
         @default {
           @if (store.detail(); as detail) {
+            @if (routeImage(); as image) {
+              <img class="hero" [src]="image" [alt]="'Imagen de ' + detail.route.name" />
+            }
             <h1>{{ detail.route.name }}</h1>
             @if (detail.route.description) {
               <p class="muted">{{ detail.route.description }}</p>
@@ -239,7 +242,7 @@ addIcons({ helpCircleOutline, mapOutline });
       overflow-wrap: anywhere;
     }
 
-    // Distance and elevation in big condensed numerals, distance in neon.
+    // Distance and elevation in big condensed numerals, in the regular text color.
     .stat dd.figure {
       font-family: var(--rc-font-family-display);
       font-size: calc(var(--rc-font-size-display) * 1.5);
@@ -247,8 +250,12 @@ addIcons({ helpCircleOutline, mapOutline });
       line-height: 1;
     }
 
-    .stat:first-child dd.figure {
-      color: var(--rc-primary-text);
+    .hero {
+      display: block;
+      width: 100%;
+      max-height: 16rem;
+      border-radius: var(--rc-radius-lg);
+      object-fit: cover;
     }
 
     .route-map {
@@ -276,9 +283,9 @@ addIcons({ helpCircleOutline, mapOutline });
       gap: var(--rc-space-sm);
       min-height: var(--rc-min-touch-target);
       padding: 0 var(--rc-space-lg);
-      border: 1px solid var(--rc-primary-text);
+      border: 1px solid var(--rc-control-border);
       border-radius: var(--rc-radius-pill);
-      color: var(--rc-primary-text);
+      color: var(--rc-text);
       font-weight: 600;
       text-decoration: none;
     }
@@ -345,6 +352,11 @@ export class RouteDetailPage {
     const route = this.route();
     return route ? routeSafetyForSlot(route, this.slotKey()) : null;
   });
+
+  /** The full image once it arrives; the thumbnail meanwhile, and when the full one fails. */
+  protected readonly routeImage = computed(
+    () => this.store.fullImage() ?? this.route()?.imageThumb ?? null,
+  );
 
   protected readonly distance = computed(() =>
     formatDistance(this.route()?.distanceKm ?? 0, this.units()),

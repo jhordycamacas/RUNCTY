@@ -7,10 +7,11 @@ import {
   effect,
   inject,
   input,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
-import { MAP_RENDERER, MapLine, MapMarker, MountedMap } from './map-renderer';
+import { MAP_RENDERER, MapLine, MapMarker, MapPoint, MapScene, MountedMap } from './map-renderer';
 
 /**
  * An interactive map that draws `lines` and `markers` (the map port, `map-renderer.ts`). The map
@@ -20,7 +21,11 @@ import { MAP_RENDERER, MapLine, MapMarker, MountedMap } from './map-renderer';
 @Component({
   selector: 'app-map-view',
   encapsulation: ViewEncapsulation.None,
-  host: { role: 'region', '[attr.aria-label]': 'label()' },
+  host: {
+    role: 'region',
+    '[attr.aria-label]': 'label()',
+    '[class.rc-map-interactive]': 'interactive()',
+  },
   template: `
     <div #canvas class="rc-map-canvas"></div>
     @if (failed()) {
@@ -70,6 +75,11 @@ import { MAP_RENDERER, MapLine, MapMarker, MountedMap } from './map-renderer';
       font-size: var(--rc-font-size-label);
     }
 
+    // A map to aim on: the crosshair says a click marks a point.
+    app-map-view.rc-map-interactive .leaflet-container {
+      cursor: crosshair;
+    }
+
     // Zoom buttons with the 48px touch target.
     app-map-view .leaflet-bar a {
       width: 48px;
@@ -114,6 +124,11 @@ export class MapView {
   readonly markers = input<readonly MapMarker[]>([]);
   /** Keep the `position` marker centred. */
   readonly follow = input(false);
+  /** Where to look while there is nothing to frame (see `MapScene.view`). */
+  readonly view = input<MapScene['view']>();
+  /** Report the clicks on the map through `mapClick`, and show a pointer to aim with. */
+  readonly interactive = input(false);
+  readonly mapClick = output<MapPoint>();
 
   private readonly loadRenderer = inject(MAP_RENDERER);
   private readonly canvas = viewChild.required<ElementRef<HTMLElement>>('canvas');
@@ -135,6 +150,9 @@ export class MapView {
             this.mounted.set(
               renderer.mount(this.canvas().nativeElement, {
                 notice: (text) => this.notice.set(text),
+                click: (point) => {
+                  if (this.interactive()) this.mapClick.emit(point);
+                },
               }),
             );
         },
@@ -143,7 +161,12 @@ export class MapView {
     });
 
     effect(() => {
-      this.mounted()?.show({ lines: this.lines(), markers: this.markers(), follow: this.follow() });
+      this.mounted()?.show({
+        lines: this.lines(),
+        markers: this.markers(),
+        follow: this.follow(),
+        view: this.view(),
+      });
     });
   }
 }

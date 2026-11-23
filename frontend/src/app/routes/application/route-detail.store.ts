@@ -14,7 +14,11 @@ export class RouteDetailStore {
   private readonly failure = signal<string | null>(null);
   private readonly gone = signal(false);
 
+  private readonly full = signal<string | null>(null);
+
   readonly detail = this.stored.asReadonly();
+  /** The full custom image of the route; null until it arrives, or when it cannot be loaded. */
+  readonly fullImage = this.full.asReadonly();
   readonly error = this.failure.asReadonly();
   readonly status = computed<RouteDetailStatus>(() => {
     if (this.stored()) return 'ready';
@@ -25,8 +29,11 @@ export class RouteDetailStore {
   async load(routeId: string): Promise<void> {
     this.failure.set(null);
     try {
-      this.stored.set(await this.repository.get(routeId));
+      const detail = await this.repository.get(routeId);
+      this.stored.set(detail);
       this.gone.set(false);
+      // Not awaited: the page shows the thumbnail meanwhile and keeps it if this fails.
+      void this.loadImage(detail);
     } catch (error) {
       if (error instanceof ApiError && error.reason === 'route-not-found') {
         this.stored.set(null);
@@ -35,6 +42,18 @@ export class RouteDetailStore {
         this.gone.set(false);
         this.failure.set(userMessage(error));
       }
+    }
+  }
+
+  private async loadImage(detail: RouteDetail): Promise<void> {
+    this.full.set(null);
+    if (!detail.route.imageThumb) return;
+    try {
+      const image = await this.repository.getImage(detail.route.id);
+      // A later load of another route may have replaced the detail meanwhile.
+      if (this.stored() === detail) this.full.set(image);
+    } catch {
+      // The thumbnail already on screen is a good enough fallback.
     }
   }
 }

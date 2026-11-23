@@ -75,7 +75,7 @@ const ICONS: Record<NoticeTone, string> = {
     }
 
     .info ion-icon {
-      color: var(--rc-primary-text);
+      color: var(--rc-text-muted);
     }
   `,
 })

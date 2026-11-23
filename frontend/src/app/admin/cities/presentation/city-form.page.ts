@@ -26,7 +26,6 @@ import {
   parseCityForm,
   toCityForm,
 } from '../domain/city-form';
-import { CITY_TYPES, CITY_TYPE_LABELS, COVERAGES, COVERAGE_LABELS } from '../domain/managed-city';
 import { AdminHeader } from '../../admin-header';
 
 const LIST_URL = '/admin/ciudades';
@@ -64,22 +63,20 @@ const LIST_URL = '/admin/ciudades';
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <h2 #heading tabindex="-1">{{ title() }}</h2>
 
-          <app-select-field
+          <app-text-field
             formControlName="type"
             label="Tipo"
-            placeholder="Elige el tipo"
-            [options]="types"
+            hint="Texto libre, por ejemplo Ciudad, Zona o Barrio."
+            [maxlength]="40"
             [error]="errorFor('type')"
           />
-          @if (isZone()) {
-            <app-select-field
-              formControlName="parentCityId"
-              label="Ciudad a la que pertenece"
-              placeholder="Elige la ciudad"
-              [options]="parentOptions()"
-              [error]="errorFor('parentCityId')"
-            />
-          }
+          <app-select-field
+            formControlName="parentCityId"
+            label="Ciudad a la que pertenece (opcional)"
+            placeholder="Ninguna (es una ciudad)"
+            [options]="parentOptions()"
+            [error]="errorFor('parentCityId')"
+          />
           <app-text-field
             formControlName="id"
             label="Identificador"
@@ -120,11 +117,11 @@ const LIST_URL = '/admin/ciudades';
             </div>
           </fieldset>
 
-          <app-select-field
+          <app-text-field
             formControlName="coverage"
             label="Cobertura"
-            placeholder="Elige la cobertura"
-            [options]="coverages"
+            hint="Texto libre, por ejemplo active, planificada o suspendida. Con «active» se habilitan las rutas seguras de la ciudad."
+            [maxlength]="60"
             [error]="errorFor('coverage')"
           />
 
@@ -203,16 +200,11 @@ export class CityFormPage implements HasUnsavedChanges {
   private readonly cityId = this.snapshot.paramMap.get('id');
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
 
-  protected readonly types: SelectOption[] = CITY_TYPES.map((value) => ({
-    value,
-    label: CITY_TYPE_LABELS[value],
-  }));
-  protected readonly coverages: SelectOption[] = COVERAGES.map((value) => ({
-    value,
-    label: COVERAGE_LABELS[value],
-  }));
   protected readonly parentOptions = computed<SelectOption[]>(() =>
-    this.store.parentOptions().map((parent) => ({ value: parent.id, label: parent.name })),
+    this.store
+      .parentOptions()
+      .filter((parent) => parent.id !== this.cityId)
+      .map((parent) => ({ value: parent.id, label: parent.name })),
   );
 
   protected readonly form = inject(FormBuilder).nonNullable.group<CityForm>({
@@ -222,7 +214,7 @@ export class CityFormPage implements HasUnsavedChanges {
   private readonly errors = computed(
     () => parseCityForm(this.values(), this.cityId !== null).errors ?? {},
   );
-  protected readonly isZone = computed(() => this.values().type === 'zone');
+  protected readonly isZone = computed(() => this.values().parentCityId !== '');
   protected readonly title = computed(() => {
     if (!this.cityId) return 'Nueva ciudad o zona';
     return this.isZone() ? 'Editar zona' : 'Editar ciudad';
@@ -245,7 +237,7 @@ export class CityFormPage implements HasUnsavedChanges {
     }
     void this.store.load();
     const parent = this.snapshot.queryParamMap.get('ciudad');
-    this.adopt(parent ? { ...EMPTY_CITY_FORM, type: 'zone', parentCityId: parent } : EMPTY_CITY_FORM);
+    this.adopt(parent ? { ...EMPTY_CITY_FORM, parentCityId: parent } : EMPTY_CITY_FORM);
   }
 
   hasUnsavedChanges(): boolean {
@@ -278,7 +270,7 @@ export class CityFormPage implements HasUnsavedChanges {
     try {
       await this.store.save(this.cityId, input);
       this.baseline.set(this.form.getRawValue());
-      await this.toast.success(this.savedMessage(input.type === 'zone'));
+      await this.toast.success(this.savedMessage(input.parentCityId !== null));
       await this.router.navigateByUrl(LIST_URL);
     } catch (error) {
       this.error.set(userMessage(error));
@@ -296,7 +288,6 @@ export class CityFormPage implements HasUnsavedChanges {
     this.form.reset(values);
     if (this.cityId) {
       this.form.controls.id.disable();
-      this.form.controls.type.disable();
     }
     this.baseline.set(this.form.getRawValue());
     this.submitted.set(false);

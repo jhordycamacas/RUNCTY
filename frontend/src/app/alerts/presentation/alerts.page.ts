@@ -12,8 +12,9 @@ import { RiskZoneAlertItem } from './risk-zone-alert-item';
 addIcons({ shieldCheckmarkOutline });
 
 /**
- * «Alertas» tab: the risk-zone alerts in force in the runner's city (RF-07-12 to RF-07-15). The
- * notifications of EP-18 will join this list later.
+ * «Notificaciones» page (opened from the bell of each tab): the risk-zone alerts in force in the
+ * runner's city (RF-07-12 to RF-07-15), shown as notifications. The notifications of EP-18 will
+ * join this list later.
  */
 @Component({
   selector: 'app-alerts-page',
@@ -28,7 +29,7 @@ addIcons({ shieldCheckmarkOutline });
     SubpageHeader,
   ],
   template: `
-    <app-subpage-header title="Alertas" backTo="/app/inicio" />
+    <app-subpage-header title="Notificaciones" backTo="/app/inicio" />
     <ion-content>
       <div class="page">
         <p class="intro">
@@ -38,7 +39,7 @@ addIcons({ shieldCheckmarkOutline });
 
         @switch (state().kind) {
           @case ('loading') {
-            <p class="state" role="status"><ion-spinner name="crescent" /> Cargando alertas…</p>
+            <p class="state" role="status"><ion-spinner name="crescent" /> Cargando notificaciones…</p>
           }
           @case ('error') {
             <app-notice [message]="errorMessage()" />
@@ -47,7 +48,7 @@ addIcons({ shieldCheckmarkOutline });
           @case ('no-city') {
             <section class="empty">
               <h2>Elige tu ciudad</h2>
-              <p>Así podremos mostrarte las alertas de la zona donde corres.</p>
+              <p>Así podremos mostrarte las notificaciones de la zona donde corres.</p>
               <ion-button routerLink="/app/cuenta/datos">Elegir ciudad</ion-button>
             </section>
           }
@@ -57,14 +58,15 @@ addIcons({ shieldCheckmarkOutline });
                 <span class="badge" aria-hidden="true"
                   ><ion-icon name="shield-checkmark-outline"
                 /></span>
-                <h2>No hay alertas activas en tu zona</h2>
+                <h2>No tienes notificaciones</h2>
                 @if (city.cityName(); as name) {
                   <p>Cuando se reporte una zona de riesgo en {{ name }}, la verás aquí.</p>
                 }
               </section>
             } @else {
               <h2 class="count">
-                {{ alerts().length }} {{ alerts().length === 1 ? 'alerta activa' : 'alertas activas' }}
+                {{ alerts().length }}
+                {{ alerts().length === 1 ? 'notificación' : 'notificaciones' }}
               </h2>
               <ul>
                 @for (alert of alerts(); track alert.id) {
@@ -114,7 +116,7 @@ addIcons({ shieldCheckmarkOutline });
       margin-bottom: var(--rc-space-sm);
       border-radius: var(--rc-radius-pill);
       background: var(--rc-primary-tint);
-      color: var(--rc-primary-text);
+      color: var(--rc-text-muted);
       font-size: 1.75rem;
     }
 

@@ -4,6 +4,8 @@ import { Router, provideRouter } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { Session } from '../../core/permissions/permissions';
 import { provideSystemSettings } from '../../core/settings/testing/fake-system-settings.store';
+import { FriendRepository } from '../../friends/domain/friend';
+import { FakeFriendRepository, profile } from '../../friends/testing/fake-friend.repository';
 import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { ProfilePhotoRepository } from '../domain/profile-photo';
 import { FakeProfilePhotoRepository } from '../testing/fake-profile-photo.repository';
@@ -31,6 +33,7 @@ describe('ProfileHomePage', () => {
   let get: ReturnType<typeof vi.fn<ProfileRepository['get']>>;
   let emailVerified: boolean;
   let photos: FakeProfilePhotoRepository;
+  let friendRepository: FakeFriendRepository;
   const session = signal<Session | null>(null);
 
   const text = () => fixture.nativeElement.textContent as string;
@@ -48,6 +51,7 @@ describe('ProfileHomePage', () => {
     signOut = vi.fn<() => Promise<void>>().mockResolvedValue();
     confirm = vi.fn<ConfirmDialog['confirm']>().mockResolvedValue(true);
     photos = new FakeProfilePhotoRepository(null);
+    friendRepository = new FakeFriendRepository();
     get = vi.fn<ProfileRepository['get']>().mockResolvedValue(PROFILE);
     TestBed.configureTestingModule({
       providers: [
@@ -56,6 +60,7 @@ describe('ProfileHomePage', () => {
         { provide: ProfileRepository, useValue: { get } },
         { provide: ConfirmDialog, useValue: { confirm } },
         { provide: ProfilePhotoRepository, useFactory: () => photos },
+        { provide: FriendRepository, useFactory: () => friendRepository },
         provideSystemSettings(),
       ],
     });
@@ -87,17 +92,43 @@ describe('ProfileHomePage', () => {
     expect(String(navigate.mock.calls.at(-1)?.[0])).toBe('/datos');
   });
 
-  it('lists the sport profile, preferences and password as plain options, then the session ones', async () => {
+  it('lists friends, the sport profile, preferences and password as plain options, then the session ones', async () => {
     await create();
 
     const labels = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('ion-item')).map((item) =>
       (item.textContent ?? '').trim(),
     );
-    expect(labels[0]).toContain('Perfil deportivo');
-    expect(labels[1]).toContain('Preferencias');
-    expect(labels[2]).toContain('Cambiar contraseña');
+    expect(labels[0]).toContain('Amigos');
+    expect(labels[1]).toContain('Perfil deportivo');
+    expect(labels[2]).toContain('Preferencias');
+    expect(labels[3]).toContain('Cambiar contraseña');
     expect(text()).toContain('Cerrar sesión');
     expect(labels.at(-1)).toContain('Eliminar cuenta');
+  });
+
+  describe('friend requests badge', () => {
+    const badge = () => fixture.nativeElement.querySelector('.count') as HTMLElement | null;
+
+    it('shows nothing without pending requests', async () => {
+      await create();
+
+      expect(badge()).toBeNull();
+    });
+
+    it('counts the requests waiting for an answer', async () => {
+      friendRepository.requests = {
+        incoming: [
+          { id: 'r1', profile: profile('a') },
+          { id: 'r2', profile: profile('b') },
+        ],
+        outgoing: [{ id: 'r3', profile: profile('c') }],
+      };
+
+      await create();
+
+      expect(badge()?.textContent?.trim()).toBe('2');
+      expect(badge()?.getAttribute('aria-label')).toBe('2 solicitudes pendientes');
+    });
   });
 
   it('flags an unverified email', async () => {

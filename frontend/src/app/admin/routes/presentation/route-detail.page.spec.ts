@@ -159,10 +159,41 @@ describe('RouteDetailPage', () => {
     });
   });
 
-  it('draws the segments on a map in the segments tab', async () => {
+  it('shows the start and end of the route on the map above the tabs', async () => {
+    repository.get.mockResolvedValue({
+      ...DETAIL,
+      route: {
+        ...DETAIL.route,
+        start: { label: 'Entrada', lat: -3.97, lng: -79.2 },
+        end: { label: 'Puente', lat: -3.98, lng: -79.21 },
+      },
+      segments: [],
+    });
+
     await create();
 
-    expect(root().querySelector('#route-panel-tramos app-map-view')).not.toBeNull();
+    expect(root().querySelector('app-map-view')).not.toBeNull();
+    expect(root().querySelector('[role=tabpanel] app-map-view')).toBeNull();
+    expect(map.scene?.lines).toEqual([]);
+    expect(map.scene?.markers).toEqual([
+      { kind: 'start', at: { lat: -3.97, lng: -79.2 } },
+      { kind: 'end', at: { lat: -3.98, lng: -79.21 } },
+    ]);
+  });
+
+  it('says so instead of drawing a map when the route has no coordinates', async () => {
+    repository.get.mockResolvedValue({ ...DETAIL, segments: [] });
+
+    await create();
+
+    expect(root().querySelector('app-map-view')).toBeNull();
+    expect(text()).toContain('Esta ruta aún no tiene puntos para mostrar en el mapa.');
+  });
+
+  it('draws the segments on the map, whatever the tab', async () => {
+    await create();
+
+    expect(root().querySelector('app-map-view')).not.toBeNull();
     expect(map.scene?.lines[0]).toEqual({
       tone: 'route',
       points: [

@@ -3,11 +3,14 @@ import { asRecord } from '../../../routes/domain/mappers';
 import {
   CitiesSummary,
   CityComparison,
+  LatestUser,
   RoutesSummary,
+  SafetySummary,
+  SignupBucket,
+  Signups,
   SportLevelCount,
   Summary,
   UsersSummary,
-  WeekCount,
 } from './summary';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -17,14 +20,60 @@ const count = (value: unknown): number =>
 
 const list = (value: unknown): unknown[] => (Array.isArray(value) ? value : []);
 
-function toWeeks(value: unknown): WeekCount[] {
+function toBuckets(value: unknown): SignupBucket[] {
   return list(value).flatMap((item) => {
-    const week = asRecord(item);
-    const start = week['weekStart'];
+    const bucket = asRecord(item);
+    const start = bucket['start'];
     return typeof start === 'string' && DATE_PATTERN.test(start)
-      ? [{ weekStart: start, count: count(week['count']) }]
+      ? [{ start, count: count(bucket['count']) }]
       : [];
   });
+}
+
+function toSignups(value: unknown): Signups {
+  const data = asRecord(value);
+  const before = asRecord(data['before']);
+  return {
+    daily: toBuckets(data['daily']),
+    weekly: toBuckets(data['weekly']),
+    monthly: toBuckets(data['monthly']),
+    before: {
+      daily: count(before['daily']),
+      weekly: count(before['weekly']),
+      monthly: count(before['monthly']),
+    },
+  };
+}
+
+const text = (value: unknown): string => (typeof value === 'string' ? value : '');
+
+function toLatest(value: unknown): LatestUser[] {
+  return list(value).flatMap((item) => {
+    const user = asRecord(item);
+    const uid = user['uid'];
+    const created = user['createdAt'];
+    if (typeof uid !== 'string' || !uid) return [];
+    if (typeof created !== 'string' || Number.isNaN(Date.parse(created))) return [];
+    const city = user['cityId'];
+    return [
+      {
+        uid,
+        firstName: text(user['firstName']),
+        lastName: text(user['lastName']),
+        cityId: typeof city === 'string' && city ? city : null,
+        createdAt: created,
+      },
+    ];
+  });
+}
+
+function toSafety(value: unknown): SafetySummary | null {
+  if (value === null || typeof value !== 'object') return null;
+  const data = asRecord(value);
+  return {
+    activeAlerts: count(data['activeAlerts']),
+    incidentsLast30Days: count(data['incidentsLast30Days']),
+  };
 }
 
 function toSportLevels(value: unknown): SportLevelCount[] {
@@ -60,7 +109,8 @@ function toUsers(value: unknown): UsersSummary | null {
     total: count(data['total']),
     registeredLast7Days: count(data['registeredLast7Days']),
     registeredLast30Days: count(data['registeredLast30Days']),
-    registrationsByWeek: toWeeks(data['registrationsByWeek']),
+    signups: toSignups(data['signups']),
+    latest: toLatest(data['latest']),
     sportProfiles: {
       completed: count(profiles['completed']),
       percentage: count(profiles['percentage']),
@@ -119,6 +169,7 @@ export function toSummary(value: unknown): Summary {
     users: toUsers(data['users']),
     routes: toRoutes(data['routes']),
     cities: toCities(data['cities']),
+    safety: toSafety(data['safety']),
     byCity: toCityComparison(data['byCity']),
   };
 }

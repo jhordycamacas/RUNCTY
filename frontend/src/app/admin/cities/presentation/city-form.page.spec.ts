@@ -90,41 +90,39 @@ describe('CityFormPage', () => {
       province: 'Azuay',
       location: { lat: -2.9, lng: -79 },
       coverage: 'planned',
+      parentCityId: null,
     });
     expect(success).toHaveBeenCalledWith('Ciudad creada.');
     expect(navigate).toHaveBeenCalledWith('/admin/ciudades');
     expect(page().hasUnsavedChanges()).toBe(false);
   });
 
-  it('creates a zone under a city', async () => {
+  it('creates a zone when the admin picks a parent city, whatever the type text', async () => {
     await create(null);
-    form().patchValue({ ...VALID, type: 'zone', id: 'cuenca-centro', parentCityId: 'loja' });
+    form().patchValue({ ...VALID, type: 'Barrio', id: 'cuenca-centro', parentCityId: 'loja' });
     await settle(fixture);
 
     await submit();
 
     expect(repository.create).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'zone', parentCityId: 'loja' }),
+      expect.objectContaining({ type: 'Barrio', parentCityId: 'loja' }),
     );
     expect(success).toHaveBeenCalledWith('Zona creada.');
   });
 
-  it('asks for the parent city only when the place is a zone', async () => {
+  it('types the type and coverage as free text and offers an optional parent city', async () => {
     await create(null);
-    expect(root().querySelectorAll('app-select-field')).toHaveLength(2);
 
-    form().patchValue({ type: 'zone' });
-    await settle(fixture);
-
-    expect(root().querySelectorAll('app-select-field')).toHaveLength(3);
-    expect(text()).toContain('Ciudad a la que pertenece');
+    expect(root().querySelectorAll('app-select-field')).toHaveLength(1);
+    expect(root().querySelectorAll('app-text-field')).toHaveLength(7);
+    expect(text()).toContain('Ciudad a la que pertenece (opcional)');
   });
 
   it('starts a zone of the city chosen in the list', async () => {
     await create(null, { ciudad: 'loja' });
 
     expect(form().getRawValue()).toEqual(
-      expect.objectContaining({ type: 'zone', parentCityId: 'loja' }),
+      expect.objectContaining({ parentCityId: 'loja' }),
     );
     expect(page().hasUnsavedChanges()).toBe(false);
   });
@@ -135,8 +133,8 @@ describe('CityFormPage', () => {
     await submit();
 
     expect(repository.create).not.toHaveBeenCalled();
-    expect(text()).toContain('Elige si es una ciudad o una zona.');
-    expect(text()).toContain('Elige la cobertura.');
+    expect(text()).toContain('El tipo es obligatorio.');
+    expect(text()).toContain('La cobertura es obligatoria.');
   });
 
   it('shows the API rejection in the form and keeps what was typed', async () => {
@@ -153,24 +151,29 @@ describe('CityFormPage', () => {
     expect(success).not.toHaveBeenCalled();
   });
 
-  it('preloads the zone to edit, keeps its identity fixed and saves the changes', async () => {
+  it('preloads the zone to edit, keeps the id fixed and saves the changes', async () => {
     await create('loja-centro');
 
     expect(text()).toContain('Editar zona');
     expect(form().getRawValue()).toEqual(
-      expect.objectContaining({ type: 'zone', id: 'loja-centro', parentCityId: 'loja', coverage: 'suspended' }),
+      expect.objectContaining({
+        type: 'Zona',
+        id: 'loja-centro',
+        parentCityId: 'loja',
+        coverage: 'suspended',
+      }),
     );
     expect(form().controls.id.disabled).toBe(true);
-    expect(form().controls.type.disabled).toBe(true);
+    expect(form().controls.type.disabled).toBe(false);
     expect(page().hasUnsavedChanges()).toBe(false);
 
-    form().patchValue({ coverage: 'active' });
+    form().patchValue({ coverage: 'Activa', type: 'Barrio' });
     expect(page().hasUnsavedChanges()).toBe(true);
     await submit();
 
     expect(repository.update).toHaveBeenCalledWith(
       'loja-centro',
-      expect.objectContaining({ coverage: 'active', parentCityId: 'loja' }),
+      expect.objectContaining({ coverage: 'Activa', type: 'Barrio', parentCityId: 'loja' }),
     );
     expect(success).toHaveBeenCalledWith('Zona actualizada.');
     expect(navigate).toHaveBeenCalledWith('/admin/ciudades');

@@ -24,9 +24,9 @@ export class AdminCitiesStore {
     const cities = this.list();
     return cities === null ? null : groupCities(cities);
   });
-  /** The cities a zone can belong to. */
+  /** The top-level cities a zone can belong to. */
   readonly parentOptions = computed(() =>
-    (this.list() ?? []).filter((city) => city.type === 'city'),
+    (this.list() ?? []).filter((city) => city.parentCityId === null),
   );
 
   private readonly names = computed(
@@ -57,7 +57,7 @@ export class AdminCitiesStore {
     return cities.find((city) => city.id === cityId) ?? null;
   }
 
-  /** Creates (`cityId` null) or updates a city or zone; its id and type never change. */
+  /** Creates (`cityId` null) or updates a city or zone; its id never changes. */
   async save(cityId: string | null, input: CityCreateInput): Promise<void> {
     if (cityId === null) {
       await this.repository.create(input);
@@ -66,9 +66,10 @@ export class AdminCitiesStore {
     await this.repository.update(cityId, {
       name: input.name,
       province: input.province,
+      type: input.type,
       location: input.location,
       coverage: input.coverage,
-      ...(input.parentCityId === undefined ? {} : { parentCityId: input.parentCityId }),
+      parentCityId: input.parentCityId,
     });
   }
 

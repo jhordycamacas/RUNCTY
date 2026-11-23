@@ -138,6 +138,22 @@ describe('AdminRoutesStore', () => {
     expect(store.cityId()).toBeNull();
   });
 
+  it('sets the custom image of a route', async () => {
+    const input = { image: 'data:image/jpeg;base64,AAAA', thumbnail: 'data:image/jpeg;base64,BB' };
+
+    await store.applyImage('r1', { kind: 'set', input });
+
+    expect(repository.setImage).toHaveBeenCalledWith('r1', input);
+    expect(repository.removeImage).not.toHaveBeenCalled();
+  });
+
+  it('removes the custom image of a route', async () => {
+    await store.applyImage('r1', { kind: 'remove' });
+
+    expect(repository.removeImage).toHaveBeenCalledWith('r1');
+    expect(repository.setImage).not.toHaveBeenCalled();
+  });
+
   it('removes a deleted route from the list', async () => {
     repository.list.mockResolvedValue([route('a'), route('b')]);
     await store.load();

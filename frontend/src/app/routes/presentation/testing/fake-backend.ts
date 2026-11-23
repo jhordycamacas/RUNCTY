@@ -17,6 +17,8 @@ export interface FakeBackend {
   /** A never-settled promise keeps the screen loading. */
   routes: Route[] | Error | Promise<Route[]>;
   detail: RouteDetail | Error;
+  /** The full custom image of the route detail; null when it has none. */
+  image: string | null | Error;
   preferences: ReturnType<typeof signal<Preferences>>;
   /** How many times each list was requested. */
   requests: { routes: number };
@@ -39,6 +41,7 @@ export function fakeBackend(routes: Route[]): FakeBackend {
     cities: [{ id: 'loja', name: 'Loja' }],
     routes,
     detail: { route: routes[0], segments: [] },
+    image: null,
     preferences: signal(defaultPreferences()),
     requests: { routes: 0 },
   };
@@ -76,6 +79,7 @@ export function provideFakeBackend(backend: FakeBackend): (Provider | Environmen
           return answer(backend.routes);
         },
         get: () => answer(backend.detail),
+        getImage: () => answer(backend.image),
       },
     },
     { provide: PreferencesStore, useValue: { preferences: backend.preferences } },

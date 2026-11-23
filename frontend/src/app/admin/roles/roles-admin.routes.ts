@@ -8,7 +8,10 @@ import { HttpRoleAdminRepository } from './infrastructure/http-role-admin.reposi
 export const ROLES_ADMIN_ROUTES: Routes = [
   {
     path: '',
-    providers: [{ provide: RoleAdminRepository, useClass: HttpRoleAdminRepository }, AdminRolesStore],
+    providers: [
+      { provide: RoleAdminRepository, useClass: HttpRoleAdminRepository },
+      AdminRolesStore,
+    ],
     children: [
       {
         path: '',

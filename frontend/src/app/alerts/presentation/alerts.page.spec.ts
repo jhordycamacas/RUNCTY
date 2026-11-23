@@ -43,7 +43,8 @@ describe('AlertsPage', () => {
   it('shows the empty state when no alert is in force', async () => {
     await create();
 
-    expect(text()).toContain('No hay alertas activas en tu zona');
+    expect(text()).toContain('Notificaciones');
+    expect(text()).toContain('No tienes notificaciones');
     expect(text()).toContain('Cuando se reporte una zona de riesgo en Loja, la verás aquí.');
   });
 
@@ -52,7 +53,7 @@ describe('AlertsPage', () => {
 
     await create();
 
-    expect(text()).toContain('2 alertas activas');
+    expect(text()).toContain('2 notificaciones');
     expect(text()).toContain('Robos frecuentes');
     expect(text()).toContain('Riesgo alto');
     expect(text()).toContain('Zona de 300 m de radio');
@@ -67,7 +68,7 @@ describe('AlertsPage', () => {
     await create();
 
     expect(text()).toContain('Sin conexión.');
-    expect(text()).not.toContain('No hay alertas activas');
+    expect(text()).not.toContain('No tienes notificaciones');
   });
 
   it('asks for a city when the profile has none', async () => {

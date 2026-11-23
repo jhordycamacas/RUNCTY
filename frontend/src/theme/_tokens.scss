@@ -15,11 +15,11 @@
   --rc-control-border: #{p.$grey500};
   --rc-text: #{p.$ink};
   --rc-text-muted: #{p.$grey600};
-  --rc-primary: #{p.$neon};
-  --rc-primary-pressed: #{p.$magenta300};
+  --rc-primary: #{p.$fuchsia};
+  --rc-primary-pressed: #{p.$fuchsia700};
   --rc-primary-tint: #{p.$grey100};
-  --rc-on-primary: #{p.$night900};
-  --rc-primary-text: #{p.$magenta800};
+  --rc-on-primary: #{p.$white};
+  --rc-primary-text: #{p.$fuchsia700};
   --rc-success: #{p.$green600};
   --rc-warning: #{p.$amber700};
   --rc-danger: #{p.$red700};
@@ -29,10 +29,12 @@
   --rc-chart-ink: #{p.$charcoal};
   --rc-chart-slate: #{p.$chartSlate};
   --rc-chart-silver: #{p.$chartSilver};
-  --rc-chart-rose: #{p.$chartRose};
+  --rc-chart-indigo: #{p.$chartIndigo};
+  --rc-chart-accent: #{p.$chartAccent};
+  --rc-tile-tint: #{p.$tileTint};
   --rc-sidebar: #{p.$sidebar};
   --rc-backdrop: #{p.$backdrop};
-  --rc-progress: #{p.$neon};
+  --rc-progress: #{p.$chartAccent};
   --rc-progress-track: #{p.$grey200};
 }
 
@@ -45,11 +47,11 @@
   --rc-control-border: #{p.$silver400};
   --rc-text: #{p.$mist};
   --rc-text-muted: #{p.$silver300};
-  --rc-primary: #{p.$neon};
-  --rc-primary-pressed: #{p.$magenta300};
+  --rc-primary: #{p.$fuchsia};
+  --rc-primary-pressed: #{p.$fuchsia700};
   --rc-primary-tint: #{p.$night700};
-  --rc-on-primary: #{p.$night900};
-  --rc-primary-text: #{p.$magenta300};
+  --rc-on-primary: #{p.$white};
+  --rc-primary-text: #{p.$fuchsia300};
   --rc-success: #{p.$green300};
   --rc-warning: #{p.$amber300};
   --rc-danger: #{p.$red300};
@@ -59,10 +61,12 @@
   --rc-chart-ink: #{p.$mist};
   --rc-chart-slate: #{p.$chartSlateDark};
   --rc-chart-silver: #{p.$chartSilverDark};
-  --rc-chart-rose: #{p.$magenta300};
+  --rc-chart-indigo: #{p.$chartIndigoDark};
+  --rc-chart-accent: #{p.$chartAccentDark};
+  --rc-tile-tint: #{p.$tileTintDark};
   --rc-sidebar: #{p.$sidebarDark};
   --rc-backdrop: #{p.$backdropDark};
-  --rc-progress: #{p.$neon};
+  --rc-progress: #{p.$chartAccentDark};
   --rc-progress-track: #{p.$night600};
 }
 

@@ -27,25 +27,29 @@ const NUMBER = new Intl.NumberFormat('es', { maximumFractionDigits: 1 });
           <span class="line base"><i class="tick">0</i></span>
           <div class="columns" [style.grid-template-columns]="columns()">
             @for (bar of rows(); track bar.label) {
-              <div class="bar-col" [class.current]="bar.current" [title]="bar.title">
+              <div class="bar-col" [title]="bar.title">
                 <span class="value">{{ bar.text }}</span>
-                <span class="bar" [style.height.%]="bar.percent" [style.background]="color()"></span>
+                <span
+                  class="bar"
+                  [style.height.%]="bar.percent"
+                  [style.background]="color()"
+                ></span>
               </div>
             }
           </div>
         </div>
         <div class="categories" [style.grid-template-columns]="columns()">
           @for (bar of rows(); track bar.label) {
-            <span class="category" [class.current]="bar.current" [attr.title]="bar.label">{{
-              bar.label
-            }}</span>
+            <span class="category" [attr.title]="bar.label">{{ bar.label }}</span>
           }
         </div>
       </div>
       <div class="sr-only">
         <table>
           <caption>
-            {{ subject() }}
+            {{
+              subject()
+            }}
           </caption>
           <thead>
             <tr>
@@ -145,14 +149,6 @@ const NUMBER = new Intl.NumberFormat('es', { maximumFractionDigits: 1 });
       animation: grow 0.6s ease-out;
     }
 
-    :host(.dimmed) .bar {
-      opacity: 0.45;
-    }
-
-    :host(.dimmed) .current .bar {
-      opacity: 1;
-    }
-
     @keyframes grow {
       from {
         transform: scaleY(0);
@@ -179,26 +175,7 @@ const NUMBER = new Intl.NumberFormat('es', { maximumFractionDigits: 1 });
       font-size: var(--rc-font-size-caption);
       color: var(--rc-text-muted);
     }
-
-    .category.current {
-      color: var(--rc-text);
-      font-weight: 800;
-    }
-
-    @media (max-width: 40rem) {
-      :host(.dimmed) .category:nth-child(odd) {
-        visibility: hidden;
-      }
-
-      :host(.dimmed) .category {
-        justify-self: center;
-        width: max-content;
-        overflow: visible;
-        text-overflow: clip;
-      }
-    }
   `,
-  host: { '[class.dimmed]': 'highlightLast()' },
 })
 export class BarChart {
   readonly bars = input.required<readonly Bar[]>();
@@ -206,8 +183,6 @@ export class BarChart {
   readonly subject = input.required<string>();
   /** Unit written in the tooltip and the table, such as `km`. */
   readonly unit = input('');
-  /** Dims every bar but the last one: the current period of a time series. */
-  readonly highlightLast = input(false);
   readonly colorName = input<ChartColor>('fuchsia');
 
   protected readonly color = computed(() => colorVar(this.colorName()));
@@ -216,14 +191,12 @@ export class BarChart {
   protected readonly axisMax = computed(() => NUMBER.format(this.max()));
 
   protected readonly rows = computed(() => {
-    const last = this.bars().length - 1;
     const unit = this.unit() ? ` ${this.unit()}` : '';
-    return this.bars().map((bar, index) => ({
+    return this.bars().map((bar) => ({
       ...bar,
       text: NUMBER.format(bar.value),
       title: `${bar.label}: ${NUMBER.format(bar.value)}${unit}`,
       percent: (bar.value / this.max()) * 100,
-      current: this.highlightLast() && index === last,
     }));
   });
 

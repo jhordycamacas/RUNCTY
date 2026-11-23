@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { weekLabel } from '../domain/labels';
 import { BarChart } from './bar-chart';
 import { BarList } from './bar-list';
 import { DonutChart } from './donut-chart';
@@ -16,7 +15,7 @@ import { KpiTile } from './kpi-tile';
     <app-donut-chart id="donut" subject="Rutas por dificultad" [slices]="slices" />
     <app-donut-chart id="empty" subject="Rutas por superficie" [slices]="empty" />
     <app-donut-chart id="single" subject="Usuarios por rol" [slices]="single" />
-    <app-bar-chart id="bars" subject="Altas por semana" [bars]="bars" [highlightLast]="true" />
+    <app-bar-chart id="bars" subject="Altas por semana" [bars]="bars" />
     <app-bar-chart id="none" subject="Rutas por ciudad" [bars]="[]" />
     <app-grouped-bars
       id="grouped"
@@ -134,10 +133,9 @@ describe('summary charts', () => {
       expect(chart.querySelector('.tick.top')?.textContent).toBe('5');
     });
 
-    it('marks the current bar and keeps the full name of a long one in a title', () => {
+    it('keeps the full name of a long category in a title', () => {
       const chart = find('#bars');
 
-      expect(chart.querySelectorAll('.bar-col.current')).toHaveLength(1);
       const names = Array.from(chart.querySelectorAll('.category'));
       expect(names[1].getAttribute('title')).toBe('Un nombre de ruta muy largo');
     });
@@ -204,9 +202,5 @@ describe('summary charts', () => {
     it('says there is no data instead of drawing empty rows', () => {
       expect(find('#nogroups').textContent).toContain('Sin datos todavía');
     });
-  });
-
-  it('writes a week as day and short month', () => {
-    expect(weekLabel('2026-09-28')).toBe('28 sept');
   });
 });

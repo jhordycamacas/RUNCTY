@@ -39,7 +39,8 @@ describe('UsersAdminPage', () => {
 
   const root = () => fixture.nativeElement as HTMLElement;
   const text = () => root().textContent ?? '';
-  const names = () => [...root().querySelectorAll('.user-name')].map((el) => el.textContent?.trim());
+  const names = () =>
+    [...root().querySelectorAll('.user-name')].map((el) => el.textContent?.trim());
   const row = (name: string) =>
     [...root().querySelectorAll('.user')].find(
       (el) => el.querySelector('.user-name')?.textContent?.trim() === name,
@@ -214,7 +215,10 @@ describe('UsersAdminPage', () => {
     await create();
     expect(button('Cargar más')).toBeDefined();
 
-    users.search.mockResolvedValueOnce({ users: [user('zoe', { firstName: 'Zoe' })], nextCursor: null });
+    users.search.mockResolvedValueOnce({
+      users: [user('zoe', { firstName: 'Zoe' })],
+      nextCursor: null,
+    });
     await press(button('Cargar más'));
 
     expect(users.search).toHaveBeenLastCalledWith('', 'nora');
@@ -226,7 +230,11 @@ describe('UsersAdminPage', () => {
     users.search.mockResolvedValueOnce({ users: USERS, nextCursor: 'nora' });
     await create();
     users.search.mockRejectedValueOnce(
-      new ApiError(400, 'invalid-cursor', 'No se pudo cargar la página siguiente. Vuelve a buscar.'),
+      new ApiError(
+        400,
+        'invalid-cursor',
+        'No se pudo cargar la página siguiente. Vuelve a buscar.',
+      ),
     );
 
     await press(button('Cargar más'));

@@ -20,12 +20,12 @@ $silver400: #8a92a0;
 $silver300: #a8aeba;
 $mist: #f4f5f7;
 
-// Brand fuchsia (Gacelas) made fluorescent: neon is the fill and carries near-black text (white
-// on neon stays under 4.5:1); magenta800 is its text tone on light surfaces and magenta300 the
-// text tone on dark ones (also the pressed fill, a step lighter so it still reads on black).
-$neon: #ff2d95;
-$magenta300: #ff5ca8;
-$magenta800: #c0005c;
+// Brand fuchsia (Gacelas): between the neon pink and a violet. fuchsia is the fill and carries white
+// text (5:1); fuchsia700 is the pressed fill and the text tone on light surfaces (white text 7:1),
+// fuchsia300 the text tone on dark surfaces. Reserved for what must stand out.
+$fuchsia: #d1177f;
+$fuchsia300: #ff5db1;
+$fuchsia700: #a80f68;
 
 // Semantic states. The "low" safety level is a true red, never confused with the brand.
 $green600: #1b7a3a;
@@ -41,11 +41,17 @@ $red300: #ff6b6b;
 $red50: #fdecec;
 $red900: #3a1618;
 
-// Chart series: fuchsia first, then a graded gray scale and a fuchsia tint. Light tones sit 3:1 or
-// more on white; dark tones sit 3:1 or more on the dark card.
+// Chart series for the admin dashboard: calm teal first, then a graded gray scale and an indigo.
+// Light tones sit 3:1 or more on white; dark tones sit 3:1 or more on the dark card. The tints are
+// the very soft backgrounds of tiles and chips.
 $chartSlate: #4b5563;
 $chartSilver: #8a919e;
-$chartRose: #e8559f;
+$chartAccent: #2a8f87;
+$chartAccentDark: #5fb8ad;
+$chartIndigo: #5b6bc0;
+$chartIndigoDark: #9fa8ee;
+$tileTint: #e8f1f1;
+$tileTintDark: #1d2a2c;
 $chartSlateDark: #b4bac6;
 $chartSilverDark: #7c8493;
 

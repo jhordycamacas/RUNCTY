@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { CityRepository } from '../../../cities/domain/city';
 import { CatalogRepository } from '../../../core/catalogs/catalog';
 import { fakeCatalogRepository } from '../../../core/catalogs/testing/fake-catalog.repository';
 import { ApiError } from '../../../core/errors/api-error';
@@ -9,19 +10,41 @@ import { SummaryStore } from './summary.store';
 describe('SummaryStore', () => {
   let get: ReturnType<typeof vi.fn<SummaryRepository['get']>>;
   let catalogs: ReturnType<typeof fakeCatalogRepository>;
+  let cities: ReturnType<typeof vi.fn<CityRepository['list']>>;
   let store: SummaryStore;
 
   beforeEach(() => {
     get = vi.fn<SummaryRepository['get']>().mockResolvedValue(summaryFixture());
     catalogs = fakeCatalogRepository();
+    cities = vi
+      .fn<CityRepository['list']>()
+      .mockResolvedValue([{ id: 'loja', name: 'Loja', type: 'city' }]);
     TestBed.configureTestingModule({
       providers: [
         SummaryStore,
         { provide: SummaryRepository, useValue: { get } },
         { provide: CatalogRepository, useValue: catalogs },
+        { provide: CityRepository, useValue: { list: cities } },
       ],
     });
     store = TestBed.inject(SummaryStore);
+  });
+
+  it('names the cities of the latest accounts once the summary is loaded', async () => {
+    expect(store.cityNames().size).toBe(0);
+
+    await store.load();
+
+    expect(store.cityNames().get('loja')).toBe('Loja');
+  });
+
+  it('shows the summary even when the cities cannot be loaded', async () => {
+    cities.mockRejectedValue(new ApiError(500, 'internal', 'No.'));
+
+    await store.load();
+
+    expect(store.summary()).not.toBeNull();
+    expect(store.cityNames().size).toBe(0);
   });
 
   it('starts without data, not loading and without error', () => {

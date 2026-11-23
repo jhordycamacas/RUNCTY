@@ -20,7 +20,7 @@ const LIMIT = 3;
   imports: [RouterLink, Notice, RouteCard, IonButton, IonSpinner],
   template: `
     <section aria-labelledby="recommended-title">
-      <h2 id="recommended-title">Rutas recomendadas</h2>
+      <h2 id="recommended-title">Recomendaciones</h2>
 
       @switch (data.state().kind) {
         @case ('loading') {

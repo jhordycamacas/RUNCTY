@@ -19,7 +19,8 @@ addIcons({ chevronForward, helpCircleOutline });
 /**
  * Catalog card: a dark rounded card with the distance in big condensed numerals, the route
  * summary, its safety level for the selected time slot and the main risk factor that explains it.
- * A small picture of the route shape, colored by that level, sits beside the name. It links to the
+ * A small picture sits beside the name: the image a manager uploaded for the route, or else its
+ * shape colored by that level. It links to the
  * detail, carrying the slot along, and gives press feedback (ripple and a slight scale). A
  * `featured` card (recommended on the home) is larger.
  */
@@ -35,7 +36,11 @@ addIcons({ chevronForward, helpCircleOutline });
       [style.animation-delay.ms]="entranceDelay()"
     >
       <span class="top">
-        <app-route-preview class="preview" [points]="route().preview" [level]="safety()?.level ?? null" />
+        @if (route().imageThumb; as thumb) {
+          <img class="preview photo" [src]="thumb" [alt]="'Imagen de ' + route().name" loading="lazy" />
+        } @else {
+          <app-route-preview class="preview" [points]="route().preview" [level]="safety()?.level ?? null" />
+        }
         <span class="summary">
           <span class="header">
             <strong class="name">{{ route().name }}</strong>
@@ -129,6 +134,14 @@ addIcons({ chevronForward, helpCircleOutline });
       width: 5.5rem;
     }
 
+    // The image a manager uploaded takes the place of the generated shape, in the same box.
+    .photo {
+      aspect-ratio: 1;
+      border: 1px solid var(--rc-border);
+      border-radius: var(--rc-radius-sm);
+      object-fit: cover;
+    }
+
     .summary {
       display: flex;
       flex: 1;
@@ -144,7 +157,7 @@ addIcons({ chevronForward, helpCircleOutline });
     }
 
     .header ion-icon {
-      color: var(--rc-primary-text);
+      color: var(--rc-text-muted);
     }
 
     .name {
@@ -192,7 +205,6 @@ addIcons({ chevronForward, helpCircleOutline });
 
     :host(.featured) .figure {
       font-size: 3rem;
-      color: var(--rc-primary-text);
     }
 
     .meta,

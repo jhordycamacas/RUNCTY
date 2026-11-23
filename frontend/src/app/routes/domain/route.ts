@@ -59,6 +59,11 @@ export interface Route {
   segmentCount: number;
   /** The route shape down-sampled by the API for the list cards; empty when it is missing. */
   preview: LatLng[];
+  /**
+   * Thumbnail (a data URL) of the image a manager uploaded for the route, shown instead of the
+   * generated shape; null when the route has no image.
+   */
+  imageThumb: string | null;
   /** Slot safety entries sorted by start time. */
   safety: RouteSlotSafety[];
 }
@@ -90,4 +95,6 @@ export abstract class RouteRepository {
   abstract listByCity(cityId: string): Promise<Route[]>;
   /** Rejects with `route-not-found` when the route does not exist or is inactive. */
   abstract get(routeId: string): Promise<RouteDetail>;
+  /** The full custom image of the route as a data URL; null when it has none. */
+  abstract getImage(routeId: string): Promise<string | null>;
 }

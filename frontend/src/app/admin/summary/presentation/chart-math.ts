@@ -1,12 +1,5 @@
 export type ChartColor =
-  | 'fuchsia'
-  | 'ink'
-  | 'slate'
-  | 'silver'
-  | 'rose'
-  | 'success'
-  | 'warning'
-  | 'danger';
+  'fuchsia' | 'ink' | 'slate' | 'silver' | 'indigo' | 'success' | 'warning' | 'danger';
 
 /** The design token behind each chart color. */
 export const CHART_COLOR_VARS: Record<ChartColor, string> = {
@@ -14,14 +7,14 @@ export const CHART_COLOR_VARS: Record<ChartColor, string> = {
   ink: '--rc-chart-ink',
   slate: '--rc-chart-slate',
   silver: '--rc-chart-silver',
-  rose: '--rc-chart-rose',
+  indigo: '--rc-chart-indigo',
   success: '--rc-success',
   warning: '--rc-warning',
   danger: '--rc-danger',
 };
 
 /** Categories take these colors in this order; the semantic ones are only for safety levels. */
-export const CATEGORICAL: readonly ChartColor[] = ['fuchsia', 'ink', 'silver', 'slate', 'rose'];
+export const CATEGORICAL: readonly ChartColor[] = ['fuchsia', 'ink', 'silver', 'slate', 'indigo'];
 
 export const colorVar = (color: ChartColor): string => `var(${CHART_COLOR_VARS[color]})`;
 
@@ -49,4 +42,15 @@ export function niceMax(max: number): number {
   const power = 10 ** Math.floor(Math.log10(max));
   const step = [1, 2, 5, 10].find((candidate) => max <= candidate * power) ?? 10;
   return step * power;
+}
+
+/**
+ * The top of an axis with three ticks (0, half, top): the smallest 2, 4, 6 or 10 times a power
+ * of ten that holds `max`, so the middle tick is always a whole number.
+ */
+export function niceAxisTop(max: number): number {
+  for (let power = 1; ; power *= 10) {
+    const top = [2, 4, 6, 10].map((step) => step * power).find((candidate) => max <= candidate);
+    if (top !== undefined) return top;
+  }
 }

@@ -47,13 +47,12 @@ export function initialsOf(name: string): string {
       height: var(--avatar-size, 4rem);
       overflow: hidden;
       border-radius: 50%;
-      background: var(--rc-primary);
-      color: var(--rc-on-primary);
+      border: 1px solid var(--rc-border);
+      background: var(--rc-primary-tint);
+      color: var(--rc-text);
       font-family: var(--rc-font-family-display);
       font-size: calc(var(--avatar-size, 4rem) * 0.4);
-      font-weight: 600;
-      box-shadow: 0 0 18px color-mix(in srgb, var(--rc-primary) 35%, transparent);
-    }
+      font-weight: 600;    }
 
     img {
       width: 100%;

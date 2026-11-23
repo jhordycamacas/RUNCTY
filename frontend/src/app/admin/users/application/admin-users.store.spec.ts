@@ -76,7 +76,11 @@ describe('AdminUsersStore', () => {
   it('drops the cursor when the API rejects it, so the user searches again', async () => {
     await store.search('');
     repository.search.mockRejectedValueOnce(
-      new ApiError(400, 'invalid-cursor', 'No se pudo cargar la página siguiente. Vuelve a buscar.'),
+      new ApiError(
+        400,
+        'invalid-cursor',
+        'No se pudo cargar la página siguiente. Vuelve a buscar.',
+      ),
     );
 
     await store.loadMore();
@@ -105,7 +109,8 @@ describe('AdminUsersStore', () => {
   });
 
   it('keeps only the answer of the latest search', async () => {
-    let finishSlow: (page: { users: ReturnType<typeof user>[]; nextCursor: null }) => void = () => undefined;
+    let finishSlow: (page: { users: ReturnType<typeof user>[]; nextCursor: null }) => void = () =>
+      undefined;
     repository.search.mockReturnValueOnce(new Promise((resolve) => (finishSlow = resolve)));
     const slow = store.search('x');
     repository.search.mockResolvedValueOnce({ users: [user('fast')], nextCursor: null });

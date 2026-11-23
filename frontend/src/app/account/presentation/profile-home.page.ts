@@ -19,6 +19,7 @@ import {
   mailUnreadOutline,
   optionsOutline,
   pencilOutline,
+  peopleOutline,
   trashOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../core/auth/auth.service';
@@ -26,6 +27,7 @@ import { Avatar } from '../../shared/ui/avatar';
 import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { Notice } from '../../shared/ui/notice';
 import { TabHeader } from '../../shared/ui/tab-header';
+import { FriendsStore } from '../../friends/application/friends.store';
 import { ProfilePhotoStore } from '../application/profile-photo.store';
 import { ProfileStore } from '../application/profile.store';
 
@@ -38,6 +40,7 @@ addIcons({
   mailUnreadOutline,
   optionsOutline,
   pencilOutline,
+  peopleOutline,
   trashOutline,
 });
 
@@ -49,6 +52,12 @@ interface Section {
 }
 
 const SECTIONS: Section[] = [
+  {
+    icon: 'people-outline',
+    title: 'Amigos',
+    subtitle: 'Tus amigos y solicitudes',
+    link: 'amigos',
+  },
   {
     icon: 'fitness-outline',
     title: 'Perfil deportivo',
@@ -128,6 +137,11 @@ const SECTIONS: Section[] = [
                 <p>{{ section.subtitle }}</p>
               }
             </ion-label>
+            @if (section.link === 'amigos' && friends.incoming().length > 0) {
+              <span class="count" slot="end" [attr.aria-label]="pendingLabel()">{{
+                friends.incoming().length
+              }}</span>
+            }
             <ion-icon name="chevron-forward" slot="end" aria-hidden="true" />
           </ion-item>
         }
@@ -171,7 +185,7 @@ const SECTIONS: Section[] = [
       position: absolute;
       inset-block-start: var(--rc-space-sm);
       inset-inline-end: var(--rc-space-sm);
-      --color: var(--rc-primary-text);
+      --color: var(--rc-text);
       min-width: var(--rc-min-touch-target);
       min-height: var(--rc-min-touch-target);
     }
@@ -250,7 +264,18 @@ const SECTIONS: Section[] = [
     }
 
     ion-item ion-icon[slot='start'] {
-      color: var(--rc-primary-text);
+      color: var(--rc-text-muted);
+    }
+
+    .count {
+      min-width: 1.5rem;
+      padding: 2px var(--rc-space-sm);
+      border-radius: var(--rc-radius-pill);
+      background: var(--rc-surface);
+      color: var(--rc-text);
+      font-size: var(--rc-font-size-caption);
+      font-weight: 600;
+      text-align: center;
     }
 
     .danger {
@@ -265,6 +290,7 @@ const SECTIONS: Section[] = [
 export class ProfileHomePage {
   protected readonly store = inject(ProfileStore);
   protected readonly photos = inject(ProfilePhotoStore);
+  protected readonly friends = inject(FriendsStore);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly dialog = inject(ConfirmDialog);
@@ -277,9 +303,16 @@ export class ProfileHomePage {
     return data ? `${data.firstName} ${data.lastName}` : '';
   });
 
+  protected readonly pendingLabel = computed(() => {
+    const count = this.friends.incoming().length;
+    return `${count} ${count === 1 ? 'solicitud pendiente' : 'solicitudes pendientes'}`;
+  });
+
   constructor() {
     void this.store.load();
     void this.photos.load();
+    // For the badge of «Amigos»; a failure is shown on that page, not here.
+    void this.friends.load();
   }
 
   protected async signOut(): Promise<void> {

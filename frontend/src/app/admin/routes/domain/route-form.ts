@@ -65,20 +65,14 @@ function coordinate(value: string, limit: number, missing: string, outOfRange: s
   return { number, error: Math.abs(number) > limit ? outOfRange : undefined };
 }
 
-const latitude = (value: string) =>
-  coordinate(
-    value,
-    90,
-    'Ingresa la latitud, por ejemplo -3.99313.',
-    'La latitud debe estar entre -90 y 90.',
-  );
-const longitude = (value: string) =>
-  coordinate(
-    value,
-    180,
-    'Ingresa la longitud, por ejemplo -79.20422.',
-    'La longitud debe estar entre -180 y 180.',
-  );
+/** The points are marked on the map, never typed: a missing one points the admin back to it. */
+const MISSING_START = 'Marca el inicio en el mapa.';
+const MISSING_END = 'Marca el fin en el mapa.';
+
+const latitude = (value: string, missing: string) =>
+  coordinate(value, 90, missing, 'La latitud debe estar entre -90 y 90.');
+const longitude = (value: string, missing: string) =>
+  coordinate(value, 180, missing, 'La longitud debe estar entre -180 y 180.');
 const pointLabel = (value: string) =>
   requiredText(
     value,
@@ -109,11 +103,11 @@ export function parseRouteForm(
   );
   const description = form.description.trim();
   const startLabel = pointLabel(form.startLabel);
-  const startLat = latitude(form.startLat);
-  const startLng = longitude(form.startLng);
+  const startLat = latitude(form.startLat, MISSING_START);
+  const startLng = longitude(form.startLng, MISSING_START);
   const endLabel = pointLabel(form.endLabel);
-  const endLat = latitude(form.endLat);
-  const endLng = longitude(form.endLng);
+  const endLat = latitude(form.endLat, MISSING_END);
+  const endLng = longitude(form.endLng, MISSING_END);
   const distanceKm = parseDecimal(form.distanceKm);
   const elevationGainM = parseDecimal(form.elevationGainM);
   const surface = requiredText(

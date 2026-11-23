@@ -11,7 +11,7 @@ import { AdminCitiesStore } from './admin-cities.store';
 
 const INPUT: CityCreateInput = {
   id: 'z1',
-  type: 'zone',
+  type: 'Zona',
   name: 'Centro',
   province: 'Loja',
   location: { lat: 1, lng: 2 },
@@ -45,7 +45,7 @@ describe('AdminCitiesStore', () => {
     expect(store.loading()).toBe(false);
   });
 
-  it('offers only cities as the parent of a zone', async () => {
+  it('offers only top-level places as a parent', async () => {
     await store.load();
 
     expect(store.parentOptions().map((c) => c.id)).toEqual(['loja', 'quito']);
@@ -79,12 +79,13 @@ describe('AdminCitiesStore', () => {
     expect(repository.create).toHaveBeenCalledWith(INPUT);
   });
 
-  it('updates without id and type', async () => {
+  it('updates without the id', async () => {
     await store.save('z1', INPUT);
 
     expect(repository.update).toHaveBeenCalledWith('z1', {
       name: 'Centro',
       province: 'Loja',
+      type: 'Zona',
       location: { lat: 1, lng: 2 },
       coverage: 'active',
       parentCityId: 'loja',

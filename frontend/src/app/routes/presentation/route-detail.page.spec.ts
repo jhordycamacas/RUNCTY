@@ -95,6 +95,43 @@ describe('RouteDetailPage', () => {
     ]);
   });
 
+  describe('custom image', () => {
+    const THUMB = 'data:image/jpeg;base64,AAAA';
+    const FULL = 'data:image/jpeg;base64,BBBBBBBB';
+    const hero = () => root().querySelector('img.hero') as HTMLImageElement | null;
+
+    beforeEach(() => {
+      const route = { ...catalogRoutes()[0], imageThumb: THUMB };
+      backend.detail = { route, segments: SEGMENTS };
+    });
+
+    it('shows no image for a route without one', async () => {
+      backend.detail = { route: catalogRoutes()[0], segments: SEGMENTS };
+
+      await create();
+
+      expect(hero()).toBeNull();
+    });
+
+    it('shows the full image above the name', async () => {
+      backend.image = FULL;
+
+      await create();
+
+      expect(hero()?.getAttribute('src')).toBe(FULL);
+      expect(hero()?.alt).toBe('Imagen de Parque Jipiro');
+    });
+
+    it('keeps the thumbnail when the full image cannot be loaded', async () => {
+      backend.image = new ApiError(0, 'network', 'sin conexión');
+
+      await create();
+
+      expect(hero()?.getAttribute('src')).toBe(THUMB);
+      expect(text()).not.toContain('sin conexión');
+    });
+  });
+
   it('shows no map for a route without points', async () => {
     backend.detail = { route: catalogRoutes()[0], segments: [] };
 

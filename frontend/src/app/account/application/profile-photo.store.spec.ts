@@ -29,7 +29,7 @@ describe('ProfilePhotoStore', () => {
     session = signal({ uid: 'u1' });
     encode = vi.fn<DecodedImage['encode']>(() => NEW);
     const codec: ImageCodec = {
-      decode: async () => ({ width: 600, height: 400, encode, close: () => undefined }),
+      decode: async () => ({ width: 600, height: 400, encode, encodeFit: () => NEW, close: () => undefined }),
     };
     TestBed.configureTestingModule({
       providers: [

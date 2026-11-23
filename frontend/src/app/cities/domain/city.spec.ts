@@ -4,7 +4,7 @@ describe('toPickerCities', () => {
   it('keeps cities, drops zones and sorts by name', () => {
     const cities = toPickerCities([
       { id: 'quito', name: 'Quito', province: 'Pichincha', type: 'city' },
-      { id: 'loja-centro', name: 'Centro', province: 'Loja', type: 'zone' },
+      { id: 'loja-centro', name: 'Centro', province: 'Loja', type: 'Barrio', parentCityId: 'loja' },
       { id: 'cuenca', name: 'Cuenca', province: 'Azuay', type: 'city' },
     ]);
 

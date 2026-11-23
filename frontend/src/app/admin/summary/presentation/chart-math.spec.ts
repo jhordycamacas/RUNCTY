@@ -1,4 +1,10 @@
-import { CATEGORICAL, CHART_COLOR_VARS, niceMax, sharePercentages } from './chart-math';
+import {
+  CATEGORICAL,
+  CHART_COLOR_VARS,
+  niceAxisTop,
+  niceMax,
+  sharePercentages,
+} from './chart-math';
 
 describe('sharePercentages', () => {
   it('always adds up to 100, giving the leftover to the largest remainders', () => {
@@ -38,5 +44,13 @@ describe('chart colors', () => {
     expect(CATEGORICAL).not.toContain('success');
     expect(CATEGORICAL).not.toContain('warning');
     expect(CATEGORICAL).not.toContain('danger');
+  });
+});
+
+describe('niceAxisTop', () => {
+  it('gives an even top so the middle tick is a whole number', () => {
+    expect([0, 1, 2, 3, 5, 7, 10, 12, 45, 101].map(niceAxisTop)).toEqual([
+      2, 2, 2, 4, 6, 10, 10, 20, 60, 200,
+    ]);
   });
 });

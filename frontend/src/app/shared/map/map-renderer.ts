@@ -34,6 +34,11 @@ export interface MapScene {
   lines: readonly MapLine[];
   markers: readonly MapMarker[];
   follow: boolean;
+  /**
+   * Where to look while there is nothing to frame yet (e.g. the city of a route that has no points
+   * yet). Applied once, on the first scene; later scenes never move the map by themselves.
+   */
+  view?: { center: MapPoint; zoom: number };
 }
 
 /** A map mounted in an element. */
@@ -46,6 +51,8 @@ export interface MountedMap {
 export interface MapHooks {
   /** A short message to show over the map (e.g. «mostramos OpenStreetMap»), or null to clear it. */
   notice(text: string | null): void;
+  /** The user clicked (or tapped) the map at this point. */
+  click?(point: MapPoint): void;
 }
 
 export abstract class MapRenderer {

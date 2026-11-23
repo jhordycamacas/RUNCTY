@@ -122,6 +122,30 @@ describe('GoogleMapRenderer', () => {
     expect(google.maps[0].zoom).toBe(17);
   });
 
+  it('reports a click on the map as a point', () => {
+    const clicks: unknown[] = [];
+    new GoogleMapRenderer(google.api, () => () => undefined, () => Promise.reject()).mount(host, {
+      notice: () => undefined,
+      click: (point) => clicks.push(point),
+    });
+
+    google.maps[0].listeners['click']({ latLng: { lat: () => -3.9, lng: () => -79.2 } });
+
+    expect(clicks).toEqual([{ lat: -3.9, lng: -79.2 }]);
+  });
+
+  it('looks at the given view while there is nothing to frame, once', () => {
+    const map = mount();
+    const view = { center: { lat: -3.99, lng: -79.2 }, zoom: 13 };
+
+    map.show({ lines: [], markers: [], follow: false, view });
+    map.show({ lines: [], markers: [{ at: start, kind: 'start' }], follow: false, view });
+
+    expect(google.maps[0].center).toEqual(view.center);
+    expect(google.maps[0].zoom).toBe(13);
+    expect(google.maps[0].fitted).toBeNull();
+  });
+
   it('frames once: a redraw keeps the view the person moved to', () => {
     const map = mount();
     map.show(scene);

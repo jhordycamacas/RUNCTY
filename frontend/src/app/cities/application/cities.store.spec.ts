@@ -10,7 +10,7 @@ describe('CitiesStore', () => {
   beforeEach(() => {
     list = vi.fn<() => Promise<CityRecord[]>>().mockResolvedValue([
       { id: 'quito', name: 'Quito', type: 'city' },
-      { id: 'centro', name: 'Centro', type: 'zone' },
+      { id: 'centro', name: 'Centro', type: 'Zona', parentCityId: 'quito' },
     ]);
     TestBed.configureTestingModule({
       providers: [{ provide: CityRepository, useValue: { list } }],
