@@ -38,5 +38,13 @@ for (const k of ['auth','firestore','functions','storage','ui']) c.emulators[k].
 c.emulators.hub={host:'0.0.0.0',port:4400};c.emulators.logging={host:'0.0.0.0',port:4500};\
 fs.writeFileSync('firebase.json',JSON.stringify(c,null,2));"
 
+# Emulator data (users, Firestore, Storage) lives in /data, which compose mounts as a named
+# volume so it survives container recreation. The emulator is exported every 10 seconds through
+# its hub (a signal-based export on stop is unreliable behind npx) and imported on start.
+# The export replaces its target directory, so it goes in a subdirectory of the mount point.
+USER root
+RUN mkdir -p /data && chown node:node /data
+USER node
+
 EXPOSE 4000 4400 4500 9150 9099 8080 5001 9199
-CMD ["npx", "firebase", "emulators:start", "--project", "demo-runcty"]
+CMD ["sh", "-c", "E=/data/export; if [ -f $E/firebase-export-metadata.json ]; then IMPORT=--import=$E; fi; (while sleep 10; do node -e \"fetch('http://127.0.0.1:4400/_admin/export',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({path:'/data/export'})}).catch(()=>{})\"; done) & exec npx firebase emulators:start --project demo-runcty $IMPORT"]
