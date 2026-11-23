@@ -211,7 +211,7 @@ def test_route_documents_have_the_expected_fields():
     route = FIREBASE.docs["routes/loja-puear"]
     assert route["cityId"] == "loja"
     assert route["active"] is True
-    assert (route["surface"], route["difficulty"]) == ("trail", "advanced")
+    assert (route["surface"], route["difficulty"]) == ("Sendero", "Avanzado")
     assert route["elevationGainM"] == 180
     assert route["start"]["label"] == "Ingreso por la UNL"
     for field in ("safetyUpdatedAt", "createdAt", "updatedAt"):

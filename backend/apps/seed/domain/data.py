@@ -84,8 +84,8 @@ SEED_ROUTES = [
         start=_place(-3.9668, -79.2047, "Entrada principal (Av. Salvador Bustamante Celi)"),
         end=_place(-3.9712, -79.2032, "Puerta sur del parque"),
         elevation_gain_m=18,
-        surface="asphalt",
-        difficulty="beginner",
+        surface="Asfalto",
+        difficulty="Principiante",
         repeats=3,
         segments=[
             SeedSegment(
@@ -129,8 +129,8 @@ SEED_ROUTES = [
         start=_place(-4.0102, -79.2085, "Ingreso por la Av. Pío Jaramillo"),
         end=_place(-4.0225, -79.2068, "Puente de La Tebaida"),
         elevation_gain_m=32,
-        surface="mixed",
-        difficulty="beginner",
+        surface="Mixto",
+        difficulty="Principiante",
         repeats=2,
         segments=[
             SeedSegment(
@@ -182,8 +182,8 @@ SEED_ROUTES = [
         start=_place(-3.9845, -79.1985, "Puente Bolívar"),
         end=_place(-4.0105, -79.2006, "Redondel de la Av. Emiliano Ortega"),
         elevation_gain_m=25,
-        surface="asphalt",
-        difficulty="intermediate",
+        surface="Asfalto",
+        difficulty="Intermedio",
         repeats=2,
         segments=[
             SeedSegment(
@@ -233,8 +233,8 @@ SEED_ROUTES = [
         start=_place(-4.0325, -79.2002, "Ingreso por la UNL"),
         end=_place(-4.0418, -79.1935, "Mirador del PUEAR"),
         elevation_gain_m=180,
-        surface="trail",
-        difficulty="advanced",
+        surface="Sendero",
+        difficulty="Avanzado",
         repeats=2,
         segments=[
             SeedSegment(
@@ -292,8 +292,8 @@ SEED_ROUTES = [
         start=_place(-3.9985, -79.1998, "Av. Orillas del Zamora y Av. Universitaria"),
         end=_place(-3.952, -79.209, "Parque Pucará"),
         elevation_gain_m=140,
-        surface="asphalt",
-        difficulty="intermediate",
+        surface="Asfalto",
+        difficulty="Intermedio",
         repeats=2,
         segments=[
             SeedSegment(
