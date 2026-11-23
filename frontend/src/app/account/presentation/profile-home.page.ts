@@ -11,6 +11,7 @@ import {
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
+  cameraOutline,
   checkmarkCircle,
   chevronForward,
   fitnessOutline,
@@ -23,12 +24,17 @@ import {
 } from 'ionicons/icons';
 import { CitiesStore } from '../../cities/application/cities.store';
 import { AuthService } from '../../core/auth/auth.service';
+import { SystemSettingsStore } from '../../core/settings/system-settings.store';
+import { Avatar } from '../../shared/ui/avatar';
 import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { Notice } from '../../shared/ui/notice';
 import { TabHeader } from '../../shared/ui/tab-header';
+import { ToastService } from '../../shared/ui/toast.service';
+import { ProfilePhotoStore } from '../application/profile-photo.store';
 import { ProfileStore } from '../application/profile.store';
 
 addIcons({
+  cameraOutline,
   checkmarkCircle,
   chevronForward,
   fitnessOutline,
@@ -74,6 +80,7 @@ const SECTIONS: Section[] = [
   selector: 'app-profile-home-page',
   imports: [
     RouterLink,
+    Avatar,
     IonButton,
     IonContent,
     IonIcon,
@@ -89,9 +96,42 @@ const SECTIONS: Section[] = [
     <ion-content class="ion-padding">
       @if (profile(); as data) {
         <section class="card identity" aria-label="Tu perfil">
-          <span class="avatar" aria-hidden="true">{{ initials() }}</span>
-          <div>
-            <h1>{{ data.firstName }} {{ data.lastName }}</h1>
+          <app-avatar [name]="fullName()" [photo]="photos.photo()" size="7rem" />
+          <input
+            #picker
+            type="file"
+            accept="image/*"
+            hidden
+            aria-label="Elegir una foto de perfil"
+            (change)="onPicked(picker)"
+          />
+          <div class="photo-actions">
+            <ion-button
+              fill="outline"
+              [disabled]="photos.saving()"
+              (click)="picker.click()"
+            >
+              <ion-icon name="camera-outline" slot="start" aria-hidden="true" />
+              Cambiar foto
+            </ion-button>
+            @if (photos.photo()) {
+              <ion-button
+                fill="clear"
+                color="danger"
+                [disabled]="photos.saving()"
+                (click)="removePhoto()"
+              >
+                <ion-icon name="trash-outline" slot="start" aria-hidden="true" />
+                Quitar foto
+              </ion-button>
+            }
+          </div>
+          @if (photos.saving()) {
+            <p class="state" role="status"><ion-spinner name="crescent" /> Guardando foto…</p>
+          }
+          <app-notice [message]="photos.error()" />
+          <div class="who">
+            <h1>{{ fullName() }}</h1>
             <p class="muted">{{ data.email }}</p>
             <p class="chips">
               <span class="chip">{{ cityName() }}</span>
@@ -170,23 +210,21 @@ const SECTIONS: Section[] = [
 
     .identity {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: var(--rc-space-lg);
+      gap: var(--rc-space-md);
+      text-align: center;
     }
 
-    .avatar {
-      display: grid;
-      flex: none;
-      place-items: center;
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: var(--rc-primary);
-      color: var(--rc-on-primary);
-      font-family: var(--rc-font-family-display);
-      font-size: 1.75rem;
-      font-weight: 600;
-      box-shadow: 0 0 18px color-mix(in srgb, var(--rc-primary) 35%, transparent);
+    .photo-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--rc-space-sm);
+    }
+
+    .photo-actions ion-button {
+      min-height: var(--rc-min-touch-target);
     }
 
     h1 {
@@ -214,6 +252,7 @@ const SECTIONS: Section[] = [
     .chips {
       display: flex;
       flex-wrap: wrap;
+      justify-content: center;
       gap: var(--rc-space-xs);
       margin: var(--rc-space-sm) 0 0;
     }
@@ -281,7 +320,10 @@ const SECTIONS: Section[] = [
 })
 export class ProfileHomePage {
   protected readonly store = inject(ProfileStore);
+  protected readonly photos = inject(ProfilePhotoStore);
   private readonly cities = inject(CitiesStore);
+  private readonly settings = inject(SystemSettingsStore);
+  private readonly toast = inject(ToastService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly dialog = inject(ConfirmDialog);
@@ -289,9 +331,9 @@ export class ProfileHomePage {
   protected readonly sections = SECTIONS;
   protected readonly profile = this.store.profile;
   protected readonly verified = computed(() => this.auth.session()?.emailVerified === true);
-  protected readonly initials = computed(() => {
+  protected readonly fullName = computed(() => {
     const data = this.profile();
-    return data ? `${data.firstName.charAt(0)}${data.lastName.charAt(0)}`.toUpperCase() : '';
+    return data ? `${data.firstName} ${data.lastName}` : '';
   });
   protected readonly cityName = computed(() => {
     const id = this.profile()?.cityId ?? '';
@@ -301,6 +343,27 @@ export class ProfileHomePage {
   constructor() {
     void this.store.load();
     void this.cities.load();
+    void this.photos.load();
+    void this.settings.load();
+  }
+
+  protected async onPicked(picker: HTMLInputElement): Promise<void> {
+    const file = picker.files?.[0];
+    // Clearing the input lets the user pick the same file again after a failure.
+    picker.value = '';
+    if (!file) return;
+    if (await this.photos.change(file)) await this.toast.success('Foto actualizada.');
+  }
+
+  protected async removePhoto(): Promise<void> {
+    const confirmed = await this.dialog.confirm({
+      header: 'Quitar foto',
+      message: 'Se borrará tu foto de perfil y volverán a verse tus iniciales.',
+      confirmText: 'Quitar foto',
+      destructive: true,
+    });
+    if (!confirmed) return;
+    if (await this.photos.remove()) await this.toast.success('Foto eliminada.');
   }
 
   protected async signOut(): Promise<void> {

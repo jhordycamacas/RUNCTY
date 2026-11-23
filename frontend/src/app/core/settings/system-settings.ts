@@ -26,6 +26,8 @@ export interface SystemSettings {
   safeRouteDistanceTolerance: number;
   safeRouteMaxDistanceKm: number;
   countryCode: string;
+  profilePhotoMaxKb: number;
+  profilePhotoMaxPx: number;
 }
 
 export type SettingKey = keyof SystemSettings;
@@ -58,6 +60,8 @@ export const DEFAULT_SETTINGS: Readonly<SystemSettings> = {
   safeRouteDistanceTolerance: 0.2,
   safeRouteMaxDistanceKm: 500,
   countryCode: 'EC',
+  profilePhotoMaxKb: 100,
+  profilePhotoMaxPx: 256,
 };
 
 /** Tolerant read of a settings body: anything missing or of the wrong type takes its default. */

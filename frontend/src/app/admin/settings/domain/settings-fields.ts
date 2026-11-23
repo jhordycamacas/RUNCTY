@@ -117,6 +117,16 @@ export const SETTING_GROUPS: readonly SettingGroup[] = [
       integer('safeRouteMaxDistanceKm', 'Distancia máxima pedida (km)', 1, 1000),
     ],
   },
+  {
+    id: 'profile-photo',
+    title: 'Foto de perfil',
+    description:
+      'El tamaño máximo de la foto de perfil y el lado del cuadrado al que se reduce en el teléfono antes de enviarla. Se aplican a las fotos nuevas; las ya guardadas no cambian.',
+    fields: [
+      integer('profilePhotoMaxKb', 'Peso máximo de la foto (KB)', 20, 500),
+      integer('profilePhotoMaxPx', 'Lado de la foto (píxeles)', 64, 1024),
+    ],
+  },
 ];
 
 export const SETTING_FIELDS: ReadonlyMap<SettingKey, SettingField> = new Map(

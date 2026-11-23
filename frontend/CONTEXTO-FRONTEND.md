@@ -38,6 +38,15 @@ Documento vivo y corto. Para el detalle técnico y los comandos ver `README.md`;
 ## Configuración y catálogos
 
 - Los límites de los formularios vienen de `GET /settings` y las opciones (superficies, dificultades, tipos, etc.) de los catálogos del backend (`src/app/core/settings`, `src/app/core/catalogs`); no hay listas escritas en el código.
+- Foto de perfil (`profilePhotoMaxKb` 20-500, por defecto 100; `profilePhotoMaxPx` 64-1024, por defecto 256): grupo «Foto de perfil» en Configuración del admin y lectura tolerante en `core/settings`.
+
+## Foto de perfil
+
+- Pantalla Cuenta (`account/presentation/profile-home.page.ts`): avatar grande, «Cambiar foto» (un `<input type="file" accept="image/*">` oculto; en Android el WebView ofrece cámara o galería, sin plugin nuevo) y «Quitar foto» (con confirmación). Muestra «Guardando foto…» mientras sube, el error en español junto al avatar y un toast de éxito.
+- `resizeToSquareJpeg(file, maxPx, maxKb)` (`shared/images`): rechaza lo que no es imagen y archivos de más de 15 MB, recorta al centro un cuadrado, lo reduce a `maxPx` sin agrandar, baja la calidad JPEG de 0.9 a 0.5 y, si aún pesa más de `maxKb`, reduce el lado un 20 % por vuelta. La parte del DOM (decodificar con `createImageBitmap` o `Image`, canvas) está detrás del puerto `ImageCodec`; los specs usan un códec falso (token `IMAGE_CODEC`).
+- `ProfilePhotoStore` (señales `photo`, `loading`, `saving`, `error`) usa `ProfilePhotoRepository` (`GET|PUT|DELETE /users/me/photo`); la foto se descarta si cambia el usuario. El motivo `fields.photo` de la API (`invalid-format`, `invalid-image`, `too-large`) se traduce en `photoReasonMessage`.
+- `<app-avatar>` (`shared/ui/avatar.ts`): foto o iniciales sobre `--rc-primary`; decorativo salvo `labelled`.
+- No verificado en un celular real: la cámara/galería del WebView y el peso final de fotos grandes.
 
 ## Android (notas aprendidas)
 

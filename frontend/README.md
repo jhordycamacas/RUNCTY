@@ -9,9 +9,9 @@ One Angular 22 + Ionic 9 + Capacitor 8 app for the web (browser) and Android (AP
 ```
 src/app/
   core/          API client, interceptors, error mapping, auth service (+ Firebase gateway port), permissions, guards, system settings (`GET /settings`: the limits the forms validate against) and option catalogs
-  shared/        base UI (text field, birth date, notice, confirm dialog, choice chips), map view (Google Maps or Leaflet + OpenStreetMap behind a renderer port), form helpers, pages (403, 404)
+  shared/        base UI (text field, birth date, notice, confirm dialog, choice chips, avatar), image resizing (`resizeToSquareJpeg` behind an `ImageCodec` port), map view (Google Maps or Leaflet + OpenStreetMap behind a renderer port), form helpers, pages (403, 404)
   auth/          sign in, sign up, password reset, email verification banner
-  account/       profile, personal data, password change, account deletion
+  account/       profile, profile photo (pick, resize on the device, upload, remove), personal data, password change, account deletion
   sport-profile/ sport profile (create, edit, delete)
   preferences/   appearance, font size, units, notifications, location privacy
   cities/        city catalogue and the city picker

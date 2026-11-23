@@ -35,8 +35,15 @@ owner has no billing, so the photo is stored resized inside Firestore through th
       delegated by the parent). Account deletion already removes every `private` document; the
       summary scan now selects only preference fields so it never downloads photos. Commit: see
       git log (`feat(backend): store a profile photo ...`).
-- [ ] T2 Frontend: avatar component, account screen (choose/take, preview, save, remove), resize
+- [x] T2 Frontend: avatar component, account screen (choose/take, preview, save, remove), resize
       util, settings page group, tests
+      Evidence: RED observed first for every piece (compile errors for the missing modules/keys, and
+      7 failing page tests); then `ng test` full: 928 passed, 5 failed, all in `admin/users` (another
+      writer's in-flight work) plus one timing flake in `risk-factors-section.spec` that passes alone
+      (8/8); `tsc --noEmit` app and spec: clean; `npm run lint`: all files pass; `ng build -c real`:
+      ok. Route: delegated writer. Not verified on a real phone (camera/gallery of the WebView).
+      The Inicio greeting was left without avatar (no redesign of other screens). Commit: see git
+      log (`feat(frontend): let a runner set ...`).
 - [ ] T3 Specs and context docs updated; verification green
 
 ## Acceptance

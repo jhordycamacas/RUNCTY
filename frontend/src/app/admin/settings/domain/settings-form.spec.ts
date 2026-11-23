@@ -56,6 +56,14 @@ describe('settings form', () => {
     );
   });
 
+  it('bounds the profile photo limits to 20-500 KB and 64-1024 px', () => {
+    expect(errorsOf({ profilePhotoMaxKb: '19' })?.profilePhotoMaxKb).toBe('Debe estar entre 20 y 500.');
+    expect(errorsOf({ profilePhotoMaxKb: '501' })?.profilePhotoMaxKb).toBe('Debe estar entre 20 y 500.');
+    expect(errorsOf({ profilePhotoMaxPx: '63' })?.profilePhotoMaxPx).toBe('Debe estar entre 64 y 1024.');
+    expect(errorsOf({ profilePhotoMaxPx: '1025' })?.profilePhotoMaxPx).toBe('Debe estar entre 64 y 1024.');
+    expect(errorsOf({ profilePhotoMaxKb: '20', profilePhotoMaxPx: '1024' })).toBeUndefined();
+  });
+
   it('accepts the bounds themselves', () => {
     expect(
       parseSettingsForm({ ...defaults(), segmentMaxPoints: '2', penaltyLow: '0', routeMaxDistanceKm: '1000' })

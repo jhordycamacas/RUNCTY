@@ -298,7 +298,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 - **Historia de usuario:** Como usuario · Deseo poner, cambiar y quitar mi foto de perfil desde la pantalla de mi cuenta. Para reconocer mi cuenta y personalizar mi perfil.
 - **Actor:** Usuario · **Prioridad:** Debe tener · **Sprint planificado:** fuera del plan (pedido del dueño, 2026-11-22) · **Dependencia:** N/A · **Caso de uso:** Gestionar foto de perfil
-- **Estado:** `Parcial` — Backend hecho y con pruebas automáticas; falta la pantalla (frontend) y la verificación en un celular. Seguimiento en `odd/tasks/foto-de-perfil.md`.
+- **Estado:** `Parcial` — Backend y pantalla hechos y con pruebas automáticas; falta la verificación en un celular. Seguimiento en `odd/tasks/foto-de-perfil.md`.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
@@ -311,12 +311,12 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] El tamaño máximo (`profilePhotoMaxKb`, 20–500, por defecto 100) y el lado en píxeles (`profilePhotoMaxPx`, 64–1024, por defecto 256) son parámetros del sistema; cambiar el primero cambia lo que acepta la API.
 - [x] Una carga mayor al límite se rechaza antes de decodificarla.
 - [x] `DELETE` es idempotente y eliminar la cuenta elimina también la foto.
-- [ ] La pantalla de la cuenta permite elegir o tomar la foto, ver la vista previa, guardarla y quitarla (frontend, tarea T2).
+- [x] La pantalla de la cuenta permite elegir o tomar la foto (el WebView ofrece cámara o galería), guardarla y quitarla con confirmación, con aviso de éxito y errores por campo en español (frontend, tarea T2).
 - [ ] Verificado de punta a punta en un celular contra la API y Firebase.
 
-**Implementación:** `backend/apps/users/domain/profile_photo.py`, `backend/apps/users/application/use_cases.py`, `backend/apps/users/infrastructure/firestore_private_documents.py`, `backend/apps/users/presentation/views.py`, `backend/apps/system_settings/domain/models.py`
+**Implementación:** `frontend/src/app/account/presentation/profile-home.page.ts`, `frontend/src/app/account/application/profile-photo.store.ts`, `frontend/src/app/shared/images/resize-to-square-jpeg.ts`, `frontend/src/app/shared/ui/avatar.ts`, `backend/apps/users/domain/profile_photo.py`, `backend/apps/users/application/use_cases.py`, `backend/apps/users/infrastructure/firestore_private_documents.py`, `backend/apps/users/presentation/views.py`, `backend/apps/system_settings/domain/models.py`
 
-**Pruebas:** `backend/tests/test_profile_photo_domain.py`, `backend/tests/test_profile_photo_use_cases.py`, `backend/tests/test_profile_photo_api.py`, `backend/tests/test_firestore_user_adapters.py`, `backend/tests/test_firestore_summary_source.py`, `backend/tests/test_system_settings_domain.py`
+**Pruebas:** `frontend/src/app/account/presentation/profile-home.page.spec.ts`, `frontend/src/app/account/application/profile-photo.store.spec.ts`, `frontend/src/app/account/infrastructure/http-profile-photo.repository.spec.ts`, `frontend/src/app/shared/images/resize-to-square-jpeg.spec.ts`, `backend/tests/test_profile_photo_domain.py`, `backend/tests/test_profile_photo_use_cases.py`, `backend/tests/test_profile_photo_api.py`, `backend/tests/test_firestore_user_adapters.py`, `backend/tests/test_firestore_summary_source.py`, `backend/tests/test_system_settings_domain.py`
 
 ## Dependencias
 

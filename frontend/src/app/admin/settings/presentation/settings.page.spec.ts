@@ -70,8 +70,8 @@ describe('SettingsPage', () => {
       expect(text()).toContain(group.title);
       expect(text()).toContain(group.description);
     }
-    expect(root().querySelectorAll('section.panel')).toHaveLength(7);
-    expect(root().querySelectorAll('app-text-field')).toHaveLength(26);
+    expect(root().querySelectorAll('section.panel')).toHaveLength(8);
+    expect(root().querySelectorAll('app-text-field')).toHaveLength(28);
     expect(text()).toContain('Ejemplo: America/Guayaquil');
     expect(form().getRawValue().safeRouteDistanceTolerance).toBe('20');
   });

@@ -31,6 +31,8 @@ import {
 import { DocumentPreferencesDisplay } from './preferences/infrastructure/document-preferences-display';
 import { HttpPreferencesRepository } from './preferences/infrastructure/http-preferences.repository';
 import { LocalStoragePreferencesCache } from './preferences/infrastructure/local-storage-preferences.cache';
+import { ProfilePhotoRepository } from './account/domain/profile-photo';
+import { HttpProfilePhotoRepository } from './account/infrastructure/http-profile-photo.repository';
 import { RiskZoneAlertRepository } from './alerts/domain/risk-zone-alert';
 import { HttpRiskZoneAlertRepository } from './alerts/infrastructure/http-risk-zone-alert.repository';
 import { RouteRepository } from './routes/domain/route';
@@ -52,6 +54,7 @@ export const appConfig: ApplicationConfig = {
     { provide: UsersRepository, useClass: HttpUsersRepository },
     { provide: CityRepository, useClass: HttpCityRepository },
     { provide: ProfileRepository, useClass: HttpProfileRepository },
+    { provide: ProfilePhotoRepository, useClass: HttpProfilePhotoRepository },
     { provide: AccountRepository, useClass: HttpAccountRepository },
     { provide: SportProfileRepository, useClass: HttpSportProfileRepository },
     { provide: CatalogRepository, useClass: HttpCatalogRepository },
