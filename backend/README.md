@@ -49,6 +49,22 @@ The command refuses to run unless the project id starts with `demo-` and both em
 create this account in a real project. From the repo root (with `backend/.venv` active),
 `npm run seed` does the same, and `npm run api` starts the API against the local emulators.
 
+Against anything else, `seed` refuses to create the test admin and points to `create_admin`;
+`seed --data-only` loads the same data without any account.
+
+## Create the first admin of a real project
+
+```bash
+.venv/Scripts/python manage.py create_admin --email owner@example.com --first-name Ana --last-name Mora
+```
+
+The password is asked twice on the terminal (never an argument, an environment variable or
+output) and must follow the password policy (8+ characters, a letter and a number). It creates
+the Firebase Auth user (email verified) and its `users/{uid}` document, and gives it the `admin`
+role with every permission. An existing account is only promoted: its password stays. It also
+saves the system roles, the city Loja, the default settings and the option catalogs, only when
+missing. Full walk-through: [docs/conectar-google.md](../docs/conectar-google.md).
+
 ## Docker
 
 From the repo root, `docker compose up -d --build` starts the Firebase emulators, the API and

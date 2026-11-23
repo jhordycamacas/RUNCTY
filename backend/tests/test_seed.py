@@ -264,7 +264,7 @@ def test_reports_what_it_seeded(report):
     assert report[1] == "Catalogs seeded: sportLevels, sportGoals"
     assert report[2] == "City seeded: cities/loja"
     assert report[3] == "Roles seeded: runner, admin, club_rep"
-    assert report[4].startswith(f"Admin seeded: {ADMIN_EMAIL} (uid ")
+    assert report[4].startswith(f"Admin ready: {ADMIN_EMAIL} (uid ")
     routes = [line for line in report if line.startswith("Route seeded: routes/")]
     assert len(routes) == 5
     assert routes[0].startswith("Route seeded: routes/loja-jipiro — Parque Recreacional Jipiro, ")
@@ -312,3 +312,31 @@ def test_the_command_refuses_anything_but_the_emulator(emulator, settings, chang
     with pytest.raises(CommandError, match=message):
         call_command("seed")
     assert not FIREBASE.cities and not FIREBASE.docs and not FIREBASE.roles
+
+
+def seeded_admin() -> bool:
+    return ADMIN_EMAIL in FIREBASE.emails or any(
+        user.get("email") == ADMIN_EMAIL for user in FIREBASE.users.values()
+    )
+
+
+def test_the_refusal_points_to_create_admin_and_data_only(emulator, settings):
+    settings.FIREBASE_PROJECT_ID = "runcty-real"
+    with pytest.raises(CommandError, match="create_admin") as refusal:
+        call_command("seed")
+    assert "--data-only" in str(refusal.value)
+    assert not seeded_admin()
+
+
+def test_data_only_seeds_everything_but_the_accounts_on_a_real_project(emulator, settings):
+    settings.FIREBASE_PROJECT_ID = "runcty-real"
+    settings.FIREBASE_EMULATOR_HOSTS = {}
+    call_command("seed", "--data-only")
+    assert "loja" in FIREBASE.cities and sorted(FIREBASE.roles) == ["admin", "club_rep", "runner"]
+    assert not seeded_admin()
+
+
+def test_data_only_also_skips_the_accounts_on_the_emulator(emulator):
+    call_command("seed", "--data-only")
+    assert "loja" in FIREBASE.cities
+    assert not seeded_admin()

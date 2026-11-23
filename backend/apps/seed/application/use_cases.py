@@ -58,17 +58,52 @@ class SeedDeps:
     catalogs: CatalogRepository
 
 
-def run_seed(deps: SeedDeps, report: Callable[[str], None]) -> None:
+@dataclass(frozen=True, slots=True)
+class AdminDeps:
+    cities: CityRepository
+    roles: RoleRepository
+    auth: AuthGateway
+    accounts: SeedAccounts
+    settings: SettingsRepository
+    catalogs: CatalogRepository
+
+
+def run_seed(
+    deps: SeedDeps, report: Callable[[str], None], *, include_accounts: bool = True
+) -> None:
+    """`include_accounts=False` leaves out the test admin: the only step with a known password."""
     settings = _seed_settings(deps.settings, report)
     _seed_catalogs(deps.catalogs, report)
     now = local_now(settings)
     _seed_city(deps.cities, settings, report)
     _seed_roles(deps.roles, report)
-    _seed_admin(deps, report)
+    if include_accounts:
+        _seed_admin(deps, report)
     _seed_sources(deps.sources, now.date(), report)
     _seed_routes(deps.routes, now, settings, report)
     _seed_support_points(deps, report)
     _seed_alerts(deps.alerts, now.date(), settings, report)
+
+
+def create_admin(
+    deps: AdminDeps,
+    *,
+    email: str,
+    password: str,
+    first_name: str,
+    last_name: str,
+    report: Callable[[str], None],
+) -> str:
+    """Makes `email` an admin of a real project and returns its uid.
+
+    Seeds the settings, catalogs, city and system roles only when missing, so an admin's edits
+    stay. An existing account keeps its password: it is only promoted.
+    """
+    settings = _seed_settings(deps.settings, report)
+    _seed_catalogs(deps.catalogs, report)
+    _ensure_city(deps.cities, settings, report)
+    _seed_roles(deps.roles, report)
+    return _grant_admin(deps.auth, deps.accounts, email, password, first_name, last_name, report)
 
 
 def _seed_settings(repository: SettingsRepository, report: Callable[[str], None]) -> SystemSettings:
@@ -102,6 +137,14 @@ def _seed_city(
     report(f"City seeded: cities/{city.id}")
 
 
+def _ensure_city(
+    cities: CityRepository, settings: SystemSettings, report: Callable[[str], None]
+) -> None:
+    city = Ciudad.parse(data.CITY, settings.country_code)
+    created = cities.create(city)
+    report(f"City {'seeded' if created else 'kept'}: cities/{city.id}")
+
+
 def _seed_roles(roles: RoleRepository, report: Callable[[str], None]) -> None:
     """`create` stamps `createdAt` once; a re-run only updates the role."""
     for role in SYSTEM_ROLES:
@@ -111,22 +154,41 @@ def _seed_roles(roles: RoleRepository, report: Callable[[str], None]) -> None:
 
 
 def _seed_admin(deps: SeedDeps, report: Callable[[str], None]) -> None:
-    uid = deps.accounts.ensure_admin_account(
-        data.ADMIN_EMAIL, data.ADMIN_PASSWORD, data.ADMIN_DISPLAY_NAME
+    _grant_admin(
+        deps.auth,
+        deps.accounts,
+        data.ADMIN_EMAIL,
+        data.ADMIN_PASSWORD,
+        data.ADMIN_FIRST_NAME,
+        data.ADMIN_LAST_NAME,
+        report,
     )
-    deps.auth.set_custom_claims(uid, {"role": ADMIN_ROLE, "perms": list(ALL_PERMISSIONS)})
-    deps.accounts.save_admin_profile(
+
+
+def _grant_admin(
+    auth: AuthGateway,
+    accounts: SeedAccounts,
+    email: str,
+    password: str,
+    first_name: str,
+    last_name: str,
+    report: Callable[[str], None],
+) -> str:
+    uid = accounts.ensure_admin_account(email, password, f"{first_name} {last_name}")
+    auth.set_custom_claims(uid, {"role": ADMIN_ROLE, "perms": list(ALL_PERMISSIONS)})
+    accounts.save_admin_profile(
         uid,
         {
             "uid": uid,
-            "email": data.ADMIN_EMAIL,
-            "firstName": data.ADMIN_FIRST_NAME,
-            "lastName": data.ADMIN_LAST_NAME,
+            "email": email,
+            "firstName": first_name,
+            "lastName": last_name,
             "cityId": data.CITY_ID,
             "role": ADMIN_ROLE,
         },
     )
-    report(f"Admin seeded: {data.ADMIN_EMAIL} (uid {uid})")
+    report(f"Admin ready: {email} (uid {uid})")
+    return uid
 
 
 def _seed_sources(sources: SourceRepository, today: date, report: Callable[[str], None]) -> None:

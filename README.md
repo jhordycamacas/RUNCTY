@@ -132,6 +132,8 @@ npm run seed            # en otra terminal: crea la ciudad Loja, los roles del s
 
 Usuario administrador de prueba (solo emulador): `admin@runcty.dev` / `Admin123!`. El seed se niega a correr si el proyecto no empieza con `demo-` o si los emuladores no están en la máquina local o en el servicio `firebase` de Docker.
 
+Para probar contra el **proyecto real de Firebase** (sin emuladores y con tu propio administrador) sigue [docs/conectar-google.md](docs/conectar-google.md).
+
 Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda en `emulator-data/`, ignorado por git).
 
 ### App móvil

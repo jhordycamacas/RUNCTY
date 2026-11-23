@@ -18,7 +18,6 @@ CITY_ID = CITY["id"]
 # Emulator-only credentials: the seed guard refuses to run against anything else.
 ADMIN_EMAIL = "admin@runcty.dev"
 ADMIN_PASSWORD = "Admin123!"  # noqa: S105
-ADMIN_DISPLAY_NAME = "Administrador RUNCTY"
 ADMIN_FIRST_NAME = "Administrador"
 ADMIN_LAST_NAME = "RUNCTY"
 
