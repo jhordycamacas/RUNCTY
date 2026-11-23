@@ -45,4 +45,14 @@ describe('AdminHeader', () => {
     expect(root().querySelector('ion-back-button')).not.toBeNull();
     expect(root().querySelector('ion-menu-button')).toBeNull();
   });
+
+  it('draws the back button as an arrow only, named Volver', () => {
+    fixture.componentInstance.backTo.set('/admin/rutas');
+    fixture.detectChanges();
+
+    const back = root().querySelector('ion-back-button') as HTMLElement & { text?: string };
+    expect(back.getAttribute('aria-label')).toBe('Volver');
+    expect(back.text).toBe('');
+    expect(root().textContent).not.toContain('Atrás');
+  });
 });

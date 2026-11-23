@@ -92,9 +92,22 @@ ion-button {
   letter-spacing: 0;
 }
 
+// Arrow only (no «Atrás» text): a centered 48px target whose arrow lines up with the screen gutter,
+// which the toolbar padding provides, so the target spills half its free space to the left.
 ion-back-button {
+  --min-width: var(--rc-min-touch-target);
   --min-height: var(--rc-min-touch-target);
+  --padding-start: 0;
+  --padding-end: 0;
+  --icon-margin-start: 0;
+  --icon-margin-end: 0;
+  --icon-padding-start: 0;
+  --icon-padding-end: 0;
+  --icon-font-size: 1.5rem;
+  --color: var(--rc-text);
+  min-width: var(--rc-min-touch-target);
   min-height: var(--rc-min-touch-target);
+  margin-inline-start: calc((1.5rem - var(--rc-min-touch-target)) / 2);
 }
 
 ion-button.button-solid {

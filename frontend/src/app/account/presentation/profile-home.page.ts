@@ -11,7 +11,6 @@ import {
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
-  cameraOutline,
   checkmarkCircle,
   chevronForward,
   fitnessOutline,
@@ -19,22 +18,18 @@ import {
   logOutOutline,
   mailUnreadOutline,
   optionsOutline,
-  personOutline,
+  pencilOutline,
   trashOutline,
 } from 'ionicons/icons';
-import { CitiesStore } from '../../cities/application/cities.store';
 import { AuthService } from '../../core/auth/auth.service';
-import { SystemSettingsStore } from '../../core/settings/system-settings.store';
 import { Avatar } from '../../shared/ui/avatar';
 import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { Notice } from '../../shared/ui/notice';
 import { TabHeader } from '../../shared/ui/tab-header';
-import { ToastService } from '../../shared/ui/toast.service';
 import { ProfilePhotoStore } from '../application/profile-photo.store';
 import { ProfileStore } from '../application/profile.store';
 
 addIcons({
-  cameraOutline,
   checkmarkCircle,
   chevronForward,
   fitnessOutline,
@@ -42,7 +37,7 @@ addIcons({
   logOutOutline,
   mailUnreadOutline,
   optionsOutline,
-  personOutline,
+  pencilOutline,
   trashOutline,
 });
 
@@ -54,12 +49,6 @@ interface Section {
 }
 
 const SECTIONS: Section[] = [
-  {
-    icon: 'person-outline',
-    title: 'Datos personales',
-    subtitle: 'Nombre, fecha de nacimiento, ciudad y cédula',
-    link: 'datos',
-  },
   {
     icon: 'fitness-outline',
     title: 'Perfil deportivo',
@@ -97,44 +86,18 @@ const SECTIONS: Section[] = [
       @if (profile(); as data) {
         <section class="card identity" aria-label="Tu perfil">
           <app-avatar [name]="fullName()" [photo]="photos.photo()" size="7rem" />
-          <input
-            #picker
-            type="file"
-            accept="image/*"
-            hidden
-            aria-label="Elegir una foto de perfil"
-            (change)="onPicked(picker)"
-          />
-          <div class="photo-actions">
-            <ion-button
-              fill="outline"
-              [disabled]="photos.saving()"
-              (click)="picker.click()"
-            >
-              <ion-icon name="camera-outline" slot="start" aria-hidden="true" />
-              Cambiar foto
-            </ion-button>
-            @if (photos.photo()) {
-              <ion-button
-                fill="clear"
-                color="danger"
-                [disabled]="photos.saving()"
-                (click)="removePhoto()"
-              >
-                <ion-icon name="trash-outline" slot="start" aria-hidden="true" />
-                Quitar foto
-              </ion-button>
-            }
-          </div>
-          @if (photos.saving()) {
-            <p class="state" role="status"><ion-spinner name="crescent" /> Guardando foto…</p>
-          }
-          <app-notice [message]="photos.error()" />
+          <ion-button
+            class="edit"
+            fill="clear"
+            routerLink="datos"
+            aria-label="Editar perfil"
+          >
+            <ion-icon name="pencil-outline" slot="icon-only" aria-hidden="true" />
+          </ion-button>
           <div class="who">
             <h1>{{ fullName() }}</h1>
             <p class="muted">{{ data.email }}</p>
             <p class="chips">
-              <span class="chip">{{ cityName() }}</span>
               @if (verified()) {
                 <span class="chip ok"
                   ><ion-icon name="checkmark-circle" aria-hidden="true" /> Correo verificado</span
@@ -148,18 +111,6 @@ const SECTIONS: Section[] = [
             </p>
           </div>
         </section>
-        <dl class="card facts">
-          <div>
-            <dt>Fecha de nacimiento</dt>
-            <dd>{{ data.birthDate }}</dd>
-          </div>
-          @if (data.idNumber) {
-            <div>
-              <dt>Cédula</dt>
-              <dd>{{ data.idNumber }}</dd>
-            </div>
-          }
-        </dl>
       } @else if (store.loading()) {
         <p class="state" role="status"><ion-spinner name="crescent" /> Cargando tu perfil…</p>
       } @else if (store.error(); as failure) {
@@ -167,8 +118,7 @@ const SECTIONS: Section[] = [
         <ion-button fill="outline" (click)="store.load()">Reintentar</ion-button>
       }
 
-      <h2>Tu cuenta</h2>
-      <ion-list inset="true" lines="full">
+      <ion-list class="options" lines="full">
         @for (section of sections; track section.link) {
           <ion-item button detail="false" [routerLink]="section.link">
             <ion-icon [name]="section.icon" slot="start" aria-hidden="true" />
@@ -209,6 +159,7 @@ const SECTIONS: Section[] = [
     }
 
     .identity {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -216,16 +167,26 @@ const SECTIONS: Section[] = [
       text-align: center;
     }
 
-    .photo-actions {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: var(--rc-space-sm);
-    }
-
-    .photo-actions ion-button {
+    .edit {
+      position: absolute;
+      inset-block-start: var(--rc-space-sm);
+      inset-inline-end: var(--rc-space-sm);
+      --color: var(--rc-primary-text);
+      min-width: var(--rc-min-touch-target);
       min-height: var(--rc-min-touch-target);
     }
+
+    .options {
+      margin: var(--rc-space-lg) 0 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .options ion-item {
+      --background: transparent;
+      min-height: var(--rc-min-touch-target);
+    }
+
 
     h1 {
       margin: 0;
@@ -276,23 +237,6 @@ const SECTIONS: Section[] = [
       color: var(--rc-warning);
     }
 
-    .facts {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--rc-space-xl);
-      margin: var(--rc-space-md) 0 0;
-    }
-
-    dt {
-      color: var(--rc-text-muted);
-      font-size: var(--rc-font-size-caption);
-    }
-
-    dd {
-      margin: 0;
-      font-weight: 500;
-    }
-
     .state {
       display: flex;
       align-items: center;
@@ -321,9 +265,6 @@ const SECTIONS: Section[] = [
 export class ProfileHomePage {
   protected readonly store = inject(ProfileStore);
   protected readonly photos = inject(ProfilePhotoStore);
-  private readonly cities = inject(CitiesStore);
-  private readonly settings = inject(SystemSettingsStore);
-  private readonly toast = inject(ToastService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly dialog = inject(ConfirmDialog);
@@ -335,35 +276,10 @@ export class ProfileHomePage {
     const data = this.profile();
     return data ? `${data.firstName} ${data.lastName}` : '';
   });
-  protected readonly cityName = computed(() => {
-    const id = this.profile()?.cityId ?? '';
-    return this.cities.byId().get(id)?.name ?? id;
-  });
 
   constructor() {
     void this.store.load();
-    void this.cities.load();
     void this.photos.load();
-    void this.settings.load();
-  }
-
-  protected async onPicked(picker: HTMLInputElement): Promise<void> {
-    const file = picker.files?.[0];
-    // Clearing the input lets the user pick the same file again after a failure.
-    picker.value = '';
-    if (!file) return;
-    if (await this.photos.change(file)) await this.toast.success('Foto actualizada.');
-  }
-
-  protected async removePhoto(): Promise<void> {
-    const confirmed = await this.dialog.confirm({
-      header: 'Quitar foto',
-      message: 'Se borrará tu foto de perfil y volverán a verse tus iniciales.',
-      confirmText: 'Quitar foto',
-      destructive: true,
-    });
-    if (!confirmed) return;
-    if (await this.photos.remove()) await this.toast.success('Foto eliminada.');
   }
 
   protected async signOut(): Promise<void> {

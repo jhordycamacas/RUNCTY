@@ -9,7 +9,7 @@ import { IonBackButton, IonButtons, IonHeader, IonTitle, IonToolbar } from '@ion
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button [defaultHref]="backTo()" text="Atrás" />
+          <ion-back-button [defaultHref]="backTo()" text="" aria-label="Volver" />
         </ion-buttons>
         <ion-title>{{ title() }}</ion-title>
       </ion-toolbar>

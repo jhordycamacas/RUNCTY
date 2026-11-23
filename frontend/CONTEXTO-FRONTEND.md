@@ -42,11 +42,18 @@ Documento vivo y corto. Para el detalle técnico y los comandos ver `README.md`;
 
 ## Foto de perfil
 
-- Pantalla Cuenta (`account/presentation/profile-home.page.ts`): avatar grande, «Cambiar foto» (un `<input type="file" accept="image/*">` oculto; en Android el WebView ofrece cámara o galería, sin plugin nuevo) y «Quitar foto» (con confirmación). Muestra «Guardando foto…» mientras sube, el error en español junto al avatar y un toast de éxito.
+- Pantalla Cuenta (`account/presentation/profile-home.page.ts`), sin módulo ni título «Tu cuenta» ni lista de datos personales: la cabecera del perfil muestra el avatar (solo lectura, sin botones de foto), el nombre y el correo, con un lápiz pequeño «Editar perfil» que abre `datos`; debajo, «Perfil deportivo», «Preferencias» y «Cambiar contraseña» son opciones de lista simples y, al final, «Cerrar sesión» y «Eliminar cuenta».
+- Pantalla «Editar perfil» (`edit-personal-data.page.ts`): contiene todo lo editable. Arriba el avatar con «Cambiar foto» (un `<input type="file" accept="image/*">` oculto; en Android el WebView ofrece cámara o galería, sin plugin nuevo) y «Quitar foto» (con confirmación); la foto se guarda sola desde esa pantalla (propio flujo, «Guardando foto…», error en español junto al avatar, toast «Foto actualizada.» / «Foto eliminada.») y no cuenta como cambio sin guardar del formulario. `ProfilePhotoStore` es único, así que el avatar de Cuenta se refresca al volver.
 - `resizeToSquareJpeg(file, maxPx, maxKb)` (`shared/images`): rechaza lo que no es imagen y archivos de más de 15 MB, recorta al centro un cuadrado, lo reduce a `maxPx` sin agrandar, baja la calidad JPEG de 0.9 a 0.5 y, si aún pesa más de `maxKb`, reduce el lado un 20 % por vuelta. La parte del DOM (decodificar con `createImageBitmap` o `Image`, canvas) está detrás del puerto `ImageCodec`; los specs usan un códec falso (token `IMAGE_CODEC`).
 - `ProfilePhotoStore` (señales `photo`, `loading`, `saving`, `error`) usa `ProfilePhotoRepository` (`GET|PUT|DELETE /users/me/photo`); la foto se descarta si cambia el usuario. El motivo `fields.photo` de la API (`invalid-format`, `invalid-image`, `too-large`) se traduce en `photoReasonMessage`.
 - `<app-avatar>` (`shared/ui/avatar.ts`): foto o iniciales sobre `--rc-primary`; decorativo salvo `labelled`.
 - No verificado en un celular real: la cámara/galería del WebView y el peso final de fotos grandes.
+
+## Administración de usuarios
+
+- Lista (`admin/users/presentation/users-admin.page.ts`): una sola barra `ion-input type="search"` («Buscar por cédula, correo o nombre»); Enter o «Buscar» envía el texto como `q` a `GET /users`, «Limpiar» vuelve a listar a todos. El nombre de cada fila enlaza a `/admin/usuarios/:uid`. No quedan filtros por campo ni `cityOptions`.
+- Ficha (`user-detail.page.ts`, `UserDetailStore`, `GET /users/{uid}`): tres paneles de solo lectura (perfil personal, perfil deportivo, valoración). Las etiquetas de nivel y objetivos salen de `SportOptionsStore` (catálogos, inactivos incluidos; un código desconocido se muestra tal cual). `toUserDetail` lee con tolerancia: `emailVerified`, `createdAt` y `rating` son opcionales. Un 404 se muestra como «No encontramos a este usuario.»
+- `<app-rating-stars [average] [count]>` (`admin/users/presentation/rating-stars.ts`) es genérico: cinco estrellas rellenas en proporción (`starFills`) y un texto alternativo único. Vive aquí porque `shared/ui` lo llevaba otro cambio; moverlo allí cuando otra pantalla lo necesite. La API manda `rating: null` hasta que existan las calificaciones de las salidas grupales.
 
 ## Android (notas aprendidas)
 
@@ -77,3 +84,7 @@ Documento vivo y corto. Para el detalle técnico y los comandos ver `README.md`;
 - Sin red real en las pruebas: los mapas usan `FakeMapRenderer` o `fakeGoogleMaps()` (`src/app/shared/map/testing`).
 - Totales conocidos: 857 pruebas en 117 archivos (`odd/tasks/google-maps.md`). Algunas pruebas con `ion-input` que leen el texto de error con `textContent` fallan a veces; la causa no está confirmada: repetir el archivo solo antes de dar un fallo por real.
 - Diseño del admin (`3153394`): sección activa con tinte fucsia, botón primario fucsia (`--rc-primary`), `color-scheme` por tema para `<select>` y autocompletado nativos, y la regla global de foco con `:where` para no duplicar la caja en `app-select-field`.
+
+## Botón Volver
+
+- Los botones de volver (`app-subpage-header` del corredor y `app-admin-header` del admin) son solo la flecha: `<ion-back-button text="" aria-label="Volver">`, sin la palabra «Atrás». El estilo vive en un solo lugar (`src/theme/_ionic.scss`, `ion-back-button`): objetivo de 48 px centrado, flecha de 1,5 rem y margen negativo para que la flecha quede alineada con el margen lateral que da el padding de la barra.

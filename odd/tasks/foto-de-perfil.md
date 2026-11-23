@@ -42,6 +42,10 @@ owner has no billing, so the photo is stored resized inside Firestore through th
       writer's in-flight work) plus one timing flake in `risk-factors-section.spec` that passes alone
       (8/8); `tsc --noEmit` app and spec: clean; `npm run lint`: all files pass; `ng build -c real`:
       ok. Route: delegated writer. Not verified on a real phone (camera/gallery of the WebView).
+      Owner layout change applied (RED first, 16 page specs green): no «Tu cuenta» module and no personal
+      data list; pencil «Editar perfil» opens `datos`; sport profile, preferences and password are plain
+      list options. Owner changes 2: the photo is edited only on «Editar perfil» (the account avatar is display-only);
+      back buttons are arrow-only with aria-label «Volver» (subpage and admin headers, theme style).
       The Inicio greeting was left without avatar (no redesign of other screens). Commit: see git
       log (`feat(frontend): let a runner set ...`).
 - [ ] T3 Specs and context docs updated; verification green

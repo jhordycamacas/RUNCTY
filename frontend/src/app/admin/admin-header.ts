@@ -31,7 +31,7 @@ export class AdminTopbar {
         <div class="bar">
           <ion-buttons>
             @if (backTo(); as href) {
-              <ion-back-button [defaultHref]="href" text="Atrás" />
+              <ion-back-button [defaultHref]="href" text="" aria-label="Volver" />
             } @else {
               <ion-menu-button />
             }
