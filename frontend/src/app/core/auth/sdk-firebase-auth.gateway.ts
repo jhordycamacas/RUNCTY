@@ -51,7 +51,13 @@ export class SdkFirebaseAuthGateway extends FirebaseAuthGateway {
   }
 
   async getIdToken(forceRefresh = false): Promise<string | null> {
-    return (await this.auth.currentUser?.getIdToken(forceRefresh)) ?? null;
+    try {
+      return (await this.auth.currentUser?.getIdToken(forceRefresh)) ?? null;
+    } catch {
+      // A stored session whose user no longer exists cannot be refreshed. Without a token the
+      // public calls (cities, routes) still work and the protected ones answer 401.
+      return null;
+    }
   }
 
   sendEmailVerification(): Promise<void> {
