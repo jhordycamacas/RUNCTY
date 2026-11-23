@@ -5,6 +5,7 @@ from apps.routes.domain.models import PuntoRuta, Ruta
 from apps.summary.domain.metrics import (
     UserRecord,
     cities_summary,
+    city_comparison,
     registrations_by_week,
     routes_summary,
     users_summary,
@@ -117,6 +118,89 @@ class TestUsersSummary:
         assert preferences["appearance"] == {"system": 0, "light": 1, "dark": 2}
         assert preferences["units"] == {"metric": 2, "imperial": 1}
         assert preferences["notificationsEnabled"] == 2
+
+
+class TestUsersBySportLevel:
+    def level(self, code) -> tuple[str, dict]:
+        return ("sportProfile", {"level": code})
+
+    def test_counts_the_stored_level_of_each_profile_most_common_first(self):
+        private = [
+            self.level("beginner"),
+            self.level("advanced"),
+            self.level("beginner"),
+            self.level("zeta"),  # a code the catalogue no longer lists keeps its raw code
+            ("preferences", {"level": "advanced"}),  # only the sport profile counts
+        ]
+
+        by_level = users_summary([], private, NOW)["bySportLevel"]
+
+        assert by_level == [
+            {"level": "beginner", "users": 2},
+            {"level": "advanced", "users": 1},
+            {"level": "zeta", "users": 1},
+        ]
+
+    def test_a_profile_without_a_usable_level_is_not_listed(self):
+        private = [
+            ("sportProfile", {}),
+            ("sportProfile", {"level": ""}),
+            ("sportProfile", {"level": 3}),
+        ]
+
+        assert users_summary([], private, NOW)["bySportLevel"] == []
+
+    def test_there_is_nothing_to_list_without_profiles(self):
+        assert users_summary([UserRecord("runner", None)], [], NOW)["bySportLevel"] == []
+
+
+class TestCityComparison:
+    def test_each_city_shows_its_routes_and_its_users(self):
+        routes = [route("a", city="loja"), route("b", city="loja"), route("c", city="quito")]
+        users = [UserRecord("runner", None, "loja"), UserRecord("runner", None, "quito")] * 2
+
+        rows = city_comparison(routes, users, {"loja": "Loja", "quito": "Quito"})
+
+        assert rows == [
+            {"cityId": "loja", "name": "Loja", "routes": 2, "users": 2},
+            {"cityId": "quito", "name": "Quito", "routes": 1, "users": 2},
+        ]
+
+    def test_sorts_by_users_then_routes_then_name(self):
+        routes = [route("a", city="b"), route("b", city="b"), route("c", city="a")]
+        users = [UserRecord("runner", None, "c")]
+        names = {"a": "Alfa", "b": "Beta", "c": "Gamma"}
+
+        rows = city_comparison(routes, users, names)
+
+        assert [row["cityId"] for row in rows] == ["c", "b", "a"]
+
+    def test_a_city_with_routes_but_no_users_and_the_reverse_show_zero(self):
+        routes = [route("a", city="loja")]
+        users = [UserRecord("runner", None, "cuenca")]
+
+        rows = city_comparison(routes, users, {"loja": "Loja", "cuenca": "Cuenca"})
+
+        assert {row["cityId"]: (row["routes"], row["users"]) for row in rows} == {
+            "loja": (1, 0),
+            "cuenca": (0, 1),
+        }
+
+    def test_users_without_a_city_are_left_out_and_a_removed_city_keeps_its_id(self):
+        routes = [route("a", city="gone")]
+        users = [UserRecord("runner", None, None), UserRecord("runner", None, "")]
+
+        rows = city_comparison(routes, users, {})
+
+        assert rows == [{"cityId": "gone", "name": "gone", "routes": 1, "users": 0}]
+
+    def test_keeps_the_eight_cities_with_most_users(self):
+        users = [UserRecord("runner", None, f"c{i}") for i in range(10) for _ in range(i + 1)]
+
+        rows = city_comparison([], users, {})
+
+        assert len(rows) == 8
+        assert rows[0]["cityId"] == "c9"
 
 
 class TestRoutesSummary:

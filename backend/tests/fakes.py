@@ -498,7 +498,12 @@ class InMemorySummarySource:
     def users(self, limit: int) -> list[UserRecord]:
         users = self._firebase.users
         return [
-            UserRecord(users[uid].get("role"), users[uid].get("createdAt")) for uid in sorted(users)
+            UserRecord(
+                users[uid].get("role"),
+                users[uid].get("createdAt"),
+                users[uid].get("cityId") or None,
+            )
+            for uid in sorted(users)
         ][:limit]
 
     def private_documents(self, limit: int) -> list[tuple[str, dict]]:

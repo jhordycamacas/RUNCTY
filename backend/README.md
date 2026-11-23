@@ -274,6 +274,26 @@ absent. The sport profile reads both catalogs once per save and accepts only the
 never checks the catalogs, so deactivating an option hides nothing. The Firestore rules deny
 every client access to the collection.
 
+### Admin summary
+
+`GET /api/v1/admin/summary` (`admin.access`, no parameters) answers aggregates only, never
+personal data. Each block is `null` unless the caller also holds its permission (`users` needs
+`users.read`, `routes` needs `routes.manage`, `cities` needs `cities.manage`). Besides the
+older figures it carries what the "Resumen" charts read:
+
+- `users.bySportLevel`: `[{level, users}]`, the stored `level` code of every `sportProfile`
+  document, most common first. A code the catalog no longer lists keeps its raw code; a profile
+  without a usable level is left out (the client shows "no profile" as `total - completed`).
+  The scan of `users/*/private` selects only the preference fields and `level`, so photos and
+  goals are never downloaded.
+- `byCity` (top level): `[{cityId, name, routes, users}]`, routes and users per city, the
+  eight cities with most users first (then most routes, then name). A city with routes and no
+  users, or the reverse, shows `0`; users without a `cityId` are left out; a city missing from
+  the catalog keeps its id as `name`. It needs both `users.read` and `routes.manage` (it joins
+  both scans) and is `null` otherwise.
+- There is no routes-per-user figure: nothing links a user to a route until the trainings and
+  favorites exist (EP-10, EP-12).
+
 ### Routes and the safety index
 
 Reason codes are the ones the route callables used: `invalid-route-id`, `invalid-segment-id`,

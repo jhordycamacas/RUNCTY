@@ -55,6 +55,10 @@ Documento vivo y corto. Para el detalle técnico y los comandos ver `README.md`;
 - Ficha (`user-detail.page.ts`, `UserDetailStore`, `GET /users/{uid}`): tres paneles de solo lectura (perfil personal, perfil deportivo, valoración). Las etiquetas de nivel y objetivos salen de `SportOptionsStore` (catálogos, inactivos incluidos; un código desconocido se muestra tal cual). `toUserDetail` lee con tolerancia: `emailVerified`, `createdAt` y `rating` son opcionales. Un 404 se muestra como «No encontramos a este usuario.»
 - `<app-rating-stars [average] [count]>` (`admin/users/presentation/rating-stars.ts`) es genérico: cinco estrellas rellenas en proporción (`starFills`) y un texto alternativo único. Vive aquí porque `shared/ui` lo llevaba otro cambio; moverlo allí cuando otra pantalla lo necesite. La API manda `rating: null` hasta que existan las calificaciones de las salidas grupales.
 
+## Resumen del panel
+
+`admin/summary` usa palabras llanas (sin «KPI»): cuatro tarjetas (Rutas activas, Usuarios registrados, Ciudades con rutas, Usuarios con perfil deportivo), «Rutas y usuarios por ciudad» (`grouped-bars.ts`, barras horizontales agrupadas con leyenda, número en cada barra, texto alternativo y tabla oculta; solo si la API manda `byCity`), «Usuarios por nivel deportivo» (etiquetas del catálogo `sportLevels` vía `SummaryStore.levelLabel`; un código desconocido o un fallo del catálogo muestra el código tal cual, más «Sin perfil deportivo» = total − completados), seguridad de las rutas (Alta/Media/Baja/Sin evaluar) y usuarios nuevos por semana. «Más detalles» (cerrado) guarda las rutas más largas. Se borraron las gráficas de dificultad, superficie, factores de riesgo, roles y apariencia (el backend aún las devuelve). El mapper tolera la ausencia de `bySportLevel` y `byCity`. Falta «usuarios por ruta» hasta tener entrenamientos (EP-12).
+
 ## Android (notas aprendidas)
 
 - Orientación bloqueada en vertical (`screenOrientation="portrait"` en `AndroidManifest.xml`).

@@ -36,6 +36,8 @@ def data(firebase):
     firebase.cities.update({"loja": LOJA, "loja-centro": ZONE})
     firebase.users["runner-1"]["createdAt"] = now - timedelta(days=1)
     firebase.users["admin-1"]["createdAt"] = now - timedelta(days=60)
+    firebase.users["runner-1"]["cityId"] = "loja"
+    firebase.users["admin-1"]["cityId"] = "quito"
     firebase.private[("runner-1", "sportProfile")] = {"level": "beginner", "goals": ["health"]}
     firebase.private[("runner-1", "preferences")] = {"appearance": "dark"}
     safety = {"slot-1": {"level": "high", "score": 90}, "slot-2": {"level": "low", "score": 10}}
@@ -59,6 +61,11 @@ class TestAuthorization:
 
         assert response.status_code == 403
         assert response.json()["error"]["reason"] == "missing-permission"
+
+    def test_the_city_comparison_needs_the_permissions_of_both_blocks(self, client, data):
+        assert client.get(URL, **bearer("manager-token")).json()["byCity"] is None
+        assert client.get(URL, **bearer("club-rep-token")).json()["byCity"] is None
+        assert client.get(URL, **bearer("admin-token")).json()["byCity"] is not None
 
     def test_an_administrator_gets_every_block(self, client, data):
         body = client.get(URL, **bearer("admin-token")).json()
@@ -117,6 +124,13 @@ class TestPayload:
         assert routes["byCity"] == [{"cityId": "loja", "cityName": "Loja", "count": 2}]
         assert body["cities"] == {"cities": 1, "zones": 1}
 
+    def test_compares_routes_and_users_per_city_and_users_per_sport_level(self, client, data):
+        body = client.get(URL, **bearer("admin-token")).json()
+
+        assert body["users"]["bySportLevel"] == [{"level": "beginner", "users": 1}]
+        assert {"cityId": "loja", "name": "Loja", "routes": 2, "users": 5} in body["byCity"]
+        assert {"cityId": "quito", "name": "quito", "routes": 0, "users": 1} in body["byCity"]
+
     def test_contains_no_personal_data(self, client, data, firebase):
         firebase.users["runner-1"].update(email="secret.runner@example.com", firstName="Zelda")
 
@@ -133,6 +147,8 @@ class TestPayload:
         assert body["users"]["sportProfiles"]["percentage"] == 0
         assert body["routes"]["total"] == 0
         assert body["routes"]["byCity"] == []
+        assert body["byCity"] == []
+        assert body["users"]["bySportLevel"] == []
 
 
 class TestTruncation:

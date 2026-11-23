@@ -16,6 +16,7 @@ from apps.users.domain.models import APPEARANCES, UNIT_SYSTEMS, PreferenciaUsuar
 
 WEEKS = 8
 LONGEST_ROUTES = 8
+CITIES_COMPARED = 8
 _LEVELS_WORST_FIRST = ("low", "medium", "high")
 _SPORT_PROFILE = "sportProfile"
 _PREFERENCES = "preferences"
@@ -24,10 +25,11 @@ _UNSPECIFIED = "Sin definir"
 
 @dataclass(frozen=True, slots=True)
 class UserRecord:
-    """The only two facts the summary reads of an account."""
+    """The only facts the summary reads of an account: no name, email or id."""
 
     role: str | None
     created_at: datetime | None
+    city_id: str | None = None
 
 
 def week_start(day: date) -> date:
@@ -62,6 +64,19 @@ def _count_by_text(values: Iterable[str]) -> dict[str, int]:
     return dict(sorted(counts.items(), key=lambda item: (-item[1], item[0].casefold())))
 
 
+def _users_by_sport_level(
+    private_documents: Sequence[tuple[str, Mapping[str, object]]],
+) -> list[dict[str, object]]:
+    """Profiles per stored level code, most common first; a profile with no level is left out."""
+    levels = Counter(
+        data["level"]
+        for document_id, data in private_documents
+        if document_id == _SPORT_PROFILE and isinstance(data.get("level"), str) and data["level"]
+    )
+    ordered = sorted(levels.items(), key=lambda item: (-item[1], item[0]))
+    return [{"level": level, "users": count} for level, count in ordered]
+
+
 def users_summary(
     users: Sequence[UserRecord],
     private_documents: Sequence[tuple[str, Mapping[str, object]]],
@@ -90,6 +105,7 @@ def users_summary(
             "completed": profiles,
             "percentage": round(profiles * 100 / total) if total else 0,
         },
+        "bySportLevel": _users_by_sport_level(private_documents),
         "preferences": {
             "saved": len(preferences),
             "appearance": _count_in((p.appearance for p in preferences), APPEARANCES),
@@ -149,3 +165,25 @@ def routes_summary(
 def cities_summary(cities: Sequence[Ciudad]) -> dict[str, int]:
     zones = sum(1 for city in cities if city.type == "zone")
     return {"cities": len(cities) - zones, "zones": zones}
+
+
+def city_comparison(
+    routes: Sequence[Ruta], users: Sequence[UserRecord], city_names: Mapping[str, str]
+) -> list[dict[str, object]]:
+    """Routes and users per city, for the cities with the most users first (at most 8).
+
+    Users without a city are left out; a city with routes and no users (or the reverse) shows 0.
+    """
+    route_counts = Counter(route.city_id for route in routes if route.city_id)
+    user_counts = Counter(user.city_id for user in users if user.city_id)
+    rows = [
+        {
+            "cityId": city_id,
+            "name": city_names.get(city_id, city_id),
+            "routes": route_counts.get(city_id, 0),
+            "users": user_counts.get(city_id, 0),
+        }
+        for city_id in route_counts.keys() | user_counts.keys()
+    ]
+    rows.sort(key=lambda row: (-row["users"], -row["routes"], row["name"].casefold()))
+    return rows[:CITIES_COMPARED]

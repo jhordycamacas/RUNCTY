@@ -57,17 +57,20 @@ Historia: como administrador, deseo que al entrar al panel lo primero que vea se
 ### Contenido
 
 1. Saludo con la fecha de hoy en español.
-2. Fichas KPI (números grandes, etiqueta pequeña en mayúsculas): Usuarios, Altas en 7 días, Rutas activas, Rutas con nivel Bajo, Ciudades y zonas.
-3. Altas por semana (últimas 8 semanas): gráfico de barras verticales con valor sobre cada barra, categorías debajo, líneas de guía y base.
-4. Gráficos de pastel (anillo con total al centro y leyenda con cantidad y porcentaje): rutas por dificultad y por superficie (agrupadas por el texto guardado; más de cinco valores distintos se suman en «Otras»), factores de riesgo por severidad, usuarios por rol y nivel de seguridad de las rutas (Alto, Medio, Bajo, Sin índice; nunca «segura» ni «insegura»).
-5. Gráficos de barras verticales: rutas por ciudad y rutas más largas (km, hasta 6 rutas).
-6. Perfil deportivo completado: barra de progreso con porcentaje; preferencias de apariencia y notificaciones activas.
-7. Fichas «Próximamente» (sin cifras): Entrenamientos registrados, Alertas SOS y Eventos.
+2. Cuatro tarjetas con número grande y una línea de apoyo, en lenguaje llano: «Rutas activas» (de N rutas · km), «Usuarios registrados» (nuevos en los últimos 30 días), «Ciudades con rutas» (de N ciudades registradas) y «Usuarios con perfil deportivo» (de N usuarios, con porcentaje).
+3. «Rutas y usuarios por ciudad»: barras horizontales agrupadas, dos series («Rutas» y «Usuarios») por ciudad, las 8 ciudades con más usuarios; una ciudad con rutas y sin usuarios (o al revés) muestra 0.
+4. «Usuarios por nivel deportivo»: lista de barras con el número de usuarios por nivel (etiqueta del catálogo de niveles; un código inactivo o desconocido se muestra tal cual) y «Sin perfil deportivo».
+5. «Qué tan seguras son las rutas» (anillo con leyenda «Alta», «Media», «Baja», «Sin evaluar»; nunca «segura» ni «insegura») y «Usuarios nuevos por semana» (últimas 8 semanas).
+6. «Más detalles» (cerrado por defecto): «Rutas más largas» (km, hasta 6 rutas).
+7. Nota final, solo texto y sin cifras: «Próximamente: cuántos usuarios recorren cada ruta (llega con el registro de entrenamientos).»
+
+Cada título lleva una frase de explicación debajo. **Limitación honesta:** no existe ningún dato que una a un usuario con una ruta (no hay entrenamientos ni favoritos hasta EP-10 y EP-12), por eso no hay una gráfica de «qué rutas, cuántos usuarios»; la comparación posible hoy es rutas y usuarios por ciudad. Se retiraron las gráficas de dificultad, superficie, factores de riesgo, usuarios por rol y apariencia por no aportar al pulso del producto (el endpoint aún devuelve esos agregados).
 
 ### Criterios de aceptación
 
 - [x] «Resumen» es la primera sección del menú y `/admin` aterriza en ella para quien tiene `admin.access`; con otro permiso solo, aterriza en su primera sección permitida.
-- [x] Muestra solo cifras que devuelve el endpoint; los bloques `null` no se pintan; las métricas inexistentes son fichas «Próximamente», sin números.
+- [x] Muestra solo cifras que devuelve el endpoint; los bloques `null` no se pintan; lo que aún no existe es solo una nota «Próximamente», sin números. Sin `byCity` o `bySportLevel` (respuesta antigua) la pantalla no falla.
+- [x] Sin jerga («KPI», «pipeline», «slice»); los números se escriben a la española (`1.200`, `41,3`).
 - [x] Estado de carga con esqueleto, estado de error con «Reintentar» y estado vacío (sin datos todavía) legible.
 - [x] Cada gráfico tiene alternativa textual (`aria-label` y lista equivalente visualmente oculta); el color nunca es la única señal (hay etiqueta y número).
 - [x] Contraste de texto 4,5:1 en claro y oscuro; sin scroll horizontal de la página a 360 px; las tarjetas se reacomodan.
@@ -84,7 +87,7 @@ Implementación:
 
 Pruebas:
 
-- `frontend/src/app/admin/summary/**/*.spec.ts`
+- `frontend/src/app/admin/summary/**/*.spec.ts` (incluye `grouped-bars` y la página)
 - `frontend/src/app/core/guards/guards.spec.ts`
 
 ## Endpoint del resumen (`GET /api/v1/admin/summary`)
@@ -111,6 +114,7 @@ Historia: como administrador, deseo ver en un solo lugar cifras reales de uso de
     "registeredLast7Days": 3,
     "registeredLast30Days": 9,
     "registrationsByWeek": [{ "weekStart": "2026-09-28", "count": 0 }],
+    "bySportLevel": [{ "level": "beginner", "users": 4 }, { "level": "advanced", "users": 2 }],
     "sportProfiles": { "completed": 7, "percentage": 58 },
     "preferences": {
       "saved": 8,
@@ -129,7 +133,8 @@ Historia: como administrador, deseo ver en un solo lugar cifras reales de uso de
     "timeSlots": 8,
     "riskFactors": { "total": 6, "bySeverity": { "low": 2, "medium": 3, "high": 1 } }
   },
-  "cities": { "cities": 1, "zones": 2 }
+  "cities": { "cities": 1, "zones": 2 },
+  "byCity": [{ "cityId": "loja", "name": "Loja", "routes": 5, "users": 9 }]
 }
 ```
 
@@ -139,6 +144,8 @@ Historia: como administrador, deseo ver en un solo lugar cifras reales de uso de
 - `routes.safetyLevels`: cuenta cada ruta una vez, por su **peor nivel** entre las franjas guardadas (Bajo < Medio < Alto). Una ruta sin índice guardado cuenta en `unrated`. Son niveles, nunca «segura» o «insegura».
 - `routes.distances`: las 8 rutas más largas (nombre y km), de mayor a menor; solo nombre de la ruta, nunca datos de cuentas.
 - `routes.byCity`: orden descendente por cantidad y luego por nombre; el nombre sale del catálogo de ciudades (si la ciudad ya no existe, se usa el id).
+- `users.bySportLevel`: usuarios por código de `level` de su perfil deportivo (solo ese campo se lee de `users/*/private`; nunca la foto), el más común primero. Un perfil sin nivel utilizable no se lista; el cliente calcula «Sin perfil deportivo» como `total - sportProfiles.completed`.
+- `byCity` (nivel superior): rutas y usuarios por ciudad, las 8 con más usuarios (luego más rutas, luego nombre); `users` sale del `cityId` del perfil; los usuarios sin ciudad no se cuentan; el nombre sale del catálogo (si falta, el id). Exige `users.read` **y** `routes.manage` (une ambos recorridos); si no, es `null`.
 - Las claves de los diccionarios `by*` aparecen siempre (con `0`), salvo `users.byRole`, que solo trae los roles presentes.
 
 ### Permisos (regla)

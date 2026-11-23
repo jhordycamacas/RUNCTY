@@ -4,21 +4,32 @@ import { weekLabel } from '../domain/labels';
 import { BarChart } from './bar-chart';
 import { BarList } from './bar-list';
 import { DonutChart } from './donut-chart';
+import { GroupedBars } from './grouped-bars';
 import { KpiTile } from './kpi-tile';
-import { ProgressBar } from './progress-bar';
 
 @Component({
-  imports: [BarChart, BarList, DonutChart, KpiTile, ProgressBar],
+  imports: [BarChart, BarList, DonutChart, GroupedBars, KpiTile],
   template: `
     <app-kpi-tile label="Usuarios" icon="people-outline" [value]="12" hint="6 con perfil" />
-    <app-kpi-tile label="Eventos" icon="calendar-outline" [soon]="true" />
+    <app-kpi-tile label="Km" icon="trail-sign-outline" [value]="1234.56" />
     <app-bar-list label="Apariencia" [items]="list" />
     <app-donut-chart id="donut" subject="Rutas por dificultad" [slices]="slices" />
     <app-donut-chart id="empty" subject="Rutas por superficie" [slices]="empty" />
     <app-donut-chart id="single" subject="Usuarios por rol" [slices]="single" />
     <app-bar-chart id="bars" subject="Altas por semana" [bars]="bars" [highlightLast]="true" />
     <app-bar-chart id="none" subject="Rutas por ciudad" [bars]="[]" />
-    <app-progress-bar label="Perfiles" [percent]="150" detail="3 de 4" />
+    <app-grouped-bars
+      id="grouped"
+      subject="Rutas y usuarios por ciudad"
+      [series]="series"
+      [groups]="groups"
+    />
+    <app-grouped-bars
+      id="nogroups"
+      subject="Rutas y usuarios por ciudad"
+      [series]="series"
+      [groups]="[]"
+    />
   `,
 })
 class Host {
@@ -33,6 +44,14 @@ class Host {
   ];
   empty = [{ label: 'Asfalto', value: 0, color: 'fuchsia' as const }];
   single = [{ label: 'Corredores', value: 7, color: 'fuchsia' as const }];
+  series = [
+    { name: 'Rutas', color: 'fuchsia' as const },
+    { name: 'Usuarios', color: 'ink' as const },
+  ];
+  groups = [
+    { label: 'Loja', values: [4, 1200] },
+    { label: 'Una ciudad con un nombre larguísimo', values: [0, 3] },
+  ];
   bars = [
     { label: '9 nov', value: 2 },
     { label: 'Un nombre de ruta muy largo', value: 4 },
@@ -50,13 +69,12 @@ describe('summary charts', () => {
     root = fixture.nativeElement;
   });
 
-  it('shows the figure of a tile, and "Próximamente" without any number for a future metric', () => {
-    const [users, events] = Array.from(root.querySelectorAll('app-kpi-tile'));
+  it('shows the figure of a tile with its hint, written the Spanish way', () => {
+    const [users, km] = Array.from(root.querySelectorAll('app-kpi-tile'));
 
     expect(users.textContent).toContain('12');
     expect(users.textContent).toContain('6 con perfil');
-    expect(events.textContent).toContain('Próximamente');
-    expect(events.querySelector('.value')).toBeNull();
+    expect(km.querySelector('.value')?.textContent).toBe('1.234,6');
   });
 
   it('lists every bar of a list with its number', () => {
@@ -138,10 +156,54 @@ describe('summary charts', () => {
     });
   });
 
-  it('keeps a progress bar between 0 and 100', () => {
-    expect(
-      root.querySelector('app-progress-bar [role="progressbar"]')?.getAttribute('aria-valuenow'),
-    ).toBe('100');
+  describe('grouped bars', () => {
+    it('draws one bar per series and group, with Spanish number formatting', () => {
+      const chart = find('#grouped');
+      const values = Array.from(chart.querySelectorAll('.item .number')).map((el) =>
+        el.textContent?.trim(),
+      );
+
+      expect(chart.querySelectorAll('.bar')).toHaveLength(4);
+      expect(values).toEqual(['4', '1.200', '0', '3']);
+    });
+
+    it('names each series in a legend and scales every bar to the same maximum', () => {
+      const chart = find('#grouped');
+      const widths = Array.from(chart.querySelectorAll<HTMLElement>('.bar')).map(
+        (el) => el.style.width,
+      );
+
+      expect(
+        Array.from(chart.querySelectorAll('.legend li')).map((el) => el.textContent?.trim()),
+      ).toEqual(['Rutas', 'Usuarios']);
+      expect(widths[1]).toBe('100%');
+      expect(widths[3]).toBe('0.25%');
+    });
+
+    it('colors bars from the design tokens and keeps long names in a title', () => {
+      const chart = find('#grouped');
+      const bar = chart.querySelector('.bar') as HTMLElement;
+
+      expect(bar.style.background).toContain('var(--rc-primary)');
+      expect(chart.querySelectorAll('.name')[1].getAttribute('title')).toBe(
+        'Una ciudad con un nombre larguísimo',
+      );
+    });
+
+    it('describes itself in text and repeats its data in a table', () => {
+      const chart = find('#grouped');
+
+      expect(chart.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(
+        'Rutas y usuarios por ciudad. Loja: Rutas 4, Usuarios 1.200. ' +
+          'Una ciudad con un nombre larguísimo: Rutas 0, Usuarios 3',
+      );
+      expect(chart.querySelectorAll('.sr-only table tbody tr')).toHaveLength(2);
+      expect(chart.querySelectorAll('.sr-only table thead th')).toHaveLength(3);
+    });
+
+    it('says there is no data instead of drawing empty rows', () => {
+      expect(find('#nogroups').textContent).toContain('Sin datos todavía');
+    });
   });
 
   it('writes a week as day and short month', () => {

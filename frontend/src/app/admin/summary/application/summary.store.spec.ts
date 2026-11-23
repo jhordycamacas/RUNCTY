@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { CatalogRepository } from '../../../core/catalogs/catalog';
+import { fakeCatalogRepository } from '../../../core/catalogs/testing/fake-catalog.repository';
 import { ApiError } from '../../../core/errors/api-error';
 import { SummaryRepository } from '../domain/summary';
 import { summaryFixture } from '../testing/summary-fixtures';
@@ -6,12 +8,18 @@ import { SummaryStore } from './summary.store';
 
 describe('SummaryStore', () => {
   let get: ReturnType<typeof vi.fn<SummaryRepository['get']>>;
+  let catalogs: ReturnType<typeof fakeCatalogRepository>;
   let store: SummaryStore;
 
   beforeEach(() => {
     get = vi.fn<SummaryRepository['get']>().mockResolvedValue(summaryFixture());
+    catalogs = fakeCatalogRepository();
     TestBed.configureTestingModule({
-      providers: [SummaryStore, { provide: SummaryRepository, useValue: { get } }],
+      providers: [
+        SummaryStore,
+        { provide: SummaryRepository, useValue: { get } },
+        { provide: CatalogRepository, useValue: catalogs },
+      ],
     });
     store = TestBed.inject(SummaryStore);
   });
@@ -64,5 +72,24 @@ describe('SummaryStore', () => {
     await store.load();
 
     expect(store.isEmpty()).toBe(false);
+  });
+
+  describe('sport level labels', () => {
+    it('names a level with its catalog label and keeps the raw code of an unknown one', async () => {
+      await store.load();
+
+      expect(store.levelLabel('beginner')).toBe('Principiante');
+      expect(store.levelLabel('legacy-code')).toBe('legacy-code');
+    });
+
+    it('falls back to the raw codes, and still shows the figures, when the catalog fails', async () => {
+      catalogs.list.mockRejectedValue(new ApiError(500, 'internal', 'Sin catálogo.'));
+
+      await store.load();
+
+      expect(store.error()).toBeNull();
+      expect(store.summary()?.users?.total).toBe(12);
+      expect(store.levelLabel('beginner')).toBe('beginner');
+    });
   });
 });

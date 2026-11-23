@@ -1,25 +1,22 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { IonIcon } from '@ionic/angular';
+
+const NUMBER = new Intl.NumberFormat('es-EC', { maximumFractionDigits: 1 });
 
 export type AccentTone = 'fuchsia' | 'neutral';
 
 /**
  * A headline figure on a white rounded tile (the whole tile in neon fuchsia for emphasis): an icon chip
- * and a label, a large thin number and a short hint. With `soon` it announces a metric that does
- * not exist yet and shows no number at all.
+ * and a label, a large thin number and a short hint.
  */
 @Component({
   selector: 'app-kpi-tile',
   imports: [IonIcon],
   template: `
-    <article class="tile" [class]="'tone-' + tone()" [class.soon]="soon()">
+    <article class="tile" [class]="'tone-' + tone()">
       <span class="icon"><ion-icon [name]="icon()" aria-hidden="true" /></span>
       <p class="label">{{ label() }}</p>
-      @if (soon()) {
-        <p class="badge">Próximamente</p>
-      } @else {
-        <p class="value">{{ value() }}</p>
-      }
+      <p class="value">{{ shown() }}</p>
       @if (hint(); as text) {
         <p class="hint">{{ text }}</p>
       }
@@ -54,17 +51,17 @@ export type AccentTone = 'fuchsia' | 'neutral';
     }
 
     // The highlighted tile takes the neon brand color as a whole, with dark text (5.6:1).
-    .tone-fuchsia:not(.soon) {
+    .tone-fuchsia {
       background: var(--rc-primary);
       color: var(--rc-on-primary);
     }
 
-    .tone-fuchsia:not(.soon) .icon {
+    .tone-fuchsia .icon {
       background: color-mix(in srgb, var(--rc-on-primary) 20%, transparent);
       color: var(--rc-on-primary);
     }
 
-    .tone-fuchsia:not(.soon) :is(.label, .hint) {
+    .tone-fuchsia :is(.label, .hint) {
       color: var(--rc-on-primary);
     }
 
@@ -79,7 +76,6 @@ export type AccentTone = 'fuchsia' | 'neutral';
     }
 
     .value,
-    .badge,
     .hint {
       grid-column: 1 / -1;
     }
@@ -94,25 +90,9 @@ export type AccentTone = 'fuchsia' | 'neutral';
       font-variant-numeric: tabular-nums;
     }
 
-    .badge {
-      justify-self: start;
-      margin-top: var(--rc-space-md);
-      padding: var(--rc-space-xs) var(--rc-space-md);
-      border-radius: var(--rc-radius-pill);
-      background: var(--rc-surface);
-      color: var(--rc-text);
-      font-size: var(--rc-font-size-caption);
-      font-weight: 600;
-    }
-
     .hint {
       font-size: var(--rc-font-size-label);
       color: var(--rc-text-muted);
-    }
-
-    .soon {
-      border: 1px dashed var(--rc-control-border);
-      background: transparent;
     }
   `,
 })
@@ -122,5 +102,10 @@ export class KpiTile {
   readonly value = input<string | number>('');
   readonly hint = input<string>('');
   readonly tone = input<AccentTone>('neutral');
-  readonly soon = input(false);
+
+  /** Numbers are written the Spanish way (`1.200`, `41,3`). */
+  protected readonly shown = computed(() => {
+    const value = this.value();
+    return typeof value === 'number' ? NUMBER.format(value) : value;
+  });
 }

@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { CatalogRepository } from '../../../core/catalogs/catalog';
+import { fakeCatalogRepository } from '../../../core/catalogs/testing/fake-catalog.repository';
 import { ApiError } from '../../../core/errors/api-error';
 import { SummaryStore } from '../application/summary.store';
 import { SummaryRepository } from '../domain/summary';
@@ -15,6 +17,7 @@ describe('SummaryPage', () => {
         provideRouter([]),
         SummaryStore,
         { provide: SummaryRepository, useValue: { get } },
+        { provide: CatalogRepository, useValue: fakeCatalogRepository() },
       ],
     });
     const fixture = TestBed.createComponent(SummaryPage);
@@ -28,26 +31,91 @@ describe('SummaryPage', () => {
     get = vi.fn<SummaryRepository['get']>().mockResolvedValue(summaryFixture());
   });
 
-  it('shows only figures the endpoint returned', async () => {
-    const page = await open();
-    const text = page.textContent ?? '';
+  const section = (page: HTMLElement, title: string): HTMLElement =>
+    Array.from(page.querySelectorAll<HTMLElement>('section')).find(
+      (el) => el.querySelector('h2')?.textContent?.trim() === title,
+    ) as HTMLElement;
 
-    expect(page.querySelectorAll('.kpis app-kpi-tile .value')[0].textContent).toContain('12');
-    expect(text).toContain('Rutas con nivel Bajo');
-    expect(text).toContain('Nivel Alto');
-    expect(text).not.toMatch(/\bsegura\b|\binsegura\b/i);
+  it('opens with four plain-worded number cards from the figures the endpoint returned', async () => {
+    const page = await open();
+    const cards = Array.from(page.querySelectorAll('.kpis app-kpi-tile')).map((tile) => ({
+      label: tile.querySelector('.label')?.textContent?.trim(),
+      value: tile.querySelector('.value')?.textContent?.trim(),
+      hint: tile.querySelector('.hint')?.textContent?.trim(),
+    }));
+
+    expect(cards).toEqual([
+      { label: 'Rutas activas', value: '4', hint: 'de 5 rutas · 41,3 km' },
+      { label: 'Usuarios registrados', value: '12', hint: '9 nuevos en los últimos 30 días' },
+      { label: 'Ciudades con rutas', value: '1', hint: 'de 1 ciudad registrada' },
+      { label: 'Usuarios con perfil deportivo', value: '6', hint: 'de 12 usuarios (50 %)' },
+    ]);
+    expect(page.textContent).not.toMatch(/KPI|pipeline|slice/i);
   });
 
-  it('marks the metrics that do not exist yet as "Próximamente", with no number', async () => {
-    const page = await open();
-    const soon = Array.from(page.querySelectorAll('.soon app-kpi-tile'));
+  it('compares routes and users per city, with a one-line explanation', async () => {
+    const card = section(await open(), 'Rutas y usuarios por ciudad');
 
-    expect(soon.map((tile) => tile.querySelector('.label')?.textContent)).toEqual([
-      'Entrenamientos registrados',
-      'Alertas SOS',
-      'Eventos',
+    expect(card.querySelector('.note')?.textContent).toContain('ciudad');
+    expect(card.querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(
+      'Rutas y usuarios por ciudad. Loja: Rutas 4, Usuarios 9. Quito: Rutas 1, Usuarios 3',
+    );
+  });
+
+  it('counts the users per sport level with catalog labels, the raw code of unknown ones and those without a profile', async () => {
+    const card = section(await open(), 'Usuarios por nivel deportivo');
+    const rows = Array.from(card.querySelectorAll('li')).map((li) => [
+      li.querySelector('.name')?.textContent?.trim(),
+      li.querySelector('.value')?.textContent?.trim(),
     ]);
-    expect(soon.every((tile) => tile.querySelector('.value') === null)).toBe(true);
+
+    expect(rows).toEqual([
+      ['Principiante', '3'],
+      ['Avanzado', '2'],
+      ['legacy-code', '1'],
+      ['Sin perfil deportivo', '6'],
+    ]);
+  });
+
+  it('words the safety levels and the weekly sign-ups plainly, never as "segura"', async () => {
+    const page = await open();
+    const safety = section(page, 'Qué tan seguras son las rutas');
+
+    const legend = Array.from(safety.querySelectorAll('.legend .name')).map((el) => el.textContent);
+    expect(legend).toEqual(['Alta', 'Media', 'Baja', 'Sin evaluar']);
+    expect(section(page, 'Usuarios nuevos por semana')).toBeTruthy();
+    expect(page.textContent).not.toMatch(/\bsegura\b|\binsegura\b/i);
+  });
+
+  it('keeps the longest routes under a collapsed "Más detalles"', async () => {
+    const details = (await open()).querySelector('details') as HTMLDetailsElement;
+
+    expect(details.open).toBe(false);
+    expect(details.querySelector('summary')?.textContent?.trim()).toBe('Más detalles');
+    expect(details.textContent).toContain('Rutas más largas');
+  });
+
+  it('ends with an honest note about what arrives later, with no figures', async () => {
+    const note = (await open()).querySelector('.later') as HTMLElement;
+
+    expect(note.textContent).toContain(
+      'Próximamente: cuántos usuarios recorren cada ruta (llega con el registro de entrenamientos).',
+    );
+    expect(note.querySelector('.value')).toBeNull();
+  });
+
+  it('does not crash when the new lists are missing from an older answer', async () => {
+    const old = summaryFixture();
+    get.mockResolvedValue({
+      ...old,
+      byCity: null,
+      users: old.users && { ...old.users, bySportLevel: [] },
+    });
+
+    const page = await open();
+
+    expect(page.textContent).not.toContain('Rutas y usuarios por ciudad');
+    expect(page.textContent).toContain('Sin perfil deportivo');
   });
 
   it('does not draw the blocks the caller may not see', async () => {
@@ -55,7 +123,7 @@ describe('SummaryPage', () => {
 
     const page = await open();
 
-    expect(page.textContent).not.toContain('Altas por semana');
+    expect(page.textContent).not.toContain('Usuarios nuevos por semana');
     expect(page.textContent).toContain('Rutas activas');
   });
 
@@ -90,7 +158,12 @@ describe('SummaryPage', () => {
   it('shows a skeleton while the first load is pending', async () => {
     get.mockReturnValue(new Promise(() => undefined));
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), SummaryStore, { provide: SummaryRepository, useValue: { get } }],
+      providers: [
+        provideRouter([]),
+        SummaryStore,
+        { provide: SummaryRepository, useValue: { get } },
+        { provide: CatalogRepository, useValue: fakeCatalogRepository() },
+      ],
     });
     const fixture = TestBed.createComponent(SummaryPage);
     fixture.componentInstance.ionViewWillEnter();

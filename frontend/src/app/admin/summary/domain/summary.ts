@@ -8,20 +8,21 @@ export interface WeekCount {
   count: number;
 }
 
+/** Users whose sport profile holds this level code (a catalog code, possibly no longer listed). */
+export interface SportLevelCount {
+  level: string;
+  users: number;
+}
+
 export interface UsersSummary {
   total: number;
-  byRole: Record<string, number>;
   registeredLast7Days: number;
   registeredLast30Days: number;
   /** The last 8 weeks, oldest first. */
   registrationsByWeek: WeekCount[];
   sportProfiles: { completed: number; percentage: number };
-  preferences: {
-    saved: number;
-    appearance: Record<string, number>;
-    units: Record<string, number>;
-    notificationsEnabled: number;
-  };
+  /** Most common level first; users without a profile are not listed (total minus completed). */
+  bySportLevel: SportLevelCount[];
 }
 
 export interface RoutesByCity {
@@ -38,17 +39,20 @@ export interface RouteDistance {
 export interface RoutesSummary {
   total: number;
   active: number;
-  inactive: number;
   totalKm: number;
-  byDifficulty: Record<string, number>;
-  bySurface: Record<string, number>;
   byCity: RoutesByCity[];
   /** Routes by their worst level; `unrated` has no stored index. */
   safetyLevels: { high: number; medium: number; low: number; unrated: number };
   /** The longest routes, longest first. */
   distances: RouteDistance[];
-  timeSlots: number;
-  riskFactors: { total: number; bySeverity: Record<string, number> };
+}
+
+/** Routes and users of one city, side by side. */
+export interface CityComparison {
+  cityId: string;
+  name: string;
+  routes: number;
+  users: number;
 }
 
 export interface CitiesSummary {
@@ -63,6 +67,8 @@ export interface Summary {
   users: UsersSummary | null;
   routes: RoutesSummary | null;
   cities: CitiesSummary | null;
+  /** Needs the permissions of both users and routes; `null` otherwise or in an older answer. */
+  byCity: CityComparison[] | null;
 }
 
 /** Port of the summary endpoint. */

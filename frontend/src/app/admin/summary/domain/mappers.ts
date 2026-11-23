@@ -1,25 +1,24 @@
 /** Tolerant mappers of `GET /admin/summary`: a malformed value becomes zero, never an error. */
 import { asRecord } from '../../../routes/domain/mappers';
-import { CitiesSummary, RoutesSummary, Summary, UsersSummary, WeekCount } from './summary';
+import {
+  CitiesSummary,
+  CityComparison,
+  RoutesSummary,
+  SportLevelCount,
+  Summary,
+  UsersSummary,
+  WeekCount,
+} from './summary';
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 const count = (value: unknown): number =>
   typeof value === 'number' && Number.isFinite(value) ? value : 0;
 
-/** The numeric entries of a dictionary, for example the routes by difficulty. */
-function counts(value: unknown): Record<string, number> {
-  return Object.fromEntries(
-    Object.entries(asRecord(value)).filter(
-      (entry): entry is [string, number] =>
-        typeof entry[1] === 'number' && Number.isFinite(entry[1]),
-    ),
-  );
-}
+const list = (value: unknown): unknown[] => (Array.isArray(value) ? value : []);
 
 function toWeeks(value: unknown): WeekCount[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((item) => {
+  return list(value).flatMap((item) => {
     const week = asRecord(item);
     const start = week['weekStart'];
     return typeof start === 'string' && DATE_PATTERN.test(start)
@@ -28,14 +27,37 @@ function toWeeks(value: unknown): WeekCount[] {
   });
 }
 
+function toSportLevels(value: unknown): SportLevelCount[] {
+  return list(value).flatMap((item) => {
+    const entry = asRecord(item);
+    const level = entry['level'];
+    return typeof level === 'string' && level ? [{ level, users: count(entry['users']) }] : [];
+  });
+}
+
+function toCityComparison(value: unknown): CityComparison[] | null {
+  if (!Array.isArray(value)) return null;
+  return value.flatMap((item) => {
+    const city = asRecord(item);
+    const id = city['cityId'];
+    if (typeof id !== 'string') return [];
+    return [
+      {
+        cityId: id,
+        name: typeof city['name'] === 'string' ? city['name'] : id,
+        routes: count(city['routes']),
+        users: count(city['users']),
+      },
+    ];
+  });
+}
+
 function toUsers(value: unknown): UsersSummary | null {
   if (value === null || typeof value !== 'object') return null;
   const data = asRecord(value);
   const profiles = asRecord(data['sportProfiles']);
-  const preferences = asRecord(data['preferences']);
   return {
     total: count(data['total']),
-    byRole: counts(data['byRole']),
     registeredLast7Days: count(data['registeredLast7Days']),
     registeredLast30Days: count(data['registeredLast30Days']),
     registrationsByWeek: toWeeks(data['registrationsByWeek']),
@@ -43,12 +65,7 @@ function toUsers(value: unknown): UsersSummary | null {
       completed: count(profiles['completed']),
       percentage: count(profiles['percentage']),
     },
-    preferences: {
-      saved: count(preferences['saved']),
-      appearance: counts(preferences['appearance']),
-      units: counts(preferences['units']),
-      notificationsEnabled: count(preferences['notificationsEnabled']),
-    },
+    bySportLevel: toSportLevels(data['bySportLevel']),
   };
 }
 
@@ -56,16 +73,11 @@ function toRoutes(value: unknown): RoutesSummary | null {
   if (value === null || typeof value !== 'object') return null;
   const data = asRecord(value);
   const levels = asRecord(data['safetyLevels']);
-  const factors = asRecord(data['riskFactors']);
-  const byCity = Array.isArray(data['byCity']) ? data['byCity'] : [];
   return {
     total: count(data['total']),
     active: count(data['active']),
-    inactive: count(data['inactive']),
     totalKm: count(data['totalKm']),
-    byDifficulty: counts(data['byDifficulty']),
-    bySurface: counts(data['bySurface']),
-    byCity: byCity.flatMap((item) => {
+    byCity: list(data['byCity']).flatMap((item) => {
       const city = asRecord(item);
       const id = city['cityId'];
       return typeof id === 'string'
@@ -84,14 +96,12 @@ function toRoutes(value: unknown): RoutesSummary | null {
       low: count(levels['low']),
       unrated: count(levels['unrated']),
     },
-    distances: (Array.isArray(data['distances']) ? data['distances'] : []).flatMap((item) => {
+    distances: list(data['distances']).flatMap((item) => {
       const route = asRecord(item);
       return typeof route['name'] === 'string'
         ? [{ name: route['name'], distanceKm: count(route['distanceKm']) }]
         : [];
     }),
-    timeSlots: count(data['timeSlots']),
-    riskFactors: { total: count(factors['total']), bySeverity: counts(factors['bySeverity']) },
   };
 }
 
@@ -109,5 +119,6 @@ export function toSummary(value: unknown): Summary {
     users: toUsers(data['users']),
     routes: toRoutes(data['routes']),
     cities: toCities(data['cities']),
+    byCity: toCityComparison(data['byCity']),
   };
 }
