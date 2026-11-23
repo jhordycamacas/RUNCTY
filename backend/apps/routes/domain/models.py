@@ -99,6 +99,12 @@ def _stored_lat_lngs(value: object) -> tuple[LatLng, ...]:
     )
 
 
+def _stored_preview(value: object) -> tuple[LatLng, ...]:
+    """The stored preview polyline; entries that are not points are skipped."""
+    points = value if isinstance(value, list) else []
+    return _stored_lat_lngs([p for p in points if isinstance(p, Mapping)])
+
+
 @dataclass(frozen=True, slots=True)
 class PuntoRuta:
     """The start or the end of a route."""
@@ -133,7 +139,8 @@ class PuntoRuta:
 
 @dataclass(frozen=True, slots=True)
 class Ruta:
-    """Document `routes/{id}`. `segment_count` and `safety` are computed, never client input."""
+    """Document `routes/{id}`. `segment_count`, `preview` and `safety` are computed, never client
+    input."""
 
     id: str
     name: str
@@ -147,6 +154,8 @@ class Ruta:
     difficulty: str
     active: bool
     segment_count: int = 0
+    # The route shape down-sampled for the list; recomputed with the segments.
+    preview: tuple[LatLng, ...] = ()
     # The stored index per time slot id (see `IndiceSeguridadRuta.to_document`).
     safety: Mapping[str, object] = field(default_factory=dict)
 
@@ -232,6 +241,7 @@ class Ruta:
             difficulty=stored_text(data.get("difficulty")),
             active=data.get("active") is True,
             segment_count=int(stored_number(data.get("segmentCount"))),
+            preview=_stored_preview(data.get("preview")),
             safety=dict(safety) if isinstance(safety, Mapping) else {},
         )
 

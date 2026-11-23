@@ -319,6 +319,13 @@ class TestStoredDocuments:
         assert (route.surface, route.difficulty, route.active) == ("Adoquín", "", False)
         assert route.safety == {}
 
+    def test_a_route_reads_its_preview_tolerantly(self):
+        route = Ruta.from_document("r1", {"preview": [{"lat": -3.97, "lng": -79.2}, "x"]})
+
+        assert route.preview == (LatLng(-3.97, -79.2),)
+        assert Ruta.from_document("r1", {}).preview == ()
+        assert Ruta.from_document("r1", {"preview": "x"}).preview == ()
+
     def test_a_route_keeps_the_computed_fields(self):
         stored = Ruta.parse(valid_route(), "r1", SETTINGS).to_document()
 

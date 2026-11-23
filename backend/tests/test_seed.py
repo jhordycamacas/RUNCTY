@@ -158,6 +158,11 @@ def test_computes_lengths_distance_and_the_safety_index():
     total_m = sum(segment["lengthM"] for segment in segments.values())
     assert jipiro["distanceKm"] == round(total_m * 3 / 1000, 1)
     assert jipiro["segmentCount"] == 3
+    # The list preview is the whole route in order, light enough for a card.
+    first = segments["seg-1"]["coordinates"][0]
+    last = segments["seg-3"]["coordinates"][-1]
+    assert 2 <= len(jipiro["preview"]) <= 40
+    assert (jipiro["preview"][0], jipiro["preview"][-1]) == (first, last)
     # One low lighting factor (18:00-24:00) takes 10 points off the evening slot only.
     assert segments["seg-3"]["safety"]["morning"]["score"] == 100
     assert segments["seg-3"]["safety"]["evening"]["score"] == 90

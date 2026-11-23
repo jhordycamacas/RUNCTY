@@ -10,8 +10,8 @@ from apps.routes.application.use_cases import RoutesDeps
 from apps.routes.presentation.serializers import (
     RiskFactorBodySerializer,
     RouteBodySerializer,
+    RouteListItemSerializer,
     RouteQuerySerializer,
-    RouteSerializer,
     SegmentBodySerializer,
     TimeSlotBodySerializer,
     route_detail_data,
@@ -68,7 +68,7 @@ class RoutesView(ReadSignedInWriteManage, APIView):
         routes = use_cases.list_routes(
             query.get("cityId"), _can_manage(request), adapter("ROUTE_REPOSITORY")
         )
-        return Response({"routes": RouteSerializer(routes, many=True).data})
+        return Response({"routes": RouteListItemSerializer(routes, many=True).data})
 
     def post(self, request) -> Response:
         route_id = use_cases.create_route(validated_body(RouteBodySerializer, request), _deps())

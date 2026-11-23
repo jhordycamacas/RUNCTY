@@ -242,6 +242,15 @@ class TestRouteRepresentation:
         assert route["segmentCount"] == 1
         assert "segments" not in route
 
+    def test_the_list_carries_a_light_preview_of_the_shape_and_the_detail_does_not(
+        self, client, route_id
+    ):
+        (route,) = client.get(ROUTES, **RUNNER).json()["routes"]
+        detail = client.get(f"{ROUTES}/{route_id}", **RUNNER).json()
+
+        assert route["preview"] == [[point["lat"], point["lng"]] for point in COORDINATES]
+        assert "preview" not in detail
+
 
 class TestRouteWrites:
     def test_creates_an_active_route(self, client, firebase):

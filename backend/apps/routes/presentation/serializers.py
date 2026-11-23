@@ -70,6 +70,16 @@ class RouteSerializer(serializers.Serializer):
         return route.end.to_document()
 
 
+class RouteListItemSerializer(RouteSerializer):
+    """A route of `GET /routes`: the route plus `preview`, its shape down-sampled to at most 40
+    `[lat, lng]` pairs. The detail carries the full segments instead."""
+
+    preview = serializers.SerializerMethodField()
+
+    def get_preview(self, route) -> list[list[float]]:
+        return [[point.lat, point.lng] for point in route.preview]
+
+
 class SegmentSerializer(serializers.Serializer):
     id = serializers.CharField()
     name = serializers.CharField()

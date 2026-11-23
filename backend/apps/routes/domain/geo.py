@@ -28,3 +28,16 @@ def path_length_m(points: Sequence[LatLng]) -> int:
     """Length of a polyline in whole meters."""
     total = sum(distance_m(a, b) for a, b in zip(points, points[1:], strict=False))
     return math.floor(total + 0.5)
+
+
+def preview_polyline(points: Sequence[LatLng], max_points: int = 40) -> list[LatLng]:
+    """Down-samples a polyline to at most `max_points` evenly picked points.
+
+    The first and last points are always kept, so the shape of the route still reads. A polyline
+    that already fits is returned unchanged.
+    """
+    if len(points) <= max_points:
+        return list(points)
+    last = len(points) - 1
+    step = last / (max_points - 1)
+    return [points[round(i * step)] for i in range(max_points)]

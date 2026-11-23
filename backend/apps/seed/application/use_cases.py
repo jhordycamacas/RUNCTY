@@ -21,7 +21,7 @@ from apps.risk_alerts.domain.models import AlertaZonaRiesgo
 from apps.roles.application.ports import RoleRepository
 from apps.roles.domain.system_roles import SYSTEM_ROLES
 from apps.routes.application.ports import SERVER_TIMESTAMP, RouteRepository, WriteOp
-from apps.routes.domain.geo import path_length_m
+from apps.routes.domain.geo import LatLng, path_length_m, preview_polyline
 from apps.routes.domain.models import FactorDeRiesgo, FranjaHoraria, Ruta, TramoInput
 from apps.routes.domain.safety import CalculadoraIndiceSeguridad, TramoEvaluado
 from apps.routes.domain.time import local_now
@@ -276,6 +276,7 @@ def _route_writes(
 
     evaluated: list[TramoEvaluado] = []
     lengths: list[int] = []
+    shape: list[LatLng] = []
     ops: list[WriteOp] = []
     for order, segment in enumerate(spec.segments):
         segment_id = f"seg-{order + 1}"
@@ -292,6 +293,7 @@ def _route_writes(
         )
         evaluated.append(TramoEvaluado(segment_id, segment.name, order, safety))
         lengths.append(length_m)
+        shape.extend(coordinates)
         ops.append(
             WriteOp(
                 "set",
@@ -350,6 +352,7 @@ def _route_writes(
         {
             **route.to_document(),
             "segmentCount": len(evaluated),
+            "preview": [point.to_document() for point in preview_polyline(shape)],
             "safety": {slot_id: index.to_document() for slot_id, index in route_safety.items()},
             "safetyUpdatedAt": SERVER_TIMESTAMP,
             **_timestamps(),

@@ -18,7 +18,7 @@ from apps.routes.application.ports import (
     RouteRepository,
     WriteOp,
 )
-from apps.routes.domain.geo import path_length_m
+from apps.routes.domain.geo import path_length_m, preview_polyline
 from apps.routes.domain.models import (
     FactorDeRiesgo,
     FranjaHoraria,
@@ -119,6 +119,13 @@ def _apply_order(
     return [replace(by_id[segment_id], order=order) for order, segment_id in enumerate(ids)]
 
 
+def _preview_document(segments: list[Tramo]) -> list[dict[str, float]]:
+    """The whole route as one light polyline (segments in route order) for the list."""
+    ordered = sorted(segments, key=lambda segment: (segment.order, segment.id))
+    shape = preview_polyline([point for segment in ordered for point in segment.coordinates])
+    return [point.to_document() for point in shape]
+
+
 def with_recalc(
     route_id: str,
     state: RouteState,
@@ -164,6 +171,7 @@ def with_recalc(
                 "safety": {slot_id: index.to_document() for slot_id, index in route_safety.items()},
                 "safetyUpdatedAt": SERVER_TIMESTAMP,
                 "segmentCount": len(evaluated),
+                "preview": _preview_document(state.segments),
                 "updatedAt": SERVER_TIMESTAMP,
             },
         )
@@ -224,6 +232,7 @@ def create_route(raw: object, deps: RoutesDeps) -> str:
                 {
                     **route.to_document(),
                     "segmentCount": 0,
+                    "preview": [],
                     "safety": {},
                     "safetyUpdatedAt": SERVER_TIMESTAMP,
                     "createdAt": SERVER_TIMESTAMP,

@@ -148,6 +148,7 @@ class TestCreateRoute:
             "difficulty": "beginner",
             "active": True,
             "segmentCount": 0,
+            "preview": [],
             "safety": {},
             "safetyUpdatedAt": TS,
             "createdAt": TS,
@@ -243,6 +244,9 @@ class TestCreateSegment:
         assert (route["segmentCount"], route["safetyUpdatedAt"], route["updatedAt"]) == (4, TS, TS)
         assert route["safety"]["night"]["worstSegmentId"] == "b"
         assert route["safety"]["night"]["score"] == 65
+        # The list preview follows the route order: the three stored segments, then the new one.
+        stored = [point.to_document() for point in POINTS]
+        assert route["preview"] == stored * 3 + COORDS
 
     def test_inserts_at_a_given_order_and_shifts_the_following_segments(self):
         deps, routes = make()

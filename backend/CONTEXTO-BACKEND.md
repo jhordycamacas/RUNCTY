@@ -43,6 +43,8 @@ Nada de negocio está fijo en el código: los parámetros (penalizaciones, umbra
 
 **Foto de perfil.** `GET`/`PUT`/`DELETE /users/me/photo` guardan la foto como data URL en `users/{uid}/private/photo` (`data`, `mime`, `updatedAt`), no en Cloud Storage: Storage exige el plan de pago y el proyecto no tiene facturación. La API valida tipo (jpeg, png, webp), base64, bytes mágicos y tamaño (`profilePhotoMaxKb`, 20–500, defecto 100; el cliente reduce a `profilePhotoMaxPx`, 64–1024, defecto 256). Solo existe la foto propia; eliminar la cuenta la borra con el resto de `private`.
 
+**Vista previa de la ruta.** Cada ítem de `GET /routes` incluye `preview`: el recorrido completo (tramos en orden) reducido a 40 pares `[lat, lng]` como máximo, siempre con el primer y el último punto (`preview_polyline`, `domain/geo.py`). Se guarda en el documento de la ruta como lista de `{lat, lng}` (Firestore no admite arreglos anidados) y se reescribe junto a `segmentCount` en cada cambio de tramos y en el seed; el detalle no lo trae. Una ruta guardada antes devuelve `[]` hasta que cambien sus tramos o se vuelva a ejecutar el seed.
+
 **Resumen del panel.** `GET /admin/summary` agrega `users.bySportLevel` (`[{level, users}]`, solo el campo `level` de `sportProfile`; la lectura de `private` nunca baja la foto) y `byCity` de nivel superior (`[{cityId, name, routes, users}]`, las 8 ciudades con más usuarios; exige `users.read` y `routes.manage`, si no es `null`). `UserRecord` lleva ahora `city_id`. No existe "usuarios por ruta": aún no hay entrenamientos ni favoritos que unan usuarios con rutas.
 
 ## Comandos de gestión (`manage.py`)

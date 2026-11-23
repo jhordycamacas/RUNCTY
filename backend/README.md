@@ -330,6 +330,13 @@ system settings with those defaults; `route-not-found`,
   `routes.manage`, and the list leaves it out. Time slots and risk factors are served only to
   `routes.manage`; the computed `safety` of the route and of each segment is public to signed-in
   users because the app shows it.
+- **List preview.** Each item of `GET /routes` carries `preview`: the whole route (segments in
+  route order) down-sampled to at most 40 `[lat, lng]` pairs, always keeping the first and last
+  point (`preview_polyline` in `domain/geo.py`). It is stored on the route document (as a list
+  of `{lat, lng}` maps, because Firestore has no nested arrays) and rewritten with `segmentCount`
+  by every segment mutation and by the seed. `GET /routes/{id}` does not carry it (it has the
+  full segments); a route stored before this field reads `[]` until its segments change or the
+  seed runs again.
 - **Safety index (RF-07).** Each segment starts at 100 points per time slot; every risk factor
   whose window overlaps the slot (no window means all day) subtracts a penalty by severity
   (`low` 10, `medium` 20, `high` 35 by default), down to 0. Levels: `high` from 70, `medium`
