@@ -18,7 +18,13 @@ COPY config ./config
 COPY apps ./apps
 
 USER app
+
+# Cloud Run injects PORT (8080); locally it falls back to 8000, the port docker-compose publishes.
+ENV PORT=8000
 EXPOSE 8000
 
 # Configuration and credentials are injected at run time; nothing secret is baked in.
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--access-logfile", "-"]
+# - WEB_CONCURRENCY (read by gunicorn) sets the worker processes; GUNICORN_THREADS the threads each.
+# - /dev/shm keeps the heartbeat files in memory, so a read-only root filesystem works.
+# - Probe path for orchestrators: GET /api/v1/health (public, no Google calls).
+CMD ["sh", "-c", "exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} --workers ${WEB_CONCURRENCY:-2} --threads ${GUNICORN_THREADS:-4} --timeout 60 --graceful-timeout 30 --worker-tmp-dir /dev/shm --access-logfile -"]
