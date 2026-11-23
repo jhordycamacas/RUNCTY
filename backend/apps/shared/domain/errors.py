@@ -8,6 +8,7 @@ class ErrorKind(Enum):
     INVALID_ARGUMENT = "invalid-argument"
     NOT_FOUND = "not-found"
     ALREADY_EXISTS = "already-exists"
+    CONFLICT = "conflict"
     FAILED_PRECONDITION = "failed-precondition"
     PERMISSION_DENIED = "permission-denied"
 

@@ -12,7 +12,9 @@ from apps.shared.presentation.serializers import validated_body, validated_query
 from apps.shared.presentation.throttles import SENSITIVE_THROTTLES
 from apps.system_settings.presentation.current import current_settings
 from apps.users.application.use_cases import (
+    clear_user_sport_profile,
     delete_account,
+    delete_user_account,
     get_preferences,
     get_profile,
     get_profile_photo,
@@ -22,8 +24,10 @@ from apps.users.application.use_cases import (
     save_preferences,
     save_profile_photo,
     save_sport_profile,
+    save_user_sport_profile,
     search_users,
     update_personal_data,
+    update_user_personal_data,
 )
 from apps.users.domain.search import parse_search_query
 from apps.users.presentation.serializers import (
@@ -40,6 +44,7 @@ from apps.users.presentation.serializers import (
 logger = logging.getLogger(__name__)
 
 CanReadUsers = HasPermission("users.read")
+CanManageUsers = HasPermission("users.manage")
 
 
 class UsersView(APIView):
@@ -76,9 +81,14 @@ class UsersView(APIView):
 
 
 class UserDetailView(APIView):
-    """The admin reads one account. The rating comes with the group runs (RF-01-2)."""
+    """The admin reads (`users.read`), edits or deletes (`users.manage`) one account.
 
-    permission_classes = [CanReadUsers]
+    The rating comes with the group runs (RF-01-2). The email is the login, so it is never
+    editable here.
+    """
+
+    def get_permissions(self):
+        return [CanReadUsers() if self.request.method == "GET" else CanManageUsers()]
 
     def get_throttles(self):
         return [throttle() for throttle in SENSITIVE_THROTTLES]
@@ -95,6 +105,46 @@ class UserDetailView(APIView):
                 "rating": None,  # {"average", "count"} once the group runs can be rated
             }
         )
+
+    def patch(self, request, uid: str) -> Response:
+        user = update_user_personal_data(
+            uid,
+            validated_body(PersonalDataSerializer, request),
+            date.today(),
+            adapter("USER_REPOSITORY"),
+        )
+        return Response({"user": UserSerializer(user).data})
+
+    def delete(self, request, uid: str) -> Response:
+        delete_user_account(request.user, uid, adapter("USER_REPOSITORY"), adapter("AUTH_GATEWAY"))
+        logger.info("Account %s deleted by %s", uid, request.user.uid)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserSportProfileView(APIView):
+    """The admin sets or clears the sport profile of one account (`users.manage`)."""
+
+    permission_classes = [CanManageUsers]
+
+    def get_throttles(self):
+        return [throttle() for throttle in SENSITIVE_THROTTLES]
+
+    def put(self, request, uid: str) -> Response:
+        profile = save_user_sport_profile(
+            uid,
+            validated_body(SportProfileSerializer, request),
+            adapter("USER_REPOSITORY"),
+            adapter("SPORT_PROFILE_REPOSITORY"),
+            adapter("CATALOG_REPOSITORY"),
+            current_settings(),
+        )
+        return Response({"sportProfile": profile.to_document()})
+
+    def delete(self, request, uid: str) -> Response:
+        clear_user_sport_profile(
+            uid, adapter("USER_REPOSITORY"), adapter("SPORT_PROFILE_REPOSITORY")
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class OwnProfileView(APIView):

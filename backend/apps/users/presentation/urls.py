@@ -6,6 +6,7 @@ from apps.users.presentation.views import (
     OwnProfileView,
     OwnSportProfileView,
     UserDetailView,
+    UserSportProfileView,
     UsersView,
 )
 
@@ -17,4 +18,5 @@ urlpatterns = [
     path("users/me/photo", OwnPhotoView.as_view()),
     # After the literal `me` routes, so `me` is never read as a uid.
     path("users/<str:uid>", UserDetailView.as_view()),
+    path("users/<str:uid>/sport-profile", UserSportProfileView.as_view()),
 ]

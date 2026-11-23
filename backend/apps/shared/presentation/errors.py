@@ -23,6 +23,7 @@ _DOMAIN_STATUS = {
     ErrorKind.PERMISSION_DENIED: 403,
     ErrorKind.NOT_FOUND: 404,
     ErrorKind.ALREADY_EXISTS: 409,
+    ErrorKind.CONFLICT: 409,
 }
 
 # DRF error codes whose hyphenated form is not the reason the clients already know.

@@ -13,7 +13,7 @@ from apps.catalogs.application.ports import CatalogRepository
 from apps.catalogs.application.use_cases import get_catalog
 from apps.catalogs.domain.models import GOALS_CATALOG, LEVELS_CATALOG
 from apps.shared.application.ports import AuthGateway, AuthUserNotFound
-from apps.shared.domain.errors import DomainError, ErrorKind
+from apps.shared.domain.errors import DomainError, ErrorKind, invalid_fields
 from apps.shared.domain.models import Principal
 from apps.shared.domain.permissions import ADMIN_ROLE
 from apps.system_settings.domain.models import SystemSettings
@@ -103,12 +103,42 @@ def get_profile(uid: str, users: UserRepository) -> Usuario:
     return user
 
 
+def _require_user(uid: str, users: UserRepository) -> Usuario:
+    """The profile of an account an admin names, or `user-not-found`."""
+    if not 0 < len(uid) <= _MAX_UID:
+        raise DomainError(
+            ErrorKind.INVALID_ARGUMENT, "invalid-argument", "A valid uid is required."
+        )
+    user = users.get(uid)
+    if user is None:
+        raise _not_found("user-not-found", "The user does not exist.")
+    return user
+
+
+def _apply_personal_data(
+    user: Usuario, changes: Mapping[str, object], today: date, users: UserRepository
+) -> Usuario:
+    updated = user.with_personal_data(changes, today)
+    users.update_personal_data(updated)
+    return updated
+
+
 def update_personal_data(
     uid: str, changes: Mapping[str, object], today: date, users: UserRepository
 ) -> Usuario:
-    user = get_profile(uid, users).with_personal_data(changes, today)
-    users.update_personal_data(user)
-    return user
+    return _apply_personal_data(get_profile(uid, users), changes, today, users)
+
+
+def update_user_personal_data(
+    uid: str, changes: Mapping[str, object], today: date, users: UserRepository
+) -> Usuario:
+    """An admin edits the personal data of any account, under the rules of the own update.
+
+    The email is the login and is never part of `changes`.
+    """
+    if not changes:
+        raise invalid_fields({})
+    return _apply_personal_data(_require_user(uid, users), changes, today, users)
 
 
 def get_sport_profile(uid: str, profiles: SportProfileRepository) -> PerfilDeportivo:
@@ -131,6 +161,27 @@ def save_sport_profile(
     profile = PerfilDeportivo.parse(data, settings, levels, goals)
     profiles.save(uid, profile)
     return profile
+
+
+def save_user_sport_profile(
+    uid: str,
+    data: Mapping[str, object],
+    users: UserRepository,
+    profiles: SportProfileRepository,
+    catalogs: CatalogRepository,
+    settings: SystemSettings,
+) -> PerfilDeportivo:
+    """An admin saves the sport profile of an existing account, under the own rules."""
+    _require_user(uid, users)
+    return save_sport_profile(uid, data, profiles, catalogs, settings)
+
+
+def clear_user_sport_profile(
+    uid: str, users: UserRepository, profiles: SportProfileRepository
+) -> None:
+    """An admin clears the sport profile of an existing account. Idempotent."""
+    _require_user(uid, users)
+    profiles.delete(uid)
 
 
 def get_preferences(uid: str, preferences: PreferencesRepository) -> PreferenciaUsuario:
@@ -198,14 +249,26 @@ def get_user_detail(
     uid: str, users: UserRepository, sport_profiles: SportProfileRepository
 ) -> UserDetail:
     """The profile and sport profile of any account. Never the photo or the preferences."""
-    if not 0 < len(uid) <= _MAX_UID:
-        raise DomainError(
-            ErrorKind.INVALID_ARGUMENT, "invalid-argument", "A valid uid is required."
-        )
-    user = users.get(uid)
-    if user is None:
-        raise _not_found("user-not-found", "The user does not exist.")
-    return UserDetail(user, sport_profiles.get(uid))
+    return UserDetail(_require_user(uid, users), sport_profiles.get(uid))
+
+
+def _erase_account(uid: str, users: UserRepository, auth: AuthGateway) -> None:
+    """Deletes the profile, private documents and credentials of `uid`, keeping an admin."""
+    try:
+        # The stored claims, not the token: the account may have been promoted since (NEW-01).
+        claims = auth.get_custom_claims(uid)
+    except AuthUserNotFound:
+        claims = None
+    is_admin = (claims or {}).get("role") == ADMIN_ROLE
+
+    # SEC-08, NEW-03: the panel must always keep at least one admin.
+    if not users.delete_user_data(uid, keep_an_admin=is_admin):
+        raise _precondition("last-admin", "You cannot delete the last admin account.")
+    # Data first: if the auth deletion fails, the user can still sign in and retry.
+    try:
+        auth.delete_user(uid)
+    except AuthUserNotFound:
+        pass
 
 
 def delete_account(caller: Principal, now: float, users: UserRepository, auth: AuthGateway) -> None:
@@ -214,18 +277,16 @@ def delete_account(caller: Principal, now: float, users: UserRepository, auth: A
         raise _precondition(
             "recent-sign-in-required", "Re-authenticate before deleting your account."
         )
-    try:
-        # The stored claims, not the token: the account may have been promoted since (NEW-01).
-        claims = auth.get_custom_claims(caller.uid)
-    except AuthUserNotFound:
-        claims = None
-    is_admin = (claims or {}).get("role") == ADMIN_ROLE
+    _erase_account(caller.uid, users, auth)
 
-    # SEC-08, NEW-03: the panel must always keep at least one admin.
-    if not users.delete_user_data(caller.uid, keep_an_admin=is_admin):
-        raise _precondition("last-admin", "You cannot delete the last admin account.")
-    # Data first: if the auth deletion fails, the user can still sign in and retry.
-    try:
-        auth.delete_user(caller.uid)
-    except AuthUserNotFound:
-        pass
+
+def delete_user_account(
+    caller: Principal, uid: str, users: UserRepository, auth: AuthGateway
+) -> None:
+    """An admin deletes another account like its owner would. Never their own."""
+    if uid == caller.uid:
+        raise DomainError(
+            ErrorKind.CONFLICT, "cannot-delete-self", "You cannot delete your own account here."
+        )
+    _require_user(uid, users)
+    _erase_account(uid, users, auth)

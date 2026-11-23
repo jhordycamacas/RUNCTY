@@ -68,7 +68,7 @@ Decididas por el equipo o derivadas de otros documentos:
 | `DELETE /roles/{id}` | `roles.manage` | Elimina un rol sin usuarios y no del sistema. |
 | `PUT /users/{uid}/role` | `roles.manage` | Asigna un rol (`roleId`) a un usuario; responde `{uid, role}`. |
 
-Catálogo de permisos y reglas de escalada: [Arquitectura](transversal/arquitectura.md#autenticación-y-autorización). El catálogo no es un endpoint: el cliente lo nombra y agrupa por área (`frontend/src/app/admin/roles/domain/role.ts`).
+Catálogo de permisos y reglas de escalada: [Arquitectura](transversal/arquitectura.md#autenticación-y-autorización). El permiso `users.manage` (2026-11-22) permite editar y eliminar cuentas ajenas ([EXT-01-3](01-gestion-de-usuarios.md#ext-01-3--el-administrador-edita-y-elimina-usuarios)); el rol de sistema `admin` lo recibe porque siempre tiene todo el catálogo, pero un administrador que ya tenía sesión abierta debe renovar su token (cerrar sesión y volver a entrar) para que su claim `perms` lo incluya. Los roles personalizados lo reciben solo si se les agrega. El catálogo no es un endpoint: el cliente lo nombra y agrupa por área (`frontend/src/app/admin/roles/domain/role.ts`).
 
 Códigos propios: `role-exists`, `role-not-found`, `role-has-users`, `system-role`, `admin-permissions`, `admin-only`, `permission-escalation`, `last-admin`, `self-lockout`, `invalid-role-id`, `invalid-role-name`, `invalid-role-description`, `invalid-permissions`.
 

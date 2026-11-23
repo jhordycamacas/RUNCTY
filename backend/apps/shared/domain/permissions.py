@@ -7,6 +7,7 @@ so they are checked without reading Firestore. Each entry gates one admin area.
 | ---------------- | --------------------------------------- |
 | admin.access     | Sign in to the admin panel              |
 | users.read       | Search and read user profiles           |
+| users.manage     | Edit and delete other accounts          |
 | roles.manage     | CRUD roles and assign them to users     |
 | cities.manage    | CRUD cities and zones                   |
 | routes.manage    | CRUD routes and segments                |
@@ -19,6 +20,7 @@ so they are checked without reading Firestore. Each entry gates one admin area.
 ALL_PERMISSIONS = (
     "admin.access",
     "users.read",
+    "users.manage",
     "roles.manage",
     "cities.manage",
     "routes.manage",

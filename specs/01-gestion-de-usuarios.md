@@ -1,11 +1,11 @@
 # EP-01 — Gestión de usuarios
 
-> Spec de capacidad · Debe tener · **1/10 Hecha, 9 Parcial, 0 Pendiente**
+> Spec de capacidad · Debe tener · **1/11 Hecha, 10 Parcial, 0 Pendiente**
 
 | Campo | Valor |
 | --- | --- |
 | Épica | EP-01 · Gestión de usuarios |
-| Requisitos | RF-01-1, RF-01-2, RF-01-3, RF-01-4, RF-01-9, RF-01-10, RF-01-11, RF-01-12 (8 sub-requisitos) más las extensiones EXT-01-1 (foto de perfil) y EXT-01-2 (ficha del usuario para el administrador), pedidas por el dueño el 2026-11-22; no están en el Excel |
+| Requisitos | RF-01-1, RF-01-2, RF-01-3, RF-01-4, RF-01-9, RF-01-10, RF-01-11, RF-01-12 (8 sub-requisitos) más las extensiones EXT-01-1 (foto de perfil) EXT-01-2 (ficha del usuario para el administrador) y EXT-01-3 (el administrador edita y elimina usuarios), pedidas por el dueño el 2026-11-22; no están en el Excel |
 | Requisito de usuario (UR) | UR-01 |
 | RNF | RNF-01, RNF-02, RNF-08, RNF-18 (transversales: RNF-10, RNF-11, RNF-21, RNF-23) |
 | Prioridad | Debe tener |
@@ -33,6 +33,7 @@ Entradas, proceso y salidas del requisito padre en el Excel (RF-01):
 - Actualización de los datos personales propios y eliminación de la cuenta propia (RF-01-3, RF-01-4).
 - Perfil deportivo del corredor: crear, consultar, actualizar y eliminar (RF-01-9 a RF-01-12).
 - Foto de perfil propia: poner, cambiar y quitar (EXT-01-1).
+- Edición y eliminación de cuentas ajenas por el administrador con `users.manage` (EXT-01-3).
 
 **No incluye**
 
@@ -64,7 +65,8 @@ Decididas por el equipo o derivadas de otros documentos:
 
 - Todo usuario nuevo recibe el rol `runner`; el rol y la identidad nunca vienen del cuerpo de la petición.
 - Al eliminar un usuario se eliminan también sus credenciales, perfil deportivo y preferencias (CONTEXTO sección 6).
-- El último administrador no puede eliminar su cuenta (`last-admin`).
+- El último administrador no puede eliminar su cuenta (`last-admin`), ni siquiera si otro administrador intenta eliminarla.
+- El administrador edita y elimina cuentas ajenas solo con el permiso `users.manage`; no puede eliminar su propia cuenta desde el panel (`cannot-delete-self`, 409: para eso existe `DELETE /users/me`, que pide un inicio de sesión reciente). El correo no se edita desde el panel porque es el inicio de sesión de la cuenta: cambiarlo exige reautenticación y verificación, que no existen.
 - Nivel del corredor y objetivos: opciones de los catálogos `sportLevels` y `sportGoals` que gestiona el administrador ([CFG-4](27-configuracion-del-sistema.md)); por defecto Principiante, Intermedio y Avanzado, y salud, bajar de peso, preparar carrera, mejorar ritmo y socializar (al menos un objetivo; por validar con Gacelas). Al guardar se aceptan solo opciones activas.
 
 ## Modelo de datos y contrato de API
@@ -76,13 +78,16 @@ Decididas por el equipo o derivadas de otros documentos:
 | `POST /users` | sesión | Crea el perfil de quien tiene el token (`201` con el usuario). Cuerpo: `firstName`, `lastName`, `birthDate` (`AAAA-MM-DD`), `cityId`, `idNumber` opcional (10 dígitos) y `consent: {lopdp: true}`. |
 | `GET /users` | `users.read` | Búsqueda de administrador con un solo texto `q` (hasta 120 caracteres; vacío lista a todos): 10 dígitos = identificación exacta, con `@` = correo exacto, otro texto = nombres y apellidos por prefijo de cada palabra sin distinguir mayúsculas ni tildes, o prefijo del correo antes de la `@`. Paginada con `limit` (máx. 50) y `cursor`; responde `{users, nextCursor}` sin identificación. Los filtros anteriores (`firstName`, `lastName`, `email`, `idNumber`, `birthDate`, `cityId`) ya no existen y se rechazan como parámetros desconocidos. |
 | `GET /users/{uid}` | `users.read` | Ficha de una cuenta para el administrador: `{user, sportProfile, rating}`. `user` es el mismo objeto de `GET /users/me` (con `idNumber`), `sportProfile` es el del corredor o `null`, y `rating` es siempre `null` por ahora: será `{average, count}` cuando existan las calificaciones de las salidas grupales. No incluye foto ni preferencias. Cuenta inexistente: 404 `user-not-found`. |
+| `PATCH /users/{uid}` | `users.manage` | El administrador edita datos personales ajenos. Cuerpo: cualquier subconjunto no vacío de `firstName`, `lastName`, `birthDate`, `idNumber` (vacía la elimina) y `cityId`, con las mismas validaciones y razones por campo que `PATCH /users/me`; el correo y cualquier otra clave se rechazan (`fields: {clave: "unknown"}`). Responde 200 `{user}` con la forma de la ficha. Cuenta inexistente: 404 `user-not-found`. |
+| `PUT /users/{uid}/sport-profile` · `DELETE /users/{uid}/sport-profile` | `users.manage` | El administrador guarda o borra el perfil deportivo ajeno. `PUT` usa el mismo cuerpo y validaciones que el perfil propio (opciones activas de los catálogos y rangos de los parámetros del sistema) y responde 200 `{sportProfile}`; `DELETE` responde 204 y es idempotente. Cuenta inexistente: 404 `user-not-found`. |
+| `DELETE /users/{uid}` | `users.manage` | El administrador elimina una cuenta ajena igual que su dueño la elimina (perfil, documentos privados con la foto y credenciales, lo que cierra sus sesiones); 204. No exige inicio de sesión reciente. Eliminarse a sí mismo: 409 `cannot-delete-self`; eliminar al último administrador: 400 `last-admin`; cuenta inexistente: 404 `user-not-found`. |
 | `GET /users/me` · `PATCH /users/me` · `DELETE /users/me` | sesión | Perfil propio, cambio parcial de datos personales (una identificación vacía la elimina) y eliminación de la cuenta (inicio de sesión de menos de 5 minutos). |
 | `GET/PUT/DELETE /users/me/sport-profile` | sesión | Perfil deportivo propio: `level`, `goals[]`, `usualPaceSecPerKm`, `preferredDistanceKm`. |
 | `GET/PUT/DELETE /users/me/photo` | sesión | Foto de perfil propia. `GET` responde `{photo}` (data URL o `null`); `PUT` recibe `{photo}` y responde lo guardado; `DELETE` responde 204 y es idempotente. No existe un endpoint para leer la foto de otra cuenta. |
 
 Documento `users/{uid}`: `email`, `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber?`, `role` (espejo del claim). Subdocumentos privados: `users/{uid}/private/sportProfile`, `users/{uid}/private/preferences` y `users/{uid}/private/photo` (`data`, `mime`, `updatedAt`). La foto vive en Firestore y no en Cloud Storage porque Storage exige el plan de pago y el dueño no tiene facturación; el cliente la recorta a un cuadrado y la reduce antes de enviarla.
 
-Códigos de error propios: `profile-exists` (409), `profile-not-found`, `sport-profile-not-found`, `not-accepted` (falta el consentimiento), `recent-sign-in-required`, `last-admin`, `invalid-cursor`, `invalid-filter`, `invalid-limit`, además de los errores por campo (`required`, `max-length`, `invalid-format`, `invalid-date`, `out-of-range`). La foto responde bajo `fields.photo`: `required`, `invalid-format` (no es un data URL `image/jpeg`, `image/png` o `image/webp` en base64), `invalid-image` (base64 inválido o bytes que no coinciden con el tipo) y `too-large` (más de `profilePhotoMaxKb`, [CFG-2](27-configuracion-del-sistema.md)).
+Códigos de error propios: `profile-exists` (409), `profile-not-found`, `sport-profile-not-found`, `not-accepted` (falta el consentimiento), `recent-sign-in-required`, `last-admin`, `cannot-delete-self` (409), `user-not-found`, `invalid-cursor`, `invalid-filter`, `invalid-limit`, además de los errores por campo (`required`, `max-length`, `invalid-format`, `invalid-date`, `out-of-range`). La foto responde bajo `fields.photo`: `required`, `invalid-format` (no es un data URL `image/jpeg`, `image/png` o `image/webp` en base64), `invalid-image` (base64 inválido o bytes que no coinciden con el tipo) y `too-large` (más de `profilePhotoMaxKb`, [CFG-2](27-configuracion-del-sistema.md)).
 
 ## Historias
 
@@ -98,6 +103,7 @@ Códigos de error propios: `profile-exists` (409), `profile-not-found`, `sport-p
 | [RF-01-12](#rf-01-12--eliminar-perfil-deportivo) | Eliminar perfil deportivo | Corredor | Sprint 1 · Semana 5 | Parcial |
 | [EXT-01-1](#ext-01-1--foto-de-perfil) | Foto de perfil | Usuario | Fuera del plan (2026-11-22) | Parcial |
 | [EXT-01-2](#ext-01-2--ficha-del-usuario-para-el-administrador) | Ficha del usuario para el administrador | Administrador | Fuera del plan (2026-11-22) | Parcial |
+| [EXT-01-3](#ext-01-3--el-administrador-edita-y-elimina-usuarios) | El administrador edita y elimina usuarios | Administrador | Fuera del plan (2026-11-22) | Parcial |
 
 Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = implementada pero con criterios sin cumplir o sin verificar; `Pendiente` = sin implementar.
 
@@ -342,6 +348,31 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 **Implementación:** `frontend/src/app/admin/users/presentation/user-detail.page.ts`, `frontend/src/app/admin/users/presentation/rating-stars.ts`, `frontend/src/app/admin/users/application/user-detail.store.ts`, `frontend/src/app/admin/users/domain/user-detail.ts`, `frontend/src/app/admin/users/domain/rating.ts`, `frontend/src/app/admin/users/infrastructure/http-user-admin.repository.ts`, `frontend/src/app/admin/users/users-admin.routes.ts`, `backend/apps/users/presentation/views.py`
 
 **Pruebas:** `frontend/src/app/admin/users/presentation/user-detail.page.spec.ts`, `frontend/src/app/admin/users/presentation/rating-stars.spec.ts`, `frontend/src/app/admin/users/application/user-detail.store.spec.ts`, `frontend/src/app/admin/users/domain/user-detail.spec.ts`, `frontend/src/app/admin/users/domain/rating.spec.ts`, `backend/tests/test_user_detail.py`
+
+### EXT-01-3 — El administrador edita y elimina usuarios
+
+- **Historia de usuario:** Como administrador · Deseo corregir los datos personales y el perfil deportivo de un usuario y eliminar su cuenta. Para atender solicitudes de soporte sin pedirle al usuario que lo haga.
+- **Actor:** Administrador con `users.manage` · **Prioridad:** Debe tener · **Sprint planificado:** fuera del plan (pedido del dueño, 2026-11-22) · **Dependencia:** EXT-01-2, RF-02 (el permiso) · **Caso de uso:** Actualizar y eliminar usuarios
+- **Estado:** `Parcial` — Backend hecho y con pruebas automáticas; la pantalla del panel está pendiente. Seguimiento en `odd/tasks/usuarios-editar-eliminar.md`.
+
+| Entrada | Proceso | Salida |
+| --- | --- | --- |
+| Identificador del usuario y los campos a cambiar, o la orden de eliminar | El sistema deberá validar los datos con las mismas reglas que el usuario, guardar solo lo enviado y, al eliminar, borrar su perfil, documentos privados, foto y credenciales. | Usuario actualizado, perfil deportivo guardado o borrado, o cuenta eliminada; o el motivo del rechazo. |
+
+**Criterios de aceptación**
+
+- [x] `PATCH /users/{uid}`, `PUT` y `DELETE /users/{uid}/sport-profile` y `DELETE /users/{uid}` exigen `users.manage`: sin sesión dan 401 y sin el permiso 403 `missing-permission` (un corredor nunca llega), con el límite de peticiones de los endpoints sensibles.
+- [x] Los datos personales siguen las validaciones de `PATCH /users/me`; el correo, el rol y cualquier clave desconocida se rechazan con `unknown`; un cuerpo vacío es inválido.
+- [x] El perfil deportivo respeta los catálogos activos y los rangos de los parámetros del sistema, igual que el propio.
+- [x] Eliminar una cuenta borra su perfil, documentos privados (incluida la foto) y credenciales; un administrador no puede eliminarse a sí mismo (`cannot-delete-self`, 409) ni eliminar al último administrador (`last-admin`).
+- [x] Una cuenta inexistente responde 404 `user-not-found` en los cuatro endpoints y no se devuelve más información de otros usuarios que la de la ficha.
+- [x] El permiso `users.manage` está en el catálogo y el rol de sistema `admin` lo recibe; las cuentas de administrador ya abiertas necesitan renovar el token (cerrar sesión y entrar, o esperar la renovación) para que el claim `perms` lo incluya.
+- [ ] Pantalla del panel: editar los datos y el perfil deportivo, y eliminar con confirmación (pendiente, frontend).
+- [ ] Verificado en un navegador contra el stack local.
+
+**Implementación:** `backend/apps/users/application/use_cases.py`, `backend/apps/users/presentation/views.py`, `backend/apps/users/presentation/urls.py`, `backend/apps/shared/domain/permissions.py`, `backend/apps/shared/domain/errors.py`, `backend/apps/shared/presentation/errors.py`
+
+**Pruebas:** `backend/tests/test_admin_user_management.py`
 
 ## Dependencias
 

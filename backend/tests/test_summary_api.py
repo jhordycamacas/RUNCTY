@@ -101,7 +101,7 @@ class TestPayload:
         assert body["truncated"] is False
         assert body["generatedAt"].endswith("Z")
         users = body["users"]
-        assert users["total"] == 6
+        assert users["total"] == 7
         assert users["byRole"]["runner"] == 1
         assert users["registeredLast7Days"] == 1
         assert users["registeredLast30Days"] == 1
@@ -109,7 +109,7 @@ class TestPayload:
             users["registrationsByWeek"][-1]["count"] + users["registrationsByWeek"][-2]["count"]
             == 1
         )
-        assert users["sportProfiles"] == {"completed": 1, "percentage": 17}
+        assert users["sportProfiles"] == {"completed": 1, "percentage": 14}
         assert users["preferences"]["appearance"]["dark"] == 1
         routes = body["routes"]
         assert (routes["total"], routes["active"], routes["inactive"]) == (2, 1, 1)
@@ -128,7 +128,7 @@ class TestPayload:
         body = client.get(URL, **bearer("admin-token")).json()
 
         assert body["users"]["bySportLevel"] == [{"level": "beginner", "users": 1}]
-        assert {"cityId": "loja", "name": "Loja", "routes": 2, "users": 5} in body["byCity"]
+        assert {"cityId": "loja", "name": "Loja", "routes": 2, "users": 6} in body["byCity"]
         assert {"cityId": "quito", "name": "quito", "routes": 0, "users": 1} in body["byCity"]
 
     def test_contains_no_personal_data(self, client, data, firebase):

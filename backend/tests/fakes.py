@@ -73,6 +73,14 @@ MANAGER = Principal(
     role="manager",
     perms=("admin.access", "roles.manage", "users.read"),
 )
+# A delegate that edits and deletes accounts without being an admin.
+USER_MANAGER = Principal(
+    uid="usermgr-1",
+    email="usermanager@example.com",
+    email_verified=True,
+    role="user_manager",
+    perms=("admin.access", "users.read", "users.manage"),
+)
 # A delegate that manages the catalogue of cities but not routes.
 CATALOGUER = Principal(
     uid="cat-1",
@@ -92,6 +100,7 @@ PRINCIPALS = {
     "club-rep-token": CLUB_REP,
     "user-reader-token": USER_READER,
     "manager-token": MANAGER,
+    "user-manager-token": USER_MANAGER,
     "cataloguer-token": CATALOGUER,
     "new-user-token": NEW_USER,
 }

@@ -100,6 +100,10 @@ gunicorn as a non-root user and contains no configuration or credentials.
 | `POST /api/v1/users` | signed in, own uid | 201 with the caller's new profile. Body: `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber?`, `consent: {lopdp: true}` |
 | `GET /api/v1/users` | `users.read` | `{"users": [{uid, email, firstName, lastName, birthDate, cityId, role}], "nextCursor"}`. Query: `q`, `limit`, `cursor` |
 | `GET /api/v1/users/{uid}` | `users.read` | `{"user": <as /users/me>, "sportProfile": {...} or null, "rating": null}`; 404 `user-not-found` |
+| `PATCH /api/v1/users/{uid}` | `users.manage` | `{"user": <as the detail's user>}`. Body: a non-empty subset of `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber`; any other key (the email included) is 400 `fields {key: "unknown"}`; 404 `user-not-found` |
+| `PUT /api/v1/users/{uid}/sport-profile` | `users.manage` | `{"sportProfile": {...}}`. Same body and validation as the own sport profile; 404 `user-not-found` |
+| `DELETE /api/v1/users/{uid}/sport-profile` | `users.manage` | 204, idempotent; 404 `user-not-found` |
+| `DELETE /api/v1/users/{uid}` | `users.manage` | 204. 409 `cannot-delete-self`, 400 `last-admin`, 404 `user-not-found` |
 | `GET /api/v1/users/me` | owner | `uid`, `email`, `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber`, `role` |
 | `PATCH /api/v1/users/me` | owner | the updated profile. Body: any of `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber` |
 | `DELETE /api/v1/users/me` | owner, signed in within 5 minutes | 204 |
@@ -198,6 +202,16 @@ Values that break a rule of a model are reported the same way, with these field 
   (`null` when missing). `rating` is always `null` until the group runs can be rated, then
   `{average, count}`. The photo and the preferences are never returned. `/users/me` is a
   literal route listed first, so it is never read as a uid.
+- **Admin edit and delete** (`users.manage`, same tighter budget): `PATCH /users/{uid}`,
+  `PUT`/`DELETE /users/{uid}/sport-profile` and `DELETE /users/{uid}` reuse the rules of the
+  own endpoints (`Usuario.with_personal_data`, `PerfilDeportivo.parse` with the active catalogs and
+  the system settings, and the account erasure of `DELETE /users/me`), so their field
+  reasons are the same. The email is not editable: it is the login, and changing it needs
+  re-authentication and verification. Deleting needs no recent sign-in of the admin, but an
+  admin cannot delete their own account here (409 `cannot-delete-self`; they use
+  `DELETE /users/me`) and the last admin cannot be deleted by anyone (400 `last-admin`). The
+  new permission is in the `admin` system role from now on, but the `perms` claim of an
+  admin already signed in is stale: they must sign out and in again to refresh the token.
 
 ### Roles
 
