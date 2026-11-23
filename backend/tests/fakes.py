@@ -4,6 +4,7 @@ import copy
 import time
 from dataclasses import replace
 
+from apps.catalogs.infrastructure.firestore_catalog_repository import FirestoreCatalogRepository
 from apps.cities.domain.models import Ciudad
 from apps.risk_alerts.infrastructure.document_repositories import (
     FirestoreRiskZoneAlertRepository,
@@ -24,6 +25,7 @@ from apps.shared.application.ports import AuthUserNotFound, TokenRejected
 from apps.shared.domain.models import Principal
 from apps.shared.domain.permissions import ADMIN_ROLE
 from apps.shared.infrastructure.firebase.collections import (
+    CATALOGS,
     GUARDED_TRAILS,
     INFORMATION_SOURCES,
     RISK_ZONE_ALERTS,
@@ -575,3 +577,8 @@ class InMemorySafeRouteRequestRepository(FirestoreSafeRouteRequestRepository):
 class InMemorySettingsRepository(FirestoreSettingsRepository):
     def __init__(self, firebase: FakeFirebase | None = None) -> None:
         super().__init__(InMemoryDocumentStore(SYSTEM_SETTINGS, firebase))
+
+
+class InMemoryCatalogRepository(FirestoreCatalogRepository):
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        super().__init__(InMemoryDocumentStore(CATALOGS, firebase))

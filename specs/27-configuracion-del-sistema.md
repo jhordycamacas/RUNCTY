@@ -24,10 +24,10 @@ Los números que gobiernan los cálculos (penalización por severidad, umbrales 
 - Recalcular el índice de todas las rutas al guardar parámetros que lo afectan y bajo demanda (`POST /admin/recalculate-routes`).
 - La sección «Configuración» del panel (`/admin/configuracion`): un formulario con los parámetros agrupados en paneles, validación en español y el botón «Recalcular rutas».
 - Valores por defecto en el código (respaldo) y en la semilla.
+- Catálogos de opciones que elige el corredor (nivel y metas deportivas) y que el administrador gestiona: `GET`/`PUT /catalogs/<id>` (CFG-4).
 
 **No incluye**
 
-- Los catálogos que elige el corredor (nivel y metas deportivas): T4.
 - Lo estructural que se queda en código a propósito: claves de severidad `low`/`medium`/`high` (tienen orden), claves de nivel, tipo de ciudad `city`/`zone`, claves de cobertura, días de la semana, el catálogo de permisos y la estructura de las preferencias.
 - Los límites de texto de 40 caracteres de las clasificaciones libres, la longitud de etiquetas y el mínimo de 2 puntos por tramo (una polilínea necesita dos puntos).
 
@@ -87,6 +87,7 @@ Los servicios leen el documento una vez por petición y pasan el objeto de pará
 | [CFG-1](#cfg-1--leer-los-parámetros) | Leer los parámetros | Usuario con sesión | Parcial |
 | [CFG-2](#cfg-2--editar-los-parámetros) | Editar los parámetros | Administrador | Hecha |
 | [CFG-3](#cfg-3--recalcular-las-rutas) | Recalcular las rutas | Administrador | Hecha |
+| [CFG-4](#cfg-4--gestionar-los-catálogos-de-opciones) | Gestionar los catálogos de opciones | Administrador | Parcial |
 
 ## Historias de usuario y criterios de aceptación
 
@@ -144,6 +145,28 @@ Los servicios leen el documento una vez por petición y pasan el objeto de pará
 **Implementación:** `backend/apps/system_settings/application/use_cases.py`, `backend/apps/routes/application/use_cases.py` (`recalculate_all_routes`), `frontend/src/app/admin/settings/presentation/settings.page.ts`
 
 **Pruebas:** `backend/tests/test_system_settings_use_cases.py`, `backend/tests/test_system_settings_api.py`, `frontend/src/app/admin/settings/presentation/settings.page.spec.ts`
+
+### CFG-4 — Gestionar los catálogos de opciones
+
+- **Historia de usuario:** Como administrador · Deseo definir los niveles y las metas deportivas que ofrece la aplicación. Para cambiar las opciones del corredor sin pedir un despliegue.
+- **Estado:** `Parcial` — 2026-11-22: API, dominio, semilla, perfil deportivo y reglas de Firestore con pruebas automáticas en el backend; faltan la pantalla del panel y los formularios del corredor que lean el catálogo (T4b).
+
+**Contrato:** `GET /catalogs/<id>` (sesión iniciada) responde `200 {"id": "sportLevels", "items": [{"code", "label", "order", "active"}]}` ordenado por `order`, con los inactivos y su marca; `?active=true` deja solo los activos para los formularios del corredor. `PUT /catalogs/<id>` (`settings.manage`) recibe `{"items": [...]}`, reemplaza la lista y responde igual. Catálogos (cerrados en el código): `sportLevels` (`beginner` Principiante, `intermediate` Intermedio, `advanced` Avanzado) y `sportGoals` (`health` Salud, `weightLoss` Bajar de peso, `racePrep` Preparar una carrera, `pace` Mejorar el ritmo, `social` Correr en compañía). Un id desconocido responde `404 catalog-not-found`.
+
+**Criterios de aceptación**
+
+- [x] Un ítem es `{code, label, order, active}`: `code` es un slug `^[a-z][a-zA-Z0-9_-]{0,39}$`, `label` de 1 a 60 caracteres sin espacios sobrantes, `order` entero, `active` booleano.
+- [x] Los códigos son únicos, al menos un ítem queda activo y un código que existió nunca se elimina: solo se desactiva (`active: false`).
+- [x] Errores `400 invalid-argument` con el motivo por campo (`items.2.label`): `required`, `invalid`, `invalid-format`, `max-length`, `unknown`, `duplicate`; y sobre `items`: `code-removed`, `no-active-item`, `max-length` (más de 30).
+- [x] `GET` exige sesión (`401`); `PUT` exige `settings.manage` (`403 missing-permission`).
+- [x] Sin documento guardado se responden los valores por defecto; la semilla los guarda solo si faltan y no pisa lo que el administrador cambió.
+- [x] El perfil deportivo valida nivel y metas contra los códigos activos de los catálogos al guardar (rechaza un código desconocido o desactivado con `invalid-choice`) y lee sin error un perfil guardado con un código luego desactivado.
+- [x] Las reglas de Firestore niegan todo acceso directo a `catalogs` y ya no listan los niveles ni las metas.
+- [ ] Sección del panel para editar los catálogos y formularios del corredor que ofrecen solo los ítems activos (T4b).
+
+**Implementación:** `backend/apps/catalogs`, `backend/apps/users/domain/models.py` (`PerfilDeportivo.parse`), `backend/apps/users/application/use_cases.py` (`save_sport_profile`), `backend/apps/seed/application/use_cases.py`, `firestore.rules`
+
+**Pruebas:** `backend/tests/test_catalogs_domain.py`, `backend/tests/test_catalogs_use_cases.py`, `backend/tests/test_catalogs_api.py`, `backend/tests/test_users_domain.py`, `backend/tests/test_seed.py`
 
 ## Dependencias
 

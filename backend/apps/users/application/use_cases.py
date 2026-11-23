@@ -8,6 +8,9 @@ from collections.abc import Mapping
 from dataclasses import replace
 from datetime import date
 
+from apps.catalogs.application.ports import CatalogRepository
+from apps.catalogs.application.use_cases import get_catalog
+from apps.catalogs.domain.models import GOALS_CATALOG, LEVELS_CATALOG
 from apps.shared.application.ports import AuthGateway, AuthUserNotFound
 from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.shared.domain.models import Principal
@@ -106,9 +109,13 @@ def save_sport_profile(
     uid: str,
     data: Mapping[str, object],
     profiles: SportProfileRepository,
+    catalogs: CatalogRepository,
     settings: SystemSettings,
 ) -> PerfilDeportivo:
-    profile = PerfilDeportivo.parse(data, settings)
+    """Saves the profile; level and goals must be active in their catalogs."""
+    levels = get_catalog(LEVELS_CATALOG, catalogs).active_codes()
+    goals = get_catalog(GOALS_CATALOG, catalogs).active_codes()
+    profile = PerfilDeportivo.parse(data, settings, levels, goals)
     profiles.save(uid, profile)
     return profile
 

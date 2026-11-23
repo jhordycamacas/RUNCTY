@@ -56,6 +56,16 @@ frontend and `firestore.rules`).
       spec uses `HttpTestingController`. Legacy `functions/` untouched (not part of this task).
       Route: single writer (delegated).
 - [ ] T4 Sport profile catalog (levels, goals) managed by the admin + runner/profile forms read it
+  - [x] T4a Backend: app `catalogs` (domain, ports, Firestore adapter, `GET`/`PUT /catalogs/<id>`
+        with `settings.manage`, seed), sport profile validates against the active codes
+        Evidence: RED observed first (3 test modules failed on import of `apps.catalogs`, 19
+        failures in the users domain / private documents specs), then GREEN: backend 1184 passed
+        (was 1092 + new), ruff clean. `SPORT_LEVELS`/`SPORT_GOALS` tuples removed (grep clean:
+        only the default items inside `catalogs`). Stored profiles keep any code
+        (`from_document` skips the catalog check). Deny-all rule for `catalogs`; the level and
+        goals `in [...]` lists left `isValidSportProfile`. Route: single writer (delegated).
+  - [ ] T4b Frontend: admin section to edit the catalogs + runner/profile forms read
+        `GET /catalogs/<id>?active=true` instead of their constants
 - [ ] T5 Remove every leftover duplicate list (frontend constants, firestore.rules `in [...]`),
       specs, README, CONTEXTO, traceability; final grep proving nothing hardcoded remains outside
       the structural list above

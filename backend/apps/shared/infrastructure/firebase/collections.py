@@ -18,3 +18,5 @@ RISK_ZONE_ALERTS = "riskZoneAlerts"
 SAFE_ROUTE_REQUESTS = "safeRouteRequests"
 # System parameters: the single document `systemSettings/global` (`settings.manage`).
 SYSTEM_SETTINGS = "systemSettings"
+# Option catalogs the admin manages (sport levels, sport goals): one document per catalog id.
+CATALOGS = "catalogs"

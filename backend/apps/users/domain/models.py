@@ -7,7 +7,7 @@ already stored and never raises.
 
 import math
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from datetime import date
 
@@ -152,10 +152,6 @@ def _personal_data(
     }
 
 
-SPORT_LEVELS = ("beginner", "intermediate", "advanced")
-SPORT_GOALS = ("health", "weightLoss", "racePrep", "pace", "social")
-
-
 def _number_reason(value: object, limits: tuple[float, float] | None) -> str | None:
     """`limits` is None when reading a stored profile: the ranges apply when it is saved."""
     if isinstance(value, bool) or not isinstance(value, (int, float)):
@@ -166,14 +162,23 @@ def _number_reason(value: object, limits: tuple[float, float] | None) -> str | N
     return None if limits[0] <= value <= limits[1] else "out-of-range"
 
 
-def _goals_reason(value: object) -> str | None:
+def _level_reason(value: object, levels: Sequence[str] | None) -> str | None:
+    """`levels` are the codes on offer; None when reading a stored profile, which keeps any code."""
+    if levels is None:
+        return None if isinstance(value, str) and value else "invalid-choice"
+    return None if value in levels else "invalid-choice"
+
+
+def _goals_reason(value: object, goals: Sequence[str] | None) -> str | None:
     if not isinstance(value, (list, tuple)):
         return "invalid"
     if not value:
         return "required"
-    if len(value) > len(SPORT_GOALS):
+    if goals is None:
+        return None if all(isinstance(goal, str) and goal for goal in value) else "invalid"
+    if len(value) > len(goals):
         return "max-length"
-    return None if all(goal in SPORT_GOALS for goal in value) else "invalid-choice"
+    return None if all(goal in goals for goal in value) else "invalid-choice"
 
 
 @dataclass(frozen=True, slots=True)
@@ -186,15 +191,22 @@ class PerfilDeportivo:
     preferred_distance_km: float
 
     @classmethod
-    def parse(cls, raw: Mapping[str, object], settings: SystemSettings | None) -> "PerfilDeportivo":
-        """Validated profile. `settings` gives the pace and distance ranges; None skips them."""
+    def parse(
+        cls,
+        raw: Mapping[str, object],
+        settings: SystemSettings | None,
+        levels: Sequence[str] | None,
+        goals: Sequence[str] | None,
+    ) -> "PerfilDeportivo":
+        """Validated profile. `settings` gives the pace and distance ranges, and `levels` and
+        `goals` the active codes of the catalogs; None skips each check."""
         pace = distance = None
         if settings is not None:
             pace = (settings.pace_min_sec_per_km, settings.pace_max_sec_per_km)
             distance = (settings.distance_min_km, settings.distance_max_km)
         reasons = {
-            "level": None if raw.get("level") in SPORT_LEVELS else "invalid-choice",
-            "goals": _goals_reason(raw.get("goals")),
+            "level": _level_reason(raw.get("level"), levels),
+            "goals": _goals_reason(raw.get("goals"), goals),
             "usualPaceSecPerKm": _number_reason(raw.get("usualPaceSecPerKm"), pace),
             "preferredDistanceKm": _number_reason(raw.get("preferredDistanceKm"), distance),
         }
@@ -212,10 +224,11 @@ class PerfilDeportivo:
     def from_document(cls, data: Mapping[str, object]) -> "PerfilDeportivo | None":
         """A stored profile that no longer matches the schema is treated as missing.
 
-        The ranges of the system settings are not applied: narrowing them never hides a profile.
+        Neither the ranges of the system settings nor the catalogs are applied: narrowing them or
+        deactivating an option never hides a profile, which keeps the code it was saved with.
         """
         try:
-            return cls.parse(data, None)
+            return cls.parse(data, None, None, None)
         except DomainError:
             return None
 

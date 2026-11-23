@@ -176,9 +176,17 @@ SPORT_PROFILE = {
 }
 
 
+LEVELS = ("beginner", "intermediate", "advanced")
+GOALS = ("health", "weightLoss", "racePrep", "pace", "social")
+
+
+def parse_sport(raw):
+    return PerfilDeportivo.parse(raw, SETTINGS, LEVELS, GOALS)
+
+
 class TestPerfilDeportivo:
     def test_parses_a_valid_profile(self):
-        profile = PerfilDeportivo.parse(SPORT_PROFILE, SETTINGS)
+        profile = parse_sport(SPORT_PROFILE)
 
         assert profile == PerfilDeportivo("intermediate", ("health", "pace"), 390, 10.5)
         assert profile.to_document() == SPORT_PROFILE
@@ -201,25 +209,59 @@ class TestPerfilDeportivo:
         ],
     )
     def test_rejects_values_outside_the_schema(self, change, fields):
-        assert (
-            fields_of(lambda raw: PerfilDeportivo.parse(raw, SETTINGS), {**SPORT_PROFILE, **change})
-            == fields
-        )
+        assert fields_of(parse_sport, {**SPORT_PROFILE, **change}) == fields
+
+    def test_the_choices_come_from_the_catalogs_it_is_given(self):
+        raw = {**SPORT_PROFILE, "level": "elite", "goals": ["fun", "pace"]}
+
+        profile = PerfilDeportivo.parse(raw, SETTINGS, ("elite",), ("fun", "pace"))
+
+        assert (profile.level, profile.goals) == ("elite", ("fun", "pace"))
+        assert fields_of(parse_sport, raw) == {"level": "invalid-choice", "goals": "invalid-choice"}
+
+    def test_the_goal_count_is_bounded_by_the_goals_on_offer(self):
+        raw = {**SPORT_PROFILE, "goals": ["pace", "pace"]}
+
+        assert fields_of(lambda r: PerfilDeportivo.parse(r, SETTINGS, LEVELS, ("pace",)), raw) == {
+            "goals": "max-length"
+        }
+
+    def test_an_unhashable_choice_is_invalid_not_a_crash(self):
+        raw = {**SPORT_PROFILE, "level": ["beginner"], "goals": [["health"]]}
+
+        assert fields_of(parse_sport, raw) == {"level": "invalid-choice", "goals": "invalid-choice"}
 
     def test_accepts_the_limits(self):
         limits = {**SPORT_PROFILE, "usualPaceSecPerKm": 150, "preferredDistanceKm": 50}
 
-        assert PerfilDeportivo.parse(limits, SETTINGS).usual_pace_sec_per_km == 150
+        assert parse_sport(limits).usual_pace_sec_per_km == 150
 
     def test_reads_a_stored_document_ignoring_its_timestamp(self):
         stored = {**SPORT_PROFILE, "updatedAt": object()}
 
-        assert PerfilDeportivo.from_document(stored) == PerfilDeportivo.parse(
-            SPORT_PROFILE, SETTINGS
-        )
+        assert PerfilDeportivo.from_document(stored) == parse_sport(SPORT_PROFILE)
 
-    def test_a_stored_document_that_no_longer_matches_is_treated_as_missing(self):
-        assert PerfilDeportivo.from_document({**SPORT_PROFILE, "level": "pro"}) is None
+    def test_a_stored_code_is_kept_even_if_the_catalog_no_longer_offers_it(self):
+        stored = {**SPORT_PROFILE, "level": "legacy", "goals": ["old", "gone", "x", "y", "z", "w"]}
+
+        profile = PerfilDeportivo.from_document(stored)
+
+        assert profile.level == "legacy"
+        assert profile.goals == ("old", "gone", "x", "y", "z", "w")
+
+    @pytest.mark.parametrize(
+        "change",
+        [
+            {"level": 7},
+            {"level": ""},
+            {"goals": []},
+            {"goals": "health"},
+            {"goals": [7]},
+            {"usualPaceSecPerKm": "fast"},
+        ],
+    )
+    def test_a_stored_document_that_no_longer_matches_the_shape_is_treated_as_missing(self, change):
+        assert PerfilDeportivo.from_document({**SPORT_PROFILE, **change}) is None
 
 
 PREFERENCES = {

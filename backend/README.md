@@ -33,8 +33,8 @@ Firebase project.
 `manage.py seed` loads the demo data into the Firebase emulators: the city Loja, the system
 roles (`runner`, `admin`, `club_rep`), the admin account `admin@runcty.dev` / `Admin123!` with
 its claims, and five sample routes in Loja with segments, time slots, risk factors and the
-computed safety index, plus the default system settings (saved once: a re-run keeps what an
-admin changed). It is idempotent: a re-run updates the same documents and rewrites each sample
+computed safety index, plus the default system settings and option catalogs (each saved only
+when absent: a re-run keeps what an admin changed). It is idempotent: a re-run updates the same documents and rewrites each sample
 route from scratch.
 
 ```bash
@@ -102,6 +102,8 @@ gunicorn as a non-root user and contains no configuration or credentials.
 | `POST /api/v1/routes/{id}/segments/{sid}/risk-factors`, `PUT`, `DELETE .../risk-factors/{fid}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `type`, `severity`, `description`, `startTime?`, `endTime?` |
 | `GET /api/v1/settings` | signed in | `{"settings": {...}}` with every system parameter (defaults when none were saved) |
 | `PUT /api/v1/settings` | `settings.manage` | `{"settings": {...}, "recalculated": n}`. Body: any subset of the parameters |
+| `GET /api/v1/catalogs/{id}` | signed in | `{"id", "items": [{code, label, order, active}]}` sorted by `order`; `id` is `sportLevels` or `sportGoals` (404 `catalog-not-found` otherwise); `?active=true` keeps only the active items |
+| `PUT /api/v1/catalogs/{id}` | `settings.manage` | Body `{"items": [...]}` replaces the list; answers like the `GET` |
 | `POST /api/v1/admin/recalculate-routes` | `settings.manage` | `{"recalculated": n}`: recomputes the stored safety of every route |
 
 JSON only, camelCase keys. Every error has the same shape; clients branch on `reason` and
@@ -212,6 +214,22 @@ request and the response reports `recalculated`. The Firestore rules deny every 
 the collection; the seed saves the defaults only when none exist. `tzdata` must be installed for
 `zoneinfo` on systems without an IANA database.
 
+### Option catalogs
+
+`catalogs/{id}` holds the choices a runner picks from (`sportLevels`, `sportGoals`: a closed set
+of ids in `apps/catalogs/domain`; the items are data). An item is `{code, label, order, active}`:
+`code` is a slug (`^[a-z][a-zA-Z0-9_-]{0,39}$`) stored in the documents that use it, `label` is
+1-60 trimmed characters. `PUT` replaces the list and the domain keeps three rules: codes are
+unique, at least one item is active, and a code that existed is never removed, only set to
+`active: false` (stored profiles keep their value). Field reasons in `error.fields` (dotted
+names, `items.2.label`): `required`, `invalid`, `invalid-format` (code), `max-length` (label, or
+more than 30 items), `unknown` (item field), `duplicate` (code), and on `items`: `code-removed`,
+`no-active-item`. A catalog nobody saved is its defaults, and the seed saves them only when
+absent. The sport profile reads both catalogs once per save and accepts only their active codes
+(`goals` may hold at most as many codes as there are active goals); reading a stored profile
+never checks the catalogs, so deactivating an option hides nothing. The Firestore rules deny
+every client access to the collection.
+
 ### Routes and the safety index
 
 Reason codes are the ones the route callables used: `invalid-route-id`, `invalid-segment-id`,
@@ -319,6 +337,8 @@ apps/
                              factors and the safety index
   system_settings/           SystemSettings: the system parameters (`systemSettings/global`),
                              `GET`/`PUT /settings` and the bulk route recalculation
+  catalogs/                  Catalog: option catalogs (`catalogs/{id}`: sport levels and goals),
+                             `GET`/`PUT /catalogs/{id}`
   seed/                      `manage.py seed`: demo data for the Firebase emulators
 tests/                       pytest suite with in-memory adapters
 ```

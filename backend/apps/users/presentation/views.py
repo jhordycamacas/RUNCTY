@@ -103,6 +103,7 @@ class OwnSportProfileView(APIView):
             request.user.uid,
             validated_body(SportProfileSerializer, request),
             adapter("SPORT_PROFILE_REPOSITORY"),
+            adapter("CATALOG_REPOSITORY"),
             current_settings(),
         )
         return Response(profile.to_document())

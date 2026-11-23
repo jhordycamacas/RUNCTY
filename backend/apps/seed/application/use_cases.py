@@ -1,7 +1,8 @@
 """Seeds the local Firebase emulators with the minimum data for development: the pilot city,
 the system roles, an admin account, sample routes with segments, time slots, risk factors,
 incidents and the safety index, and the sources, support points, guarded trails and risk zone
-alerts of Sprint 3, and the system settings (only when none were saved: an admin's edits stay).
+alerts of Sprint 3, the system settings and the option catalogs (each only when absent: an
+admin's edits stay).
 Every step is idempotent, so running it again the same day leaves the same data (incident and
 alert dates are relative to the day it runs)."""
 
@@ -10,6 +11,9 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
+from apps.catalogs.application.ports import CatalogRepository
+from apps.catalogs.application.use_cases import ensure_default_catalogs
+from apps.catalogs.domain.models import CATALOG_IDS
 from apps.cities.application.ports import CityRepository
 from apps.cities.domain.models import Ciudad
 from apps.risk_alerts.application.ports import RiskZoneAlertRepository
@@ -51,10 +55,12 @@ class SeedDeps:
     guarded_trails: GuardedTrailRepository
     alerts: RiskZoneAlertRepository
     settings: SettingsRepository
+    catalogs: CatalogRepository
 
 
 def run_seed(deps: SeedDeps, report: Callable[[str], None]) -> None:
     settings = _seed_settings(deps.settings, report)
+    _seed_catalogs(deps.catalogs, report)
     now = local_now(settings)
     _seed_city(deps.cities, settings, report)
     _seed_roles(deps.roles, report)
@@ -75,6 +81,16 @@ def _seed_settings(repository: SettingsRepository, report: Callable[[str], None]
     repository.save(defaults)
     report("System settings seeded: systemSettings/global")
     return defaults
+
+
+def _seed_catalogs(catalogs: CatalogRepository, report: Callable[[str], None]) -> None:
+    """Saves the default catalogs that are absent; later runs keep what an admin changed."""
+    seeded = ensure_default_catalogs(catalogs)
+    kept = [catalog_id for catalog_id in CATALOG_IDS if catalog_id not in seeded]
+    if seeded:
+        report(f"Catalogs seeded: {', '.join(seeded)}")
+    if kept:
+        report(f"Catalogs kept: {', '.join(kept)}")
 
 
 def _seed_city(

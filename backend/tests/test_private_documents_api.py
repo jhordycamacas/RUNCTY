@@ -127,7 +127,7 @@ class TestSportProfileValues:
         assert firebase.private == {}
 
     def test_a_stored_profile_that_no_longer_matches_is_not_found(self, client, firebase):
-        firebase.private[(RUNNER.uid, "sportProfile")] = {**SPORT_PROFILE, "level": "pro"}
+        firebase.private[(RUNNER.uid, "sportProfile")] = {**SPORT_PROFILE, "level": 7}
 
         assert client.get(self.URL, **bearer("runner-token")).status_code == 404
 

@@ -64,7 +64,7 @@ Decididas por el equipo o derivadas de otros documentos:
 - Todo usuario nuevo recibe el rol `runner`; el rol y la identidad nunca vienen del cuerpo de la petición.
 - Al eliminar un usuario se eliminan también sus credenciales, perfil deportivo y preferencias (CONTEXTO sección 6).
 - El último administrador no puede eliminar su cuenta (`last-admin`).
-- Nivel del corredor: Principiante, Intermedio o Avanzado. Objetivos: salud, bajar de peso, preparar carrera, mejorar ritmo, socializar (al menos uno; por validar con Gacelas).
+- Nivel del corredor y objetivos: opciones de los catálogos `sportLevels` y `sportGoals` que gestiona el administrador ([CFG-4](27-configuracion-del-sistema.md)); por defecto Principiante, Intermedio y Avanzado, y salud, bajar de peso, preparar carrera, mejorar ritmo y socializar (al menos un objetivo; por validar con Gacelas). Al guardar se aceptan solo opciones activas.
 
 ## Modelo de datos y contrato de API
 

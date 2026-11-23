@@ -13,6 +13,7 @@ urlpatterns = [
     path("api/v1/", include("apps.safe_routes.presentation.urls")),
     path("api/v1/", include("apps.summary.presentation.urls")),
     path("api/v1/", include("apps.system_settings.presentation.urls")),
+    path("api/v1/", include("apps.catalogs.presentation.urls")),
 ]
 
 handler404 = "apps.shared.presentation.errors.not_found"

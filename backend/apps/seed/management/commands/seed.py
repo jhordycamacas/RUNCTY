@@ -33,5 +33,6 @@ class Command(BaseCommand):
             guarded_trails=adapter("GUARDED_TRAIL_REPOSITORY"),
             alerts=adapter("RISK_ZONE_ALERT_REPOSITORY"),
             settings=adapter("SETTINGS_REPOSITORY"),
+            catalogs=adapter("CATALOG_REPOSITORY"),
         )
         run_seed(deps, self.stdout.write)

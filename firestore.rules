@@ -92,11 +92,9 @@ service cloud.firestore {
     function isValidSportProfile(d) {
       return d.keys().hasAll(['level', 'goals', 'usualPaceSecPerKm', 'preferredDistanceKm', 'updatedAt'])
         && d.keys().hasOnly(['level', 'goals', 'usualPaceSecPerKm', 'preferredDistanceKm', 'updatedAt'])
-        && d.level in ['beginner', 'intermediate', 'advanced']
+        && d.level is string
         && d.goals is list
         && d.goals.size() >= 1
-        && d.goals.size() <= 5
-        && d.goals.hasOnly(['health', 'weightLoss', 'racePrep', 'pace', 'social'])
         && d.usualPaceSecPerKm is number
         && d.usualPaceSecPerKm >= 150
         && d.usualPaceSecPerKm <= 1200
@@ -245,6 +243,12 @@ service cloud.firestore {
     // System parameters (`systemSettings/global`): only the Django API reads
     // and writes them (Admin SDK), applying `settings.manage` for changes.
     match /systemSettings/{settingId} {
+      allow read, write: if false;
+    }
+
+    // Option catalogs (`catalogs/{id}`: sport levels and goals): only the Django API
+    // reads and writes them (Admin SDK), applying `settings.manage` for changes.
+    match /catalogs/{catalogId} {
       allow read, write: if false;
     }
 

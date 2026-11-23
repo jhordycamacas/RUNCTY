@@ -4,6 +4,7 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
+from apps.catalogs.domain.models import Catalog
 from apps.roles.domain.system_roles import SYSTEM_ROLES
 from apps.routes.domain.time import local_now
 from apps.seed.application.use_cases import SeedDeps, run_seed
@@ -33,6 +34,7 @@ def deps() -> SeedDeps:
         guarded_trails=fakes.InMemoryGuardedTrailRepository(),
         alerts=fakes.InMemoryRiskZoneAlertRepository(),
         settings=fakes.InMemorySettingsRepository(),
+        catalogs=fakes.InMemoryCatalogRepository(),
     )
 
 
@@ -78,6 +80,21 @@ def test_a_rerun_keeps_the_system_settings_an_admin_changed():
     seed(report)
     assert FIREBASE.docs["systemSettings/global"]["penaltyHigh"] == 50
     assert report[0] == "System settings kept: systemSettings/global"
+
+
+def test_seeds_the_default_catalogs():
+    seed([])
+    assert FIREBASE.docs["catalogs/sportLevels"] == Catalog.defaults("sportLevels").to_document()
+    assert FIREBASE.docs["catalogs/sportGoals"] == Catalog.defaults("sportGoals").to_document()
+
+
+def test_a_rerun_keeps_the_catalogs_an_admin_changed():
+    seed([])
+    FIREBASE.docs["catalogs/sportLevels"]["items"][0]["label"] = "Editado"
+    report: list[str] = []
+    seed(report)
+    assert FIREBASE.docs["catalogs/sportLevels"]["items"][0]["label"] == "Editado"
+    assert "Catalogs kept: sportLevels, sportGoals" in report
 
 
 def test_seeds_the_system_roles_with_sorted_permissions():
@@ -244,9 +261,10 @@ def test_a_rerun_keeps_the_admin_account_and_restores_its_claims():
 def test_reports_what_it_seeded(report):
     seed(report)
     assert report[0] == "System settings seeded: systemSettings/global"
-    assert report[1] == "City seeded: cities/loja"
-    assert report[2] == "Roles seeded: runner, admin, club_rep"
-    assert report[3].startswith(f"Admin seeded: {ADMIN_EMAIL} (uid ")
+    assert report[1] == "Catalogs seeded: sportLevels, sportGoals"
+    assert report[2] == "City seeded: cities/loja"
+    assert report[3] == "Roles seeded: runner, admin, club_rep"
+    assert report[4].startswith(f"Admin seeded: {ADMIN_EMAIL} (uid ")
     routes = [line for line in report if line.startswith("Route seeded: routes/")]
     assert len(routes) == 5
     assert routes[0].startswith("Route seeded: routes/loja-jipiro — Parque Recreacional Jipiro, ")

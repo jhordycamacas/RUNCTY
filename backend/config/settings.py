@@ -81,6 +81,9 @@ RISK_ZONE_ALERT_REPOSITORY = (
 SETTINGS_REPOSITORY = (
     "apps.system_settings.infrastructure.firestore_settings_repository.FirestoreSettingsRepository"
 )
+CATALOG_REPOSITORY = (
+    "apps.catalogs.infrastructure.firestore_catalog_repository.FirestoreCatalogRepository"
+)
 SAFE_ROUTE_REQUEST_REPOSITORY = (
     "apps.safe_routes.infrastructure.document_repositories.FirestoreSafeRouteRequestRepository"
 )
