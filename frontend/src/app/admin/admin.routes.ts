@@ -21,6 +21,10 @@ const SECTION_SCREENS: Record<string, Pick<Route, 'loadChildren'>> = {
   rutas: {
     loadChildren: () => import('./routes/routes-admin.routes').then((m) => m.ROUTES_ADMIN_ROUTES),
   },
+  configuracion: {
+    loadChildren: () =>
+      import('./settings/settings-admin.routes').then((m) => m.SETTINGS_ADMIN_ROUTES),
+  },
 };
 
 export const ADMIN_ROUTES: Routes = [

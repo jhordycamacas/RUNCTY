@@ -98,8 +98,9 @@ describe('RoleFormPage', () => {
       'Cuentas y roles',
       'Ciudades y rutas',
       'Comunidad y alianzas',
+      'Sistema',
     ]);
-    expect(root().querySelectorAll('input[type="checkbox"]')).toHaveLength(8);
+    expect(root().querySelectorAll('input[type="checkbox"]')).toHaveLength(9);
   });
 
   it('shows the field messages in Spanish and sends nothing when the input is invalid', async () => {

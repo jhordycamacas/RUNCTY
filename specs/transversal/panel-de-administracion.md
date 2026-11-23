@@ -17,6 +17,7 @@ Dar al personal de Gacelas (administrador y, en la expansión, representante de 
 | Roles | `/admin/roles` | `roles.manage` | [EP-02](../02-roles-y-permisos.md) |
 | Ciudades | `/admin/ciudades` | `cities.manage` | [EP-04](../04-ciudades-y-zonas.md) |
 | Rutas | `/admin/rutas` | `routes.manage` | [EP-05](../05-catalogo-de-rutas.md) y [EP-07](../07-evaluacion-de-seguridad.md) |
+| Configuración | `/admin/configuracion` | `settings.manage` | [Configuración del sistema](../27-configuracion-del-sistema.md) |
 
 ### Criterios de aceptación de la estructura
 

@@ -26,6 +26,7 @@ import {
   gridOutline,
   logOutOutline,
   peopleOutline,
+  settingsOutline,
   shieldCheckmarkOutline,
   trailSignOutline,
 } from 'ionicons/icons';
@@ -40,6 +41,7 @@ addIcons({
   gridOutline,
   logOutOutline,
   peopleOutline,
+  settingsOutline,
   shieldCheckmarkOutline,
   trailSignOutline,
 });

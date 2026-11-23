@@ -15,4 +15,10 @@ export const ADMIN_SECTIONS: readonly AdminSection[] = [
   { path: 'roles', label: 'Roles', icon: 'shield-checkmark-outline', permission: 'roles.manage' },
   { path: 'ciudades', label: 'Ciudades', icon: 'business-outline', permission: 'cities.manage' },
   { path: 'rutas', label: 'Rutas', icon: 'trail-sign-outline', permission: 'routes.manage' },
+  {
+    path: 'configuracion',
+    label: 'Configuración',
+    icon: 'settings-outline',
+    permission: 'settings.manage',
+  },
 ];

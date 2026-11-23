@@ -39,6 +39,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   'reports.validate': 'Validar reportes de la comunidad',
   'ads.manage': 'Gestionar anunciantes y campañas',
   'clubs.manage': 'Gestionar clubes y membresías',
+  'settings.manage': 'Gestionar la configuración del sistema',
 };
 
 export interface PermissionGroup {
@@ -52,6 +53,7 @@ export const PERMISSION_GROUPS: readonly PermissionGroup[] = [
   { label: 'Cuentas y roles', permissions: ['users.read', 'roles.manage'] },
   { label: 'Ciudades y rutas', permissions: ['cities.manage', 'routes.manage'] },
   { label: 'Comunidad y alianzas', permissions: ['reports.validate', 'clubs.manage', 'ads.manage'] },
+  { label: 'Sistema', permissions: ['settings.manage'] },
 ];
 
 /** The permissions in catalogue order, so two lists with the same permissions are equal. */

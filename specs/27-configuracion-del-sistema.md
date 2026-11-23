@@ -1,6 +1,6 @@
 # Configuración del sistema
 
-> Spec de capacidad · Decisión del producto (2026-11-22): «nada hardcodeado, todo configurable» · **Parcial**: backend hecho, pantalla de administración pendiente (T3)
+> Spec de capacidad · Decisión del producto (2026-11-22): «nada hardcodeado, todo configurable» · **Parcial**: backend y pantalla de administración hechos; faltan los formularios del cliente que leen los parámetros (T5)
 
 | Campo | Valor |
 | --- | --- |
@@ -8,7 +8,7 @@
 | Requisitos | Ninguno del Excel; sale de la decisión del dueño del producto (`odd/tasks/todo-configurable.md`) |
 | Prioridad | Debe tener |
 | Permiso | `settings.manage` (lo incluye el rol del sistema `admin`) |
-| Estado | `Parcial`: API, dominio, semilla y reglas de Firestore listos; falta la sección «Configuración» del panel (T3) |
+| Estado | `Parcial`: API, dominio, semilla, reglas de Firestore y la sección «Configuración» del panel listos; falta que los formularios del cliente lean los parámetros (T5) |
 | Dependencias | [EP-07](07-evaluacion-de-seguridad.md), [EP-08](08-incidentes-y-fuentes.md), [EP-06](06-puntos-de-apoyo.md), [EP-09](09-rutas-seguras.md), [EP-05](05-catalogo-de-rutas.md), [EP-04](04-ciudades-y-zonas.md), [EP-01](01-gestion-de-usuarios.md) |
 
 ## Propósito
@@ -22,11 +22,11 @@ Los números que gobiernan los cálculos (penalización por severidad, umbrales 
 - Un documento `systemSettings/global` con todos los parámetros, validados en el dominio con tipo y límites.
 - `GET /settings` (cualquier usuario con sesión) y `PUT /settings` (`settings.manage`).
 - Recalcular el índice de todas las rutas al guardar parámetros que lo afectan y bajo demanda (`POST /admin/recalculate-routes`).
+- La sección «Configuración» del panel (`/admin/configuracion`): un formulario con los parámetros agrupados en paneles, validación en español y el botón «Recalcular rutas».
 - Valores por defecto en el código (respaldo) y en la semilla.
 
 **No incluye**
 
-- La sección «Configuración» del panel (T3).
 - Los catálogos que elige el corredor (nivel y metas deportivas): T4.
 - Lo estructural que se queda en código a propósito: claves de severidad `low`/`medium`/`high` (tienen orden), claves de nivel, tipo de ciudad `city`/`zone`, claves de cobertura, días de la semana, el catálogo de permisos y la estructura de las preferencias.
 - Los límites de texto de 40 caracteres de las clasificaciones libres, la longitud de etiquetas y el mínimo de 2 puntos por tramo (una polilínea necesita dos puntos).
@@ -44,7 +44,7 @@ Los números que gobiernan los cálculos (penalización por severidad, umbrales 
 
 ## Modelo de datos y contrato de API
 
-**Estado: backend implementado** (código en `backend/apps/system_settings`; la sección del panel está pendiente).
+**Estado: backend y sección del panel implementados** (código en `backend/apps/system_settings` y `frontend/src/app/admin/settings`).
 
 | Endpoint | Permiso | Descripción |
 | --- | --- | --- |
@@ -85,8 +85,8 @@ Los servicios leen el documento una vez por petición y pasan el objeto de pará
 | ID | Historia | Actor | Estado |
 | --- | --- | --- | --- |
 | [CFG-1](#cfg-1--leer-los-parámetros) | Leer los parámetros | Usuario con sesión | Parcial |
-| [CFG-2](#cfg-2--editar-los-parámetros) | Editar los parámetros | Administrador | Parcial |
-| [CFG-3](#cfg-3--recalcular-las-rutas) | Recalcular las rutas | Administrador | Parcial |
+| [CFG-2](#cfg-2--editar-los-parámetros) | Editar los parámetros | Administrador | Hecha |
+| [CFG-3](#cfg-3--recalcular-las-rutas) | Recalcular las rutas | Administrador | Hecha |
 
 ## Historias de usuario y criterios de aceptación
 
@@ -109,7 +109,7 @@ Los servicios leen el documento una vez por petición y pasan el objeto de pará
 ### CFG-2 — Editar los parámetros
 
 - **Historia de usuario:** Como administrador · Deseo cambiar los números que gobiernan los cálculos desde el panel. Para ajustarlos sin pedir un despliegue.
-- **Estado:** `Parcial` — 2026-11-22: API y pruebas automáticas en el backend; falta la sección «Configuración» del panel (T3).
+- **Estado:** `Hecha` — 2026-11-22: API y pruebas automáticas en el backend; sección «Configuración» del panel con pruebas automáticas en el frontend.
 
 **Criterios de aceptación**
 
@@ -119,16 +119,19 @@ Los servicios leen el documento una vez por petición y pasan el objeto de pará
 - [x] Los parámetros se aplican en la siguiente petición: límite de tramos, largo del nombre de la ruta, país de las ciudades nuevas y rango del perfil deportivo.
 - [x] La semilla guarda los valores por defecto una sola vez y no pisa lo que el administrador cambió.
 - [x] Las reglas de Firestore niegan todo acceso directo a `systemSettings`.
-- [ ] Sección «Configuración» del panel con formulario, validación y mensajes en español (T3).
+- [x] Sección «Configuración» del panel (`/admin/configuracion`, permiso `settings.manage`, solo visible con ese permiso) con los parámetros en siete paneles, cada uno con su explicación, y una lectura en vivo de los niveles de seguridad.
+- [x] Un solo formulario: «Guardar cambios» (deshabilitado sin cambios o mientras guarda) envía solo los parámetros modificados; «Restablecer valores por defecto» pide confirmación, rellena el formulario y sigue exigiendo guardar.
+- [x] Errores en español por campo: los límites del cliente y los motivos que devuelve el API (`required`, `invalid`, `out-of-range`, `invalid-time-zone`, `invalid-country-code`, `must-not-be-below-previous`, `must-be-below-high`, `must-exceed-min`).
+- [x] Tras guardar avisa «Configuración guardada» y, si recalculó rutas, cuántas.
 
-**Implementación:** `backend/apps/system_settings`, `backend/apps/shared/domain/permissions.py`, `backend/apps/seed/application/use_cases.py`, `firestore.rules`
+**Implementación:** `backend/apps/system_settings`, `backend/apps/shared/domain/permissions.py`, `backend/apps/seed/application/use_cases.py`, `firestore.rules`, `frontend/src/app/admin/settings`, `frontend/src/app/admin/admin-sections.ts`
 
-**Pruebas:** `backend/tests/test_system_settings_api.py`, `backend/tests/test_system_settings_domain.py`, `backend/tests/test_system_settings_use_cases.py`, `backend/tests/test_seed.py`
+**Pruebas:** `backend/tests/test_system_settings_api.py`, `backend/tests/test_system_settings_domain.py`, `backend/tests/test_system_settings_use_cases.py`, `backend/tests/test_seed.py`, `frontend/src/app/admin/settings/**/*.spec.ts`, `frontend/src/app/admin/admin-sections.spec.ts`
 
 ### CFG-3 — Recalcular las rutas
 
 - **Historia de usuario:** Como administrador · Deseo que al cambiar la penalización, los umbrales, la ventana o el margen se recalculen todas las rutas. Para que el índice que ven el panel y el corredor coincida con los parámetros.
-- **Estado:** `Parcial` — 2026-11-22: API y pruebas automáticas en el backend; falta mostrar el resultado en el panel (T3).
+- **Estado:** `Hecha` — 2026-11-22: API y pruebas automáticas en el backend; el panel muestra el resultado, con pruebas automáticas en el frontend.
 
 **Criterios de aceptación**
 
@@ -136,11 +139,11 @@ Los servicios leen el documento una vez por petición y pasan el objeto de pará
 - [x] Cambiar la penalización alta de 35 a 50 baja de 65 a 50 el índice almacenado de una ruta con un factor alto.
 - [x] Un cambio que no afecta al índice responde `recalculated: 0` y no toca las rutas.
 - [x] `POST /admin/recalculate-routes` (`settings.manage`) recalcula todas las rutas con los parámetros vigentes y responde `{"recalculated": n}`.
-- [ ] El panel muestra el resultado de «Recalcular rutas» (T3).
+- [x] El panel ofrece «Recalcular rutas» y avisa cuántas se recalcularon (con los valores ya guardados).
 
-**Implementación:** `backend/apps/system_settings/application/use_cases.py`, `backend/apps/routes/application/use_cases.py` (`recalculate_all_routes`)
+**Implementación:** `backend/apps/system_settings/application/use_cases.py`, `backend/apps/routes/application/use_cases.py` (`recalculate_all_routes`), `frontend/src/app/admin/settings/presentation/settings.page.ts`
 
-**Pruebas:** `backend/tests/test_system_settings_use_cases.py`, `backend/tests/test_system_settings_api.py`
+**Pruebas:** `backend/tests/test_system_settings_use_cases.py`, `backend/tests/test_system_settings_api.py`, `frontend/src/app/admin/settings/presentation/settings.page.spec.ts`
 
 ## Dependencias
 

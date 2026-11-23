@@ -8,6 +8,7 @@ export const PERMISSIONS = [
   'reports.validate',
   'ads.manage',
   'clubs.manage',
+  'settings.manage',
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];

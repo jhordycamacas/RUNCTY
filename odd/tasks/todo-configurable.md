@@ -44,8 +44,17 @@ frontend and `firestore.rules`).
       penalty change recalculates the stored index (65 -> 50 with `penaltyHigh` 35 -> 50). Domain
       tests observed RED (import error) first; the rest were written after the code and passed.
       Route: single writer (delegated).
-- [ ] T3 Admin "Configuración" section (permission `settings.manage` in backend, frontend and
+- [x] T3 Admin "Configuración" section (permission `settings.manage` in backend, frontend and
       functions; parameters form with validation and a "recalcular rutas" result)
+      Evidence: frontend section `admin/settings` (domain, store, HTTP repository, fake, page) at
+      `/admin/configuracion`; permission added to the catalog, its Spanish label and the role
+      editor (group "Sistema"); 7 panels / 26 fields, live levels read-out, one save sending only
+      the changed keys, reset with confirmation, field errors from `fields` plus client bounds,
+      toast with the recalculated count, "Recalcular rutas". Admin + core specs 423 passed in 54
+      files (39 of them new, in settings and `admin-sections.spec.ts`), both tsc clean, `ng lint`
+      clean. Specs were written together with the code (RED not observed separately). The HTTP
+      spec uses `HttpTestingController`. Legacy `functions/` untouched (not part of this task).
+      Route: single writer (delegated).
 - [ ] T4 Sport profile catalog (levels, goals) managed by the admin + runner/profile forms read it
 - [ ] T5 Remove every leftover duplicate list (frontend constants, firestore.rules `in [...]`),
       specs, README, CONTEXTO, traceability; final grep proving nothing hardcoded remains outside
