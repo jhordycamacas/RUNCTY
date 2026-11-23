@@ -1,11 +1,11 @@
 # EP-01 — Gestión de usuarios
 
-> Spec de capacidad · Debe tener · **1/9 Hecha, 8 Parcial, 0 Pendiente**
+> Spec de capacidad · Debe tener · **1/10 Hecha, 9 Parcial, 0 Pendiente**
 
 | Campo | Valor |
 | --- | --- |
 | Épica | EP-01 · Gestión de usuarios |
-| Requisitos | RF-01-1, RF-01-2, RF-01-3, RF-01-4, RF-01-9, RF-01-10, RF-01-11, RF-01-12 (8 sub-requisitos) más la extensión EXT-01-1 (foto de perfil, pedida por el dueño el 2026-11-22; no está en el Excel) |
+| Requisitos | RF-01-1, RF-01-2, RF-01-3, RF-01-4, RF-01-9, RF-01-10, RF-01-11, RF-01-12 (8 sub-requisitos) más las extensiones EXT-01-1 (foto de perfil) y EXT-01-2 (ficha del usuario para el administrador), pedidas por el dueño el 2026-11-22; no están en el Excel |
 | Requisito de usuario (UR) | UR-01 |
 | RNF | RNF-01, RNF-02, RNF-08, RNF-18 (transversales: RNF-10, RNF-11, RNF-21, RNF-23) |
 | Prioridad | Debe tener |
@@ -29,7 +29,7 @@ Entradas, proceso y salidas del requisito padre en el Excel (RF-01):
 **Incluye**
 
 - Registro de una cuenta con datos personales y consentimiento LOPDP (RF-01-1).
-- Consulta de usuarios por el administrador con filtros (RF-01-2).
+- Consulta de usuarios por el administrador con una sola barra de búsqueda (RF-01-2) y su ficha con perfil personal, perfil deportivo y valoración (EXT-01-2).
 - Actualización de los datos personales propios y eliminación de la cuenta propia (RF-01-3, RF-01-4).
 - Perfil deportivo del corredor: crear, consultar, actualizar y eliminar (RF-01-9 a RF-01-12).
 - Foto de perfil propia: poner, cambiar y quitar (EXT-01-1).
@@ -97,6 +97,7 @@ Códigos de error propios: `profile-exists` (409), `profile-not-found`, `sport-p
 | [RF-01-11](#rf-01-11--actualizar-perfil-deportivo) | Actualizar perfil deportivo | Corredor | Sprint 1 · Semana 5 | Parcial |
 | [RF-01-12](#rf-01-12--eliminar-perfil-deportivo) | Eliminar perfil deportivo | Corredor | Sprint 1 · Semana 5 | Parcial |
 | [EXT-01-1](#ext-01-1--foto-de-perfil) | Foto de perfil | Usuario | Fuera del plan (2026-11-22) | Parcial |
+| [EXT-01-2](#ext-01-2--ficha-del-usuario-para-el-administrador) | Ficha del usuario para el administrador | Administrador | Fuera del plan (2026-11-22) | Parcial |
 
 Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = implementada pero con criterios sin cumplir o sin verificar; `Pendiente` = sin implementar.
 
@@ -130,19 +131,19 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 ### RF-01-2 — Leer usuarios
 
-- **Historia de usuario:** Como administrador · Deseo consultar los datos de los usuarios autorizados. Para localizar información de usuarios mediante filtros concretos cuando tenga autorización para consultarla.
+- **Historia de usuario:** Como administrador · Deseo consultar los datos de los usuarios autorizados. Para localizar información de usuarios con una sola búsqueda (cédula, correo o nombre) cuando tenga autorización para consultarla.
 - **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** Sprint 1 · Semana 4 · **Dependencia:** N/A · **Caso de uso:** Consultar usuarios
-- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17). Specs `fe15884`; implementación: `83c9d18`, `b25af72`; backend `04e66b3`.
+- **Estado:** `Hecha` — Verificada en el navegador con el stack local (2026-11-17). Specs `fe15884`; implementación: `83c9d18`, `b25af72`; backend `04e66b3`. La búsqueda de un solo texto (2026-11-22) tiene pruebas automáticas (backend `3d7b464`); falta repetir la verificación en el navegador con ella.
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
-| Nombres (filtro); Apellidos (filtro); Correo electrónico (filtro); Fecha de nacimiento (filtro) | El sistema deberá permitir leer los datos de los usuarios, filtrándolos por nombres, apellidos, correo electrónico, identificación, fecha de nacimiento o ciudad de residencia. | Datos de «usuarios» (lista o detalle) o aviso de que no hay resultados. |
+| Texto de búsqueda: cédula, correo electrónico o nombre (Excel: nombres, apellidos, correo y fecha de nacimiento como filtros; el dueño pidió una sola barra el 2026-11-22) | El sistema deberá permitir leer los datos de los usuarios, buscándolos con un solo texto que puede ser su identificación, su correo electrónico o parte de su nombre. | Datos de «usuarios» (lista o detalle) o aviso de que no hay resultados. |
 
 **Criterios de aceptación**
 
 - [x] `/admin/usuarios` lista los usuarios con nombre, correo, ciudad y rol, con estados de carga, vacío y error con botón «Reintentar».
-- [x] Se puede filtrar por nombres, apellidos, correo, identificación, fecha de nacimiento y ciudad; solo se envían a la API los filtros con valor.
-- [x] Una identificación que no tiene 10 dígitos o una fecha que no es AAAA-MM-DD muestra un aviso en español y no envía nada a la API.
+- [x] Una sola barra «Buscar por cédula, correo o nombre» (Enter o «Buscar»; «Limpiar» vuelve a listar a todos) envía el texto como `q`; vacío lista a todos. Con una pista: «Escribe una cédula de 10 dígitos, un correo o parte del nombre.»
+- [x] Cada nombre de la lista es un enlace a la ficha `/admin/usuarios/:uid` (EXT-01-2).
 - [x] Si la API devuelve `nextCursor`, aparece «Cargar más» y añade la página siguiente; sin cursor no aparece. Un cursor inválido (`invalid-cursor`) muestra un mensaje y permite volver a buscar.
 - [x] La lista no muestra la identificación (minimización de datos): la API tampoco la devuelve.
 - [x] Cada usuario muestra el nombre de su rol (RF-02-2).
@@ -152,9 +153,9 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Backend (2026-11-22): `GET /users?q=` busca con un solo texto (identificación de 10 dígitos, correo con `@`, o prefijos de nombres, apellidos y correo sin tildes ni mayúsculas) y rechaza los filtros anteriores como parámetros desconocidos.
 - [x] Backend (2026-11-22): `GET /users/{uid}` entrega la ficha `{user, sportProfile, rating}` solo con `users.read` (un corredor recibe 403); `rating` es `null` hasta que existan las calificaciones de salidas grupales (`{average, count}`) y no incluye foto ni preferencias; una cuenta inexistente da 404 `user-not-found`.
 
-**Implementación:** `frontend/src/app/admin/users/presentation/users-admin.page.ts`, `frontend/src/app/admin/users/application/admin-users.store.ts`, `frontend/src/app/admin/users/domain/user-search.ts`, `frontend/src/app/admin/users/domain/managed-user.ts`, `frontend/src/app/admin/users/infrastructure/http-user-admin.repository.ts`, `backend/apps/users/presentation/views.py`
+**Implementación:** `frontend/src/app/admin/users/presentation/users-admin.page.ts`, `frontend/src/app/admin/users/application/admin-users.store.ts`, `frontend/src/app/admin/users/domain/managed-user.ts`, `frontend/src/app/admin/users/infrastructure/http-user-admin.repository.ts`, `backend/apps/users/presentation/views.py`
 
-**Pruebas:** `backend/tests/test_user_search.py`, `backend/tests/test_user_detail.py`, `frontend/src/app/admin/users/domain/user-search.spec.ts`, `frontend/src/app/admin/users/infrastructure/http-user-admin.repository.spec.ts`, `frontend/src/app/admin/users/application/admin-users.store.spec.ts`, `frontend/src/app/admin/users/presentation/users-admin.page.spec.ts`
+**Pruebas:** `backend/tests/test_user_search.py`, `backend/tests/test_user_detail.py`, `frontend/src/app/admin/users/infrastructure/http-user-admin.repository.spec.ts`, `frontend/src/app/admin/users/application/admin-users.store.spec.ts`, `frontend/src/app/admin/users/presentation/users-admin.page.spec.ts`
 
 ### RF-01-3 — Actualizar usuario
 
@@ -317,6 +318,30 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 **Implementación:** `frontend/src/app/account/presentation/profile-home.page.ts`, `frontend/src/app/account/application/profile-photo.store.ts`, `frontend/src/app/shared/images/resize-to-square-jpeg.ts`, `frontend/src/app/shared/ui/avatar.ts`, `backend/apps/users/domain/profile_photo.py`, `backend/apps/users/application/use_cases.py`, `backend/apps/users/infrastructure/firestore_private_documents.py`, `backend/apps/users/presentation/views.py`, `backend/apps/system_settings/domain/models.py`
 
 **Pruebas:** `frontend/src/app/account/presentation/profile-home.page.spec.ts`, `frontend/src/app/account/application/profile-photo.store.spec.ts`, `frontend/src/app/account/infrastructure/http-profile-photo.repository.spec.ts`, `frontend/src/app/shared/images/resize-to-square-jpeg.spec.ts`, `backend/tests/test_profile_photo_domain.py`, `backend/tests/test_profile_photo_use_cases.py`, `backend/tests/test_profile_photo_api.py`, `backend/tests/test_firestore_user_adapters.py`, `backend/tests/test_firestore_summary_source.py`, `backend/tests/test_system_settings_domain.py`
+
+### EXT-01-2 — Ficha del usuario para el administrador
+
+- **Historia de usuario:** Como administrador · Deseo abrir la ficha de un usuario y ver su perfil personal, su perfil deportivo y su valoración. Para conocer a un corredor antes de asignarle un rol o atender una consulta.
+- **Actor:** Administrador · **Prioridad:** Debe tener · **Sprint planificado:** fuera del plan (pedido del dueño, 2026-11-22) · **Dependencia:** RF-01-2; la valoración depende de [EP-22](22-companeros-para-correr.md) · **Caso de uso:** Consultar usuarios
+- **Estado:** `Parcial` — Pantalla y API hechas y con pruebas automáticas (backend `3d7b464`); la valoración sale vacía porque aún no existe su fuente (llega con las salidas grupales) y falta la verificación en un navegador. Seguimiento en `odd/tasks/usuarios-busqueda-ficha.md`.
+
+| Entrada | Proceso | Salida |
+| --- | --- | --- |
+| Identificador del usuario (enlace desde la lista) | El sistema deberá mostrar al administrador con `users.read` los datos personales, el perfil deportivo y la valoración promedio del usuario. | Ficha en tres paneles, o aviso de usuario inexistente o de error con «Reintentar». |
+
+**Criterios de aceptación**
+
+- [x] `/admin/usuarios/:uid` exige `users.read` (el mismo permiso de la lista) y su cabecera lleva el nombre completo y un botón para volver a la lista.
+- [x] «Perfil personal»: nombre, correo (con la etiqueta «Verificado» o «Sin verificar» solo si la API envía `emailVerified`), cédula, fecha de nacimiento con la edad, nombre de la ciudad, nombre del rol y fecha de registro si la API la envía.
+- [x] «Perfil deportivo»: nivel, objetivos, ritmo y distancia tal como los envía la API, con las etiquetas de los catálogos (un código que el catálogo ya no conoce se muestra tal cual); sin perfil dice «Este usuario aún no completó su perfil deportivo.»
+- [x] «Valoración»: cinco estrellas rellenas en proporción al promedio, con el texto alternativo «4,3 de 5 estrellas, 12 valoraciones»; sin valoraciones dice «Aún no tiene valoraciones.»
+- [x] Estados de carga, usuario inexistente («No encontramos a este usuario.») y error con «Reintentar»; se ve bien en celular y en escritorio y los enlaces y botones miden al menos 48 px.
+- [ ] La valoración llega de la API: pendiente de las calificaciones de las salidas grupales ([EP-22](22-companeros-para-correr.md)).
+- [ ] Verificado en un navegador contra el stack local.
+
+**Implementación:** `frontend/src/app/admin/users/presentation/user-detail.page.ts`, `frontend/src/app/admin/users/presentation/rating-stars.ts`, `frontend/src/app/admin/users/application/user-detail.store.ts`, `frontend/src/app/admin/users/domain/user-detail.ts`, `frontend/src/app/admin/users/domain/rating.ts`, `frontend/src/app/admin/users/infrastructure/http-user-admin.repository.ts`, `frontend/src/app/admin/users/users-admin.routes.ts`, `backend/apps/users/presentation/views.py`
+
+**Pruebas:** `frontend/src/app/admin/users/presentation/user-detail.page.spec.ts`, `frontend/src/app/admin/users/presentation/rating-stars.spec.ts`, `frontend/src/app/admin/users/application/user-detail.store.spec.ts`, `frontend/src/app/admin/users/domain/user-detail.spec.ts`, `frontend/src/app/admin/users/domain/rating.spec.ts`, `backend/tests/test_user_detail.py`
 
 ## Dependencias
 

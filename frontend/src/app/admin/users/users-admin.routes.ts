@@ -3,10 +3,14 @@ import { AdminRolesStore } from '../roles/application/admin-roles.store';
 import { RoleAdminRepository } from '../roles/domain/role';
 import { HttpRoleAdminRepository } from '../roles/infrastructure/http-role-admin.repository';
 import { AdminUsersStore } from './application/admin-users.store';
+import { UserDetailStore } from './application/user-detail.store';
 import { UserAdminRepository } from './domain/managed-user';
 import { HttpUserAdminRepository } from './infrastructure/http-user-admin.repository';
 
-/** The `usuarios` admin section (RF-01-2, RF-02-3): the user search and the role assignment. */
+/**
+ * The `usuarios` admin section (RF-01-2, RF-02-3): the user search with the role assignment and
+ * the detail of one user. Both need `users.read`, which the section guard already checks.
+ */
 export const USERS_ADMIN_ROUTES: Routes = [
   {
     path: '',
@@ -15,8 +19,19 @@ export const USERS_ADMIN_ROUTES: Routes = [
       { provide: RoleAdminRepository, useClass: HttpRoleAdminRepository },
       AdminUsersStore,
       AdminRolesStore,
+      UserDetailStore,
     ],
-    loadComponent: () =>
-      import('./presentation/users-admin.page').then((m) => m.UsersAdminPage),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./presentation/users-admin.page').then((m) => m.UsersAdminPage),
+      },
+      {
+        path: ':uid',
+        loadComponent: () =>
+          import('./presentation/user-detail.page').then((m) => m.UserDetailPage),
+      },
+    ],
   },
 ];

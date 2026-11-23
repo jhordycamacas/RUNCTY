@@ -24,38 +24,38 @@ describe('AdminUsersStore', () => {
   it('has no users until the first page arrives', async () => {
     expect(store.users()).toBeNull();
 
-    await store.search({});
+    await store.search('');
 
     expect(store.users()?.map((u) => u.uid)).toEqual(['a', 'b']);
     expect(store.hasMore()).toBe(true);
-    expect(repository.search).toHaveBeenCalledWith({}, null);
+    expect(repository.search).toHaveBeenCalledWith('', null);
   });
 
-  it('searches with the filters and starts over from the first page', async () => {
-    await store.search({});
+  it('searches with the text and starts over from the first page', async () => {
+    await store.search('');
 
     repository.search.mockResolvedValue({ users: [user('c')], nextCursor: null });
-    await store.search({ firstName: 'Ana' });
+    await store.search('Ana');
 
-    expect(repository.search).toHaveBeenLastCalledWith({ firstName: 'Ana' }, null);
+    expect(repository.search).toHaveBeenLastCalledWith('Ana', null);
     expect(store.users()?.map((u) => u.uid)).toEqual(['c']);
     expect(store.hasMore()).toBe(false);
   });
 
-  it('appends the next page with the cursor and the same filters', async () => {
-    await store.search({ cityId: 'loja' });
+  it('appends the next page with the cursor and the same text', async () => {
+    await store.search('loja');
     repository.search.mockResolvedValue({ users: [user('c')], nextCursor: null });
 
     await store.loadMore();
 
-    expect(repository.search).toHaveBeenLastCalledWith({ cityId: 'loja' }, 'b');
+    expect(repository.search).toHaveBeenLastCalledWith('loja', 'b');
     expect(store.users()?.map((u) => u.uid)).toEqual(['a', 'b', 'c']);
     expect(store.hasMore()).toBe(false);
   });
 
   it('does nothing when there is no next page', async () => {
     repository.search.mockResolvedValue({ users: [user('a')], nextCursor: null });
-    await store.search({});
+    await store.search('');
 
     await store.loadMore();
 
@@ -63,7 +63,7 @@ describe('AdminUsersStore', () => {
   });
 
   it('keeps the users and reports the failure of a search', async () => {
-    await store.search({});
+    await store.search('');
     repository.search.mockRejectedValueOnce(new ApiError(0, 'network', 'Sin conexión.'));
 
     await store.reload();
@@ -74,7 +74,7 @@ describe('AdminUsersStore', () => {
   });
 
   it('drops the cursor when the API rejects it, so the user searches again', async () => {
-    await store.search({});
+    await store.search('');
     repository.search.mockRejectedValueOnce(
       new ApiError(400, 'invalid-cursor', 'No se pudo cargar la página siguiente. Vuelve a buscar.'),
     );
@@ -87,7 +87,7 @@ describe('AdminUsersStore', () => {
   });
 
   it('keeps the cursor when the next page fails for another reason', async () => {
-    await store.search({});
+    await store.search('');
     repository.search.mockRejectedValueOnce(new ApiError(0, 'network', 'Sin conexión.'));
 
     await store.loadMore();
@@ -96,20 +96,20 @@ describe('AdminUsersStore', () => {
     expect(store.error()).toBe('Sin conexión.');
   });
 
-  it('reloads the first page with the current filters', async () => {
-    await store.search({ email: 'a@b.c' });
+  it('reloads the first page with the current text', async () => {
+    await store.search('a@b.c');
 
     await store.reload();
 
-    expect(repository.search).toHaveBeenLastCalledWith({ email: 'a@b.c' }, null);
+    expect(repository.search).toHaveBeenLastCalledWith('a@b.c', null);
   });
 
   it('keeps only the answer of the latest search', async () => {
     let finishSlow: (page: { users: ReturnType<typeof user>[]; nextCursor: null }) => void = () => undefined;
     repository.search.mockReturnValueOnce(new Promise((resolve) => (finishSlow = resolve)));
-    const slow = store.search({ firstName: 'x' });
+    const slow = store.search('x');
     repository.search.mockResolvedValueOnce({ users: [user('fast')], nextCursor: null });
-    await store.search({ firstName: 'y' });
+    await store.search('y');
 
     finishSlow({ users: [user('slow')], nextCursor: null });
     await slow;
@@ -118,7 +118,7 @@ describe('AdminUsersStore', () => {
   });
 
   it('updates the role of a listed user', async () => {
-    await store.search({});
+    await store.search('');
 
     store.setRole('a', 'admin');
 

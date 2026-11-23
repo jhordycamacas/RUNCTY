@@ -15,7 +15,7 @@ describe('HttpUserAdminRepository', () => {
     repository = TestBed.inject(HttpUserAdminRepository);
   });
 
-  it('searches with the filters and the cursor, and maps the page', async () => {
+  it('searches with the text and the cursor, and maps the page', async () => {
     api.get.mockReturnValue(
       of({
         users: [
@@ -34,9 +34,9 @@ describe('HttpUserAdminRepository', () => {
       }),
     );
 
-    const page = await repository.search({ firstName: 'Ana' }, 'u0');
+    const page = await repository.search('  Ana ', 'u0');
 
-    expect(api.get).toHaveBeenCalledWith('/users', { firstName: 'Ana', cursor: 'u0' });
+    expect(api.get).toHaveBeenCalledWith('/users', { q: 'Ana', cursor: 'u0' });
     expect(page.nextCursor).toBe('u2');
     expect(page.users).toEqual([
       {
@@ -52,12 +52,29 @@ describe('HttpUserAdminRepository', () => {
     ]);
   });
 
-  it('sends no cursor on the first page and tolerates a body without users', async () => {
+  it('sends neither text nor cursor on the first page and tolerates a body without users', async () => {
     api.get.mockReturnValue(of({}));
 
-    const page = await repository.search({}, null);
+    const page = await repository.search('   ', null);
 
     expect(api.get).toHaveBeenCalledWith('/users', {});
     expect(page).toEqual({ users: [], nextCursor: null });
+  });
+
+  it('reads the detail of one user', async () => {
+    api.get.mockReturnValue(
+      of({
+        user: { uid: 'u1', email: 'ana@mail.com', idNumber: '1710034065', emailVerified: false },
+        sportProfile: null,
+        rating: { average: 4, count: 3 },
+      }),
+    );
+
+    const detail = await repository.get('u 1');
+
+    expect(api.get).toHaveBeenCalledWith('/users/u%201');
+    expect(detail.user).toMatchObject({ uid: 'u1', idNumber: '1710034065', emailVerified: false });
+    expect(detail.sportProfile).toBeNull();
+    expect(detail.rating).toEqual({ average: 4, count: 3 });
   });
 });

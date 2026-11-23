@@ -1,3 +1,5 @@
+import { UserDetail } from './user-detail';
+
 /** A user as the admin list shows it; the API leaves the id number out (data minimization). */
 export interface ManagedUser {
   uid: string;
@@ -16,10 +18,11 @@ export interface UserPage {
   nextCursor: string | null;
 }
 
-export type UserFilters = Readonly<Record<string, string>>;
-
 export abstract class UserAdminRepository {
-  abstract search(filters: UserFilters, cursor: string | null): Promise<UserPage>;
+  /** `query` is one free text: a cédula, an email or part of a name; empty lists everyone. */
+  abstract search(query: string, cursor: string | null): Promise<UserPage>;
+  /** The user with their sport profile and rating; rejects with `user-not-found` (404). */
+  abstract get(uid: string): Promise<UserDetail>;
 }
 
 const text = (value: unknown): string => (typeof value === 'string' ? value : '');

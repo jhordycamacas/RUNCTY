@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { CitiesStore } from '../../../cities/application/cities.store';
 import { CityRepository } from '../../../cities/domain/city';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -55,7 +56,9 @@ describe('UsersAdminPage', () => {
     root().querySelector('form')?.dispatchEvent(new Event('submit'));
     await settle(fixture);
   };
-  const form = () => fixture.componentInstance['form'];
+  const searchInput = () => root().querySelector('ion-input[type="search"]') as HTMLElement;
+  const type = (value: string) =>
+    searchInput().dispatchEvent(new CustomEvent('ionInput', { detail: { value } }));
 
   async function create(): Promise<void> {
     fixture = TestBed.createComponent(UsersAdminPage);
@@ -82,6 +85,7 @@ describe('UsersAdminPage', () => {
     success = vi.fn<ToastService['success']>().mockResolvedValue(undefined);
     TestBed.configureTestingModule({
       providers: [
+        provideRouter([]),
         AdminUsersStore,
         AdminRolesStore,
         CitiesStore,
@@ -144,38 +148,65 @@ describe('UsersAdminPage', () => {
     expect(text()).toContain('No hay usuarios que coincidan con la búsqueda.');
   });
 
-  it('searches with only the filters that have a value', async () => {
+  it('has one search box and nothing else to filter by', async () => {
     await create();
-    form().patchValue({ firstName: ' Ana ', cityId: 'loja' });
+
+    expect(root().querySelectorAll('ion-input')).toHaveLength(1);
+    expect(searchInput().getAttribute('label')).toBe('Buscar por cédula, correo o nombre');
+    expect(root().querySelector('app-text-field, app-select-field')).toBeNull();
+    expect(text()).toContain('Escribe una cédula de 10 dígitos, un correo o parte del nombre.');
+  });
+
+  it('lists everyone the first time', async () => {
+    await create();
+
+    expect(users.search).toHaveBeenCalledWith('', null);
+  });
+
+  it('searches with the trimmed text when the form is submitted (Enter or the button)', async () => {
+    await create();
+    type('  Ana ');
 
     await submit();
 
-    expect(users.search).toHaveBeenLastCalledWith({ firstName: 'Ana', cityId: 'loja' }, null);
+    expect(users.search).toHaveBeenLastCalledWith('Ana', null);
+    expect(button('Buscar')).toBeDefined();
   });
 
-  it('shows the field message and sends nothing for an invalid filter', async () => {
+  it('searches by a cédula or an email as plain text', async () => {
     await create();
-    users.search.mockClear();
-    form().patchValue({ idNumber: '123', birthDate: '23/04/1995' });
 
+    type('1710034065');
     await submit();
+    expect(users.search).toHaveBeenLastCalledWith('1710034065', null);
 
-    expect(users.search).not.toHaveBeenCalled();
-    expect(root().querySelector('.filter-error')?.textContent).toContain(
-      'La identificación debe tener 10 dígitos.',
-    );
-    expect(root().querySelector('.filter-error')?.textContent).toContain('AAAA-MM-DD');
+    type('ana@mail.com');
+    await submit();
+    expect(users.search).toHaveBeenLastCalledWith('ana@mail.com', null);
   });
 
-  it('clears the filters and lists everyone again', async () => {
+  it('clears the text and lists everyone again', async () => {
     await create();
-    form().patchValue({ firstName: 'Ana' });
+    type('Ana');
     await submit();
 
     await press(button('Limpiar'));
 
-    expect(form().getRawValue().firstName).toBe('');
-    expect(users.search).toHaveBeenLastCalledWith({}, null);
+    expect((searchInput() as unknown as { value: string }).value).toBe('');
+    expect(users.search).toHaveBeenLastCalledWith('', null);
+    await submit();
+    expect(users.search).toHaveBeenLastCalledWith('', null);
+  });
+
+  it('links every name to the detail of the user', async () => {
+    await create();
+
+    const link = root().querySelector('a.user-name') as HTMLAnchorElement;
+    expect(link.textContent?.trim()).toBe('Ana Pérez');
+    expect(link.getAttribute('href')).toBe('/admin/usuarios/ana');
+    expect(
+      [...root().querySelectorAll('a.user-name')].map((el) => el.getAttribute('href')),
+    ).toEqual(['/admin/usuarios/ana', '/admin/usuarios/luis', '/admin/usuarios/nora']);
   });
 
   it('offers more users when there is a next page, and appends them', async () => {
@@ -186,7 +217,7 @@ describe('UsersAdminPage', () => {
     users.search.mockResolvedValueOnce({ users: [user('zoe', { firstName: 'Zoe' })], nextCursor: null });
     await press(button('Cargar más'));
 
-    expect(users.search).toHaveBeenLastCalledWith({}, 'nora');
+    expect(users.search).toHaveBeenLastCalledWith('', 'nora');
     expect(names()).toHaveLength(4);
     expect(button('Cargar más')).toBeUndefined();
   });
@@ -269,7 +300,6 @@ describe('UsersAdminPage', () => {
     expect(root().querySelector('select.role-select')?.getAttribute('aria-label')).toBe(
       'Rol de Ana Pérez',
     );
-    expect(root().querySelector('app-select-field label')?.textContent).toContain('Ciudad');
-    expect(root().querySelectorAll('app-text-field')).toHaveLength(5);
+    expect(searchInput().getAttribute('label')).toBeTruthy();
   });
 });

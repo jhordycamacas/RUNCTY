@@ -1,9 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { ApiError } from '../../../core/errors/api-error';
 import { userMessage } from '../../../core/errors/user-message';
-import { ManagedUser, UserAdminRepository, UserFilters } from '../domain/managed-user';
+import { ManagedUser, UserAdminRepository } from '../domain/managed-user';
 
-/** The admin user search (RF-01-2): the filters, the pages read so far and the cursor of the next. */
+/** The admin user search (RF-01-2): the search text, the pages read so far and the cursor of the next. */
 @Injectable()
 export class AdminUsersStore {
   private readonly repository = inject(UserAdminRepository);
@@ -13,7 +13,7 @@ export class AdminUsersStore {
   private readonly failure = signal<string | null>(null);
   private readonly pending = signal(false);
   private readonly pendingMore = signal(false);
-  private filters: UserFilters = {};
+  private query = '';
   /** Only the answer of the latest search is kept. */
   private request = 0;
 
@@ -25,18 +25,18 @@ export class AdminUsersStore {
   readonly hasMore = computed(() => this.cursor() !== null);
 
   /** A new search: it starts over from the first page. */
-  search(filters: UserFilters): Promise<void> {
-    this.filters = filters;
+  search(query: string): Promise<void> {
+    this.query = query.trim();
     return this.reload();
   }
 
-  /** Reads the first page of the current filters; the list on screen stays while it loads. */
+  /** Reads the first page of the current search; the list on screen stays while it loads. */
   async reload(): Promise<void> {
     const request = ++this.request;
     this.pending.set(true);
     this.failure.set(null);
     try {
-      const page = await this.repository.search(this.filters, null);
+      const page = await this.repository.search(this.query, null);
       if (request !== this.request) return;
       this.list.set(page.users);
       this.cursor.set(page.nextCursor);
@@ -55,7 +55,7 @@ export class AdminUsersStore {
     this.pendingMore.set(true);
     this.failure.set(null);
     try {
-      const page = await this.repository.search(this.filters, cursor);
+      const page = await this.repository.search(this.query, cursor);
       if (request !== this.request) return;
       this.list.update((users) => [...(users ?? []), ...page.users]);
       this.cursor.set(page.nextCursor);

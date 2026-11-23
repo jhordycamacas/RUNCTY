@@ -1,27 +1,19 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import {
-  IonButton,
-  IonContent,
-  IonSpinner,
-  ViewWillEnter,
-} from '@ionic/angular';
+import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { IonButton, IonContent, IonInput, IonSpinner, ViewWillEnter } from '@ionic/angular';
 import { CitiesStore } from '../../../cities/application/cities.store';
 import { AuthService } from '../../../core/auth/auth.service';
-import { formValues } from '../../../shared/forms/form-values';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog';
 import { Notice } from '../../../shared/ui/notice';
-import { SelectField, SelectOption } from '../../../shared/ui/select-field';
-import { TextField } from '../../../shared/ui/text-field';
+import { SelectOption } from '../../../shared/ui/select-field';
 import { ToastService } from '../../../shared/ui/toast.service';
 import { AdminRolesStore } from '../../roles/application/admin-roles.store';
 import { AdminUsersStore } from '../application/admin-users.store';
 import { ManagedUser, fullName } from '../domain/managed-user';
-import { parseUserSearch } from '../domain/user-search';
 import { AdminHeader } from '../../admin-header';
 
 /**
- * RF-01-2 and RF-02-3: the search of the users (filters and pages) and the assignment of their
+ * RF-01-2 and RF-02-3: the search of the users (one text box and pages) and the assignment of their
  * role. Only an admin with `roles.manage` gets the role picker; the rest read the role.
  */
 @Component({
@@ -30,44 +22,28 @@ import { AdminHeader } from '../../admin-header';
     AdminHeader,
     IonButton,
     IonContent,
+    IonInput,
     IonSpinner,
     Notice,
-    ReactiveFormsModule,
-    SelectField,
-    TextField,
+    RouterLink,
   ],
   template: `
     <app-admin-header title="Usuarios" />
     <ion-content class="ion-padding">
-      <form class="filters" [formGroup]="form" (ngSubmit)="search()" novalidate>
-        <app-text-field formControlName="firstName" label="Nombres" [maxlength]="120" />
-        <app-text-field formControlName="lastName" label="Apellidos" [maxlength]="120" />
-        <app-text-field
-          formControlName="email"
-          label="Correo electrónico"
-          inputmode="email"
+      <form class="filters" (submit)="$event.preventDefault(); search()">
+        <ion-input
+          label="Buscar por cédula, correo o nombre"
+          labelPlacement="floating"
+          fill="outline"
+          type="search"
+          inputmode="search"
+          enterkeyhint="search"
+          autocomplete="off"
+          helperText="Escribe una cédula de 10 dígitos, un correo o parte del nombre."
           [maxlength]="120"
+          [value]="query()"
+          (ionInput)="query.set($event.detail.value ?? '')"
         />
-        <app-text-field
-          formControlName="idNumber"
-          label="Identificación"
-          inputmode="numeric"
-          [maxlength]="10"
-        />
-        <app-text-field
-          formControlName="birthDate"
-          label="Fecha de nacimiento"
-          placeholder="AAAA-MM-DD"
-          inputmode="numeric"
-          [maxlength]="10"
-        />
-        <app-select-field
-          formControlName="cityId"
-          label="Ciudad"
-          placeholder="Todas las ciudades"
-          [options]="cityOptions()"
-        />
-        <app-notice class="filter-error" [message]="filterError()" />
         <div class="buttons">
           <ion-button type="submit">Buscar</ion-button>
           <ion-button fill="outline" (click)="clear()">Limpiar</ion-button>
@@ -91,7 +67,11 @@ import { AdminHeader } from '../../admin-header';
             @for (user of users; track user.uid) {
               <li class="user">
                 <div class="summary">
-                  <h2 class="user-name">{{ name(user) }}</h2>
+                  <h2>
+                    <a class="user-name" [routerLink]="['/admin/usuarios', user.uid]">{{
+                      name(user)
+                    }}</a>
+                  </h2>
                   <p class="meta">
                     <span>{{ user.email }}</span>
                     <span>{{ cityName(user.cityId) }}</span>
@@ -139,19 +119,13 @@ import { AdminHeader } from '../../admin-header';
   `,
   styles: `
     .filters {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-      align-items: start;
+      display: flex;
+      flex-direction: column;
       gap: var(--rc-space-md);
       margin-bottom: var(--rc-space-lg);
     }
 
-    .filter-error {
-      grid-column: 1 / -1;
-    }
-
     .buttons {
-      grid-column: 1 / -1;
       display: flex;
       flex-wrap: wrap;
       gap: var(--rc-space-sm);
@@ -202,6 +176,12 @@ import { AdminHeader } from '../../admin-header';
       overflow-wrap: anywhere;
     }
 
+    .user-name {
+      display: inline-flex;
+      align-items: center;
+      min-height: var(--rc-min-touch-target);
+    }
+
     .meta {
       display: flex;
       flex-wrap: wrap;
@@ -247,25 +227,8 @@ export class UsersAdminPage implements ViewWillEnter {
   /** Assigning roles needs `roles.manage`; the search itself only needs `users.read`. */
   protected readonly canAssign = inject(AuthService).can('roles.manage');
 
-  protected readonly form = new FormGroup({
-    firstName: new FormControl('', { nonNullable: true }),
-    lastName: new FormControl('', { nonNullable: true }),
-    email: new FormControl('', { nonNullable: true }),
-    idNumber: new FormControl('', { nonNullable: true }),
-    birthDate: new FormControl('', { nonNullable: true }),
-    cityId: new FormControl('', { nonNullable: true }),
-  });
-  private readonly values = formValues(this.form);
-  private readonly submitted = signal(false);
-  private readonly errors = computed(() => parseUserSearch(this.values()).errors ?? {});
-
-  protected readonly cityOptions = computed<SelectOption[]>(() =>
-    (this.cities.cities() ?? []).map((city) => ({ value: city.id, label: city.name })),
-  );
-  /** Both format messages in one alert: a notice is announced, and it needs no field plumbing. */
-  protected readonly filterError = computed(() =>
-    this.submitted() ? Object.values(this.errors()).join(' ') || null : null,
-  );
+  /** One text for the cédula, the email or the name. */
+  protected readonly query = signal('');
 
   /** Every time the list shows again, it asks the API again; the roles name the assignments. */
   ionViewWillEnter(): void {
@@ -292,15 +255,12 @@ export class UsersAdminPage implements ViewWillEnter {
   }
 
   protected async search(): Promise<void> {
-    this.submitted.set(true);
-    const { filters } = parseUserSearch(this.form.getRawValue());
-    if (filters) await this.store.search(filters);
+    await this.store.search(this.query());
   }
 
   protected async clear(): Promise<void> {
-    this.form.reset();
-    this.submitted.set(false);
-    await this.store.search({});
+    this.query.set('');
+    await this.store.search('');
   }
 
   protected async changeRole(user: ManagedUser, event: Event): Promise<void> {
