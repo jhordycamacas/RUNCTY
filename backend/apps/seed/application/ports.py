@@ -9,6 +9,10 @@ class SeedAccounts(Protocol):
         """The uid of the account with `email`; created, verified, when it does not exist."""
         ...
 
+    def set_password(self, email: str, password: str) -> str | None:
+        """Sets the password of the account with `email`; its uid, or None when there is none."""
+        ...
+
     def save_admin_profile(self, uid: str, profile: Mapping[str, object]) -> None:
         """Merges `profile` into `users/{uid}`; the creation timestamp is set only once."""
         ...

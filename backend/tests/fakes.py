@@ -127,6 +127,7 @@ class FakeFirebase:
     def reset(self) -> None:
         self.claims: dict[str, dict | None] = {}  # Auth accounts by uid
         self.emails: dict[str, str] = {}  # uid of the accounts created by email (the seed)
+        self.passwords: dict[str, str] = {}  # passwords set by uid after the account was created
         self.users: dict[str, dict] = {}  # `users/{uid}` documents
         self.private: dict[tuple[str, str], dict] = {}  # `users/{uid}/private/{id}` documents
         self.roles: dict[str, Rol] = {}
@@ -209,6 +210,12 @@ class InMemorySeedAccounts:
             emails[email] = f"seed-uid-{len(emails) + 1}"
             self._firebase.claims[emails[email]] = None
         return emails[email]
+
+    def set_password(self, email: str, password: str) -> str | None:
+        uid = self._firebase.emails.get(email)
+        if uid is not None:
+            self._firebase.passwords[uid] = password
+        return uid
 
     def save_admin_profile(self, uid: str, profile: dict) -> None:
         self._firebase.users.setdefault(uid, {}).update(profile)

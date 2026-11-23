@@ -19,6 +19,14 @@ class FirebaseSeedAccounts:
             )
             return created.uid
 
+    def set_password(self, email: str, password: str) -> str | None:
+        try:
+            uid = auth_client().get_user_by_email(email).uid
+        except auth.UserNotFoundError:
+            return None
+        auth_client().update_user(uid, password=password)
+        return uid
+
     def save_admin_profile(self, uid: str, profile: Mapping[str, object]) -> None:
         document = firestore_client().collection(USERS).document(uid)
         created = {} if document.get().exists else {"createdAt": SERVER_TIMESTAMP}
