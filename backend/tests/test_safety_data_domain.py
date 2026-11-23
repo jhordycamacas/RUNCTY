@@ -18,6 +18,7 @@ def incident(**changes) -> IncidenteSeguridad:
         "route_id": "r1",
         "segment_id": "s1",
         "type": "robbery",
+        "severity": "high",
         "date": "2026-11-01",
         "time": "20:30",
         "source_id": "src",
@@ -27,7 +28,13 @@ def incident(**changes) -> IncidenteSeguridad:
 
 
 def test_an_incident_can_be_earlier_today_but_not_later():
-    raw = {"routeId": "r1", "type": "other", "date": "2026-11-22", "sourceId": "s"}
+    raw = {
+        "routeId": "r1",
+        "type": "Otro",
+        "severity": "low",
+        "date": "2026-11-22",
+        "sourceId": "s",
+    }
 
     assert IncidenteSeguridad.parse({**raw, "time": "18:30"}, "i1", NOW).segment_id is None
     with pytest.raises(DomainError) as error:
@@ -35,18 +42,9 @@ def test_an_incident_can_be_earlier_today_but_not_later():
     assert error.value.reason == "incident-in-future"
 
 
-@pytest.mark.parametrize(
-    ("incident_type", "severity"),
-    [
-        ("robbery", "high"),
-        ("assault", "high"),
-        ("harassment", "medium"),
-        ("traffic_accident", "low"),
-        ("other", "low"),
-    ],
-)
-def test_the_penalty_severity_depends_on_the_type(incident_type, severity):
-    assert incident(type=incident_type).penalty().severity == severity
+@pytest.mark.parametrize("severity", ["low", "medium", "high"])
+def test_the_penalty_severity_is_the_one_chosen_for_the_incident(severity):
+    assert incident(type="Hurto", severity=severity).penalty().severity == severity
 
 
 def test_the_penalty_covers_one_hour_around_the_incident():
@@ -85,7 +83,20 @@ def test_a_segment_gets_its_incidents_and_those_of_the_whole_route():
 
 def test_a_malformed_stored_incident_is_skipped():
     assert IncidenteSeguridad.from_document("i1", {"type": "robbery", "date": "x"}) is None
+    assert IncidenteSeguridad.from_document("i1", {"date": "2026-01-01", "time": "07:00"}) is None
     stored = IncidenteSeguridad.from_document(
-        "i1", {"type": "other", "date": "2026-01-01", "time": "07:00", "routeId": "r1"}
+        "i1", {"type": "Otro", "date": "2026-01-01", "time": "07:00", "routeId": "r1"}
     )
     assert stored is not None and stored.segment_id is None and stored.date == "2026-01-01"
+
+
+def test_a_stored_incident_keeps_its_text_and_defaults_a_missing_severity_to_medium():
+    base = {"date": "2026-01-01", "time": "07:00", "routeId": "r1"}
+
+    legacy = IncidenteSeguridad.from_document("i1", {**base, "type": "fire"})
+    chosen = IncidenteSeguridad.from_document("i2", {**base, "type": "Robo", "severity": "high"})
+    unknown = IncidenteSeguridad.from_document("i3", {**base, "type": "Robo", "severity": "x"})
+
+    assert legacy is not None and (legacy.type, legacy.severity) == ("fire", "medium")
+    assert chosen is not None and (chosen.type, chosen.severity) == ("Robo", "high")
+    assert unknown is not None and unknown.severity == "medium"

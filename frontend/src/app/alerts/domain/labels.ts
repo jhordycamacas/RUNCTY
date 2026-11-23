@@ -1,27 +1,10 @@
 import { AlertSeverity, RiskZoneAlert } from './risk-zone-alert';
 
-const ALERT_TYPE_LABELS: Record<string, string> = {
-  robbery: 'Robos reportados',
-  assault: 'Asaltos reportados',
-  harassment: 'Acoso',
-  poor_lighting: 'Iluminación deficiente',
-  roadworks: 'Obras en la vía',
-  flooding: 'Inundación',
-  traffic: 'Tráfico intenso',
-};
-
 export const ALERT_SEVERITY_LABELS: Record<AlertSeverity, string> = {
   alta: 'Riesgo alto',
   media: 'Riesgo medio',
   baja: 'Riesgo bajo',
 };
-
-/** Kinds added later in the backend read as a generic risk zone. */
-export function alertTypeLabel(type: string): string {
-  return Object.prototype.hasOwnProperty.call(ALERT_TYPE_LABELS, type)
-    ? ALERT_TYPE_LABELS[type]
-    : 'Zona de riesgo';
-}
 
 const DATE_FORMAT = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' });
 

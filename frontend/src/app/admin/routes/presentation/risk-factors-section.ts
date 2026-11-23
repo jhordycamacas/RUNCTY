@@ -11,7 +11,7 @@ import {
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { IonButton, IonSpinner } from '@ionic/angular';
 import { userMessage } from '../../../core/errors/user-message';
-import { SEVERITY_LABELS, factorTypeLabel } from '../../../routes/domain/labels';
+import { SEVERITY_LABELS } from '../../../routes/domain/labels';
 import { SEVERITIES } from '../../../routes/domain/route';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog';
@@ -19,9 +19,10 @@ import { DateTimeField } from '../../../shared/ui/date-time-field';
 import { Notice } from '../../../shared/ui/notice';
 import { SelectField, SelectOption } from '../../../shared/ui/select-field';
 import { TextareaField } from '../../../shared/ui/textarea-field';
+import { TextField } from '../../../shared/ui/text-field';
 import { ToastService } from '../../../shared/ui/toast.service';
 import { RouteDetailStore } from '../application/route-detail.store';
-import { ManagedSegment, RISK_FACTOR_TYPES, RiskFactor } from '../domain/managed-route';
+import { ManagedSegment, RiskFactor } from '../domain/managed-route';
 import {
   EMPTY_RISK_FACTOR_FORM,
   RiskFactorForm,
@@ -34,10 +35,6 @@ import { formatWindow } from '../domain/time-slot-form';
 /** What the form edits: a new factor or an existing one. */
 type Editing = { kind: 'new' } | { kind: 'edit'; factor: RiskFactor };
 
-const TYPE_OPTIONS: readonly SelectOption[] = RISK_FACTOR_TYPES.map((type) => ({
-  value: type,
-  label: factorTypeLabel(type),
-}));
 const SEVERITY_OPTIONS: readonly SelectOption[] = SEVERITIES.map((severity) => ({
   value: severity,
   label: SEVERITY_LABELS[severity],
@@ -60,6 +57,7 @@ let nextId = 0;
     Notice,
     SelectField,
     TextareaField,
+    TextField,
   ],
   template: `
     <div class="header">
@@ -85,11 +83,11 @@ let nextId = 0;
           {{ current.kind === 'new' ? 'Nuevo factor de riesgo' : 'Editar factor de riesgo' }}
         </h5>
         <div class="pair">
-          <app-select-field
+          <app-text-field
             formControlName="type"
             label="Tipo"
-            placeholder="Elige el tipo"
-            [options]="typeOptions"
+            placeholder="Iluminación deficiente"
+            [maxlength]="40"
             [error]="errorFor('type')"
           />
           <app-select-field
@@ -144,7 +142,7 @@ let nextId = 0;
           <li class="factor">
             <div class="summary">
               <p class="title">
-                <span class="type">{{ typeLabel(factor) }}</span>
+                <span class="type">{{ factor.type }}</span>
                 <span class="severity" [class]="factor.severity"
                   >Severidad {{ severityLabel(factor) }}</span
                 >
@@ -156,14 +154,14 @@ let nextId = 0;
               <ion-button
                 fill="outline"
                 [disabled]="editing() !== null"
-                [attr.aria-label]="'Editar factor ' + typeLabel(factor)"
+                [attr.aria-label]="'Editar factor ' + factor.type"
                 (click)="startEdit(factor)"
                 >Editar</ion-button
               >
               <ion-button
                 fill="clear"
                 color="danger"
-                [attr.aria-label]="'Eliminar factor ' + typeLabel(factor)"
+                [attr.aria-label]="'Eliminar factor ' + factor.type"
                 (click)="remove(factor)"
                 >Eliminar</ion-button
               >
@@ -285,7 +283,6 @@ export class RiskFactorsSection implements HasUnsavedChanges {
   readonly segment = input.required<ManagedSegment>();
 
   protected readonly id = `risk-factors-${nextId++}`;
-  protected readonly typeOptions = TYPE_OPTIONS;
   protected readonly severityOptions = SEVERITY_OPTIONS;
   protected readonly form = inject(FormBuilder).nonNullable.group<RiskFactorForm>({
     ...EMPTY_RISK_FACTOR_FORM,
@@ -295,10 +292,6 @@ export class RiskFactorsSection implements HasUnsavedChanges {
   private readonly submitted = signal(false);
   protected readonly saving = signal(false);
   protected readonly formError = signal<string | null>(null);
-
-  protected typeLabel(factor: RiskFactor): string {
-    return factorTypeLabel(factor.type);
-  }
 
   protected severityLabel(factor: RiskFactor): string {
     return SEVERITY_LABELS[factor.severity];
@@ -372,7 +365,7 @@ export class RiskFactorsSection implements HasUnsavedChanges {
   protected async remove(factor: RiskFactor): Promise<void> {
     const deleted = await this.dialog.confirmAction({
       header: 'Eliminar factor de riesgo',
-      message: `Se eliminará "${this.typeLabel(factor)}" de ${this.segment().name} y se recalculará la seguridad de la ruta. Esta acción no se puede deshacer.`,
+      message: `Se eliminará "${factor.type}" de ${this.segment().name} y se recalculará la seguridad de la ruta. Esta acción no se puede deshacer.`,
       confirmText: 'Eliminar',
       destructive: true,
       run: () => this.store.deleteRiskFactor(this.segment().id, factor.id),

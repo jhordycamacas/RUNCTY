@@ -48,16 +48,16 @@ describe('AlertsPage', () => {
   });
 
   it('lists the alerts with their kind, severity, place and schedule', async () => {
-    repo.alerts = [riskZoneAlert(), riskZoneAlert({ id: 'a2', type: 'new_kind', severity: 'baja' })];
+    repo.alerts = [riskZoneAlert(), riskZoneAlert({ id: 'a2', type: 'Obras en la vía', severity: 'baja' })];
 
     await create();
 
     expect(text()).toContain('2 alertas activas');
-    expect(text()).toContain('Robos reportados');
+    expect(text()).toContain('Robos frecuentes');
     expect(text()).toContain('Riesgo alto');
     expect(text()).toContain('Zona de 300 m de radio');
     expect(text()).toContain('de 18:00 a 21:00');
-    expect(text()).toContain('Zona de riesgo');
+    expect(text()).toContain('Obras en la vía');
     expect(text()).toContain('Riesgo bajo');
   });
 

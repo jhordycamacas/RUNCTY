@@ -53,7 +53,7 @@ Del Excel (hoja MODULOS), por operación:
 
 Decididas por el equipo o derivadas de otros documentos:
 
-- Tipos de punto de apoyo: comercio abierto, puesto de la Policía Nacional, centro de salud, lugar concurrido.
+- Tipo de punto de apoyo: texto libre del administrador, recortado, de 1 a 40 caracteres (por ejemplo comercio abierto, puesto policial, centro de salud, lugar concurrido). No hay lista fija en código.
 - Un sendero o tramo no puede tener dos registros de resguardo con el mismo horario (inferido de la regla de no solapamiento).
 
 ## Modelo de datos y contrato de API
@@ -75,7 +75,7 @@ Campos propuestos de «punto de apoyo» (de la hoja MODULOS):
 
 | Campo | Obligatorio |
 | --- | --- |
-| Tipo {Comercio abierto, Puesto de la Policía Nacional, Centro de salud, Lugar concurrido} | Sí |
+| Tipo (texto libre, 1 a 40 caracteres) | Sí |
 | Ubicación | Sí |
 | Horario de atención | No |
 

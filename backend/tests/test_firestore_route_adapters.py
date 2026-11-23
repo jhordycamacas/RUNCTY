@@ -32,6 +32,7 @@ INCIDENT = {
     "routeId": "r1",
     "segmentId": "s1",
     "type": "robbery",
+    "severity": "high",
     "date": "2026-11-01",
     "time": "20:00",
     "sourceId": "src1",
@@ -48,7 +49,7 @@ def route_tree(client: MagicMock) -> SimpleNamespace:
     factors = MagicMock()
     factors.stream.return_value = [
         snapshot("f1", {"type": "traffic", "severity": "low", "description": "x"}),
-        snapshot("f2", {"type": "crime", "severity": "low"}),
+        snapshot("f2", {"type": "crime", "severity": "extreme"}),
     ]
     segment_doc = MagicMock()
     segment_doc.collection.return_value = factors
@@ -66,7 +67,7 @@ def route_tree(client: MagicMock) -> SimpleNamespace:
     incidents = client.collection.return_value.where.return_value
     incidents.stream.return_value = [
         snapshot("i1", INCIDENT),
-        snapshot("i2", {**INCIDENT, "type": "crime"}),
+        snapshot("i2", {**INCIDENT, "date": "x"}),
     ]
     return SimpleNamespace(
         route=route, segments=segments, slots=slots, factors=factors, incidents=incidents

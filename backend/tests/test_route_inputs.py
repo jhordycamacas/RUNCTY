@@ -245,7 +245,9 @@ class TestParseRiskFactor:
     @pytest.mark.parametrize(
         ("override", "reason"),
         [
-            ({"type": "crime"}, "invalid-factor-type"),
+            ({"type": "  "}, "invalid-factor-type"),
+            ({"type": "x" * 41}, "invalid-factor-type"),
+            ({"type": 3}, "invalid-factor-type"),
             ({"severity": "extreme"}, "invalid-severity"),
             ({"description": " "}, "invalid-factor-description"),
             ({"description": "x" * 201}, "invalid-factor-description"),
@@ -262,6 +264,11 @@ class TestParseRiskFactor:
 
         assert reason_of(lambda: FactorDeRiesgo.parse(raw, "f1")) == reason
 
+    def test_the_type_is_trimmed_free_text(self):
+        raw = {"type": "  Perros sueltos ", "severity": "low", "description": "Busy"}
+
+        assert FactorDeRiesgo.parse(raw, "f1").type == "Perros sueltos"
+
     def test_rejects_a_malformed_factor_id(self):
         raw = {"type": "traffic", "severity": "low", "description": "Busy"}
 
@@ -270,8 +277,13 @@ class TestParseRiskFactor:
 
 class TestStoredDocuments:
     def test_a_malformed_stored_factor_is_ignored(self):
-        assert FactorDeRiesgo.from_document("f1", {"type": "crime", "severity": "low"}) is None
+        assert FactorDeRiesgo.from_document("f1", {"type": 7, "severity": "low"}) is None
         assert FactorDeRiesgo.from_document("f1", {"type": "other", "severity": "x"}) is None
+
+    def test_a_stored_factor_type_is_never_rewritten(self):
+        factor = FactorDeRiesgo.from_document("f1", {"type": "crime", "severity": "low"})
+
+        assert factor is not None and factor.type == "crime"
 
     def test_a_factor_round_trips(self):
         factor = FactorDeRiesgo("f1", "traffic", "high", "Busy", "17:00", "19:00")

@@ -11,7 +11,6 @@ import {
 } from './catalog';
 import {
   SAFETY_LEVEL_LABELS,
-  factorTypeLabel,
   formatElevation,
   formatSegmentLength,
 } from './labels';
@@ -165,12 +164,6 @@ describe('labels', () => {
     expect(formatSegmentLength(1609.344, 'imperial')).toBe('1 mi');
     expect(formatElevation(15, 'metric')).toBe('15 m');
     expect(formatElevation(100, 'imperial')).toBe('328 ft');
-  });
-
-  it('labels known and unknown factor types', () => {
-    expect(factorTypeLabel('poor_lighting')).toBe('Iluminación deficiente');
-    expect(factorTypeLabel('flood_risk')).toBe('Riesgo de inundación');
-    expect(factorTypeLabel('aliens')).toBe('Otro');
   });
 
   it('never calls a route absolutely safe or unsafe', () => {

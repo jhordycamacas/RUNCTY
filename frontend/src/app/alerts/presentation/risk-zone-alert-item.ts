@@ -2,7 +2,7 @@ import { Component, computed, input } from '@angular/core';
 import { IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { locationOutline, timeOutline, warningOutline } from 'ionicons/icons';
-import { ALERT_SEVERITY_LABELS, alertSchedule, alertTypeLabel } from '../domain/labels';
+import { ALERT_SEVERITY_LABELS, alertSchedule } from '../domain/labels';
 import { RiskZoneAlert } from '../domain/risk-zone-alert';
 
 addIcons({ locationOutline, timeOutline, warningOutline });
@@ -15,7 +15,7 @@ addIcons({ locationOutline, timeOutline, warningOutline });
     <article class="alert" [class]="alert().severity">
       <header>
         <span class="icon" aria-hidden="true"><ion-icon name="warning-outline" /></span>
-        <h3>{{ type() }}</h3>
+        <h3>{{ alert().type }}</h3>
         <span class="chip">{{ severity() }}</span>
       </header>
       @if (alert().description) {
@@ -111,7 +111,6 @@ addIcons({ locationOutline, timeOutline, warningOutline });
 export class RiskZoneAlertItem {
   readonly alert = input.required<RiskZoneAlert>();
 
-  protected readonly type = computed(() => alertTypeLabel(this.alert().type));
   protected readonly severity = computed(() => ALERT_SEVERITY_LABELS[this.alert().severity]);
   protected readonly schedule = computed(() => alertSchedule(this.alert()));
 }

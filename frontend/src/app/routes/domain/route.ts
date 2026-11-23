@@ -19,7 +19,7 @@ export interface RoutePoint extends LatLng {
 
 /** A risk factor that explains a safety level. */
 export interface SafetyFactor {
-  /** Risk factor type, e.g. `poor_lighting`; unknown types are kept as-is. */
+  /** Risk factor type, e.g. `Iluminación deficiente`; unknown types are kept as-is. */
   type: string;
   severity: Severity;
   description: string;

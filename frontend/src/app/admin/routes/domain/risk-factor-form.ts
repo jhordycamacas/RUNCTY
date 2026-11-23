@@ -1,7 +1,8 @@
 import { SEVERITIES, Severity } from '../../../routes/domain/route';
 import { SAME_DAY_MESSAGE, endFromInput, endToInput, isTimeInput, minutesOf } from './form-parsing';
-import { RISK_FACTOR_TYPES, RiskFactor, RiskFactorInput, RiskFactorType } from './managed-route';
+import { RiskFactor, RiskFactorInput } from './managed-route';
 
+const MAX_TYPE = 40;
 const MAX_DESCRIPTION = 200;
 const BOTH_OR_NONE = 'Completa ambas horas o deja las dos vacías (todo el día).';
 const INVALID_TIME = 'Elige una hora válida.';
@@ -30,15 +31,15 @@ export type RiskFactorFormResult =
   | { input: RiskFactorInput; errors?: undefined }
   | { input?: undefined; errors: RiskFactorFormErrors };
 
-const isFactorType = (value: string): value is RiskFactorType =>
-  (RISK_FACTOR_TYPES as readonly string[]).includes(value);
 const isSeverity = (value: string): value is Severity =>
   (SEVERITIES as readonly string[]).includes(value);
 
 /** Validates the form with the rules of the API and converts it into the body it expects. */
 export function parseRiskFactorForm(form: RiskFactorForm): RiskFactorFormResult {
   const errors: RiskFactorFormErrors = {};
-  if (!isFactorType(form.type)) errors.type = 'Elige el tipo de factor.';
+  const type = form.type.trim();
+  if (!type) errors.type = 'Escribe el tipo de factor, por ejemplo Iluminación deficiente.';
+  else if (type.length > MAX_TYPE) errors.type = `El tipo admite máximo ${MAX_TYPE} caracteres.`;
   if (!isSeverity(form.severity)) errors.severity = 'Elige la severidad.';
   const description = form.description.trim();
   if (!description) errors.description = 'La descripción es obligatoria.';
@@ -61,10 +62,10 @@ export function parseRiskFactorForm(form: RiskFactorForm): RiskFactorFormResult 
     errors.endTime = SAME_DAY_MESSAGE;
   }
 
-  if (Object.keys(errors).length > 0 || !isFactorType(form.type) || !isSeverity(form.severity)) {
+  if (Object.keys(errors).length > 0 || !isSeverity(form.severity)) {
     return { errors };
   }
-  const input: RiskFactorInput = { type: form.type, severity: form.severity, description };
+  const input: RiskFactorInput = { type, severity: form.severity, description };
   if (startTime) {
     input.startTime = startTime;
     input.endTime = endTime;
@@ -72,10 +73,10 @@ export function parseRiskFactorForm(form: RiskFactorForm): RiskFactorFormResult 
   return { input };
 }
 
-/** The current values of a factor; a type the app does not know is shown as "other". */
+/** The current values of a factor; the stored type text is kept as it is. */
 export function toRiskFactorForm(factor: RiskFactor): RiskFactorForm {
   return {
-    type: isFactorType(factor.type) ? factor.type : 'other',
+    type: factor.type,
     severity: factor.severity,
     description: factor.description,
     startTime: factor.startTime ?? '',

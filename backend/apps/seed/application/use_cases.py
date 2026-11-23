@@ -119,6 +119,7 @@ def _seed_incidents(route_id: str, now: datetime) -> list[IncidenteSeguridad]:
                 "routeId": incident.route_id,
                 "segmentId": incident.segment_id,
                 "type": incident.type,
+                "severity": incident.severity,
                 "date": (now.date() - timedelta(days=incident.days_ago)).isoformat(),
                 "time": incident.time,
                 "sourceId": incident.source_id,

@@ -17,20 +17,11 @@ from apps.routes.domain.models import (
     stored_optional_text,
     stored_text,
 )
-from apps.routes.domain.safety import ExtraPenalty
+from apps.routes.domain.safety import SEVERITIES, ExtraPenalty
 from apps.routes.domain.time import DAY_MINUTES, is_iso_date, parse_time
 from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.shared.domain.text import sort_key
 
-INCIDENT_TYPES = ("robbery", "assault", "harassment", "traffic_accident", "other")
-# Severity of the index penalty of each incident type (design decisions of EP-08).
-_INCIDENT_SEVERITY = {
-    "robbery": "high",
-    "assault": "high",
-    "harassment": "medium",
-    "traffic_accident": "low",
-    "other": "low",
-}
 INCIDENT_PENALTY_SOURCE = "incident"
 # An incident penalizes the time slots that cover its hour, plus or minus this margin.
 _PENALTY_MARGIN_MINUTES = 60
@@ -38,7 +29,10 @@ _PENALTY_MARGIN_MINUTES = 60
 _COUNTED_DAYS = 365
 
 _MAX_ENTITY = 80
-_MAX_DATA_TYPE = 80
+_MAX_TYPE = 40
+# Stored incidents from before the severity was chosen by the admin.
+_DEFAULT_SEVERITY = "medium"
+_MAX_DATA_TYPE = 40
 _MAX_DATA = 5000
 
 
@@ -119,6 +113,8 @@ class IncidenteSeguridad:
     route_id: str
     segment_id: str | None
     type: str
+    # low, medium or high: chosen by the admin, it sets the index penalty.
+    severity: str
     date: str
     time: str
     source_id: str
@@ -133,9 +129,15 @@ class IncidenteSeguridad:
         route_id = parse_doc_id(data.get("routeId"), "invalid-route-id")
         segment = data.get("segmentId")
         segment_id = None if segment is None else parse_doc_id(segment, "invalid-segment-id")
-        incident_type = data.get("type")
-        if not isinstance(incident_type, str) or incident_type not in INCIDENT_TYPES:
-            raise _invalid("invalid-incident-type", "Unknown incident type.")
+        incident_type = required_text(
+            data.get("type"),
+            _MAX_TYPE,
+            "invalid-incident-type",
+            f"Type is required (max {_MAX_TYPE} chars).",
+        )
+        severity = data.get("severity")
+        if not isinstance(severity, str) or severity not in SEVERITIES:
+            raise _invalid("invalid-incident-severity", "Severity must be low, medium or high.")
         day, time = data.get("date"), data.get("time")
         if not is_iso_date(day):
             raise _invalid("invalid-incident-date", "Date must be YYYY-MM-DD.")
@@ -145,7 +147,7 @@ class IncidenteSeguridad:
         if datetime.fromisoformat(f"{day}T{time}") > now.replace(tzinfo=None):
             raise _invalid("incident-in-future", "The incident cannot be after the current date.")
         source_id = parse_doc_id(data.get("sourceId"), "invalid-source-id")
-        return cls(incident_id, route_id, segment_id, incident_type, day, time, source_id)
+        return cls(incident_id, route_id, segment_id, incident_type, severity, day, time, source_id)
 
     @classmethod
     def from_document(
@@ -153,9 +155,10 @@ class IncidenteSeguridad:
     ) -> "IncidenteSeguridad | None":
         """None for a malformed document, so it never breaks the index."""
         incident_type, day, time = data.get("type"), data.get("date"), data.get("time")
+        severity = data.get("severity")
         minutes = parse_time(time)
         if (
-            incident_type not in INCIDENT_TYPES
+            not isinstance(incident_type, str)
             or not is_iso_date(day)
             or minutes is None
             or minutes >= DAY_MINUTES
@@ -166,6 +169,7 @@ class IncidenteSeguridad:
             route_id=stored_text(data.get("routeId")),
             segment_id=stored_optional_text(data.get("segmentId")),
             type=incident_type,
+            severity=severity if severity in SEVERITIES else _DEFAULT_SEVERITY,
             date=day,
             time=time,
             source_id=stored_text(data.get("sourceId")),
@@ -177,6 +181,7 @@ class IncidenteSeguridad:
             "routeId": self.route_id,
             "segmentId": self.segment_id,
             "type": self.type,
+            "severity": self.severity,
             "date": self.date,
             "time": self.time,
             "sourceId": self.source_id,
@@ -189,14 +194,14 @@ class IncidenteSeguridad:
         return not self.source_deleted and today - timedelta(days=_COUNTED_DAYS) <= happened
 
     def penalty(self) -> ExtraPenalty:
-        """The index penalty: by type, in the window of its hour plus or minus one hour."""
+        """The index penalty: by its severity, in the window of its hour plus or minus one hour."""
         minutes = parse_time(self.time) or 0
         start = max(0, minutes - _PENALTY_MARGIN_MINUTES)
         end = min(DAY_MINUTES, minutes + _PENALTY_MARGIN_MINUTES)
         return ExtraPenalty(
             source=INCIDENT_PENALTY_SOURCE,
             type=self.type,
-            severity=_INCIDENT_SEVERITY[self.type],
+            severity=self.severity,
             description=f"Incidente registrado el {self.date} a las {self.time}.",
             start_time=_hh_mm(start),
             end_time=_hh_mm(end),

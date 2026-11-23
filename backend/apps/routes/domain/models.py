@@ -19,15 +19,6 @@ from apps.shared.domain.errors import DomainError, ErrorKind
 if TYPE_CHECKING:  # The incident model imports this module.
     from apps.safety_data.domain.models import IncidenteSeguridad
 
-RISK_FACTOR_TYPES = (
-    "poor_lighting",
-    "traffic",
-    "isolated_area",
-    "harassment",
-    "uneven_terrain",
-    "flood_risk",
-    "other",
-)
 
 # Firestore auto ids (20 chars) and slugs used by the seed.
 _DOC_ID = re.compile(r"[A-Za-z0-9_-]{1,64}")
@@ -397,9 +388,13 @@ class FactorDeRiesgo:
     def parse(cls, raw: object, factor_id: str) -> "FactorDeRiesgo":
         factor_id = parse_doc_id(factor_id, "invalid-risk-factor-id")
         data = as_mapping(raw)
-        factor_type, severity = data.get("type"), data.get("severity")
-        if not isinstance(factor_type, str) or factor_type not in RISK_FACTOR_TYPES:
-            raise _invalid("invalid-factor-type", "Unknown risk factor type.")
+        factor_type = required_text(
+            data.get("type"),
+            _MAX_CATEGORY,
+            "invalid-factor-type",
+            f"Risk factor type is required (max {_MAX_CATEGORY} chars).",
+        )
+        severity = data.get("severity")
         if not isinstance(severity, str) or severity not in SEVERITIES:
             raise _invalid("invalid-severity", "Severity must be low, medium or high.")
         description = required_text(
@@ -415,7 +410,7 @@ class FactorDeRiesgo:
     def from_document(cls, factor_id: str, data: Mapping[str, object]) -> "FactorDeRiesgo | None":
         """None for a malformed document, so it never breaks the index."""
         factor_type, severity = data.get("type"), data.get("severity")
-        if factor_type not in RISK_FACTOR_TYPES or severity not in SEVERITIES:
+        if not isinstance(factor_type, str) or severity not in SEVERITIES:
             return None
         return cls(
             id=factor_id,

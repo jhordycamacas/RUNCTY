@@ -27,7 +27,7 @@ from apps.shared.domain.errors import DomainError, ErrorKind
 ALERT_SEVERITIES = ("alta", "media", "baja")
 MAX_ALERT_RADIUS_M = 5000
 
-_MAX_TYPE = 80
+_MAX_TYPE = 40
 _MAX_DESCRIPTION = 200
 
 

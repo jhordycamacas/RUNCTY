@@ -12,7 +12,7 @@ export class FakeRiskZoneAlertRepository extends RiskZoneAlertRepository {
 
 export const riskZoneAlert = (overrides: Partial<RiskZoneAlert> = {}): RiskZoneAlert => ({
   id: 'a1',
-  type: 'robbery',
+  type: 'Robos frecuentes',
   severity: 'alta',
   description: 'Robos reportados al anochecer',
   location: { lat: -4, lng: -79.2 },

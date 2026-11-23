@@ -8,7 +8,6 @@ import { distanceParts } from '../../preferences/domain/units';
 import { routeSafetyForSlot } from '../domain/catalog';
 import {
   SEVERITY_LABELS,
-  factorTypeLabel,
   formatElevation,
 } from '../domain/labels';
 import { Route } from '../domain/route';
@@ -227,7 +226,7 @@ export class RouteCard {
     if (!factor) return null;
     const where = factor.segmentName ? ` en ${factor.segmentName}` : '';
     return {
-      text: `${factorTypeLabel(factor.type)}${where}`,
+      text: `${factor.type}${where}`,
       severity: SEVERITY_LABELS[factor.severity].toLowerCase(),
     };
   });

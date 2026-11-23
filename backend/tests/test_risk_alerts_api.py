@@ -89,6 +89,7 @@ class TestAlerts:
         ("changes", "status", "reason"),
         [
             ({"type": " "}, 400, "invalid-alert-type"),
+            ({"type": "x" * 41}, 400, "invalid-alert-type"),
             ({"severity": "high"}, 400, "invalid-alert-severity"),
             ({"description": None}, 400, "invalid-alert-description"),
             ({"location": {"lat": "x", "lng": 0}}, 400, "invalid-location"),

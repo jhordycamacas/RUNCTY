@@ -41,7 +41,7 @@ describe('segmentSlotLevels', () => {
 
 describe('safetySummary', () => {
   const factor = {
-    type: 'poor_lighting',
+    type: 'Iluminación deficiente',
     severity: 'high' as const,
     description: 'Sin postes de luz',
     segmentId: 's2',

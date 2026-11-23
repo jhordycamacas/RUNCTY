@@ -67,7 +67,7 @@ Decididas por el equipo o derivadas de otros documentos:
 - Índice: cada tramo parte de 100 puntos por franja; cada factor activo en esa franja resta 10 (baja), 20 (media) o 35 (alta), con mínimo 0.
 - Niveles: **Alto ≥ 70, Medio 40–69, Bajo < 40**. La ruta toma el nivel de su **peor tramo** y siempre se muestran los factores que lo explican.
 - Las franjas de una ruta no se solapan (`time-slot-overlap`); las fechas de vigencia (`validFrom`, `validTo`) son de las franjas, no de los factores.
-- Un factor tiene tipo, severidad, descripción y una ventana diaria opcional (`startTime` y `endTime`, ambas o ninguna = todo el día).
+- Un factor tiene tipo (texto libre de 1 a 40 caracteres, `invalid-factor-type`), severidad, descripción y una ventana diaria opcional (`startTime` y `endTime`, ambas o ninguna = todo el día).
 - El cliente nunca calcula el puntaje: el servidor recalcula en la misma transacción de cada cambio y el cliente recarga `GET /routes/{id}`. No hay endpoint del índice.
 - El índice se actualiza en ≤ 24 h tras un cambio (RNF-14); hoy es inmediato.
 - Franjas de entrenamiento de referencia: 05:00–07:00 y 18:00–20:00.
@@ -210,7 +210,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
-| Ruta o tramo (obligatorio); Tipo {Iluminación deficiente, Baja circulación de personas, Señalización deficiente, Desnivel, Deslave, Falta de separación entre vehículos y corredores} (obligatorio); Franja horaria (obligatorio); Descripción (opcional) | El sistema deberá permitir crear los factores de riesgo de un tramo, indicando su tipo, descripción y horario de aplicación. | Registro de «factor de riesgo» creado y mensaje de confirmación o de error. |
+| Ruta o tramo (obligatorio); Tipo (texto libre, 1 a 40 caracteres; obligatorio); Franja horaria (obligatorio); Descripción (opcional) | El sistema deberá permitir crear los factores de riesgo de un tramo, indicando su tipo, descripción y horario de aplicación. | Registro de «factor de riesgo» creado y mensaje de confirmación o de error. |
 
 **Criterios de aceptación**
 
@@ -256,7 +256,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
-| Ruta o tramo (obligatorio); Tipo {Iluminación deficiente, Baja circulación de personas, Señalización deficiente, Desnivel, Deslave, Falta de separación entre vehículos y corredores} (obligatorio); Franja horaria (obligatorio); Descripción (opcional) | El sistema deberá permitir actualizar la información y los horarios de los factores de riesgo de un tramo. | Registro de «factor de riesgo» actualizado y mensaje de confirmación o de error. |
+| Ruta o tramo (obligatorio); Tipo (texto libre, 1 a 40 caracteres; obligatorio); Franja horaria (obligatorio); Descripción (opcional) | El sistema deberá permitir actualizar la información y los horarios de los factores de riesgo de un tramo. | Registro de «factor de riesgo» actualizado y mensaje de confirmación o de error. |
 
 **Criterios de aceptación**
 
@@ -372,7 +372,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
-| Ubicación (obligatorio); Tipo (obligatorio); Horario de vigencia (obligatorio); Nivel de severidad {Alta, Media, Baja} (obligatorio) | El sistema deberá permitir crear una alerta de zona de riesgo con su ubicación, tipo, horario de vigencia y nivel de severidad, para avisar al corredor al planificar o realizar un entrenamiento. | Registro de «alerta de zona de riesgo» creado y mensaje de confirmación o de error. |
+| Ubicación (obligatorio); Tipo (texto libre, 1 a 40 caracteres; obligatorio); Horario de vigencia (obligatorio); Nivel de severidad {Alta, Media, Baja} (obligatorio) | El sistema deberá permitir crear una alerta de zona de riesgo con su ubicación, tipo, horario de vigencia y nivel de severidad, para avisar al corredor al planificar o realizar un entrenamiento. | Registro de «alerta de zona de riesgo» creado y mensaje de confirmación o de error. |
 
 **Criterios de aceptación**
 
@@ -414,7 +414,7 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 | Entrada | Proceso | Salida |
 | --- | --- | --- |
-| Ubicación (obligatorio); Tipo (obligatorio); Horario de vigencia (obligatorio); Nivel de severidad {Alta, Media, Baja} (obligatorio) | El sistema deberá permitir actualizar el horario, la severidad o el alcance de una alerta, para mantenerla acorde con la situación actual. | Registro de «alerta de zona de riesgo» actualizado y mensaje de confirmación o de error. |
+| Ubicación (obligatorio); Tipo (texto libre, 1 a 40 caracteres; obligatorio); Horario de vigencia (obligatorio); Nivel de severidad {Alta, Media, Baja} (obligatorio) | El sistema deberá permitir actualizar el horario, la severidad o el alcance de una alerta, para mantenerla acorde con la situación actual. | Registro de «alerta de zona de riesgo» actualizado y mensaje de confirmación o de error. |
 
 **Criterios de aceptación**
 

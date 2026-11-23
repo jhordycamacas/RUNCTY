@@ -103,7 +103,7 @@ def test_seeds_five_routes_with_segments_time_slots_and_risk_factors():
     factors = children("routes/loja-tebaida/segments/seg-2/riskFactors")
     assert sorted(factors) == ["factor-1", "factor-2", "factor-3"]
     assert factors["factor-2"] == {
-        "type": "poor_lighting",
+        "type": "Iluminación deficiente",
         "severity": "high",
         "description": "Tramo sin alumbrado público.",
         "startTime": "18:00",
@@ -148,8 +148,9 @@ def test_seeds_incidents_that_lower_the_index_of_their_segment():
     assert (incident["routeId"], incident["segmentId"], incident["type"]) == (
         "loja-jipiro",
         "seg-2",
-        "robbery",
+        "Robo",
     )
+    assert incident["severity"] == "high"
     assert incident["sourceId"] in children("informationSources")
     jipiro = FIREBASE.docs["routes/loja-jipiro"]["safety"]["evening"]
     # The robbery at 19:00 (high, -35) beats the low lighting factor of seg-3 (-10).

@@ -6,7 +6,7 @@ import {
 } from './risk-factor-form';
 
 const VALID: RiskFactorForm = {
-  type: 'poor_lighting',
+  type: ' Iluminación deficiente ',
   severity: 'high',
   description: ' Postes apagados ',
   startTime: '',
@@ -16,7 +16,7 @@ const VALID: RiskFactorForm = {
 describe('parseRiskFactorForm', () => {
   it('builds an all-day factor when no window is given', () => {
     expect(parseRiskFactorForm(VALID).input).toEqual({
-      type: 'poor_lighting',
+      type: 'Iluminación deficiente',
       severity: 'high',
       description: 'Postes apagados',
     });
@@ -30,7 +30,7 @@ describe('parseRiskFactorForm', () => {
 
   it('explains an empty form', () => {
     expect(parseRiskFactorForm(EMPTY_RISK_FACTOR_FORM).errors).toEqual({
-      type: 'Elige el tipo de factor.',
+      type: 'Escribe el tipo de factor, por ejemplo Iluminación deficiente.',
       severity: 'Elige la severidad.',
       description: 'La descripción es obligatoria.',
     });
@@ -53,16 +53,16 @@ describe('parseRiskFactorForm', () => {
     });
   });
 
-  it('applies the description limit and rejects unknown values', () => {
+  it('applies the type and description limits and rejects an unknown severity', () => {
     expect(
       parseRiskFactorForm({
         ...VALID,
-        type: 'ufo',
+        type: 'a'.repeat(41),
         severity: 'extreme',
         description: 'a'.repeat(201),
       }).errors,
     ).toEqual({
-      type: 'Elige el tipo de factor.',
+      type: 'El tipo admite máximo 40 caracteres.',
       severity: 'Elige la severidad.',
       description: 'La descripción admite máximo 200 caracteres.',
     });
@@ -70,18 +70,19 @@ describe('parseRiskFactorForm', () => {
 });
 
 describe('toRiskFactorForm', () => {
+
   it('preloads a factor with its window', () => {
     expect(
       toRiskFactorForm({
         id: 'f1',
-        type: 'traffic',
+        type: 'Tráfico',
         severity: 'medium',
         description: 'Cruce',
         startTime: '18:00',
         endTime: '24:00',
       }),
     ).toEqual({
-      type: 'traffic',
+      type: 'Tráfico',
       severity: 'medium',
       description: 'Cruce',
       startTime: '18:00',
@@ -89,16 +90,16 @@ describe('toRiskFactorForm', () => {
     });
   });
 
-  it('reads a type the app does not know as "other", so it can still be saved', () => {
+  it('keeps the stored type text as it is', () => {
     const form = toRiskFactorForm({
       id: 'f1',
-      type: 'meteor',
+      type: 'Perros sueltos',
       severity: 'low',
       description: 'x',
       startTime: null,
       endTime: null,
     });
 
-    expect(form).toMatchObject({ type: 'other', startTime: '', endTime: '' });
+    expect(form).toMatchObject({ type: 'Perros sueltos', startTime: '', endTime: '' });
   });
 });

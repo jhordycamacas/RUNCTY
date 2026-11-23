@@ -23,7 +23,7 @@ const DETAIL: ManagedRouteDetail = managedDetail(route('jipiro'), {
       riskFactors: [
         {
           id: 'f1',
-          type: 'poor_lighting',
+          type: 'Iluminación deficiente',
           severity: 'high',
           description: 'Sin postes de luz',
           startTime: '18:00',
@@ -31,7 +31,7 @@ const DETAIL: ManagedRouteDetail = managedDetail(route('jipiro'), {
         },
         {
           id: 'f2',
-          type: 'traffic',
+          type: 'Tráfico',
           severity: 'low',
           description: 'Cruce concurrido',
           startTime: null,
@@ -144,7 +144,7 @@ describe('RiskFactorsSection', () => {
     expect(document.activeElement?.textContent?.trim()).toBe('Nuevo factor de riesgo');
     expect(root().querySelectorAll('form input[type="time"]')).toHaveLength(2);
     factorForm().setValue({
-      type: 'isolated_area',
+      type: 'Zona solitaria',
       severity: 'medium',
       description: ' Tramo sin casas ',
       startTime: '',
@@ -153,7 +153,7 @@ describe('RiskFactorsSection', () => {
     await submit();
 
     expect(repository.createRiskFactor).toHaveBeenCalledWith('jipiro', 's1', {
-      type: 'isolated_area',
+      type: 'Zona solitaria',
       severity: 'medium',
       description: 'Tramo sin casas',
     });
@@ -176,7 +176,7 @@ describe('RiskFactorsSection', () => {
     await submit();
 
     expect(repository.createRiskFactor).not.toHaveBeenCalled();
-    expect(text()).toContain('Elige el tipo de factor.');
+    expect(text()).toContain('Escribe el tipo de factor, por ejemplo Iluminación deficiente.');
     expect(text()).toContain('Completa ambas horas o deja las dos vacías (todo el día).');
   });
 
@@ -187,7 +187,7 @@ describe('RiskFactorsSection', () => {
 
     expect(document.activeElement?.textContent?.trim()).toBe('Editar factor de riesgo');
     expect(factorForm().getRawValue()).toEqual({
-      type: 'poor_lighting',
+      type: 'Iluminación deficiente',
       severity: 'high',
       description: 'Sin postes de luz',
       startTime: '18:00',
@@ -200,7 +200,7 @@ describe('RiskFactorsSection', () => {
     await submit();
 
     expect(repository.updateRiskFactor).toHaveBeenCalledWith('jipiro', 's1', 'f1', {
-      type: 'poor_lighting',
+      type: 'Iluminación deficiente',
       severity: 'medium',
       description: 'Sin postes de luz',
       startTime: '18:00',
@@ -217,7 +217,7 @@ describe('RiskFactorsSection', () => {
     await create();
     await press(button('Agregar factor'));
     factorForm().setValue({
-      type: 'other',
+      type: 'Perros sueltos',
       severity: 'low',
       description: 'Perros sueltos',
       startTime: '',

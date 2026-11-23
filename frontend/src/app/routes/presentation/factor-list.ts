@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { SEVERITY_LABELS, factorTypeLabel } from '../domain/labels';
+import { SEVERITY_LABELS } from '../domain/labels';
 import { SafetyFactor } from '../domain/route';
 
 /** Risk factors that explain a safety level, each with its severity. */
@@ -13,7 +13,7 @@ import { SafetyFactor } from '../domain/route';
             Severidad {{ severity(factor).toLowerCase() }}
           </span>
           <div class="text">
-            <strong>{{ type(factor) }}</strong>
+            <strong>{{ factor.type }}</strong>
             @if (factor.description) {
               <span class="muted">{{ factor.description }}</span>
             }
@@ -83,10 +83,6 @@ export class FactorList {
 
   protected severity(factor: SafetyFactor): string {
     return SEVERITY_LABELS[factor.severity];
-  }
-
-  protected type(factor: SafetyFactor): string {
-    return factorTypeLabel(factor.type);
   }
 
   protected segmentName(factor: SafetyFactor & { segmentName?: string }): string {

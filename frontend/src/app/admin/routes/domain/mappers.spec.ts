@@ -13,13 +13,13 @@ const RAW = {
       riskFactors: [
         {
           id: 'f1',
-          type: 'poor_lighting',
+          type: 'Iluminación deficiente',
           severity: 'high',
           description: 'Postes apagados',
           startTime: '18:00',
           endTime: '24:00',
         },
-        { id: 'f2', type: 'traffic', severity: 'low', description: 'Cruce', startTime: null },
+        { id: 'f2', type: 'Tráfico', severity: 'low', description: 'Cruce', startTime: null },
         { id: 'broken', severity: 'extreme' },
         'nope',
       ],
@@ -55,7 +55,7 @@ describe('toManagedRouteDetail', () => {
     expect(segments[1].riskFactors).toEqual([
       {
         id: 'f1',
-        type: 'poor_lighting',
+        type: 'Iluminación deficiente',
         severity: 'high',
         description: 'Postes apagados',
         startTime: '18:00',
@@ -63,7 +63,7 @@ describe('toManagedRouteDetail', () => {
       },
       {
         id: 'f2',
-        type: 'traffic',
+        type: 'Tráfico',
         severity: 'low',
         description: 'Cruce',
         startTime: null,

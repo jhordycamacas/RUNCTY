@@ -25,7 +25,7 @@ const SEGMENT: SegmentInput = {
   order: 1,
 };
 const SLOT: TimeSlotInput = { startTime: '18:00', endTime: '20:00' };
-const FACTOR: RiskFactorInput = { type: 'traffic', severity: 'low', description: 'Cruce' };
+const FACTOR: RiskFactorInput = { type: 'Tráfico', severity: 'low', description: 'Cruce' };
 
 describe('HttpRouteAdminRepository', () => {
   const api = { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() };
@@ -64,7 +64,7 @@ describe('HttpRouteAdminRepository', () => {
     api.get.mockReturnValue(
       of({
         id: 'a/b',
-        segments: [{ id: 's1', riskFactors: [{ id: 'f1', type: 'traffic', severity: 'low' }] }],
+        segments: [{ id: 's1', riskFactors: [{ id: 'f1', type: 'Tráfico', severity: 'low' }] }],
         timeSlots: [{ id: 't1', startTime: '06:00', endTime: '09:00' }],
       }),
     );

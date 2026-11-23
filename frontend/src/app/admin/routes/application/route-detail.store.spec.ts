@@ -106,7 +106,7 @@ describe('RouteDetailStore', () => {
 
   it('creates, updates and deletes a risk factor of a segment, reloading each time', async () => {
     const factorInput: RiskFactorInput = {
-      type: 'traffic',
+      type: 'Tráfico',
       severity: 'medium',
       description: 'Cruce sin semáforo',
     };

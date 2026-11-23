@@ -86,7 +86,7 @@ const REASON_MESSAGES: Record<string, string> = {
   'invalid-valid-to': 'La fecha de fin de vigencia debe tener el formato AAAA-MM-DD.',
   'invalid-date-range': 'La fecha final de vigencia no puede ser anterior a la inicial.',
   'invalid-risk-factor-id': 'El identificador del factor de riesgo no es válido.',
-  'invalid-factor-type': 'Elige un tipo de factor de riesgo válido.',
+  'invalid-factor-type': 'El tipo de factor es obligatorio y admite máximo 40 caracteres.',
   'invalid-severity': 'La severidad debe ser baja, media o alta.',
   'invalid-factor-description': 'La descripción del factor es obligatoria (máximo 200 caracteres).',
   'route-not-found': 'La ruta ya no existe.',

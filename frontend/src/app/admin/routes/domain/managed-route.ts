@@ -12,18 +12,6 @@ import {
   Severity,
 } from '../../../routes/domain/route';
 
-export const RISK_FACTOR_TYPES = [
-  'poor_lighting',
-  'traffic',
-  'isolated_area',
-  'harassment',
-  'uneven_terrain',
-  'flood_risk',
-  'other',
-] as const;
-
-export type RiskFactorType = (typeof RISK_FACTOR_TYPES)[number];
-
 /** A window of the day the index is computed for. `endTime` may be `24:00` (midnight). */
 export interface TimeSlot {
   id: string;
@@ -88,7 +76,8 @@ export interface TimeSlotInput {
 
 /** Body of the risk factor writes: both times or none (all day). */
 export interface RiskFactorInput {
-  type: RiskFactorType;
+  /** Free text typed by the admin (1-40 chars). */
+  type: string;
   severity: Severity;
   description: string;
   startTime?: string;

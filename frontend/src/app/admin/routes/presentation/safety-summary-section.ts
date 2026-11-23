@@ -1,5 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { SAFETY_DISCLAIMER, SEVERITY_LABELS, factorTypeLabel } from '../../../routes/domain/labels';
+import { SAFETY_DISCLAIMER, SEVERITY_LABELS } from '../../../routes/domain/labels';
 import { SafetyBadge } from '../../../routes/presentation/safety-badge';
 import { RouteDetailStore } from '../application/route-detail.store';
 import { safetySummary } from '../domain/slot-safety';
@@ -36,7 +36,7 @@ import { safetySummary } from '../domain/slot-safety';
                 <ul class="factors" [attr.aria-label]="'Factores de ' + entry.label">
                   @for (factor of entry.factors; track $index) {
                     <li>
-                      <strong>{{ typeLabel(factor.type) }}</strong>
+                      <strong>{{ factor.type }}</strong>
                       · Severidad {{ severityLabels[factor.severity] }} · {{ factor.segmentName }}:
                       {{ factor.description }}
                     </li>
@@ -115,7 +115,6 @@ export class SafetySummarySection {
 
   protected readonly disclaimer = SAFETY_DISCLAIMER;
   protected readonly severityLabels = SEVERITY_LABELS;
-  protected readonly typeLabel = factorTypeLabel;
   protected readonly entries = computed(() => {
     const detail = this.store.detail();
     return detail ? safetySummary(detail) : [];

@@ -117,7 +117,9 @@ class TestSupportPoints:
     @pytest.mark.parametrize(
         ("changes", "status", "reason"),
         [
-            ({"type": "bank"}, 400, "invalid-support-point-type"),
+            ({"type": "  "}, 400, "invalid-support-point-type"),
+            ({"type": "x" * 41}, 400, "invalid-support-point-type"),
+            ({"type": 3}, 400, "invalid-support-point-type"),
             ({"location": {"lat": 91, "lng": 0}}, 400, "invalid-location"),
             ({"location": None}, 400, "invalid-location"),
             ({"cityId": None}, 400, "invalid-city-id"),
@@ -134,12 +136,12 @@ class TestSupportPoints:
 
     def test_updates_and_deletes_a_support_point(self, client, firebase):
         point_id = create(client, POINTS, POINT)
-        changes = {**POINT, "type": "health_center", "openingHours": None}
+        changes = {**POINT, "type": "  Centro de salud ", "openingHours": None}
 
         assert (
             client.put(f"{POINTS}/{point_id}", changes, format="json", **ADMIN).status_code == 204
         )
-        assert client.get(f"{POINTS}/{point_id}", **RUNNER).json()["type"] == "health_center"
+        assert client.get(f"{POINTS}/{point_id}", **RUNNER).json()["type"] == "Centro de salud"
         assert client.delete(f"{POINTS}/{point_id}", **ADMIN).status_code == 204
         assert client.get(POINTS, **RUNNER).json() == {"supportPoints": []}
 

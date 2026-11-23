@@ -294,14 +294,14 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 
 Tomadas para implementar el Sprint 3 sin bloquearlo; se revisan con Gacelas en la demo.
 
-- **Tipos de incidente:** `robbery` (robo), `assault` (asalto), `harassment` (acoso), `traffic_accident` (accidente de tránsito), `other` (otro).
-- **Efecto en el índice (RF-07-11):** cada incidente de los últimos 12 meses suma una penalización (`ExtraPenalty`, origen `incident`) al tramo donde ocurrió, en la franja que cubre la hora del incidente (±1 h). Severidad por tipo: robo y asalto **alta** (35), acoso **media** (20), accidente de tránsito y otro **baja** (10). Registrar, editar o eliminar un incidente recalcula el índice de su ruta.
+- **Tipo de incidente y del tipo de dato de la fuente:** texto libre del administrador, recortado, de 1 a 40 caracteres (decisión del 2026-11-22: nada de listas fijas en código). Se guarda y se muestra tal cual.
+- **Efecto en el índice (RF-07-11):** cada incidente de los últimos 12 meses suma una penalización (`ExtraPenalty`, origen `incident`) al tramo donde ocurrió, en la franja que cubre la hora del incidente (±1 h). Cada incidente lleva una **severidad** (`low`, `medium` o `high`) que elige el administrador, porque el tipo ya no la determina: baja (10), media (20) o alta (35). Un incidente guardado sin severidad se lee como `medium`; razón `invalid-incident-severity` (400) si es inválida. Registrar, editar o eliminar un incidente recalcula el índice de su ruta.
 - **Fuente eliminada:** sus incidentes dejan de contar en el índice y se recalculan las rutas afectadas; el registro del incidente se conserva para el historial del administrador.
 - **Permisos:** lectura y escritura solo con `routes.manage` (el corredor nunca ve incidentes; no tienen datos personales).
 - **API:** `GET/POST /safety-incidents`, `GET/PUT/DELETE /safety-incidents/{id}` con filtros `routeId`, `segmentId`, `type`, `from`, `to`; `GET/POST /information-sources`, `GET/PUT/DELETE /information-sources/{id}`. Respuestas: `201 {id}`, `204`, errores `{error:{reason,message}}`.
 
 ## Supuestos por validar
 
-- Los tipos de incidente no están enumerados en el Excel; se tomó una lista inicial (ver Decisiones de diseño) que se valida con Gacelas.
+- Los tipos de incidente no están enumerados en el Excel; son texto libre (ver Decisiones de diseño) y la severidad la elige el administrador.
 - La importación automática desde fuentes externas (RNF-16, «Podría tener») queda fuera de las cuatro historias; aquí solo se cubre el registro manual (inferido).
 - Los criterios de las historias pendientes salen del Excel (entradas, reglas de negocio) y del backlog; los mensajes de confirmación y de error son genéricos, tomados de las salidas del requisito padre (inferido). Se afinan al planificar el sprint.

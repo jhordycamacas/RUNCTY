@@ -15,7 +15,7 @@ from apps.routes.application.use_cases import with_recalc
 from apps.routes.domain.models import RouteState, parse_doc_id
 from apps.routes.domain.time import is_iso_date
 from apps.safety_data.application.ports import IncidentRepository, SourceRepository
-from apps.safety_data.domain.models import INCIDENT_TYPES, FuenteInformacion, IncidenteSeguridad
+from apps.safety_data.domain.models import FuenteInformacion, IncidenteSeguridad
 from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.shared.domain.text import sort_key
 
@@ -153,8 +153,6 @@ def list_incidents(
     route_id = _optional_id(query, "routeId", "invalid-route-id")
     segment_id = _optional_id(query, "segmentId", "invalid-segment-id")
     incident_type = query.get("type")
-    if incident_type is not None and incident_type not in INCIDENT_TYPES:
-        raise _invalid("invalid-incident-type", "Unknown incident type.")
     first, last = _optional_date(query, "from"), _optional_date(query, "to")
     found = [
         incident

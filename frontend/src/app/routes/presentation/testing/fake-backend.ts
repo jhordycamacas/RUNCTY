@@ -105,7 +105,7 @@ export function catalogRoutes(): Route[] {
           ...slot('evening', '18:00', '20:00', 30),
           factors: [
             {
-              type: 'poor_lighting',
+              type: 'Iluminación deficiente',
               severity: 'high',
               description: 'Postes apagados',
               segmentId: 's2',

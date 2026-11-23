@@ -69,6 +69,7 @@ def incident(route: dict, source_id: str, **changes) -> dict:
         "routeId": route["id"],
         "segmentId": route["segment"],
         "type": "robbery",
+        "severity": "high",
         "date": YESTERDAY,
         "time": "20:00",
         "sourceId": source_id,
@@ -134,6 +135,7 @@ class TestSources:
         ("body", "reason"),
         [
             ({"dataType": "x"}, "invalid-source-entity"),
+            ({"entity": "x", "dataType": "y" * 41}, "invalid-source-data-type"),
             ({"entity": "x", "dataType": "  "}, "invalid-source-data-type"),
             ({"entity": "x", "dataType": "y", "data": 5}, "invalid-source-data"),
         ],
@@ -196,13 +198,27 @@ class TestIncidents:
             }
         ]
 
+    def test_the_admin_chooses_the_severity_and_types_the_incident_type(
+        self, client, route, source_id
+    ):
+        body = incident(route, source_id, type="  Hurto de bicicleta ", severity="low")
+        incident_id = create(client, INCIDENTS, body)
+
+        stored = client.get(f"{INCIDENTS}/{incident_id}", **ADMIN).json()
+        assert (stored["type"], stored["severity"]) == ("Hurto de bicicleta", "low")
+        assert night_score(client, route) == 90
+
     def test_an_incident_outside_the_slot_does_not_count(self, client, route, source_id):
         create(client, INCIDENTS, incident(route, source_id, time="10:00"))
 
         assert night_score(client, route) == 100
 
     def test_an_incident_on_the_whole_route_penalizes_every_segment(self, client, route, source_id):
-        create(client, INCIDENTS, incident(route, source_id, segmentId=None, type="harassment"))
+        create(
+            client,
+            INCIDENTS,
+            incident(route, source_id, segmentId=None, type="harassment", severity="medium"),
+        )
 
         assert night_score(client, route) == 80
 
@@ -218,7 +234,11 @@ class TestIncidents:
             ({"routeId": "ghost"}, 404, "route-not-found"),
             ({"segmentId": "ghost"}, 404, "segment-not-found"),
             ({"sourceId": "ghost"}, 404, "source-not-found"),
-            ({"type": "fire"}, 400, "invalid-incident-type"),
+            ({"type": "  "}, 400, "invalid-incident-type"),
+            ({"type": "x" * 41}, 400, "invalid-incident-type"),
+            ({"type": 3}, 400, "invalid-incident-type"),
+            ({"severity": "critical"}, 400, "invalid-incident-severity"),
+            ({"severity": None}, 400, "invalid-incident-severity"),
             ({"date": "2026-02-30"}, 400, "invalid-incident-date"),
             ({"time": "24:00"}, 400, "invalid-incident-time"),
             ({"date": "2999-01-01"}, 400, "incident-in-future"),
@@ -249,7 +269,7 @@ class TestIncidents:
 
     def test_updating_recalculates_the_index(self, client, route, source_id):
         incident_id = create(client, INCIDENTS, incident(route, source_id))
-        body = incident(route, source_id, type="traffic_accident")
+        body = incident(route, source_id, type="traffic_accident", severity="low")
 
         response = client.put(f"{INCIDENTS}/{incident_id}", body, format="json", **ADMIN)
 
@@ -289,7 +309,9 @@ class TestIncidents:
         old = (local_now() - timedelta(days=30)).date().isoformat()
         robbery = create(client, INCIDENTS, incident(route, source_id))
         harassment = create(
-            client, INCIDENTS, incident(route, source_id, type="harassment", date=old)
+            client,
+            INCIDENTS,
+            incident(route, source_id, type="harassment", severity="medium", date=old),
         )
         whole_route = create(client, INCIDENTS, incident(route, source_id, segmentId=None))
 
@@ -306,7 +328,7 @@ class TestIncidents:
 
     @pytest.mark.parametrize(
         ("query", "reason"),
-        [("type=fire", "invalid-incident-type"), ("from=yesterday", "invalid-from-date")],
+        [("from=yesterday", "invalid-from-date")],
     )
     def test_rejects_invalid_filters(self, client, query, reason):
         response = client.get(f"{INCIDENTS}?{query}", **ADMIN)
@@ -319,7 +341,9 @@ class TestDeletingASource:
     def test_its_incidents_stay_but_stop_counting(self, client, firebase, route, source_id):
         incident_id = create(client, INCIDENTS, incident(route, source_id))
         other_source = create(client, SOURCES, {"entity": "Policía", "dataType": "Robos"})
-        create(client, INCIDENTS, incident(route, other_source, type="harassment"))
+        create(
+            client, INCIDENTS, incident(route, other_source, type="harassment", severity="medium")
+        )
         assert night_score(client, route) == 45
 
         response = client.delete(f"{SOURCES}/{source_id}", **ADMIN)

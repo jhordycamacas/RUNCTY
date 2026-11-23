@@ -24,7 +24,7 @@ const fullRoute = {
         {
           segmentId: 's2',
           segmentName: 'Orilla',
-          type: 'poor_lighting',
+          type: 'Iluminación deficiente',
           severity: 'medium',
           description: 'Poca luz',
         },
@@ -67,7 +67,7 @@ describe('toRoute', () => {
         {
           segmentId: 's2',
           segmentName: 'Orilla',
-          type: 'poor_lighting',
+          type: 'Iluminación deficiente',
           severity: 'medium',
           description: 'Poca luz',
         },
@@ -149,7 +149,7 @@ describe('toSegment', () => {
         evening: {
           level: 'medium',
           score: 60,
-          factors: [{ type: 'traffic', severity: 'high', description: 'Hora pico' }],
+          factors: [{ type: 'Tráfico', severity: 'high', description: 'Hora pico' }],
         },
         bad: 'nope',
       },
@@ -167,7 +167,7 @@ describe('toSegment', () => {
         evening: {
           level: 'medium',
           score: 60,
-          factors: [{ type: 'traffic', severity: 'high', description: 'Hora pico' }],
+          factors: [{ type: 'Tráfico', severity: 'high', description: 'Hora pico' }],
         },
       },
     });

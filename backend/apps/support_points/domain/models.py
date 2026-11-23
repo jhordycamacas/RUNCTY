@@ -16,6 +16,7 @@ from apps.routes.domain.models import (
     parse_doc_id,
     parse_lat_lng,
     parse_window,
+    required_text,
     stored_number,
     stored_optional_text,
     stored_text,
@@ -23,13 +24,13 @@ from apps.routes.domain.models import (
 from apps.routes.domain.time import time_windows_overlap, to_window
 from apps.shared.domain.errors import DomainError, ErrorKind
 
-SUPPORT_POINT_TYPES = ("open_business", "police_post", "health_center", "busy_place")
 WEEK_DAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 # "Near" a route or a runner (design decisions of EP-06).
 NEARBY_RADIUS_M = 500
 MAX_SEARCH_RADIUS_M = 50_000
 
 _MAX_NAME = 80
+_MAX_TYPE = 40
 _MAX_OPENING_HOURS = 80
 
 
@@ -73,9 +74,12 @@ class PuntoApoyo:
     def parse(cls, raw: object, point_id: str) -> "PuntoApoyo":
         point_id = parse_doc_id(point_id, "invalid-support-point-id")
         data = as_mapping(raw)
-        point_type = data.get("type")
-        if not isinstance(point_type, str) or point_type not in SUPPORT_POINT_TYPES:
-            raise _invalid("invalid-support-point-type", "Unknown support point type.")
+        point_type = required_text(
+            data.get("type"),
+            _MAX_TYPE,
+            "invalid-support-point-type",
+            f"Type is required (max {_MAX_TYPE} chars).",
+        )
         location = parse_lat_lng(data.get("location"))
         if location is None:
             raise _invalid(
@@ -98,10 +102,10 @@ class PuntoApoyo:
 
     @classmethod
     def from_document(cls, point_id: str, data: Mapping[str, object]) -> "PuntoApoyo":
-        point_type, location = data.get("type"), as_mapping(data.get("location"))
+        location = as_mapping(data.get("location"))
         return cls(
             id=point_id,
-            type=point_type if point_type in SUPPORT_POINT_TYPES else "busy_place",
+            type=stored_text(data.get("type")),
             location=LatLng(stored_number(location.get("lat")), stored_number(location.get("lng"))),
             city_id=stored_text(data.get("cityId")),
             name=stored_optional_text(data.get("name")),

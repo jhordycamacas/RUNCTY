@@ -3,16 +3,6 @@ import { formatDistance } from '../../preferences/domain/units';
 import { SafetyLevel, Severity } from './route';
 
 /** Spanish UI labels for the route catalog. */
-const FACTOR_TYPE_LABELS: Record<string, string> = {
-  poor_lighting: 'Iluminación deficiente',
-  traffic: 'Tráfico',
-  isolated_area: 'Zona solitaria',
-  harassment: 'Acoso',
-  uneven_terrain: 'Terreno irregular',
-  flood_risk: 'Riesgo de inundación',
-  other: 'Otro',
-};
-
 export const SEVERITY_LABELS: Record<Severity, string> = {
   low: 'Baja',
   medium: 'Media',
@@ -31,13 +21,6 @@ export const SAFETY_LEVEL_LABELS: Record<SafetyLevel, { full: string; short: str
 
 export const SAFETY_DISCLAIMER =
   'El nivel de seguridad es una estimación según los factores registrados. No garantiza seguridad absoluta.';
-
-/** Unknown factor types (added later in the backend) read as "Otro". */
-export function factorTypeLabel(type: string): string {
-  return Object.prototype.hasOwnProperty.call(FACTOR_TYPE_LABELS, type)
-    ? FACTOR_TYPE_LABELS[type]
-    : 'Otro';
-}
 
 const FEET_PER_METER = 3.28084;
 

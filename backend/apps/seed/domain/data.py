@@ -110,7 +110,7 @@ SEED_ROUTES = [
                 [_pt(-3.9685, -79.2036), _pt(-3.9698, -79.203), _pt(-3.9712, -79.2032)],
                 [
                     _factor(
-                        "poor_lighting",
+                        "Iluminación deficiente",
                         "low",
                         "Algunas luminarias apagadas junto a los juegos.",
                         "18:00",
@@ -144,17 +144,21 @@ SEED_ROUTES = [
                 [_pt(-4.0151, -79.2077), _pt(-4.0176, -79.2074), _pt(-4.0199, -79.2071)],
                 [
                     _factor(
-                        "isolated_area",
+                        "Zona solitaria",
                         "medium",
                         "Poco tránsito de personas al amanecer.",
                         "04:30",
                         "06:30",
                     ),
                     _factor(
-                        "poor_lighting", "high", "Tramo sin alumbrado público.", "18:00", "24:00"
+                        "Iluminación deficiente",
+                        "high",
+                        "Tramo sin alumbrado público.",
+                        "18:00",
+                        "24:00",
                     ),
                     _factor(
-                        "harassment",
+                        "Acoso",
                         "low",
                         "Reportes ocasionales de acoso verbal.",
                         "19:00",
@@ -188,14 +192,14 @@ SEED_ROUTES = [
                 [_pt(-3.9845, -79.1985), _pt(-3.989, -79.199), _pt(-3.9935, -79.1994)],
                 [
                     _factor(
-                        "traffic",
+                        "Tráfico",
                         "high",
                         "Cruces sin semáforo con mucho tráfico de entrada a la ciudad.",
                         "06:00",
                         "08:30",
                     ),
                     _factor(
-                        "traffic", "medium", "Tráfico de salida en hora pico.", "17:00", "20:00"
+                        "Tráfico", "medium", "Tráfico de salida en hora pico.", "17:00", "20:00"
                     ),
                 ],
             ),
@@ -203,9 +207,9 @@ SEED_ROUTES = [
                 "Malecón central",
                 [_pt(-3.9935, -79.1994), _pt(-3.9985, -79.1998), _pt(-4.003, -79.2001)],
                 [
-                    _factor("flood_risk", "low", "Se encharca cuando llueve fuerte."),
+                    _factor("Riesgo de inundación", "low", "Se encharca cuando llueve fuerte."),
                     _factor(
-                        "poor_lighting",
+                        "Iluminación deficiente",
                         "high",
                         "Luminarias dañadas en varios postes.",
                         "18:00",
@@ -249,16 +253,22 @@ SEED_ROUTES = [
                 ],
                 [
                     _factor(
-                        "isolated_area",
+                        "Zona solitaria",
                         "high",
                         "Bosque sin personas cerca a primera hora.",
                         "05:00",
                         "07:30",
                     ),
-                    _factor("uneven_terrain", "medium", "Raíces y piedras sueltas."),
-                    _factor("poor_lighting", "high", "Sendero sin iluminación.", "18:00", "24:00"),
+                    _factor("Terreno irregular", "medium", "Raíces y piedras sueltas."),
                     _factor(
-                        "isolated_area",
+                        "Iluminación deficiente",
+                        "high",
+                        "Sendero sin iluminación.",
+                        "18:00",
+                        "24:00",
+                    ),
+                    _factor(
+                        "Zona solitaria",
                         "high",
                         "Zona aislada al anochecer.",
                         "18:30",
@@ -269,7 +279,7 @@ SEED_ROUTES = [
             SeedSegment(
                 "Subida al mirador",
                 [_pt(-4.0404, -79.1944), _pt(-4.0411, -79.194), _pt(-4.0418, -79.1935)],
-                [_factor("uneven_terrain", "low", "Escalones de tierra irregulares.")],
+                [_factor("Terreno irregular", "low", "Escalones de tierra irregulares.")],
             ),
         ],
     ),
@@ -298,7 +308,7 @@ SEED_ROUTES = [
                 ],
                 [
                     _factor(
-                        "traffic",
+                        "Tráfico",
                         "medium",
                         "Tráfico intenso al salir del trabajo.",
                         "17:30",
@@ -311,21 +321,21 @@ SEED_ROUTES = [
                 [_pt(-3.97, -79.2005), _pt(-3.964, -79.203), _pt(-3.958, -79.2055)],
                 [
                     _factor(
-                        "isolated_area",
+                        "Zona solitaria",
                         "high",
                         "Tramo solitario antes del amanecer.",
                         "04:30",
                         "06:00",
                     ),
                     _factor(
-                        "poor_lighting",
+                        "Iluminación deficiente",
                         "high",
                         "Alumbrado escaso hasta que amanece.",
                         "00:00",
                         "06:15",
                     ),
                     _factor(
-                        "harassment",
+                        "Acoso",
                         "medium",
                         "Reportes de acoso al anochecer cerca de la parada de buses.",
                         "18:00",
@@ -357,6 +367,7 @@ class SeedIncident:
     route_id: str
     segment_id: str
     type: str
+    severity: str
     # Dated relative to the day the seed runs, so it always falls in the last 12 months.
     days_ago: int
     time: str
@@ -365,13 +376,16 @@ class SeedIncident:
 
 SEED_INCIDENTS = [
     # Takes the evening of Jipiro from high to medium (seg-2: 100 - 35).
-    SeedIncident("inc-jipiro-robo", "loja-jipiro", "seg-2", "robbery", 20, "19:00", "ecu911-robos"),
+    SeedIncident(
+        "inc-jipiro-robo", "loja-jipiro", "seg-2", "Robo", "high", 20, "19:00", "ecu911-robos"
+    ),
     # Adds to the morning traffic of the Malecón (seg-1: 65 - 20).
     SeedIncident(
         "inc-malecon-acoso",
         "loja-malecon-zamora",
         "seg-1",
-        "harassment",
+        "Acoso",
+        "medium",
         45,
         "06:00",
         "policia-acoso",
@@ -381,7 +395,7 @@ SEED_INCIDENTS = [
 SEED_SUPPORT_POINTS = [
     {
         "id": "upc-jipiro",
-        "type": "police_post",
+        "type": "Puesto policial",
         "name": "UPC Jipiro",
         "location": _pt(-3.9671, -79.2052),
         "cityId": CITY_ID,
@@ -389,7 +403,7 @@ SEED_SUPPORT_POINTS = [
     },
     {
         "id": "centro-salud-tebaida",
-        "type": "health_center",
+        "type": "Centro de salud",
         "name": "Centro de Salud La Tebaida",
         "location": _pt(-4.0145, -79.2092),
         "cityId": CITY_ID,
@@ -397,7 +411,7 @@ SEED_SUPPORT_POINTS = [
     },
     {
         "id": "tienda-malecon",
-        "type": "open_business",
+        "type": "Negocio abierto",
         "name": "Tienda del Malecón",
         "location": _pt(-3.9938, -79.1989),
         "cityId": CITY_ID,

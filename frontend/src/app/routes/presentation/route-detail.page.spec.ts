@@ -27,7 +27,7 @@ const SEGMENTS: Segment[] = [
       evening: {
         level: 'medium',
         score: 60,
-        factors: [{ type: 'traffic', severity: 'medium', description: 'Cruce de avenida' }],
+        factors: [{ type: 'Tráfico', severity: 'medium', description: 'Cruce de avenida' }],
       },
     },
   },
