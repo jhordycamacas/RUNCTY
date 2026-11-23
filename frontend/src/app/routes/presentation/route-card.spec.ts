@@ -72,4 +72,43 @@ describe('RouteCard', () => {
     expect(link.getAttribute('href')).toContain('/app/rutas/jipiro');
     expect(decodeURIComponent(link.getAttribute('href') ?? '')).toContain('franja=18:00-20:00');
   });
+
+  it('draws the shape of the route colored by the level of the selected slot', () => {
+    render(jipiro, '05:00-07:00');
+    expect(fixture.nativeElement.querySelector('app-route-preview svg.tone-high')).not.toBeNull();
+
+    render(jipiro, '18:00-20:00');
+    expect(fixture.nativeElement.querySelector('app-route-preview svg.tone-low')).not.toBeNull();
+
+    render(jipiro, null);
+    expect(fixture.nativeElement.querySelector('app-route-preview svg.tone-none')).not.toBeNull();
+  });
+
+  it('shows a placeholder instead of the shape when the list sent no preview', () => {
+    render(unrated, '05:00-07:00');
+
+    expect(fixture.nativeElement.querySelector('app-route-preview svg')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-route-preview ion-icon')).not.toBeNull();
+  });
+
+  it('keeps the preview inside the link, so tapping it opens the detail', () => {
+    render(jipiro, '05:00-07:00');
+
+    const link = fixture.nativeElement.querySelector('a.card') as HTMLAnchorElement;
+    expect(link.querySelector('app-route-preview')).not.toBeNull();
+  });
+
+  it('delays its entrance by its position in the list, with a ceiling', () => {
+    render(jipiro, '05:00-07:00');
+    const delay = () => (fixture.nativeElement.querySelector('a.card') as HTMLElement).style.animationDelay;
+    expect(delay()).toBe('0ms');
+
+    fixture.componentRef.setInput('index', 3);
+    fixture.detectChanges();
+    expect(delay()).toBe('180ms');
+
+    fixture.componentRef.setInput('index', 40);
+    fixture.detectChanges();
+    expect(delay()).toBe('360ms');
+  });
 });

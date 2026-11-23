@@ -1,12 +1,17 @@
 import {
+  DEFAULT_FILTERS,
+  countActiveFilters,
   filterRoutes,
   listDifficulties,
+  listSurfaces,
   listTimeSlots,
   pickDefaultSlot,
   resolveSlotKey,
   routeSafetyForSlot,
+  searchRoutes,
   segmentSafetyForSlot,
   slotKey,
+  sortRoutes,
   sortRoutesForSlot,
 } from './catalog';
 import {
@@ -28,7 +33,7 @@ describe('filterRoutes', () => {
   const ids = (list: Route[]) => list.map((r) => r.id);
 
   it('keeps everything with no filters', () => {
-    expect(ids(filterRoutes(routes, { distance: 'all', difficulty: 'all' }))).toEqual([
+    expect(ids(filterRoutes(routes, DEFAULT_FILTERS))).toEqual([
       'a',
       'b',
       'c',
@@ -42,14 +47,102 @@ describe('filterRoutes', () => {
     ['from5to10', ['c', 'd']],
     ['over10', ['e']],
   ] as const)('filters the %s distance bucket', (distance, expected) => {
-    expect(ids(filterRoutes(routes, { distance, difficulty: 'all' }))).toEqual(expected);
+    expect(ids(filterRoutes(routes, { ...DEFAULT_FILTERS, distance }))).toEqual(expected);
   });
 
   it('combines distance and difficulty', () => {
     expect(
-      ids(filterRoutes(routes, { distance: 'from5to10', difficulty: 'Intermedio' })),
+      ids(filterRoutes(routes, {
+          ...DEFAULT_FILTERS,
+          distance: 'from5to10',
+          difficulty: 'Intermedio',
+        })),
     ).toEqual(['c']);
-    expect(ids(filterRoutes(routes, { distance: 'all', difficulty: 'Avanzado' }))).toEqual(['d']);
+    expect(ids(filterRoutes(routes, { ...DEFAULT_FILTERS, difficulty: 'Avanzado' }))).toEqual(['d']);
+  });
+});
+
+describe('surface filter', () => {
+  const routes = [
+    route('a', { surface: 'Asfalto' }),
+    route('b', { surface: 'Tierra' }),
+    route('c', { surface: 'Asfalto' }),
+    route('d', { surface: null }),
+  ];
+
+  it('lists the distinct surfaces alphabetically', () => {
+    expect(listSurfaces(routes)).toEqual(['Asfalto', 'Tierra']);
+  });
+
+  it('keeps the routes with that surface', () => {
+    const found = filterRoutes(routes, { ...DEFAULT_FILTERS, surface: 'Asfalto' });
+
+    expect(found.map((r) => r.id)).toEqual(['a', 'c']);
+  });
+});
+
+describe('countActiveFilters', () => {
+  it('counts the filters that differ from "Todas"', () => {
+    expect(countActiveFilters(DEFAULT_FILTERS)).toBe(0);
+    expect(countActiveFilters({ ...DEFAULT_FILTERS, distance: 'upTo5' })).toBe(1);
+    expect(
+      countActiveFilters({ distance: 'over10', difficulty: 'Avanzado', surface: 'Tierra' }),
+    ).toBe(3);
+  });
+});
+
+describe('searchRoutes', () => {
+  const routes = [
+    route('a', { name: 'Parque Jipiro' }),
+    route('b', { name: 'Malecón de Zamora' }),
+    route('c', { name: 'Sendero Puéar' }),
+  ];
+  const names = (list: Route[]) => list.map((r) => r.id);
+
+  it('keeps everything with a blank query', () => {
+    expect(names(searchRoutes(routes, ''))).toEqual(['a', 'b', 'c']);
+    expect(names(searchRoutes(routes, '   '))).toEqual(['a', 'b', 'c']);
+  });
+
+  it('ignores case and accents in both the query and the name', () => {
+    expect(names(searchRoutes(routes, 'MALECON'))).toEqual(['b']);
+    expect(names(searchRoutes(routes, 'puear'))).toEqual(['c']);
+    expect(names(searchRoutes(routes, 'puéar'))).toEqual(['c']);
+  });
+
+  it('matches any part of the name and finds nothing for an unknown word', () => {
+    expect(names(searchRoutes(routes, 'parq'))).toEqual(['a']);
+    expect(names(searchRoutes(routes, ' de zam '))).toEqual(['b']);
+    expect(searchRoutes(routes, 'volcán')).toEqual([]);
+  });
+});
+
+describe('sortRoutes', () => {
+  const routes = [
+    route('long', { name: 'Zeta', distanceKm: 9, safety: [slot('m', '05:00', '07:00', 95)] }),
+    route('short', { name: 'Árbol', distanceKm: 2, safety: [slot('m', '05:00', '07:00', 40)] }),
+    route('mid', { name: 'Beta', distanceKm: 5, safety: [slot('m', '05:00', '07:00', 70)] }),
+  ];
+  const ids = (list: Route[]) => list.map((r) => r.id);
+
+  it('puts the safest route for the slot first', () => {
+    expect(ids(sortRoutes(routes, 'safety', '05:00-07:00'))).toEqual(['long', 'mid', 'short']);
+  });
+
+  it('orders by distance, shortest first', () => {
+    expect(ids(sortRoutes(routes, 'distance', '05:00-07:00'))).toEqual(['short', 'mid', 'long']);
+  });
+
+  it('orders by name ignoring accents and case', () => {
+    expect(ids(sortRoutes(routes, 'name', null))).toEqual(['short', 'mid', 'long']);
+  });
+
+  it('does not change the list it receives', () => {
+    const before = ids(routes);
+
+    sortRoutes(routes, 'name', null);
+
+    expect(ids(routes)).toEqual(before);
   });
 });
 

@@ -99,6 +99,11 @@ export function catalogRoutes(): Route[] {
       elevationGainM: 15,
       start: { lat: -3.97, lng: -79.2, label: 'Entrada principal' },
       end: { lat: -3.98, lng: -79.2, label: 'Puente sur' },
+      preview: [
+        { lat: -3.97, lng: -79.2 },
+        { lat: -3.974, lng: -79.196 },
+        { lat: -3.98, lng: -79.2 },
+      ],
       safety: [
         slot('morning', '05:00', '07:00', 90),
         {
@@ -120,6 +125,10 @@ export function catalogRoutes(): Route[] {
       distanceKm: 7.5,
       difficulty: 'Intermedio',
       surface: 'Mixto',
+      preview: [
+        { lat: -3.99, lng: -79.21 },
+        { lat: -3.99, lng: -79.19 },
+      ],
       safety: [slot('morning', '05:00', '07:00', 55), slot('evening', '18:00', '20:00', 80)],
     }),
     route('nueva', { name: 'Ruta nueva', distanceKm: 12, difficulty: 'Avanzado', safety: [] }),

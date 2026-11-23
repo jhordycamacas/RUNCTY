@@ -90,7 +90,7 @@ Decididas por el equipo o derivadas de otros documentos:
 
 | Endpoint | Permiso | Descripción |
 | --- | --- | --- |
-| `GET /routes?cityId=` | sesión | Lista del catálogo (el administrador ve también las inactivas); incluye el nivel de seguridad por franja. |
+| `GET /routes?cityId=` | sesión | Lista del catálogo (el administrador ve también las inactivas); incluye el nivel de seguridad por franja y `preview`, el recorrido reducido a 40 pares `[lat, lng]` como máximo para dibujar la miniatura. |
 | `GET /routes/{id}` | sesión | Detalle con `segments`; las franjas y los factores solo con `routes.manage`. |
 | `POST /routes` | `routes.manage` | Crea una ruta (`201 {id}`). Cuerpo: `name`, `cityId`, `description`, `start`, `end`, `distanceKm`, `elevationGainM`, `surface` y `difficulty` (texto libre, 1 a 40 caracteres, los escribe el administrador), `active`. |
 | `PUT /routes/{id}` · `DELETE /routes/{id}` | `routes.manage` | Reemplaza los datos de la ruta o la elimina en cascada con sus tramos, franjas y factores (`204`). |
@@ -159,11 +159,15 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Todo el texto de la interfaz está en español y nunca llama a una ruta "segura" o "insegura": muestra el nivel (Alto, Medio, Bajo) por franja con los factores que lo explican.
 - [x] Un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
 - [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas.
-- [x] El corredor consulta las rutas activas de su ciudad en `/app/rutas` y en el inicio, con filtros por distancia y dificultad (cubierto por pruebas unitarias; sin verificación manual).
+- [x] El corredor consulta las rutas activas de su ciudad en `/app/rutas` y en el inicio (cubierto por pruebas unitarias; sin verificación manual).
+- [x] En `/app/rutas` arriba solo hay la ciudad, un buscador por nombre (sin distinguir mayúsculas ni tildes) y los botones «Filtros» (con el número de filtros activos, p. ej. «Filtros · 2») y «Ordenar» (Más segura, Distancia, Nombre).
+- [x] «Filtros» abre una hoja inferior con franja horaria, distancia, dificultad y superficie (las dos últimas salen de las rutas cargadas), «Limpiar» y «Ver N rutas» con el conteo en vivo; los filtros activos se ven como fichas que se quitan una a una y, si no queda ninguna ruta, «Quitar filtros» limpia filtros y búsqueda.
+- [x] Cada tarjeta muestra una miniatura de la forma del recorrido (SVG dibujado con `preview`, sin mapa ni red), con la línea del color del nivel de seguridad de la franja elegida; sin `preview` muestra un ícono.
+- [x] La lista tiene jalar para actualizar, esqueletos de carga, conteo («5 rutas · Loja»), efecto al tocar y entrada escalonada de las tarjetas (sin animación si el dispositivo pide reducir movimiento).
 
-**Implementación:** `frontend/src/app/admin/routes/presentation/routes-admin.page.ts`, `frontend/src/app/admin/routes/application/admin-routes.store.ts`, `frontend/src/app/admin/routes/domain/route-places.ts`, `frontend/src/app/routes/presentation/routes-list.page.ts`, `frontend/src/app/routes/presentation/route-card.ts`, `frontend/src/app/routes/domain/catalog.ts`, `frontend/src/app/routes/infrastructure/http-route.repository.ts`
+**Implementación:** `frontend/src/app/admin/routes/presentation/routes-admin.page.ts`, `frontend/src/app/admin/routes/application/admin-routes.store.ts`, `frontend/src/app/admin/routes/domain/route-places.ts`, `frontend/src/app/routes/presentation/routes-list.page.ts`, `frontend/src/app/routes/presentation/route-card.ts`, `frontend/src/app/routes/presentation/route-preview.ts`, `frontend/src/app/routes/presentation/routes-filter-sheet.ts`, `frontend/src/app/routes/domain/catalog.ts`, `frontend/src/app/routes/domain/route-preview.ts`, `frontend/src/app/routes/infrastructure/http-route.repository.ts`, `backend/apps/routes/domain/geo.py`
 
-**Pruebas:** `frontend/src/app/admin/routes/presentation/routes-admin.page.spec.ts`, `frontend/src/app/admin/routes/application/admin-routes.store.spec.ts`, `frontend/src/app/admin/routes/domain/route-places.spec.ts`, `frontend/src/app/routes/presentation/routes-list.page.spec.ts`, `frontend/src/app/routes/domain/catalog.spec.ts`, `frontend/src/app/routes/infrastructure/http-route.repository.spec.ts`, `backend/tests/test_routes_api.py`
+**Pruebas:** `frontend/src/app/admin/routes/presentation/routes-admin.page.spec.ts`, `frontend/src/app/admin/routes/application/admin-routes.store.spec.ts`, `frontend/src/app/admin/routes/domain/route-places.spec.ts`, `frontend/src/app/routes/presentation/routes-list.page.spec.ts`, `frontend/src/app/routes/presentation/routes-filter-sheet.spec.ts`, `frontend/src/app/routes/presentation/route-preview.spec.ts`, `frontend/src/app/routes/domain/catalog.spec.ts`, `frontend/src/app/routes/domain/route-preview.spec.ts`, `backend/tests/test_route_geo.py`, `frontend/src/app/routes/infrastructure/http-route.repository.spec.ts`, `backend/tests/test_routes_api.py`
 
 ### RF-05-3 — Actualizar ruta de running
 
@@ -319,4 +323,5 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - El corredor lee las rutas en `/app/rutas` (no en el admin); el Excel asigna RF-05-2 y RF-05-6 al actor Administrador, pero el corredor también las consulta para recomendarlas.
 - Queda abierto el criterio de accesibilidad medida (objetivo táctil de 48 px y contraste) de las pantallas de rutas del panel: no se midió en pantalla.
 - Los criterios de las historias pendientes salen del Excel (entradas, reglas de negocio) y del backlog; los mensajes de confirmación y de error son genéricos, tomados de las salidas del requisito padre (inferido). Se afinan al planificar el sprint.
+- Nota de diseño (2026-11-23): la lista del corredor se rediseñó (filtros en una hoja inferior, buscador, orden, miniatura del recorrido). La miniatura usa una sola línea con el nivel de la ruta en la franja elegida, no un color por tramo: la lista no trae los niveles por tramo y el detalle ya dibuja el mapa con ellos. Cambio de presentación: no cambia el estado de ninguna historia.
 - Nota de diseño (2026-11-22): el detalle de ruta del corredor (`/app/rutas/:id`) lista los tramos en solo lectura, con su largo y su nivel en la franja elegida; el detalle del panel (`/admin/rutas/:id`) organiza la ruta en pestañas («Resumen», «Franjas horarias», «Tramos y factores») y la lista del panel muestra el número de tramos con un acceso «Tramos» que abre esa pestaña (`?seccion=tramos`). Es un cambio de presentación: no cambia el estado de ninguna historia.

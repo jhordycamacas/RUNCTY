@@ -46,6 +46,14 @@ function toLatLng(value: unknown): LatLng | null {
   return { lat: data['lat'], lng: data['lng'] };
 }
 
+/** `[lat, lng]` as the list sends the preview. */
+function toPair(value: unknown): LatLng | null {
+  if (!Array.isArray(value) || value.length !== 2) return null;
+  const [lat, lng] = value as unknown[];
+  if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+  return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+}
+
 function toRoutePoint(value: unknown): RoutePoint | null {
   const point = toLatLng(value);
   return point ? { ...point, label: asString(asRecord(value)['label']) } : null;
@@ -123,6 +131,7 @@ export function toRoute(raw: unknown): Route {
     difficulty: asText(data['difficulty']),
     active: data['active'] === true,
     segmentCount: asNumber(data['segmentCount']),
+    preview: toList(data['preview'], toPair),
     safety,
   };
 }

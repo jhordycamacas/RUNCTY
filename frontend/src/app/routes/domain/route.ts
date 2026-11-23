@@ -57,6 +57,8 @@ export interface Route {
   /** Inactive routes are only listed to who can manage routes. */
   active: boolean;
   segmentCount: number;
+  /** The route shape down-sampled by the API for the list cards; empty when it is missing. */
+  preview: LatLng[];
   /** Slot safety entries sorted by start time. */
   safety: RouteSlotSafety[];
 }

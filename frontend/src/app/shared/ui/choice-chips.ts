@@ -6,15 +6,15 @@ export interface ChipOption {
 }
 
 /**
- * Single-choice filter as a row of chips that scrolls sideways instead of wrapping, so several
- * filters stay on screen at once. Exposed to assistive technology as a radio group.
+ * Single-choice filter as a row of chips that scrolls sideways instead of wrapping (unless `wrap`
+ * is set), so several filters stay on screen at once. Exposed to assistive technology as a radio group.
  */
 @Component({
   selector: 'app-choice-chips',
   template: `
     <div class="group" role="radiogroup" [attr.aria-label]="label()">
       <span class="caption" aria-hidden="true">{{ label() }}</span>
-      <div class="row">
+      <div class="row" [class.wrap]="wrap()">
         @for (option of options(); track option.value) {
           <button
             type="button"
@@ -52,6 +52,11 @@ export interface ChipOption {
       scrollbar-width: none;
     }
 
+    .row.wrap {
+      flex-wrap: wrap;
+      overflow-x: visible;
+    }
+
     .row::-webkit-scrollbar {
       display: none;
     }
@@ -81,5 +86,7 @@ export class ChoiceChips {
   readonly label = input.required<string>();
   readonly options = input.required<readonly ChipOption[]>();
   readonly value = input<string | null>(null);
+  /** Chips wrap onto several lines instead of scrolling sideways (for a roomy container). */
+  readonly wrap = input(false);
   readonly selected = output<string>();
 }

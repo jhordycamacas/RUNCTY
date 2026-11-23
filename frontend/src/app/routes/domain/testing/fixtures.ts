@@ -30,6 +30,7 @@ export const route = (id: string, overrides: Partial<Route> = {}): Route => ({
   difficulty: 'Principiante',
   active: true,
   segmentCount: 1,
+  preview: [],
   safety: [],
   ...overrides,
 });

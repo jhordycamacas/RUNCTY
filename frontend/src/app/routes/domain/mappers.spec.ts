@@ -126,6 +126,23 @@ describe('toRoute', () => {
     ]);
   });
 
+  it('reads the preview as lat/lng pairs and drops what is not a pair', () => {
+    const route = toRoute({
+      id: 'x',
+      preview: [[-3.97, -79.2], [-3.98, -79.21], [1], 'bad', ['a', 2], [null, 1]],
+    });
+
+    expect(route.preview).toEqual([
+      { lat: -3.97, lng: -79.2 },
+      { lat: -3.98, lng: -79.21 },
+    ]);
+  });
+
+  it('has no preview when the API does not send one', () => {
+    expect(toRoute({ id: 'x' }).preview).toEqual([]);
+    expect(toRoute({ id: 'x', preview: 'bad' }).preview).toEqual([]);
+  });
+
   it('tolerates a missing document', () => {
     expect(toRoute(undefined).safety).toEqual([]);
   });

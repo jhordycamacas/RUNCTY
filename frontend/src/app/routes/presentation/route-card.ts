@@ -1,6 +1,6 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { IonIcon } from '@ionic/angular';
+import { IonIcon, IonRippleEffect } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { chevronForward, helpCircleOutline } from 'ionicons/icons';
 import { PreferencesStore } from '../../preferences/application/preferences.store';
@@ -11,6 +11,7 @@ import {
   formatElevation,
 } from '../domain/labels';
 import { Route } from '../domain/route';
+import { RoutePreview } from './route-preview';
 import { SafetyBadge } from './safety-badge';
 
 addIcons({ chevronForward, helpCircleOutline });
@@ -18,27 +19,33 @@ addIcons({ chevronForward, helpCircleOutline });
 /**
  * Catalog card: a dark rounded card with the distance in big condensed numerals, the route
  * summary, its safety level for the selected time slot and the main risk factor that explains it.
- * It links to the detail, carrying the slot along. A `featured` card (recommended on the home) is
- * larger and draws a subtle neon route line.
+ * A small picture of the route shape, colored by that level, sits beside the name. It links to the
+ * detail, carrying the slot along, and gives press feedback (ripple and a slight scale). A
+ * `featured` card (recommended on the home) is larger.
  */
 @Component({
   selector: 'app-route-card',
-  imports: [RouterLink, IonIcon, SafetyBadge],
+  imports: [RouterLink, IonIcon, IonRippleEffect, RoutePreview, SafetyBadge],
   host: { '[class.featured]': 'featured()' },
   template: `
-    <a class="card" [routerLink]="['/app/rutas', route().id]" [queryParams]="{ franja: slotKey() }">
-      @if (featured()) {
-        <svg class="line" viewBox="0 0 120 60" aria-hidden="true" focusable="false">
-          <path d="M4 52 C 24 52, 22 18, 44 20 S 70 46, 86 30 S 104 8, 116 10" />
-        </svg>
-      }
-      <span class="header">
-        <strong class="name">{{ route().name }}</strong>
-        <ion-icon name="chevron-forward" aria-hidden="true" />
-      </span>
-      <span class="figures">
-        <span class="figure">{{ distance().value }}<small>{{ distance().unit }}</small></span>
-        <span class="meta">{{ meta() }}</span>
+    <a
+      class="card ion-activatable"
+      [routerLink]="['/app/rutas', route().id]"
+      [queryParams]="{ franja: slotKey() }"
+      [style.animation-delay.ms]="entranceDelay()"
+    >
+      <span class="top">
+        <app-route-preview class="preview" [points]="route().preview" [level]="safety()?.level ?? null" />
+        <span class="summary">
+          <span class="header">
+            <strong class="name">{{ route().name }}</strong>
+            <ion-icon name="chevron-forward" aria-hidden="true" />
+          </span>
+          <span class="figures">
+            <span class="figure">{{ distance().value }}<small>{{ distance().unit }}</small></span>
+            <span class="meta">{{ meta() }}</span>
+          </span>
+        </span>
       </span>
       <span class="safety">
         @if (safety(); as slot) {
@@ -58,6 +65,7 @@ addIcons({ chevronForward, helpCircleOutline });
       } @else if (safety()) {
         <span class="factor-text">Sin factores de riesgo registrados</span>
       }
+      <ion-ripple-effect />
     </a>
   `,
   styles: `
@@ -79,11 +87,54 @@ addIcons({ chevronForward, helpCircleOutline });
       background: var(--rc-surface-elevated);
       color: var(--rc-text);
       text-decoration: none;
+      animation: card-in 360ms ease-out both;
+      transition: transform 120ms ease-out;
+    }
+
+    .card:active {
+      transform: scale(0.985);
+    }
+
+    @keyframes card-in {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card {
+        animation: none;
+        transition: none;
+      }
+
+      .card:active {
+        transform: none;
+      }
     }
 
     .card:focus-visible {
       outline: 3px solid var(--rc-primary-text);
       outline-offset: 2px;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      gap: var(--rc-space-md);
+    }
+
+    .preview {
+      flex: none;
+      width: 5.5rem;
+    }
+
+    .summary {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: var(--rc-space-xs);
+      min-width: 0;
     }
 
     .header {
@@ -131,32 +182,17 @@ addIcons({ chevronForward, helpCircleOutline });
       padding: var(--rc-space-xl) var(--rc-space-lg);
     }
 
+    :host(.featured) .preview {
+      width: 6.5rem;
+    }
+
     :host(.featured) .name {
-      padding-right: 4rem;
       font-size: var(--rc-font-size-title);
     }
 
     :host(.featured) .figure {
       font-size: 3rem;
       color: var(--rc-primary-text);
-    }
-
-    // A route line in neon, decorative, in the corner of the featured card.
-    .line {
-      position: absolute;
-      top: var(--rc-space-md);
-      right: var(--rc-space-md);
-      width: 5.5rem;
-      height: 2.75rem;
-      opacity: 0.85;
-    }
-
-    .line path {
-      fill: none;
-      stroke: var(--rc-primary);
-      stroke-width: 3;
-      stroke-linecap: round;
-      filter: drop-shadow(0 0 3px var(--rc-primary));
     }
 
     .meta,
@@ -198,10 +234,15 @@ export class RouteCard {
   /** Time slot window ("05:00-07:00") whose safety level is shown. */
   readonly slotKey = input<string | null>(null);
   readonly featured = input(false);
+  /** Position in the list: later cards enter a little later (see `entranceDelay`). */
+  readonly index = input(0);
 
   private readonly preferences = inject(PreferencesStore);
 
   protected readonly safety = computed(() => routeSafetyForSlot(this.route(), this.slotKey()));
+
+  /** Staggered entrance: 60 ms per position, up to the 6th, so long lists do not wait. */
+  protected readonly entranceDelay = computed(() => Math.min(this.index(), 6) * 60);
 
   protected readonly distance = computed(() =>
     distanceParts(this.route().distanceKm, this.preferences.preferences().units),

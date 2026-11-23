@@ -14,9 +14,11 @@ export type DifficultyFilter = string;
 export interface RouteFilters {
   distance: DistanceBucket;
   difficulty: DifficultyFilter;
+  /** A surface typed by the admins, or `all`. */
+  surface: string;
 }
 
-export const DEFAULT_FILTERS: RouteFilters = { distance: 'all', difficulty: 'all' };
+export const DEFAULT_FILTERS: RouteFilters = { distance: 'all', difficulty: 'all', surface: 'all' };
 
 /** Buckets are in kilometres whatever the units preference is; only the route cards convert. */
 export const DISTANCE_BUCKET_LABELS: Record<DistanceBucket, string> = {
@@ -39,19 +41,49 @@ function inBucket(km: number, bucket: DistanceBucket): boolean {
   }
 }
 
+function distinctSorted(values: readonly (string | null)[]): string[] {
+  const found = new Set<string>();
+  for (const value of values) if (value) found.add(value);
+  return [...found].sort((a, b) => a.localeCompare(b, 'es'));
+}
+
 /** The distinct difficulties found in the routes, in alphabetical order. */
 export function listDifficulties(routes: readonly Route[]): string[] {
-  const found = new Set<string>();
-  for (const route of routes) if (route.difficulty) found.add(route.difficulty);
-  return [...found].sort((a, b) => a.localeCompare(b, 'es'));
+  return distinctSorted(routes.map((route) => route.difficulty));
+}
+
+/** The distinct surfaces found in the routes, in alphabetical order. */
+export function listSurfaces(routes: readonly Route[]): string[] {
+  return distinctSorted(routes.map((route) => route.surface));
 }
 
 export function filterRoutes(routes: readonly Route[], filters: RouteFilters): Route[] {
   return routes.filter(
     (route) =>
       inBucket(route.distanceKm, filters.distance) &&
-      (filters.difficulty === 'all' || route.difficulty === filters.difficulty),
+      (filters.difficulty === 'all' || route.difficulty === filters.difficulty) &&
+      (filters.surface === 'all' || route.surface === filters.surface),
   );
+}
+
+/** How many filters are set to something other than "Todas". */
+export function countActiveFilters(filters: RouteFilters): number {
+  return (Object.keys(DEFAULT_FILTERS) as (keyof RouteFilters)[]).filter(
+    (key) => filters[key] !== DEFAULT_FILTERS[key],
+  ).length;
+}
+
+/** Lower case without accents, so "Malecón" is found typing "malecon". */
+const fold = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase();
+
+/** Routes whose name contains the typed text, ignoring case and accents; blank keeps all. */
+export function searchRoutes(routes: readonly Route[], query: string): Route[] {
+  const wanted = fold(query).trim();
+  return wanted ? routes.filter((route) => fold(route.name).includes(wanted)) : [...routes];
 }
 
 export interface TimeSlotOption {
@@ -137,3 +169,29 @@ export function sortRoutesForSlot(routes: readonly Route[], key: string | null):
     return a.distanceKm - b.distanceKm;
   });
 }
+
+export type RouteSort = 'safety' | 'distance' | 'name';
+
+export const ROUTE_SORT_LABELS: Record<RouteSort, string> = {
+  safety: 'Más segura',
+  distance: 'Distancia',
+  name: 'Nombre',
+};
+
+/** Orders the routes by safety for the slot, shortest distance or name (accents ignored). */
+export function sortRoutes(
+  routes: readonly Route[],
+  sort: RouteSort,
+  key: string | null,
+): Route[] {
+  switch (sort) {
+    case 'distance':
+      return [...routes].sort((a, b) => a.distanceKm - b.distanceKm || byName(a, b));
+    case 'name':
+      return [...routes].sort(byName);
+    default:
+      return sortRoutesForSlot(routes, key);
+  }
+}
+
+const byName = (a: Route, b: Route) => a.name.localeCompare(b.name, 'es');
