@@ -8,6 +8,7 @@ class CityUpdateSerializer(StrictSerializer):
 
     name = raw_field()
     province = raw_field()
+    type = raw_field()
     location = raw_field()
     coverage = raw_field()
     parentCityId = raw_field()
@@ -15,7 +16,6 @@ class CityUpdateSerializer(StrictSerializer):
 
 class CityCreateSerializer(CityUpdateSerializer):
     id = raw_field()
-    type = raw_field()
 
 
 class CityQuerySerializer(StrictSerializer):

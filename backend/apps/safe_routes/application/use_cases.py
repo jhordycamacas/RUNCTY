@@ -12,6 +12,9 @@ from apps.safe_routes.domain.models import RutaRecomendada, SolicitudRutaSegura,
 from apps.shared.domain.errors import DomainError, ErrorKind
 from apps.system_settings.domain.models import SystemSettings
 
+# Coverage values that enable safe route requests for a city, compared trimmed and casefolded.
+_ENABLED_COVERAGE = frozenset({"active", "activa", "activo"})
+
 
 @dataclass(frozen=True, slots=True)
 class SafeRoutesDeps:
@@ -57,7 +60,8 @@ def create_request(
         raise DomainError(
             ErrorKind.NOT_FOUND, "city-not-found", f'City "{request.city_id}" does not exist.'
         )
-    if city.coverage != "active":
+    # Coverage is free text typed by the admin: tolerate case, spaces and the Spanish spelling.
+    if city.coverage.strip().casefold() not in _ENABLED_COVERAGE:
         raise DomainError(
             ErrorKind.FAILED_PRECONDITION, "city-not-enabled", "The city is not enabled."
         )

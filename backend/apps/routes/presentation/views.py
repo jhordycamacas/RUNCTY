@@ -10,6 +10,7 @@ from apps.routes.application.use_cases import RoutesDeps
 from apps.routes.presentation.serializers import (
     RiskFactorBodySerializer,
     RouteBodySerializer,
+    RouteImageBodySerializer,
     RouteListItemSerializer,
     RouteQuerySerializer,
     SegmentBodySerializer,
@@ -88,6 +89,24 @@ class RouteView(ReadSignedInWriteManage, APIView):
     def delete(self, request, route_id: str) -> Response:
         use_cases.delete_route({"id": route_id}, _deps())
         return changed(request, "Route", {"route": route_id}, "deleted")
+
+
+class RouteImageView(ReadSignedInWriteManage, APIView):
+    """The custom image of a route: any signed-in user reads it, `routes.manage` changes it."""
+
+    def get(self, request, route_id: str) -> Response:
+        routes = adapter("ROUTE_REPOSITORY")
+        image = use_cases.get_route_image(route_id, _can_manage(request), routes)
+        return Response({"image": image})
+
+    def put(self, request, route_id: str) -> Response:
+        body = {**validated_body(RouteImageBodySerializer, request), "routeId": route_id}
+        use_cases.set_route_image(body, _deps())
+        return changed(request, "Route image", {"route": route_id}, "updated")
+
+    def delete(self, request, route_id: str) -> Response:
+        use_cases.remove_route_image({"routeId": route_id}, _deps())
+        return changed(request, "Route image", {"route": route_id}, "removed")
 
 
 class SegmentsView(ManageOnly, APIView):

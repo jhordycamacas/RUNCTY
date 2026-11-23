@@ -53,8 +53,7 @@ class TestListCities:
 
         assert [city["id"] for city in response.json()["cities"]] == ["loja"]
 
-    def test_rejects_an_unknown_coverage_and_unknown_parameters(self, client):
-        assert error_of(client.get(CITIES, {"coverage": "off"}))["reason"] == "invalid-coverage"
+    def test_rejects_unknown_parameters(self, client):
         assert error_of(client.get(CITIES, {"page": "2"}))["reason"] == "invalid-argument"
 
     def test_a_signed_in_runner_reads_it_too(self, client):
@@ -104,7 +103,7 @@ class TestCreateCity:
         assert error_of(response)["reason"] == "city-exists"
 
     def test_domain_rules_use_their_reason(self, client):
-        body = {**NEW_CITY, "coverage": "off"}
+        body = {**NEW_CITY, "coverage": ""}
 
         response = client.post(CITIES, body, format="json", **bearer("admin-token"))
 
@@ -131,14 +130,19 @@ class TestUpdateCity:
         assert response.json()["coverage"] == "suspended"
         assert firebase.cities["loja"].name == "Loja ciudad"
 
-    def test_the_type_cannot_change(self, client, firebase):
+    def test_the_type_is_free_text_and_editable(self, client, firebase):
         response = client.patch(
-            LOJA_URL, {"type": "zone"}, format="json", **bearer("cataloguer-token")
+            LOJA_URL, {"type": "Región"}, format="json", **bearer("cataloguer-token")
         )
 
+        assert response.status_code == 200
+        assert firebase.cities["loja"].type == "Región"
+
+    def test_the_id_cannot_change(self, client, firebase):
+        response = client.patch(LOJA_URL, {"id": "x"}, format="json", **bearer("cataloguer-token"))
+
         assert response.status_code == 400
-        assert error_of(response)["fields"] == {"type": "unknown"}
-        assert firebase.cities["loja"].type == "city"
+        assert error_of(response)["fields"] == {"id": "unknown"}
 
     def test_a_missing_city_is_not_found(self, client):
         response = client.patch(f"{CITIES}/ghost", {}, format="json", **bearer("cataloguer-token"))

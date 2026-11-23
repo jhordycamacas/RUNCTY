@@ -1,5 +1,8 @@
 """Document `cities/{id}`: a city or one of its zones (RF-04).
 
+`type` and `coverage` are free text the admin types. Only `parentCityId` carries meaning: a place
+with a parent city is a zone of it, one without is a top-level city.
+
 `parse` and `with_changes` validate client input and raise an `invalid-argument` domain error
 with the reason code of the broken field. `from_document` reads what is stored and never raises.
 """
@@ -14,9 +17,8 @@ from apps.shared.domain.errors import DomainError, ErrorKind
 # Slug ids, like the admin panel generates them (e.g. `loja`, `loja-centro`).
 _CITY_ID = re.compile(r"[a-z0-9][a-z0-9-]{1,63}")
 _MAX_TEXT = 80
-
-COVERAGES = ("active", "planned", "suspended")
-CITY_TYPES = ("city", "zone")
+_MAX_TYPE = 40
+_MAX_COVERAGE = 60
 
 
 def _invalid(reason: str, message: str) -> DomainError:
@@ -30,21 +32,19 @@ def parse_city_id(value: object) -> str:
 
 
 def parse_coverage(value: object) -> str:
-    if not isinstance(value, str) or value not in COVERAGES:
-        raise _invalid("invalid-coverage", "Coverage must be active, planned or suspended.")
-    return value
+    return _text(value, "invalid-coverage", "Coverage", _MAX_COVERAGE)
 
 
 def parse_parent_id(value: object) -> str:
     if not isinstance(value, str) or not _CITY_ID.fullmatch(value):
-        raise _invalid("invalid-parent-city", "A zone needs the id of its parent city.")
+        raise _invalid("invalid-parent-city", "The parent city needs a valid city id.")
     return value
 
 
-def _text(value: object, reason: str, label: str) -> str:
+def _text(value: object, reason: str, label: str, limit: int = _MAX_TEXT) -> str:
     text = value.strip() if isinstance(value, str) else ""
-    if not text or len(text) > _MAX_TEXT:
-        raise _invalid(reason, f"{label} is required (max {_MAX_TEXT} chars).")
+    if not text or len(text) > limit:
+        raise _invalid(reason, f"{label} is required (max {limit} chars).")
     return text
 
 
@@ -92,47 +92,44 @@ class Ciudad:
         name = _text(raw.get("name"), "invalid-city-name", "City name")
         province = _text(raw.get("province"), "invalid-city-province", "Province")
 
-        city_type = raw.get("type")
-        if not isinstance(city_type, str) or city_type not in CITY_TYPES:
-            raise _invalid("invalid-city-type", "Type must be city or zone.")
+        city_type = _text(raw.get("type"), "invalid-city-type", "Type", _MAX_TYPE)
         lat, lng = _location(raw.get("location"))
         coverage = parse_coverage(raw.get("coverage"))
 
         parent = raw.get("parentCityId")
-        if city_type == "city" and parent is not None:
-            raise _invalid("invalid-parent-city", "Only a zone has a parent city.")
-        if city_type == "zone":
-            if parse_parent_id(parent) == city_id:
-                raise _invalid("invalid-parent-city", "A zone cannot belong to itself.")
+        if parent is not None and parse_parent_id(parent) == city_id:
+            raise _invalid("invalid-parent-city", "A zone cannot belong to itself.")
         return cls(city_id, name, province, city_type, lat, lng, coverage, parent, country)
 
     def with_changes(self, changes: Mapping[str, object]) -> "Ciudad":
-        """This city with some editable fields replaced. Identity and type are immutable."""
+        """This city with some editable fields replaced. Only the identity is immutable."""
         merged = {
             "name": self.name,
             "province": self.province,
+            "type": self.type,
             "location": {"lat": self.lat, "lng": self.lng},
             "coverage": self.coverage,
             "parentCityId": self.parent_city_id,
             **changes,
         }
-        return self.parse({**merged, "id": self.id, "type": self.type}, self.country)
+        return self.parse({**merged, "id": self.id}, self.country)
 
     @classmethod
     def from_document(cls, city_id: str, data: Mapping[str, object]) -> "Ciudad":
         """Tolerant read: documents created before zones existed have no `type`."""
         location = data.get("location")
         point = location if isinstance(location, Mapping) else {}
+        city_type = data.get("type")
         coverage = data.get("coverage")
         parent = data.get("parentCityId")
         return cls(
             id=city_id,
             name=_stored_text(data.get("name"), city_id),
             province=_stored_text(data.get("province"), ""),
-            type="zone" if data.get("type") == "zone" else "city",
+            type=city_type if isinstance(city_type, str) and city_type else "city",
             lat=_stored_number(point.get("lat")),
             lng=_stored_number(point.get("lng")),
-            coverage=coverage if coverage in COVERAGES else "planned",
+            coverage=coverage if isinstance(coverage, str) and coverage else "planned",
             parent_city_id=parent if isinstance(parent, str) else None,
             country=_stored_text(data.get("country"), ""),
         )

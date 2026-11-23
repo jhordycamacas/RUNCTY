@@ -90,6 +90,13 @@ CATALOG_REPOSITORY = (
 SAFE_ROUTE_REQUEST_REPOSITORY = (
     "apps.safe_routes.infrastructure.document_repositories.FirestoreSafeRouteRequestRepository"
 )
+FRIEND_REQUEST_REPOSITORY = (
+    "apps.friends.infrastructure.firestore_friends.FirestoreFriendRequestRepository"
+)
+FRIENDSHIP_REPOSITORY = (
+    "apps.friends.infrastructure.firestore_friends.FirestoreFriendshipRepository"
+)
+FRIENDS_ERASER = "apps.friends.infrastructure.firestore_friends.FirestoreFriendsEraser"
 
 # --- Django ----------------------------------------------------------------
 

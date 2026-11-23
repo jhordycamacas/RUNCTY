@@ -1,18 +1,25 @@
 from datetime import date, datetime, timezone
+from zoneinfo import ZoneInfo
 
 from apps.cities.domain.models import Ciudad
+from apps.risk_alerts.domain.models import AlertaZonaRiesgo
+from apps.routes.domain.geo import LatLng
 from apps.routes.domain.models import PuntoRuta, Ruta
 from apps.summary.domain.metrics import (
+    LatestUser,
     UserRecord,
     cities_summary,
     city_comparison,
-    registrations_by_week,
+    latest_registrations,
     routes_summary,
+    safety_summary,
+    signups,
     users_summary,
     week_start,
 )
 
-NOW = datetime(2026, 11, 17, 15, 0, tzinfo=timezone.utc)  # a Tuesday
+LOCAL = ZoneInfo("America/Guayaquil")  # UTC-5, no daylight saving
+NOW = datetime(2026, 11, 17, 15, 0, tzinfo=timezone.utc)  # a Tuesday, 10:00 in Guayaquil
 POINT = PuntoRuta(-3.99, -79.2, "A")
 
 
@@ -52,24 +59,200 @@ class TestWeeks:
         assert week_start(date(2026, 11, 22)) == date(2026, 11, 16)
         assert week_start(date(2026, 11, 16)) == date(2026, 11, 16)
 
-    def test_there_are_eight_weeks_oldest_first_ending_with_the_current_one(self):
-        weeks = registrations_by_week([], NOW)
 
-        assert len(weeks) == 8
-        assert weeks[0] == {"weekStart": "2026-09-28", "count": 0}
-        assert weeks[-1] == {"weekStart": "2026-11-16", "count": 0}
+def at_local(day: str, hour: int = 12) -> datetime:
+    """A moment of the local calendar day `day` (UTC-5), as the stored UTC timestamp."""
+    local = datetime.fromisoformat(f"{day}T{hour:02d}:00:00").replace(tzinfo=LOCAL)
+    return local.astimezone(timezone.utc)
 
-    def test_each_registration_counts_in_its_own_utc_week(self):
+
+def starts(series: list[dict]) -> list[str]:
+    return [bucket["start"] for bucket in series]
+
+
+def counts(series: list[dict]) -> list[int]:
+    return [bucket["count"] for bucket in series]
+
+
+class TestSignups:
+    def test_each_range_has_its_fixed_number_of_buckets_oldest_first(self):
+        result = signups([], NOW, LOCAL)
+
+        assert [len(result[name]) for name in ("daily", "weekly", "monthly")] == [30, 12, 12]
+        assert result["before"] == {"daily": 0, "weekly": 0, "monthly": 0}
+        assert sum(sum(counts(result[name])) for name in ("daily", "weekly", "monthly")) == 0
+
+    def test_the_daily_range_ends_today_in_the_local_time_zone(self):
+        daily = signups([], NOW, LOCAL)["daily"]
+
+        assert daily[0]["start"] == "2026-10-19"
+        assert daily[-1]["start"] == "2026-11-17"
+
+    def test_the_local_day_can_differ_from_the_utc_day(self):
+        late_utc = datetime(2026, 11, 17, 3, 0, tzinfo=timezone.utc)  # Monday 22:00 in Guayaquil
+
+        daily = signups([late_utc], late_utc, LOCAL)["daily"]
+
+        assert daily[-1] == {"start": "2026-11-16", "count": 1}
+
+    def test_a_registration_counts_in_the_local_day_not_the_utc_day(self):
         created = [
-            datetime(2026, 11, 16, 0, 0, tzinfo=timezone.utc),
-            datetime(2026, 11, 15, 23, 59, tzinfo=timezone.utc),
-            datetime(2026, 9, 28, 8, 0, tzinfo=timezone.utc),
-            datetime(2026, 9, 27, 23, 0, tzinfo=timezone.utc),  # before the window
+            datetime(2026, 11, 17, 4, 59, tzinfo=timezone.utc),  # 23:59 on the 16th
+            datetime(2026, 11, 17, 5, 0, tzinfo=timezone.utc),  # 00:00 on the 17th
         ]
 
-        counts = [week["count"] for week in registrations_by_week(created, NOW)]
+        daily = signups(created, NOW, LOCAL)["daily"]
 
-        assert counts == [1, 0, 0, 0, 0, 0, 1, 1]
+        assert counts(daily)[-2:] == [1, 1]
+
+    def test_weeks_start_on_monday_and_the_last_one_is_the_current_week(self):
+        weekly = signups([], NOW, LOCAL)["weekly"]
+
+        assert weekly[0]["start"] == "2026-08-31"
+        assert weekly[-1]["start"] == "2026-11-16"
+        assert all(date.fromisoformat(start).weekday() == 0 for start in starts(weekly))
+
+    def test_sunday_night_local_time_belongs_to_the_week_that_ends(self):
+        # Sunday 23:30 in Guayaquil is already Monday 04:30 UTC.
+        created = [datetime(2026, 11, 16, 4, 30, tzinfo=timezone.utc)]
+
+        weekly = signups(created, NOW, LOCAL)["weekly"]
+
+        assert counts(weekly)[-2:] == [1, 0]
+
+    def test_months_start_on_the_first_and_cross_the_year(self):
+        monthly = signups([], NOW, LOCAL)["monthly"]
+
+        assert monthly[0]["start"] == "2025-12-01"
+        assert monthly[1]["start"] == "2026-01-01"
+        assert monthly[-1]["start"] == "2026-11-01"
+
+    def test_buckets_without_registrations_count_zero(self):
+        created = [at_local("2026-11-17"), at_local("2026-11-17"), at_local("2026-09-02")]
+
+        series = signups(created, NOW, LOCAL)
+
+        assert counts(series["daily"]).count(0) == 29
+        assert counts(series["monthly"])[-1] == 2
+        assert counts(series["monthly"])[-3] == 1
+        assert sum(counts(series["weekly"])) == 3
+
+    def test_registrations_before_the_first_bucket_are_counted_apart_for_each_range(self):
+        created = [
+            at_local("2026-10-18"),  # one day before the daily range
+            at_local("2026-08-30"),  # the Sunday before the first week
+            at_local("2025-11-30"),  # before the first month
+            at_local("2026-11-10"),  # inside every range
+        ]
+
+        before = signups(created, NOW, LOCAL)["before"]
+
+        assert before == {"daily": 3, "weekly": 2, "monthly": 1}
+
+    def test_registrations_after_now_fill_no_bucket_and_are_not_before_any(self):
+        series = signups([at_local("2026-11-30")], NOW, LOCAL)
+
+        assert sum(counts(series["daily"])) == 0
+        assert series["before"] == {"daily": 0, "weekly": 0, "monthly": 0}
+
+    def test_the_current_day_follows_the_given_time_zone(self):
+        evening = datetime(2026, 11, 17, 23, 30, tzinfo=timezone.utc)
+
+        assert signups([], evening, LOCAL)["daily"][-1]["start"] == "2026-11-17"
+        assert signups([], evening, ZoneInfo("Asia/Tokyo"))["daily"][-1]["start"] == "2026-11-18"
+
+    def test_a_naive_timestamp_is_read_as_utc(self):
+        created = [datetime(2026, 11, 17, 3, 0)]  # 22:00 on the 16th in Guayaquil
+
+        assert counts(signups(created, NOW, LOCAL)["daily"])[-2] == 1
+
+    def test_accounts_without_a_valid_date_are_ignored_by_the_summary(self):
+        users = [UserRecord("runner", None), UserRecord("runner", at_local("2026-11-17"))]
+
+        result = users_summary(users, [], NOW, LOCAL)
+
+        assert result["total"] == 2
+        assert sum(counts(result["signups"]["daily"])) == 1
+
+
+class TestLatestRegistrations:
+    def person(self, uid, day, **changes) -> LatestUser:
+        fields = {"first_name": "Ana", "last_name": "Mora", "city_id": "loja"} | changes
+        return LatestUser(uid=uid, created_at=at_local(day), **fields)
+
+    def test_lists_the_newest_first_and_at_most_five(self):
+        people = [self.person(f"u{i}", f"2026-11-{i:02d}") for i in range(1, 9)]
+
+        latest = latest_registrations(people)
+
+        assert [row["uid"] for row in latest] == ["u8", "u7", "u6", "u5", "u4"]
+
+    def test_each_row_carries_only_what_the_list_shows(self):
+        row = latest_registrations([self.person("u1", "2026-11-17")])[0]
+
+        assert row == {
+            "uid": "u1",
+            "firstName": "Ana",
+            "lastName": "Mora",
+            "cityId": "loja",
+            "createdAt": "2026-11-17T17:00:00Z",
+        }
+
+    def test_a_missing_city_stays_null(self):
+        row = latest_registrations([self.person("u1", "2026-11-17", city_id=None)])[0]
+
+        assert row["cityId"] is None
+
+    def test_nothing_to_list_without_accounts(self):
+        assert latest_registrations([]) == []
+
+
+class TestSafetySummary:
+    def alert(self, valid_from, valid_to, start=None, end=None) -> AlertaZonaRiesgo:
+        return AlertaZonaRiesgo(
+            id="a",
+            type="Robos",
+            severity="alta",
+            description="",
+            location=LatLng(-3.99, -79.2),
+            radius_m=100,
+            city_id="loja",
+            valid_from=valid_from,
+            valid_to=valid_to,
+            start_time=start,
+            end_time=end,
+        )
+
+    def test_counts_the_alerts_in_force_now_not_the_expired_or_future_ones(self):
+        alerts = [
+            self.alert("2026-11-01", "2026-11-30"),
+            self.alert("2026-11-17", "2026-11-17"),
+            self.alert("2026-10-01", "2026-11-16"),  # expired yesterday
+            self.alert("2026-11-18", "2026-12-01"),  # starts tomorrow
+        ]
+
+        assert safety_summary(alerts, [], NOW, LOCAL)["activeAlerts"] == 2
+
+    def test_an_alert_with_a_daily_window_counts_only_inside_it(self):
+        evening = self.alert("2026-11-01", "2026-11-30", "18:00", "22:00")
+        morning = self.alert("2026-11-01", "2026-11-30", "06:00", "11:00")  # it is 10:00 there
+
+        assert safety_summary([evening, morning], [], NOW, LOCAL)["activeAlerts"] == 1
+
+    def test_the_day_of_the_alerts_is_the_local_one(self):
+        late_utc = datetime(2026, 11, 18, 3, 0, tzinfo=timezone.utc)  # still the 17th in Loja
+
+        result = safety_summary([self.alert("2026-11-17", "2026-11-17")], [], late_utc, LOCAL)
+
+        assert result["activeAlerts"] == 1
+
+    def test_counts_the_incidents_of_the_last_30_days_including_today(self):
+        dates = ["2026-11-17", "2026-10-19", "2026-10-18", "2026-11-18", "bogus", ""]
+
+        assert safety_summary([], dates, NOW, LOCAL)["incidentsLast30Days"] == 2
+
+    def test_there_is_nothing_to_count_without_alerts_or_incidents(self):
+        assert safety_summary([], [], NOW, LOCAL) == {"activeAlerts": 0, "incidentsLast30Days": 0}
 
 
 class TestUsersSummary:
@@ -82,7 +265,7 @@ class TestUsersSummary:
             UserRecord(None, days_ago(2)),
         ]
 
-        summary = users_summary(users, [], NOW)
+        summary = users_summary(users, [], NOW, LOCAL)
 
         assert summary["total"] == 5
         assert summary["byRole"] == {"runner": 3, "admin": 1, "none": 1}
@@ -93,12 +276,12 @@ class TestUsersSummary:
         users = [UserRecord("runner", None)] * 3
         private = [("sportProfile", {}), ("other", {}), ("sportProfile", {})]
 
-        profiles = users_summary(users, private, NOW)["sportProfiles"]
+        profiles = users_summary(users, private, NOW, LOCAL)["sportProfiles"]
 
         assert profiles == {"completed": 2, "percentage": 67}
 
     def test_there_is_no_percentage_without_users(self):
-        profiles = users_summary([], [("sportProfile", {})], NOW)["sportProfiles"]
+        profiles = users_summary([], [("sportProfile", {})], NOW, LOCAL)["sportProfiles"]
 
         assert profiles["percentage"] == 0
 
@@ -112,7 +295,7 @@ class TestUsersSummary:
             ("preferences", {"appearance": "bogus"}),
         ]
 
-        preferences = users_summary([], private, NOW)["preferences"]
+        preferences = users_summary([], private, NOW, LOCAL)["preferences"]
 
         assert preferences["saved"] == 3
         assert preferences["appearance"] == {"system": 0, "light": 1, "dark": 2}
@@ -133,7 +316,7 @@ class TestUsersBySportLevel:
             ("preferences", {"level": "advanced"}),  # only the sport profile counts
         ]
 
-        by_level = users_summary([], private, NOW)["bySportLevel"]
+        by_level = users_summary([], private, NOW, LOCAL)["bySportLevel"]
 
         assert by_level == [
             {"level": "beginner", "users": 2},
@@ -148,10 +331,10 @@ class TestUsersBySportLevel:
             ("sportProfile", {"level": 3}),
         ]
 
-        assert users_summary([], private, NOW)["bySportLevel"] == []
+        assert users_summary([], private, NOW, LOCAL)["bySportLevel"] == []
 
     def test_there_is_nothing_to_list_without_profiles(self):
-        assert users_summary([UserRecord("runner", None)], [], NOW)["bySportLevel"] == []
+        assert users_summary([UserRecord("runner", None)], [], NOW, LOCAL)["bySportLevel"] == []
 
 
 class TestCityComparison:

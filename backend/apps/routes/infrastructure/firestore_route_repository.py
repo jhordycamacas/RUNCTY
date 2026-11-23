@@ -18,6 +18,9 @@ from apps.shared.infrastructure.firebase.collections import ROUTES, SAFETY_INCID
 SEGMENTS = "segments"
 TIME_SLOTS = "timeSlots"
 RISK_FACTORS = "riskFactors"
+# `routes/{id}/private/image`: the full custom image; read by its own endpoint only.
+PRIVATE = "private"
+IMAGE = "image"
 
 _SENTINELS = {Marker.SERVER_TIMESTAMP: SERVER_TIMESTAMP, Marker.DELETE_FIELD: DELETE_FIELD}
 
@@ -80,6 +83,12 @@ class FirestoreRouteRepository:
     def get(self, route_id: str) -> Ruta | None:
         snapshot = self._routes().document(route_id).get()
         return Ruta.from_document(snapshot.id, snapshot.to_dict()) if snapshot.exists else None
+
+    def image(self, route_id: str) -> str | None:
+        snapshot = self._routes().document(route_id).collection(PRIVATE).document(IMAGE).get()
+        data = snapshot.to_dict() if snapshot.exists else None
+        stored = (data or {}).get("data")
+        return stored if isinstance(stored, str) else None
 
     def state(self, route_id: str) -> RouteState | None:
         route = self._routes().document(route_id)

@@ -31,15 +31,15 @@ def _existing_city(city_id: str, cities: CityRepository) -> Ciudad:
 
 
 def _assert_valid_parent(city: Ciudad, cities: CityRepository) -> None:
-    """A zone belongs to an existing city, not to another zone."""
+    """A zone belongs to an existing top-level city, never to another zone."""
     if city.parent_city_id is None:
         return
     parent = cities.get(city.parent_city_id)
-    if parent is None or parent.type != "city":
+    if parent is None or parent.parent_city_id is not None:
         raise DomainError(
             ErrorKind.INVALID_ARGUMENT,
             "invalid-parent-city",
-            "The parent of a zone must be an existing city.",
+            "The parent must be an existing city that is not a zone itself.",
         )
 
 

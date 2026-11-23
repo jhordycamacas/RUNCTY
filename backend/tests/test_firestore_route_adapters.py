@@ -100,6 +100,26 @@ class TestReading:
         assert repository.get("ghost") is None
         assert repository.state("ghost") is None
 
+    def test_reads_the_image_from_the_private_subdocument(self, client):
+        route = client.collection.return_value.document.return_value
+        image = route.collection.return_value.document.return_value
+        image.get.return_value = snapshot("image", {"data": "data:image/png;base64,AAAA"})
+
+        stored = FirestoreRouteRepository().image("r1")
+
+        assert stored == "data:image/png;base64,AAAA"
+        route.collection.assert_called_once_with("private")
+        route.collection.return_value.document.assert_called_once_with("image")
+
+    @pytest.mark.parametrize("data", [None, {}, {"data": 3}])
+    def test_a_missing_or_malformed_image_document_is_no_image(self, client, data):
+        route = client.collection.return_value.document.return_value
+        route.collection.return_value.document.return_value.get.return_value = snapshot(
+            "image", data
+        )
+
+        assert FirestoreRouteRepository().image("r1") is None
+
     def test_lists_every_route_or_those_of_a_city(self, client):
         routes = client.collection.return_value
         routes.stream.return_value = [snapshot("r1", ROUTE)]

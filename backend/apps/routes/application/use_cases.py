@@ -29,6 +29,7 @@ from apps.routes.domain.models import (
     parse_doc_id,
 )
 from apps.routes.domain.reorder import insert_at, move_to, order_updates, ordered_ids, remove_id
+from apps.routes.domain.route_image import RouteImage
 from apps.routes.domain.safety import CalculadoraIndiceSeguridad, TramoEvaluado
 from apps.routes.domain.time import local_now, time_windows_overlap, to_window
 from apps.safety_data.domain.models import incident_penalties
@@ -257,8 +258,60 @@ def update_route(raw: object, deps: RoutesDeps) -> None:
     deps.routes.mutate(route_id, plan)
 
 
+def _image_path(route_id: str) -> str:
+    return f"{_route_path(route_id)}/private/image"
+
+
+def get_route_image(raw_route_id: object, can_manage: bool, routes: RouteRepository) -> str:
+    """The data URL of the custom image; an inactive route has none for who cannot manage."""
+    route_id = parse_doc_id(raw_route_id, "invalid-route-id")
+    route = routes.get(route_id)
+    image = routes.image(route_id) if route and (route.active or can_manage) else None
+    if image is None:
+        raise _not_found("route-image-not-found", f'Route "{route_id}" has no image.')
+    return image
+
+
+def set_route_image(raw: object, deps: RoutesDeps) -> None:
+    """Stores the full image under the route and its thumbnail in the route document."""
+    route_id = parse_doc_id(_as_mapping(raw).get("routeId"), "invalid-route-id")
+    image = RouteImage.parse(raw)
+
+    def plan(state: RouteState | None) -> list[WriteOp]:
+        _require_state(state, route_id)
+        stored = {**image.to_document(), "updatedAt": SERVER_TIMESTAMP}
+        return [
+            WriteOp("set", _image_path(route_id), stored),
+            WriteOp(
+                "update",
+                _route_path(route_id),
+                {"imageThumb": image.thumbnail, "updatedAt": SERVER_TIMESTAMP},
+            ),
+        ]
+
+    deps.routes.mutate(route_id, plan)
+
+
+def remove_route_image(raw: object, deps: RoutesDeps) -> None:
+    """Idempotent: removing a missing image is not an error, a missing route is."""
+    route_id = parse_doc_id(_as_mapping(raw).get("routeId"), "invalid-route-id")
+
+    def plan(state: RouteState | None) -> list[WriteOp]:
+        _require_state(state, route_id)
+        return [
+            WriteOp("delete", _image_path(route_id)),
+            WriteOp(
+                "update",
+                _route_path(route_id),
+                {"imageThumb": DELETE_FIELD, "updatedAt": SERVER_TIMESTAMP},
+            ),
+        ]
+
+    deps.routes.mutate(route_id, plan)
+
+
 def delete_route(raw: object, deps: RoutesDeps) -> None:
-    """Cascades to segments, risk factors and time slots."""
+    """Cascades to segments, risk factors, time slots and the image."""
     route_id = parse_doc_id(_as_mapping(raw).get("id"), "invalid-route-id")
     if deps.routes.get(route_id) is None:
         raise _not_found("route-not-found", f'Route "{route_id}" does not exist.')

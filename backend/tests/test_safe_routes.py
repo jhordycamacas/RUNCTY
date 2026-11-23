@@ -161,6 +161,23 @@ class TestApi:
         assert error_of(response)["reason"] == reason
         assert not any(path.startswith("safeRouteRequests/") for path in firebase.docs)
 
+    @pytest.mark.parametrize("coverage", ["active", " Active ", "ACTIVA", "activo", "Activo "])
+    def test_free_text_coverage_that_means_active_enables_the_city(
+        self, client, firebase, coverage
+    ):
+        firebase.cities["loja"] = Ciudad("loja", "Loja", "Loja", "city", -3.99, -79.2, coverage)
+
+        assert client.post(REQUESTS, BODY, format="json", **RUNNER).status_code == 201
+
+    @pytest.mark.parametrize("coverage", ["", "planned", "inactiva", "en proceso"])
+    def test_any_other_coverage_text_does_not_enable_the_city(self, client, firebase, coverage):
+        firebase.cities["loja"] = Ciudad("loja", "Loja", "Loja", "city", -3.99, -79.2, coverage)
+
+        response = client.post(REQUESTS, BODY, format="json", **RUNNER)
+
+        assert response.status_code == 400
+        assert error_of(response)["reason"] == "city-not-enabled"
+
     def test_a_runner_lists_only_their_requests_newest_first(self, client, firebase):
         first = create(client)["id"]
         second = create(client, {**BODY, "distanceKm": 10})["id"]

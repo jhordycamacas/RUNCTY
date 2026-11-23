@@ -16,6 +16,10 @@ GUARDED_TRAILS = "guardedTrails"
 RISK_ZONE_ALERTS = "riskZoneAlerts"
 # EP-09. Each request keeps the `uid` of the runner who made it.
 SAFE_ROUTE_REQUESTS = "safeRouteRequests"
+# Friendships: requests live in `friendRequests`; each friendship is mirrored in the
+# `friends` sub-collection of both users (`users/{uid}/friends/{friendUid}`).
+FRIEND_REQUESTS = "friendRequests"
+FRIENDS = "friends"
 # System parameters: the single document `systemSettings/global` (`settings.manage`).
 SYSTEM_SETTINGS = "systemSettings"
 # Option catalogs the admin manages (sport levels, sport goals): one document per catalog id.

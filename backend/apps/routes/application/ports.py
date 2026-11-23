@@ -42,6 +42,10 @@ class RouteRepository(Protocol):
         """The segments, time slots and risk factors of a route; None if it does not exist."""
         ...
 
+    def image(self, route_id: str) -> str | None:
+        """The data URL of the custom image of a route, or None when it has none."""
+        ...
+
     def commit(self, ops: list[WriteOp]) -> None:
         """Applies the writes atomically."""
         ...

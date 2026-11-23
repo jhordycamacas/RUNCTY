@@ -41,6 +41,12 @@ class UserRepository(Protocol):
         ...
 
 
+class UserFriendsEraser(Protocol):
+    def erase(self, uid: str) -> None:
+        """Deletes the friend requests and friendships of `uid`, on both sides. Idempotent."""
+        ...
+
+
 class SportProfileRepository(Protocol):
     def get(self, uid: str) -> PerfilDeportivo | None: ...
 

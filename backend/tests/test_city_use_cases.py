@@ -45,8 +45,8 @@ class TestListCities:
         assert [city.id for city in list_cities(None, deps.cities)] == ["ambato", "loja", "zeta"]
         assert [city.id for city in list_cities("planned", deps.cities)] == ["ambato"]
 
-    def test_rejects_an_unknown_coverage(self, deps):
-        assert failure(lambda: list_cities("off", deps.cities)).reason == "invalid-coverage"
+    def test_rejects_a_blank_coverage(self, deps):
+        assert failure(lambda: list_cities(" ", deps.cities)).reason == "invalid-coverage"
 
 
 class TestCreateCity:
@@ -61,8 +61,8 @@ class TestCreateCity:
 
         assert (error.kind, error.reason) == (ErrorKind.ALREADY_EXISTS, "city-exists")
 
-    def test_a_zone_needs_an_existing_city_as_parent(self, firebase, deps):
-        zone = {**NEW_CITY, "id": "loja-sur", "type": "zone"}
+    def test_a_parent_must_be_an_existing_top_level_city(self, firebase, deps):
+        zone = {**NEW_CITY, "id": "loja-sur", "type": "Barrio"}
 
         create_city({**zone, "parentCityId": "loja"}, deps)
         assert firebase.cities["loja-sur"].parent_city_id == "loja"
@@ -73,6 +73,11 @@ class TestCreateCity:
                 lambda parent=parent: create_city({**zone, "parentCityId": parent}, deps)
             )
             assert error.reason == "invalid-parent-city"
+
+    def test_the_parent_is_optional_for_any_type(self, firebase, deps):
+        create_city({**NEW_CITY, "type": "Zona"}, deps)
+
+        assert firebase.cities["quito"].parent_city_id is None
 
     def test_invalid_input_writes_nothing(self, firebase, deps):
         assert failure(lambda: create_city({**NEW_CITY, "name": ""}, deps)).reason == (
@@ -87,6 +92,11 @@ class TestUpdateCity:
 
         assert city.coverage == "suspended"
         assert firebase.cities["loja"] == city
+
+    def test_the_type_is_editable(self, firebase, deps):
+        city = update_city("loja", {"type": "Región"}, deps)
+
+        assert firebase.cities["loja"].type == city.type == "Región"
 
     def test_reports_a_missing_city(self, deps):
         error = failure(lambda: update_city("ghost", {}, deps))

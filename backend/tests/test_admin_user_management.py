@@ -21,6 +21,7 @@ from tests.fakes import (
     USER_MANAGER,
     InMemoryAuthGateway,
     InMemoryCatalogRepository,
+    InMemoryFriendsEraser,
     InMemorySportProfileRepository,
     InMemoryUserRepository,
 )
@@ -148,7 +149,11 @@ class TestSportProfileUseCases:
 class TestDeleteUserAccount:
     def delete(self, firebase, caller, uid):
         delete_user_account(
-            caller, uid, InMemoryUserRepository(firebase), InMemoryAuthGateway(firebase)
+            caller,
+            uid,
+            InMemoryUserRepository(firebase),
+            InMemoryAuthGateway(firebase),
+            InMemoryFriendsEraser(firebase),
         )
 
     def test_deletes_the_profile_the_private_documents_and_the_credentials(self, firebase, ana):

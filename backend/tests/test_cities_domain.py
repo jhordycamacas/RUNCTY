@@ -26,13 +26,18 @@ class TestParse:
             "loja", "Loja", "Loja", "city", -3.99, -79.2, "active", None, "EC"
         )
 
-    def test_a_zone_names_its_parent_city(self):
+    def test_a_parent_city_makes_it_a_zone_whatever_the_type_text(self):
         zone = Ciudad.parse(
-            {**LOJA, "id": "loja-centro", "type": "zone", "parentCityId": "loja"}, "EC"
+            {**LOJA, "id": "loja-centro", "type": " Barrio ", "parentCityId": "loja"}, "EC"
         )
 
-        assert zone.type == "zone"
+        assert zone.type == "Barrio"
         assert zone.parent_city_id == "loja"
+
+    def test_type_and_coverage_are_free_text(self):
+        city = Ciudad.parse({**LOJA, "type": "Región", "coverage": " En estudio "}, "EC")
+
+        assert (city.type, city.coverage) == ("Región", "En estudio")
 
     @pytest.mark.parametrize(
         ("override", "reason"),
@@ -43,8 +48,12 @@ class TestParse:
             ({"name": "x" * 81}, "invalid-city-name"),
             ({"province": ""}, "invalid-city-province"),
             ({"province": 5}, "invalid-city-province"),
-            ({"type": "region"}, "invalid-city-type"),
-            ({"coverage": "unknown"}, "invalid-coverage"),
+            ({"type": " "}, "invalid-city-type"),
+            ({"type": 5}, "invalid-city-type"),
+            ({"type": "x" * 41}, "invalid-city-type"),
+            ({"coverage": ""}, "invalid-coverage"),
+            ({"coverage": None}, "invalid-coverage"),
+            ({"coverage": "x" * 61}, "invalid-coverage"),
             ({"location": None}, "invalid-city-location"),
             ({"location": {"lat": 91, "lng": 0}}, "invalid-city-location"),
             ({"location": {"lat": 0, "lng": -181}}, "invalid-city-location"),
@@ -52,9 +61,8 @@ class TestParse:
             ({"location": {"lat": True, "lng": 0}}, "invalid-city-location"),
             ({"location": {"lat": 0}}, "invalid-city-location"),
             ({"parentCityId": "loja"}, "invalid-parent-city"),
-            ({"type": "zone"}, "invalid-parent-city"),
-            ({"type": "zone", "parentCityId": "loja"}, "invalid-parent-city"),
-            ({"type": "zone", "parentCityId": "Bad Id"}, "invalid-parent-city"),
+            ({"parentCityId": "Bad Id"}, "invalid-parent-city"),
+            ({"parentCityId": 5}, "invalid-parent-city"),
         ],
     )
     def test_rejects_broken_input(self, override, reason):
@@ -76,23 +84,24 @@ class TestWithChanges:
 
     def test_validates_the_result(self):
         assert reason_of(lambda: self.ZONE.with_changes({"name": ""})) == "invalid-city-name"
-        assert reason_of(lambda: self.ZONE.with_changes({"parentCityId": None})) == (
-            "invalid-parent-city"
-        )
+        assert reason_of(lambda: self.ZONE.with_changes({"type": ""})) == "invalid-city-type"
 
-    def test_a_city_cannot_get_a_parent(self):
-        city = Ciudad.parse(LOJA, "EC")
+    def test_type_and_parent_can_change(self):
+        changed = self.ZONE.with_changes({"type": "Barrio", "parentCityId": None})
 
-        assert reason_of(lambda: city.with_changes({"parentCityId": "quito"})) == (
-            "invalid-parent-city"
-        )
+        assert (changed.type, changed.parent_city_id) == ("Barrio", None)
 
 
 class TestStoredDocuments:
     def test_reads_tolerantly(self):
-        city = Ciudad.from_document("old", {"name": 5, "location": "x", "coverage": "bogus"})
+        city = Ciudad.from_document("old", {"name": 5, "location": "x", "coverage": 3})
 
         assert city == Ciudad("old", "old", "", "city", 0, 0, "planned")
+
+    def test_keeps_stored_free_text_as_written(self):
+        city = Ciudad.from_document("x", {"type": "Región", "coverage": "En estudio"})
+
+        assert (city.type, city.coverage) == ("Región", "En estudio")
 
     def test_round_trips_the_stored_fields(self):
         zone = Ciudad("loja-centro", "Centro", "Loja", "zone", -3.99, -79.2, "active", "loja", "EC")
@@ -117,5 +126,5 @@ class TestStoredDocuments:
 def test_parse_city_id_and_coverage():
     assert parse_city_id("loja-2") == "loja-2"
     assert reason_of(lambda: parse_city_id("x/y")) == "invalid-city-id"
-    assert parse_coverage("planned") == "planned"
-    assert reason_of(lambda: parse_coverage("off")) == "invalid-coverage"
+    assert parse_coverage(" planned ") == "planned"
+    assert reason_of(lambda: parse_coverage(" ")) == "invalid-coverage"

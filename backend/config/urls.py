@@ -11,6 +11,7 @@ urlpatterns = [
     path("api/v1/", include("apps.support_points.presentation.urls")),
     path("api/v1/", include("apps.risk_alerts.presentation.urls")),
     path("api/v1/", include("apps.safe_routes.presentation.urls")),
+    path("api/v1/", include("apps.friends.presentation.urls")),
     path("api/v1/", include("apps.summary.presentation.urls")),
     path("api/v1/", include("apps.system_settings.presentation.urls")),
     path("api/v1/", include("apps.catalogs.presentation.urls")),

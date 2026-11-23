@@ -12,6 +12,7 @@ from tests.fakes import (
     RUNNER,
     FakeTokenVerifier,
     InMemoryAuthGateway,
+    InMemoryFriendsEraser,
     InMemoryUserRepository,
 )
 
@@ -40,7 +41,13 @@ class TestIsRecentSignIn:
 class TestDeleteAccount:
     def delete(self, firebase, principal: Principal, seconds_since_sign_in: float = 30) -> None:
         caller = replace(principal, auth_time=NOW - seconds_since_sign_in)
-        delete_account(caller, NOW, InMemoryUserRepository(firebase), InMemoryAuthGateway(firebase))
+        delete_account(
+            caller,
+            NOW,
+            InMemoryUserRepository(firebase),
+            InMemoryAuthGateway(firebase),
+            InMemoryFriendsEraser(firebase),
+        )
 
     def test_deletes_the_firestore_data_first_and_then_the_auth_user(self, firebase):
         firebase.private[(RUNNER.uid, "preferences")] = {"units": "metric"}

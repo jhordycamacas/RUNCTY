@@ -116,7 +116,13 @@ class UserDetailView(APIView):
         return Response({"user": UserSerializer(user).data})
 
     def delete(self, request, uid: str) -> Response:
-        delete_user_account(request.user, uid, adapter("USER_REPOSITORY"), adapter("AUTH_GATEWAY"))
+        delete_user_account(
+            request.user,
+            uid,
+            adapter("USER_REPOSITORY"),
+            adapter("AUTH_GATEWAY"),
+            adapter("FRIENDS_ERASER"),
+        )
         logger.info("Account %s deleted by %s", uid, request.user.uid)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -163,7 +169,11 @@ class OwnProfileView(APIView):
 
     def delete(self, request) -> Response:
         delete_account(
-            request.user, time.time(), adapter("USER_REPOSITORY"), adapter("AUTH_GATEWAY")
+            request.user,
+            time.time(),
+            adapter("USER_REPOSITORY"),
+            adapter("AUTH_GATEWAY"),
+            adapter("FRIENDS_ERASER"),
         )
         logger.info("Account %s deleted", request.user.uid)
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -6,6 +6,12 @@ from dataclasses import replace
 
 from apps.catalogs.infrastructure.firestore_catalog_repository import FirestoreCatalogRepository
 from apps.cities.domain.models import Ciudad
+from apps.friends.domain.models import Friendship
+from apps.friends.infrastructure.firestore_friends import (
+    FirestoreFriendRequestRepository,
+    FirestoreFriendsEraser,
+)
+from apps.risk_alerts.domain.models import AlertaZonaRiesgo
 from apps.risk_alerts.infrastructure.document_repositories import (
     FirestoreRiskZoneAlertRepository,
 )
@@ -26,6 +32,7 @@ from apps.shared.domain.models import Principal
 from apps.shared.domain.permissions import ADMIN_ROLE
 from apps.shared.infrastructure.firebase.collections import (
     CATALOGS,
+    FRIEND_REQUESTS,
     GUARDED_TRAILS,
     INFORMATION_SOURCES,
     RISK_ZONE_ALERTS,
@@ -34,7 +41,7 @@ from apps.shared.infrastructure.firebase.collections import (
     SUPPORT_POINTS,
     SYSTEM_SETTINGS,
 )
-from apps.summary.domain.metrics import UserRecord
+from apps.summary.domain.metrics import LatestUser, UserRecord
 from apps.support_points.infrastructure.document_repositories import (
     FirestoreGuardedTrailRepository,
     FirestoreSupportPointRepository,
@@ -333,6 +340,10 @@ class InMemoryRouteRepository:
         document = self._docs.get(f"routes/{route_id}")
         return None if document is None else Ruta.from_document(route_id, document)
 
+    def image(self, route_id: str) -> str | None:
+        document = self._docs.get(f"routes/{route_id}/private/image")
+        return None if document is None else document.get("data")
+
     def _children(self, prefix: str) -> list[tuple[str, dict]]:
         """The documents directly under a collection path, as (id, document)."""
         depth = prefix.count("/") + 1
@@ -515,6 +526,24 @@ class InMemorySummarySource:
             for uid in sorted(users)
         ][:limit]
 
+    def latest_users(self, limit: int) -> list[LatestUser]:
+        dated = [
+            (uid, document)
+            for uid, document in self._firebase.users.items()
+            if hasattr(document.get("createdAt"), "astimezone")
+        ]
+        dated.sort(key=lambda item: item[1]["createdAt"], reverse=True)
+        return [
+            LatestUser(
+                uid=uid,
+                first_name=document.get("firstName") or "",
+                last_name=document.get("lastName") or "",
+                city_id=document.get("cityId") or None,
+                created_at=document["createdAt"],
+            )
+            for uid, document in dated[:limit]
+        ]
+
     def private_documents(self, limit: int) -> list[tuple[str, dict]]:
         private = self._firebase.private
         return [(key[1], dict(private[key])) for key in sorted(private)][:limit]
@@ -534,6 +563,14 @@ class InMemorySummarySource:
 
     def risk_factor_severities(self, limit: int) -> list[str]:
         return [str(document.get("severity", "")) for document in self._under("riskFactors")][
+            :limit
+        ]
+
+    def risk_zone_alerts(self, limit: int) -> list[AlertaZonaRiesgo]:
+        return InMemoryRiskZoneAlertRepository(self._firebase).list()[:limit]
+
+    def incident_dates(self, limit: int) -> list[str]:
+        return [str(document.get("date", "")) for document in self._under("safetyIncidents")][
             :limit
         ]
 
@@ -609,3 +646,49 @@ class InMemorySettingsRepository(FirestoreSettingsRepository):
 class InMemoryCatalogRepository(FirestoreCatalogRepository):
     def __init__(self, firebase: FakeFirebase | None = None) -> None:
         super().__init__(InMemoryDocumentStore(CATALOGS, firebase))
+
+
+class InMemoryFriendRequestRepository(FirestoreFriendRequestRepository):
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        super().__init__(InMemoryDocumentStore(FRIEND_REQUESTS, firebase))
+
+
+class InMemoryFriendshipRepository:
+    """`users/{uid}/friends/{friendUid}` documents of `FakeFirebase.docs`."""
+
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        self._docs = (firebase or FIREBASE).docs
+
+    @staticmethod
+    def _path(uid: str, friend_uid: str) -> str:
+        return f"users/{uid}/friends/{friend_uid}"
+
+    def list(self, uid: str) -> list[Friendship]:
+        prefix = f"users/{uid}/friends/"
+        return [
+            Friendship.from_document(path.removeprefix(prefix), document)
+            for path, document in sorted(self._docs.items())
+            if path.startswith(prefix)
+        ]
+
+    def exists(self, uid: str, friend_uid: str) -> bool:
+        return self._path(uid, friend_uid) in self._docs
+
+    def add(self, uid: str, friend_uid: str, since: str) -> None:
+        self._docs[self._path(uid, friend_uid)] = Friendship(friend_uid, since).to_document()
+        self._docs[self._path(friend_uid, uid)] = Friendship(uid, since).to_document()
+
+    def remove(self, uid: str, friend_uid: str) -> None:
+        self._docs.pop(self._path(uid, friend_uid), None)
+        self._docs.pop(self._path(friend_uid, uid), None)
+
+    def remove_all(self, uid: str) -> None:
+        for friendship in self.list(uid):
+            self.remove(uid, friendship.friend_uid)
+
+
+class InMemoryFriendsEraser(FirestoreFriendsEraser):
+    def __init__(self, firebase: FakeFirebase | None = None) -> None:
+        super().__init__(
+            InMemoryFriendRequestRepository(firebase), InMemoryFriendshipRepository(firebase)
+        )

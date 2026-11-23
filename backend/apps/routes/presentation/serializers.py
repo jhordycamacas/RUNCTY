@@ -19,6 +19,13 @@ class RouteBodySerializer(StrictSerializer):
     active = raw_field()
 
 
+class RouteImageBodySerializer(StrictSerializer):
+    """Body of `PUT /routes/{id}/image`: the full image and its thumbnail as data URLs."""
+
+    image = raw_field()
+    thumbnail = raw_field()
+
+
 class SegmentBodySerializer(StrictSerializer):
     name = raw_field()
     coordinates = raw_field()
@@ -62,6 +69,7 @@ class RouteSerializer(serializers.Serializer):
     active = serializers.BooleanField()
     segmentCount = serializers.ReadOnlyField(source="segment_count")
     safety = serializers.ReadOnlyField()
+    imageThumb = serializers.CharField(source="image_thumb", allow_null=True)
 
     def get_start(self, route) -> dict:
         return route.start.to_document()

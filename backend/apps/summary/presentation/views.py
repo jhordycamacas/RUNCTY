@@ -20,5 +20,9 @@ class SummaryView(APIView):
 
     def get(self, request) -> Response:
         validated_query(SummaryQuerySerializer, request)
-        deps = SummaryDeps(source=adapter("SUMMARY_SOURCE"), cities=adapter("CITY_REPOSITORY"))
+        deps = SummaryDeps(
+            source=adapter("SUMMARY_SOURCE"),
+            cities=adapter("CITY_REPOSITORY"),
+            settings=adapter("SETTINGS_REPOSITORY"),
+        )
         return Response(get_summary(request.user, deps, datetime.now(timezone.utc)))

@@ -68,6 +68,8 @@ class TestAuthorization:
         ("post", ROUTES, ROUTE),
         ("put", f"{ROUTES}/r1", ROUTE),
         ("delete", f"{ROUTES}/r1", None),
+        ("put", f"{ROUTES}/r1/image", {"image": "x", "thumbnail": "y"}),
+        ("delete", f"{ROUTES}/r1/image", None),
         ("post", f"{ROUTES}/r1/segments", SEGMENT),
         ("put", f"{ROUTES}/r1/segments/s1", SEGMENT),
         ("delete", f"{ROUTES}/r1/segments/s1", None),
@@ -221,6 +223,7 @@ class TestRouteRepresentation:
             "active": True,
             "segmentCount": 1,
             "safety": body["safety"],
+            "imageThumb": None,
             "segments": [
                 {
                     "id": segment["id"],

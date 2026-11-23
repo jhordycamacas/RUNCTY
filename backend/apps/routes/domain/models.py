@@ -139,8 +139,8 @@ class PuntoRuta:
 
 @dataclass(frozen=True, slots=True)
 class Ruta:
-    """Document `routes/{id}`. `segment_count`, `preview` and `safety` are computed, never client
-    input."""
+    """Document `routes/{id}`. `segment_count`, `preview`, `safety` and `image_thumb` are computed
+    or set by their own endpoints, never part of the route body."""
 
     id: str
     name: str
@@ -158,6 +158,9 @@ class Ruta:
     preview: tuple[LatLng, ...] = ()
     # The stored index per time slot id (see `IndiceSeguridadRuta.to_document`).
     safety: Mapping[str, object] = field(default_factory=dict)
+    # Thumbnail data URL of the custom image a manager set (see `route_image`); never client input
+    # of the route body.
+    image_thumb: str | None = None
 
     @classmethod
     def parse(cls, raw: object, route_id: str, settings: SystemSettings) -> "Ruta":
@@ -243,6 +246,7 @@ class Ruta:
             segment_count=int(stored_number(data.get("segmentCount"))),
             preview=_stored_preview(data.get("preview")),
             safety=dict(safety) if isinstance(safety, Mapping) else {},
+            image_thumb=stored_optional_text(data.get("imageThumb")),
         )
 
     def to_document(self) -> dict[str, object]:

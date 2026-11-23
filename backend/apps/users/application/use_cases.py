@@ -21,6 +21,7 @@ from apps.users.application.ports import (
     PreferencesRepository,
     ProfilePhotoRepository,
     SportProfileRepository,
+    UserFriendsEraser,
     UserRepository,
 )
 from apps.users.domain.account_deletion import is_recent_sign_in
@@ -252,8 +253,13 @@ def get_user_detail(
     return UserDetail(_require_user(uid, users), sport_profiles.get(uid))
 
 
-def _erase_account(uid: str, users: UserRepository, auth: AuthGateway) -> None:
-    """Deletes the profile, private documents and credentials of `uid`, keeping an admin."""
+def _erase_account(
+    uid: str, users: UserRepository, auth: AuthGateway, friends: UserFriendsEraser
+) -> None:
+    """Deletes the profile, private documents, friend data and credentials of `uid`.
+
+    Keeps the last admin.
+    """
     try:
         # The stored claims, not the token: the account may have been promoted since (NEW-01).
         claims = auth.get_custom_claims(uid)
@@ -264,6 +270,7 @@ def _erase_account(uid: str, users: UserRepository, auth: AuthGateway) -> None:
     # SEC-08, NEW-03: the panel must always keep at least one admin.
     if not users.delete_user_data(uid, keep_an_admin=is_admin):
         raise _precondition("last-admin", "You cannot delete the last admin account.")
+    friends.erase(uid)
     # Data first: if the auth deletion fails, the user can still sign in and retry.
     try:
         auth.delete_user(uid)
@@ -271,17 +278,27 @@ def _erase_account(uid: str, users: UserRepository, auth: AuthGateway) -> None:
         pass
 
 
-def delete_account(caller: Principal, now: float, users: UserRepository, auth: AuthGateway) -> None:
-    """RF-01-4: deletes the caller's profile, private documents and credentials."""
+def delete_account(
+    caller: Principal,
+    now: float,
+    users: UserRepository,
+    auth: AuthGateway,
+    friends: UserFriendsEraser,
+) -> None:
+    """RF-01-4: deletes the caller's profile, private documents, friend data and credentials."""
     if not is_recent_sign_in(caller.auth_time, now):
         raise _precondition(
             "recent-sign-in-required", "Re-authenticate before deleting your account."
         )
-    _erase_account(caller.uid, users, auth)
+    _erase_account(caller.uid, users, auth, friends)
 
 
 def delete_user_account(
-    caller: Principal, uid: str, users: UserRepository, auth: AuthGateway
+    caller: Principal,
+    uid: str,
+    users: UserRepository,
+    auth: AuthGateway,
+    friends: UserFriendsEraser,
 ) -> None:
     """An admin deletes another account like its owner would. Never their own."""
     if uid == caller.uid:
@@ -289,4 +306,4 @@ def delete_user_account(
             ErrorKind.CONFLICT, "cannot-delete-self", "You cannot delete your own account here."
         )
     _require_user(uid, users)
-    _erase_account(uid, users, auth)
+    _erase_account(uid, users, auth, friends)
