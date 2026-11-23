@@ -1,4 +1,12 @@
-import { Component, forwardRef, input, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  afterRenderEffect,
+  forwardRef,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { IonInput, IonInputPasswordToggle } from '@ionic/angular';
 import { focusNextField } from '../forms/focus-next';
@@ -17,6 +25,7 @@ import { focusNextField } from '../forms/focus-next';
   ],
   template: `
     <ion-input
+      #field
       [label]="label()"
       labelPlacement="floating"
       fill="outline"
@@ -30,8 +39,6 @@ import { focusNextField } from '../forms/focus-next';
       [maxlength]="maxlength()"
       [helperText]="hint()"
       [errorText]="error() ?? ''"
-      [class.ion-invalid]="!!error()"
-      [class.ion-touched]="!!error()"
       (ionInput)="changed($event.detail.value)"
       (ionBlur)="onTouched()"
       (keydown.enter)="enter($event)"
@@ -59,9 +66,23 @@ export class TextField implements ControlValueAccessor {
   readonly maxlength = input<number>();
 
   protected readonly value = signal('');
+  private readonly field = viewChild.required('field', { read: ElementRef<HTMLElement> });
   protected readonly disabled = signal(false);
   private onChange: (value: string) => void = () => undefined;
   protected onTouched: () => void = () => undefined;
+
+  constructor() {
+    // Ionic only shows `errorText` while the input has `ion-invalid` and `ion-touched`. A
+    // `[class.*]` binding loses that race: ion-input re-renders its own host classes when
+    // `errorText` changes and drops them, so the error never appeared and «Crear cuenta» looked
+    // dead. Setting the classes after each render keeps them.
+    afterRenderEffect(() => {
+      const invalid = !!this.error();
+      const classes = this.field().nativeElement.classList;
+      classes.toggle('ion-invalid', invalid);
+      classes.toggle('ion-touched', invalid);
+    });
+  }
 
   writeValue(value: string | null): void {
     this.value.set(value ?? '');
