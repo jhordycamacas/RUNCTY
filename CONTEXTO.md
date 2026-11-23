@@ -824,7 +824,7 @@ Totales de las specs: 28 `Hecha`, 38 `Parcial` y 87 `Pendiente` (153).
 
 ### 18.3 Problemas conocidos
 
-- En el celular Android (Infinix, Android 14, WebView 157), tras el cambio a borde a borde, la cabecera de cada pestaña se ve como una franja blanca. Las medidas del diseño son correctas; es un problema de composición del WebView que se sigue investigando.
+- ~~Franja blanca en la cabecera del celular Android~~: corregida en la rama `PedroV` (2026-11-23), junto con la franja negra sobre el teclado y los errores de formulario que no se mostraban (por eso «Crear cuenta» parecía no hacer nada). Causas y cambios en `docs/cambios-rama-PedroV.md`.
 - El emulador de Firebase Auth pierde los usuarios cada vez que se reinicia el contenedor `runcty-firebase`.
 - La recarga en vivo en el celular necesita el cable USB y `adb reverse` de los puertos 4200, 8000 y 9099.
 - La clave de Google Maps está pendiente (la entrega el usuario); mientras tanto se usa OpenStreetMap.

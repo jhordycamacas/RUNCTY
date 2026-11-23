@@ -159,6 +159,6 @@ Se quitó de la pantalla. El pánico se activará con los botones de volumen del
 | La app no abre en el navegador | Revisar que `ng serve` siga corriendo; volver a ejecutar `npx ng serve --host 127.0.0.1` en `frontend/`. |
 | No hay datos o el login falla | Volver a cargar el seed: `docker compose up -d --build` y esperar `runcty-seed` en Exited (0). Crear de nuevo el corredor. |
 | El celular no conecta | Presentar en el navegador. Si se quiere vista móvil: F12 → icono de dispositivo móvil. |
-| El celular muestra una franja blanca arriba | Es un problema conocido del WebView en Android 14. Seguir en el navegador. |
+| El celular muestra una franja blanca arriba | Corregido en la rama `PedroV` (`docs/cambios-rama-PedroV.md`). Si el APK instalado es anterior, seguir en el navegador. |
 | Docker no arranca | Mostrar las capturas y los diagramas PNG de `D:\Proyecto5to\Docs\Entregables` y explicar el flujo con los diagramas de secuencia. |
 | No abre el Documento de Visión | Abrir los PDF de `Entregables\Final` (casos de uso, clases, contexto). |
