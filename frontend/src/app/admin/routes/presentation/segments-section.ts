@@ -12,6 +12,7 @@ import {
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { IonButton, IonSpinner } from '@ionic/angular';
 import { userMessage } from '../../../core/errors/user-message';
+import { SystemSettingsStore } from '../../../core/settings/system-settings.store';
 import { formatSegmentLength } from '../../../routes/domain/labels';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog';
@@ -56,10 +57,16 @@ type Editing = { kind: 'new' } | { kind: 'edit'; segment: ManagedSegment };
     <section aria-labelledby="segments-title">
       <div class="section-header">
         <h2 id="segments-title">Tramos</h2>
-        <ion-button fill="outline" [disabled]="editing() !== null" (click)="startCreate()"
+        <ion-button
+          fill="outline"
+          [disabled]="editing() !== null || full()"
+          (click)="startCreate()"
           >Agregar tramo</ion-button
         >
       </div>
+      @if (full()) {
+        <p class="muted">Máximo de {{ maxSegments() }} tramos por ruta alcanzado.</p>
+      }
 
       @if (editing(); as current) {
         <form
@@ -75,7 +82,7 @@ type Editing = { kind: 'new' } | { kind: 'edit'; segment: ManagedSegment };
           <app-text-field
             formControlName="name"
             label="Nombre del tramo"
-            [maxlength]="80"
+            [maxlength]="limits().routeNameMaxLength"
             [error]="errorFor('name')"
           />
           <app-text-field
@@ -237,11 +244,15 @@ export class SegmentsSection implements HasUnsavedChanges {
   private readonly store = inject(RouteDetailStore);
   private readonly dialog = inject(ConfirmDialog);
   private readonly toast = inject(ToastService);
+  private readonly settings = inject(SystemSettingsStore);
   private readonly injector = inject(Injector);
   private readonly formHeading = viewChild<ElementRef<HTMLElement>>('formHeading');
   private readonly riskFactors = viewChildren(RiskFactorsSection);
 
   protected readonly segments = computed(() => this.store.detail()?.segments ?? []);
+  protected readonly limits = this.settings.settings;
+  protected readonly maxSegments = computed(() => this.limits().maxSegmentsPerRoute);
+  protected readonly full = computed(() => this.segments().length >= this.maxSegments());
   private readonly timeSlots = computed(() => this.store.detail()?.timeSlots ?? []);
 
   protected readonly form = inject(FormBuilder).nonNullable.group<SegmentForm>({
@@ -256,7 +267,7 @@ export class SegmentsSection implements HasUnsavedChanges {
   /** Errors are read when shown, so they follow the current values. */
   protected errorFor(name: SegmentFormField): string | null {
     if (!this.submitted() && !this.form.controls[name].touched) return null;
-    return parseSegmentForm(this.form.getRawValue()).errors?.[name] ?? null;
+    return parseSegmentForm(this.form.getRawValue(), this.limits()).errors?.[name] ?? null;
   }
 
   /** The segment draft or a risk factor draft of any segment. */
@@ -302,7 +313,7 @@ export class SegmentsSection implements HasUnsavedChanges {
     if (!current || this.saving()) return;
     this.submitted.set(true);
     this.formError.set(null);
-    const { input } = parseSegmentForm(this.form.getRawValue());
+    const { input } = parseSegmentForm(this.form.getRawValue(), this.limits());
     if (!input) return;
 
     this.saving.set(true);

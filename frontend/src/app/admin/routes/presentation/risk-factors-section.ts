@@ -3,6 +3,7 @@ import {
   ElementRef,
   Injector,
   afterNextRender,
+  computed,
   inject,
   input,
   signal,
@@ -11,6 +12,7 @@ import {
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { IonButton, IonSpinner } from '@ionic/angular';
 import { userMessage } from '../../../core/errors/user-message';
+import { SystemSettingsStore } from '../../../core/settings/system-settings.store';
 import { SEVERITY_LABELS } from '../../../routes/domain/labels';
 import { SEVERITIES } from '../../../routes/domain/route';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
@@ -64,12 +66,15 @@ let nextId = 0;
       <h4 [id]="id + '-title'">Factores de riesgo</h4>
       <ion-button
         fill="outline"
-        [disabled]="editing() !== null"
+        [disabled]="editing() !== null || full()"
         [attr.aria-label]="'Agregar factor de riesgo a ' + segment().name"
         (click)="startCreate()"
         >Agregar factor</ion-button
       >
     </div>
+    @if (full()) {
+      <p class="muted">Máximo de {{ maxFactors() }} factores por tramo alcanzado.</p>
+    }
 
     @if (editing(); as current) {
       <form
@@ -277,10 +282,16 @@ export class RiskFactorsSection implements HasUnsavedChanges {
   private readonly store = inject(RouteDetailStore);
   private readonly dialog = inject(ConfirmDialog);
   private readonly toast = inject(ToastService);
+  private readonly settings = inject(SystemSettingsStore);
   private readonly injector = inject(Injector);
   private readonly formHeading = viewChild<ElementRef<HTMLElement>>('formHeading');
 
   readonly segment = input.required<ManagedSegment>();
+
+  protected readonly maxFactors = computed(
+    () => this.settings.settings().maxRiskFactorsPerSegment,
+  );
+  protected readonly full = computed(() => this.segment().riskFactors.length >= this.maxFactors());
 
   protected readonly id = `risk-factors-${nextId++}`;
   protected readonly severityOptions = SEVERITY_OPTIONS;

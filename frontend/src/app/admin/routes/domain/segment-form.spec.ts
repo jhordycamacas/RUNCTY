@@ -1,3 +1,4 @@
+import { DEFAULT_SETTINGS } from '../../../core/settings/system-settings';
 import { segment } from '../../../routes/domain/testing/fixtures';
 import { EMPTY_SEGMENT_FORM, parseSegmentForm, toSegmentForm } from './segment-form';
 
@@ -68,6 +69,33 @@ describe('parseSegmentForm', () => {
     expect(
       parseSegmentForm({ name: 'Orilla', position: '1.5', coordinates: POINTS }).errors?.position,
     ).toBe('La posición debe ser un número entero desde 1.');
+  });
+});
+
+describe('parseSegmentForm with the limits of the system settings', () => {
+  const limits = { ...DEFAULT_SETTINGS, routeNameMaxLength: 10, segmentMaxPoints: 3 };
+
+  it('limits the name and the number of points to the configured values', () => {
+    const { errors } = parseSegmentForm(
+      { name: 'Nombre muy largo', position: '', coordinates: ['1, 1', '2, 2', '3, 3', '4, 4'].join(String.fromCharCode(10)) },
+      limits,
+    );
+
+    expect(errors).toEqual({
+      name: 'El nombre admite máximo 10 caracteres.',
+      coordinates: 'Un tramo admite máximo 3 puntos.',
+    });
+  });
+
+  it('accepts as many points as the setting allows, above the default', () => {
+    const lines = Array.from({ length: 600 }, (_, i) => `${i / 100}, ${i / 100}`).join(String.fromCharCode(10));
+
+    expect(
+      parseSegmentForm(
+        { name: 'Largo', position: '', coordinates: lines },
+        { ...DEFAULT_SETTINGS, segmentMaxPoints: 600 },
+      ).errors,
+    ).toBeUndefined();
   });
 });
 

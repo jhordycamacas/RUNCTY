@@ -12,6 +12,7 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IonButton, IonContent, IonSpinner, IonToggle } from '@ionic/angular';
 import { userMessage } from '../../../core/errors/user-message';
+import { SystemSettingsStore } from '../../../core/settings/system-settings.store';
 import { formValues } from '../../../shared/forms/form-values';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
 import { Notice } from '../../../shared/ui/notice';
@@ -66,7 +67,7 @@ const LIST_URL = '/admin/rutas';
           <app-text-field
             formControlName="name"
             label="Nombre"
-            [maxlength]="80"
+            [maxlength]="limits().routeNameMaxLength"
             [error]="errorFor('name')"
           />
 
@@ -87,7 +88,7 @@ const LIST_URL = '/admin/rutas';
           <app-textarea-field
             formControlName="description"
             label="Descripción (opcional)"
-            [maxlength]="500"
+            [maxlength]="limits().routeDescriptionMaxLength"
             [error]="errorFor('description')"
           />
 
@@ -260,6 +261,7 @@ export class RouteFormPage implements HasUnsavedChanges {
   protected readonly store = inject(AdminRoutesStore);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly settings = inject(SystemSettingsStore);
   private readonly injector = inject(Injector);
   private readonly routeId = inject(ActivatedRoute).snapshot.paramMap.get('id');
   private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
@@ -273,7 +275,8 @@ export class RouteFormPage implements HasUnsavedChanges {
     ...EMPTY_ROUTE_FORM,
   });
   private readonly values = formValues(this.form);
-  private readonly errors = computed(() => parseRouteForm(this.values()).errors ?? {});
+  protected readonly limits = this.settings.settings;
+  private readonly errors = computed(() => parseRouteForm(this.values(), this.limits()).errors ?? {});
   /** What is stored, to tell whether the form holds unsaved changes. */
   private readonly baseline = signal<RouteForm | null>(null);
   private readonly submitted = signal(false);
@@ -287,6 +290,7 @@ export class RouteFormPage implements HasUnsavedChanges {
 
   constructor() {
     void this.store.loadPlaces();
+    void this.settings.load();
     if (this.routeId) void this.load();
     else this.adopt({ ...EMPTY_ROUTE_FORM, cityId: this.store.cityId() ?? '' });
   }
@@ -312,7 +316,7 @@ export class RouteFormPage implements HasUnsavedChanges {
     if (this.saving()) return;
     this.submitted.set(true);
     this.error.set(null);
-    const { input } = parseRouteForm(this.form.getRawValue());
+    const { input } = parseRouteForm(this.form.getRawValue(), this.limits());
     if (!input) return;
 
     this.saving.set(true);

@@ -86,16 +86,20 @@ describe('pickDefaultSlot', () => {
   it.each([
     [at(3), '05:00-07:00'],
     [at(6), '05:00-07:00'],
-    [at(9), '18:00-20:00'],
+    [at(7), '12:00-13:00'],
+    [at(9), '12:00-13:00'],
+    [at(12, 30), '12:00-13:00'],
+    [at(13), '18:00-20:00'],
     [at(19), '18:00-20:00'],
     [at(21), '05:00-07:00'],
-  ])('at %s picks the slot of the current or next training slot', (now, expected) => {
+  ])('at %s picks the window in progress, else the next one to start, else the first', (now, expected) => {
     expect(pickDefaultSlot(slots, now)?.key).toBe(expected);
   });
 
-  it('falls back to the first slot when none matches a training slot', () => {
-    const midday = listTimeSlots([route('a', { safety: [slot('n', '12:00', '13:00', 90)] })]);
-    expect(pickDefaultSlot(midday, at(6))?.key).toBe('12:00-13:00');
+  it('follows whatever windows the admin defined, not a fixed schedule', () => {
+    const custom = listTimeSlots([route('a', { safety: [slot('n', '21:00', '22:30', 90)] })]);
+    expect(pickDefaultSlot(custom, at(6))?.key).toBe('21:00-22:30');
+    expect(pickDefaultSlot(custom, at(22))?.key).toBe('21:00-22:30');
   });
 
   it('returns null when there are no slots', () => {

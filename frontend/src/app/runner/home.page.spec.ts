@@ -69,7 +69,7 @@ describe('RunnerHomePage recommended routes', () => {
     expect(cta?.getAttribute('href')).toBe('/app/correr');
   });
 
-  it('orders by the evening slot when that is the next training slot', async () => {
+  it('orders by the evening slot when that is the next window to start', async () => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date(2026, 10, 2, 12, 0));
     try {

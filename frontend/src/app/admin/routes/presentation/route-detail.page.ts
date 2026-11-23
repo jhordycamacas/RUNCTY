@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IonButton, IonContent, IonSpinner, ViewWillEnter } from '@ionic/angular';
+import { SystemSettingsStore } from '../../../core/settings/system-settings.store';
 import { formatDistance } from '../../../preferences/domain/units';
 import { routeMapScene } from '../../../routes/presentation/route-map';
 import { MapView } from '../../../shared/map/map-view';
@@ -285,6 +286,7 @@ const isDetailTab = (value: string | null): value is DetailTab =>
 })
 export class RouteDetailPage implements ViewWillEnter, HasUnsavedChanges {
   protected readonly store = inject(RouteDetailStore);
+  private readonly settings = inject(SystemSettingsStore);
   private readonly snapshot = inject(ActivatedRoute).snapshot;
   private readonly routeId = this.snapshot.paramMap.get('id') ?? '';
   private readonly segments = viewChild(SegmentsSection);
@@ -324,6 +326,7 @@ export class RouteDetailPage implements ViewWillEnter, HasUnsavedChanges {
   /** Coming back from the route form shows the saved values. */
   ionViewWillEnter(): void {
     void this.store.load(this.routeId);
+    void this.settings.load();
   }
 
   hasUnsavedChanges(): boolean {

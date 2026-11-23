@@ -11,7 +11,7 @@ const LIMIT = 3;
 
 /**
  * Home section: the routes of the runner's city with the best safety level for the current or
- * next training slot. Loading, a failed load, a missing city and a city without routes are
+ * next time slot. Loading, a failed load, a missing city and a city without routes are
  * different states, so a failure is never presented as "no routes". With `featured` the routes
  * show as the brand-gradient cards of the home's dark band.
  */
@@ -102,7 +102,7 @@ export class RecommendedRoutes {
 
   private readonly now = new Date();
   private readonly slots = computed(() => listTimeSlots(this.data.routes()));
-  /** The window of the current or next training slot. */
+  /** The window in progress or the next one to start. */
   protected readonly slotKey = computed(() => resolveSlotKey(this.slots(), null, this.now));
   protected readonly top = computed(() =>
     sortRoutesForSlot(this.data.routes(), this.slotKey()).slice(0, LIMIT),

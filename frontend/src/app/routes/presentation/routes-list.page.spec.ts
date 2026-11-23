@@ -95,7 +95,7 @@ describe('RoutesListPage', () => {
     expect(text()).toContain('Factor principal: Iluminación deficiente en Orilla del río');
   });
 
-  it('opens on the slot of the current or next training slot', async () => {
+  it('opens on the window in progress or the next one to start', async () => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date(2026, 10, 2, 19, 0));
     try {

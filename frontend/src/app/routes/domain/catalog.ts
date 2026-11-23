@@ -5,11 +5,6 @@
  * Time slots are per route in the API (`timeSlots`), so the catalog groups them by window
  * ("05:00-07:00") instead of by id.
  */
-import {
-  TRAINING_SLOTS,
-  TrainingSlot,
-  getNextTrainingSlot,
-} from '../../training/domain/training-slots';
 import { Route, RouteSlotSafety, Segment, SegmentSlotSafety } from './route';
 
 export type DistanceBucket = 'all' | 'upTo5' | 'from5to10' | 'over10';
@@ -89,19 +84,20 @@ export function listTimeSlots(routes: readonly Route[]): TimeSlotOption[] {
 const minutes = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
 
 /**
- * The slot overlapping the current (or next) recommended training slot, so the catalog opens on
- * the hour the runner is likely to go out. Falls back to the first slot.
+ * The window the runner is likely to go out in: the one in progress, else the next one to start
+ * today, else the first of tomorrow. The windows are the ones the admins defined (`slots` are
+ * ordered by start time), so no schedule is fixed in the app.
  */
 export function pickDefaultSlot(
   slots: readonly TimeSlotOption[],
   now: Date,
-  trainingSlots: readonly TrainingSlot[] = TRAINING_SLOTS,
 ): TimeSlotOption | null {
   if (slots.length === 0) return null;
-  const { slot } = getNextTrainingSlot(now, trainingSlots);
-  const start = slot.startHour * 60;
-  const end = slot.endHour * 60;
-  return slots.find((s) => minutes(s.startTime) < end && start < minutes(s.endTime)) ?? slots[0];
+  const current = now.getHours() * 60 + now.getMinutes();
+  const inProgress = slots.find(
+    (s) => minutes(s.startTime) <= current && current < minutes(s.endTime),
+  );
+  return inProgress ?? slots.find((s) => minutes(s.startTime) > current) ?? slots[0];
 }
 
 /** The chosen window when the routes still offer it, else the default one. */

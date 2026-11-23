@@ -1,3 +1,4 @@
+import { DEFAULT_SETTINGS } from '../../../core/settings/system-settings';
 import { route } from '../../../routes/domain/testing/fixtures';
 import {
   EMPTY_ROUTE_FORM,
@@ -23,6 +24,43 @@ const VALID: RouteForm = {
   difficulty: 'Principiante',
   active: true,
 };
+
+describe('parseRouteForm with the limits of the system settings', () => {
+  const limits = {
+    ...DEFAULT_SETTINGS,
+    routeNameMaxLength: 12,
+    routeDescriptionMaxLength: 20,
+    routeMaxDistanceKm: 10,
+    routeMaxElevationM: 100,
+  };
+
+  it('rejects what exceeds the configured limits and names them', () => {
+    const { errors } = parseRouteForm(
+      {
+        ...VALID,
+        name: 'Nombre demasiado largo',
+        description: 'd'.repeat(21),
+        distanceKm: '11',
+        elevationGainM: '101',
+      },
+      limits,
+    );
+
+    expect(errors).toEqual({
+      name: 'El nombre admite máximo 12 caracteres.',
+      description: 'La descripción admite máximo 20 caracteres.',
+      distanceKm: 'La distancia debe ser mayor que 0 y máximo 10 km.',
+      elevationGainM: 'El desnivel debe estar entre 0 y 100 m.',
+    });
+  });
+
+  it('accepts values at the configured limits, even above the defaults', () => {
+    const wide = { ...limits, routeMaxDistanceKm: 900, routeNameMaxLength: 120 };
+
+    expect(parseRouteForm({ ...VALID, distanceKm: '900', name: 'n'.repeat(120) }, wide).errors)
+      .toBeUndefined();
+  });
+});
 
 describe('parseRouteForm', () => {
   it('builds the API input, trimming text and accepting a decimal comma', () => {

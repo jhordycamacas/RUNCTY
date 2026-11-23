@@ -2,6 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { CityRepository } from '../../../cities/domain/city';
 import { ApiError } from '../../../core/errors/api-error';
+import {
+  FakeSystemSettingsStore,
+  fakeSystemSettingsStore,
+  provideSystemSettings,
+} from '../../../core/settings/testing/fake-system-settings.store';
 import { route } from '../../../routes/domain/testing/fixtures';
 import { ToastService } from '../../../shared/ui/toast.service';
 import { AdminRoutesStore } from '../application/admin-routes.store';
@@ -43,6 +48,7 @@ const STORED = route('jipiro', {
 describe('RouteFormPage', () => {
   let fixture: ComponentFixture<RouteFormPage>;
   let repository: FakeRouteAdminRepository;
+  let settings: FakeSystemSettingsStore;
   let success: ReturnType<typeof vi.fn<ToastService['success']>>;
   let navigate: ReturnType<typeof vi.spyOn>;
   let routeId: string | null;
@@ -50,6 +56,9 @@ describe('RouteFormPage', () => {
   const root = () => fixture.nativeElement as HTMLElement;
   const text = () => root().textContent ?? '';
   const page = () => fixture.componentInstance;
+  /** What each text input shows as its error (a property of `ion-input`, whatever its hydration). */
+  const inputErrors = () =>
+    [...root().querySelectorAll('ion-input')].map((el) => (el as unknown as { errorText: string }).errorText);
   const form = () => page()['form'];
 
   async function create(id: string | null): Promise<void> {
@@ -66,11 +75,13 @@ describe('RouteFormPage', () => {
 
   beforeEach(() => {
     repository = fakeRouteAdminRepository();
+    settings = fakeSystemSettingsStore();
     repository.get.mockResolvedValue(managedDetail(STORED));
     success = vi.fn<ToastService['success']>().mockResolvedValue(undefined);
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
+        provideSystemSettings(settings),
         AdminRoutesStore,
         { provide: RouteAdminRepository, useValue: repository },
         {
@@ -111,6 +122,20 @@ describe('RouteFormPage', () => {
     expect(repository.createRoute).not.toHaveBeenCalled();
     expect(text()).toContain('Elige la ciudad o zona de la ruta.');
     expect(text()).toContain('Escribe la dificultad, por ejemplo Media.');
+  });
+
+  it('reads the system settings and validates the route with their limits', async () => {
+    settings.use({ routeNameMaxLength: 12, routeMaxDistanceKm: 10 });
+    await create(null);
+    form().patchValue({ ...VALID, name: 'Nombre demasiado largo', distanceKm: '11' });
+
+    await submit();
+
+    expect(settings.load).toHaveBeenCalled();
+    expect(repository.createRoute).not.toHaveBeenCalled();
+    expect(inputErrors()).toContain('El nombre admite máximo 12 caracteres.');
+    expect(inputErrors()).toContain('La distancia debe ser mayor que 0 y máximo 10 km.');
+    expect(root().querySelector('input[maxlength="12"]')).not.toBeNull();
   });
 
   it('preselects the city chosen in the list for a new route', async () => {

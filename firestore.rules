@@ -88,7 +88,9 @@ service cloud.firestore {
       }
     }
 
-    // RF-01-9..12. Mirrors the app's zod schema.
+    // RF-01-9..12. Only the shape: the options (levels, goals) and the pace and distance ranges are
+    // system parameters an admin edits (`catalogs`, `systemSettings`), so the Django API, which
+    // writes the profile with the Admin SDK, is the one that validates them.
     function isValidSportProfile(d) {
       return d.keys().hasAll(['level', 'goals', 'usualPaceSecPerKm', 'preferredDistanceKm', 'updatedAt'])
         && d.keys().hasOnly(['level', 'goals', 'usualPaceSecPerKm', 'preferredDistanceKm', 'updatedAt'])
@@ -96,11 +98,7 @@ service cloud.firestore {
         && d.goals is list
         && d.goals.size() >= 1
         && d.usualPaceSecPerKm is number
-        && d.usualPaceSecPerKm >= 150
-        && d.usualPaceSecPerKm <= 1200
         && d.preferredDistanceKm is number
-        && d.preferredDistanceKm >= 1
-        && d.preferredDistanceKm <= 50
         && d.updatedAt == request.time;
     }
 
@@ -152,7 +150,7 @@ service cloud.firestore {
         && d.keys().hasOnly(['name', 'province', 'country', 'type', 'parentCityId', 'location', 'coverage', 'createdAt', 'updatedAt'])
         && isNonEmptyString(d.name, 80)
         && isNonEmptyString(d.province, 80)
-        && d.country == 'EC'
+        && d.country is string && d.country.size() == 2
         && d.coverage in ['active', 'planned', 'suspended']
         && d.location is map
         && d.location.keys().hasAll(['lat', 'lng'])

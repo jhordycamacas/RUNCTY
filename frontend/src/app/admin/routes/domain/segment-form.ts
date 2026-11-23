@@ -1,11 +1,13 @@
+import { DEFAULT_SETTINGS, SystemSettings } from '../../../core/settings/system-settings';
 import { LatLng, Segment } from '../../../routes/domain/route';
 import { parseDecimal } from './form-parsing';
 import { SegmentInput } from './managed-route';
 
-const MAX_NAME = 80;
 const MIN_POINTS = 2;
-const MAX_POINTS = 500;
 const POSITION_PATTERN = /^\d+$/;
+
+/** The parameters the segment form validates against (Configuración). */
+export type SegmentLimits = Pick<SystemSettings, 'routeNameMaxLength' | 'segmentMaxPoints'>;
 
 /**
  * The segment form: the 1-based position in the route (blank keeps it, or appends a new
@@ -40,7 +42,10 @@ function parsePoint(line: string): LatLng | null {
   return { lat, lng };
 }
 
-function parseCoordinates(text: string): { points: LatLng[]; error?: string } {
+function parseCoordinates(
+  text: string,
+  maxPoints: number,
+): { points: LatLng[]; error?: string } {
   const points: LatLng[] = [];
   const lines = text.split('\n');
   for (const [index, raw] of lines.entries()) {
@@ -58,25 +63,29 @@ function parseCoordinates(text: string): { points: LatLng[]; error?: string } {
   if (points.length < MIN_POINTS) {
     return { points, error: `Ingresa al menos ${MIN_POINTS} puntos, uno por línea.` };
   }
-  if (points.length > MAX_POINTS) {
-    return { points, error: `Un tramo admite máximo ${MAX_POINTS} puntos.` };
+  if (points.length > maxPoints) {
+    return { points, error: `Un tramo admite máximo ${maxPoints} puntos.` };
   }
   return { points };
 }
 
 /** Validates the form with the limits of the API; the position becomes the 0-based `order`. */
-export function parseSegmentForm(form: SegmentForm): SegmentFormResult {
+export function parseSegmentForm(
+  form: SegmentForm,
+  limits: SegmentLimits = DEFAULT_SETTINGS,
+): SegmentFormResult {
   const errors: SegmentFormErrors = {};
   const name = form.name.trim();
+  const maxName = limits.routeNameMaxLength;
   if (!name) errors.name = 'El nombre es obligatorio.';
-  else if (name.length > MAX_NAME) errors.name = `El nombre admite máximo ${MAX_NAME} caracteres.`;
+  else if (name.length > maxName) errors.name = `El nombre admite máximo ${maxName} caracteres.`;
 
   const position = form.position.trim();
   if (position && (!POSITION_PATTERN.test(position) || Number(position) < 1)) {
     errors.position = 'La posición debe ser un número entero desde 1.';
   }
 
-  const coordinates = parseCoordinates(form.coordinates);
+  const coordinates = parseCoordinates(form.coordinates, limits.segmentMaxPoints);
   if (coordinates.error) errors.coordinates = coordinates.error;
 
   if (Object.keys(errors).length > 0) return { errors };

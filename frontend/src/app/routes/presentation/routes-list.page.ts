@@ -160,7 +160,7 @@ export class RoutesListPage {
   protected readonly slotOptions = computed<ChipOption[]>(() =>
     this.slots().map((slot) => ({ value: slot.key, label: slot.label })),
   );
-  /** The window the runner picked, else the one of the current or next training slot. */
+  /** The window the runner picked, else the window in progress or the next one to start. */
   protected readonly slotKey = computed(() =>
     resolveSlotKey(this.slots(), this.chosenSlot(), this.now),
   );

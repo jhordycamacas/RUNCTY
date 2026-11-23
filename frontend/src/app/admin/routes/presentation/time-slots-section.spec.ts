@@ -3,6 +3,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
 import { ApiError } from '../../../core/errors/api-error';
+import {
+  FakeSystemSettingsStore,
+  fakeSystemSettingsStore,
+  provideSystemSettings,
+} from '../../../core/settings/testing/fake-system-settings.store';
 import { route } from '../../../routes/domain/testing/fixtures';
 import { ConfirmActionOptions, ConfirmDialog } from '../../../shared/ui/confirm-dialog';
 import { ToastService } from '../../../shared/ui/toast.service';
@@ -46,6 +51,7 @@ class Host {
 describe('TimeSlotsSection', () => {
   let fixture: ComponentFixture<Host>;
   let repository: FakeRouteAdminRepository;
+  let settings: FakeSystemSettingsStore;
   let confirmAction: ReturnType<typeof vi.fn<ConfirmDialog['confirmAction']>>;
   let success: ReturnType<typeof vi.fn<ToastService['success']>>;
 
@@ -93,8 +99,10 @@ describe('TimeSlotsSection', () => {
         return true;
       });
     success = vi.fn<ToastService['success']>().mockResolvedValue(undefined);
+    settings = fakeSystemSettingsStore();
     TestBed.configureTestingModule({
       providers: [
+        provideSystemSettings(settings),
         { provide: RouteAdminRepository, useValue: repository },
         { provide: ConfirmDialog, useValue: { confirmAction, confirm: async () => true } },
         { provide: ToastService, useValue: { success } },
@@ -108,6 +116,17 @@ describe('TimeSlotsSection', () => {
     expect(slotNames()).toEqual(['05:00 – 07:00 (Mañana)', '18:00 – 24:00']);
     expect(text()).toContain('Vigente desde el 01/01/2026');
     expect(text()).toContain('Todos los días');
+  });
+
+  it('stops offering to add slots once the route holds the configured maximum', async () => {
+    settings.use({ maxTimeSlotsPerRoute: 2 });
+    await create();
+
+    const add = button('Agregar franja');
+    expect(add?.hasAttribute('disabled') || add?.getAttribute('aria-disabled') === 'true').toBe(
+      true,
+    );
+    expect(text()).toContain('Máximo de 2 franjas por ruta alcanzado.');
   });
 
   it('says so when the route has no slots yet', async () => {

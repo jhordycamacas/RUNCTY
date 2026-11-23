@@ -3,6 +3,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
 import { ApiError } from '../../../core/errors/api-error';
+import {
+  FakeSystemSettingsStore,
+  fakeSystemSettingsStore,
+  provideSystemSettings,
+} from '../../../core/settings/testing/fake-system-settings.store';
 import { route, segment } from '../../../routes/domain/testing/fixtures';
 import { ConfirmActionOptions, ConfirmDialog } from '../../../shared/ui/confirm-dialog';
 import { ToastService } from '../../../shared/ui/toast.service';
@@ -57,6 +62,7 @@ class Host {
 describe('RiskFactorsSection', () => {
   let fixture: ComponentFixture<Host>;
   let repository: FakeRouteAdminRepository;
+  let settings: FakeSystemSettingsStore;
   let confirmAction: ReturnType<typeof vi.fn<ConfirmDialog['confirmAction']>>;
   let success: ReturnType<typeof vi.fn<ToastService['success']>>;
 
@@ -102,8 +108,10 @@ describe('RiskFactorsSection', () => {
         return true;
       });
     success = vi.fn<ToastService['success']>().mockResolvedValue(undefined);
+    settings = fakeSystemSettingsStore();
     TestBed.configureTestingModule({
       providers: [
+        provideSystemSettings(settings),
         { provide: RouteAdminRepository, useValue: repository },
         { provide: ConfirmDialog, useValue: { confirmAction, confirm: async () => true } },
         { provide: ToastService, useValue: { success } },
@@ -123,6 +131,19 @@ describe('RiskFactorsSection', () => {
     expect(rows[1]).toContain('Tráfico');
     expect(rows[1]).toContain('Severidad Baja');
     expect(rows[1]).toContain('Todo el día');
+  });
+
+  it('stops offering to add factors once the segment holds the configured maximum', async () => {
+    settings.use({ maxRiskFactorsPerSegment: 2 });
+    await create();
+
+    const add = [...root().querySelectorAll('ion-button')].find(
+      (el) => el.textContent?.trim() === 'Agregar factor',
+    );
+    expect(add?.hasAttribute('disabled') || add?.getAttribute('aria-disabled') === 'true').toBe(
+      true,
+    );
+    expect(text()).toContain('Máximo de 2 factores por tramo alcanzado.');
   });
 
   it('says so when the segment has no factors', async () => {

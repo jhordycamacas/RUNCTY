@@ -11,6 +11,7 @@ import {
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { IonButton, IonSpinner } from '@ionic/angular';
 import { userMessage } from '../../../core/errors/user-message';
+import { SystemSettingsStore } from '../../../core/settings/system-settings.store';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog';
 import { DateTimeField } from '../../../shared/ui/date-time-field';
@@ -45,10 +46,16 @@ type Editing = { kind: 'new' } | { kind: 'edit'; slot: TimeSlot };
     <section aria-labelledby="slots-title">
       <div class="section-header">
         <h2 id="slots-title">Franjas horarias</h2>
-        <ion-button fill="outline" [disabled]="editing() !== null" (click)="startCreate()"
+        <ion-button
+          fill="outline"
+          [disabled]="editing() !== null || full()"
+          (click)="startCreate()"
           >Agregar franja</ion-button
         >
       </div>
+      @if (full()) {
+        <p class="muted">Máximo de {{ maxSlots() }} franjas por ruta alcanzado.</p>
+      }
 
       @if (editing(); as current) {
         <form
@@ -236,6 +243,7 @@ export class TimeSlotsSection implements HasUnsavedChanges {
   private readonly store = inject(RouteDetailStore);
   private readonly dialog = inject(ConfirmDialog);
   private readonly toast = inject(ToastService);
+  private readonly settings = inject(SystemSettingsStore);
   private readonly injector = inject(Injector);
   private readonly formHeading = viewChild<ElementRef<HTMLElement>>('formHeading');
 
@@ -244,6 +252,9 @@ export class TimeSlotsSection implements HasUnsavedChanges {
       (a, b) => minutesOf(a.startTime) - minutesOf(b.startTime),
     ),
   );
+
+  protected readonly maxSlots = computed(() => this.settings.settings().maxTimeSlotsPerRoute);
+  protected readonly full = computed(() => this.slots().length >= this.maxSlots());
 
   protected readonly form = inject(FormBuilder).nonNullable.group<TimeSlotForm>({
     ...EMPTY_TIME_SLOT_FORM,

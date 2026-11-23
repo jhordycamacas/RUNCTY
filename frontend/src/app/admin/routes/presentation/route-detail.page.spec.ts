@@ -2,6 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { ApiError } from '../../../core/errors/api-error';
+import {
+  FakeSystemSettingsStore,
+  fakeSystemSettingsStore,
+  provideSystemSettings,
+} from '../../../core/settings/testing/fake-system-settings.store';
 import { route, segment, slot } from '../../../routes/domain/testing/fixtures';
 import { FakeMapRenderer, provideFakeMapRenderer } from '../../../shared/map/testing/fake-map-renderer';
 import { ConfirmActionOptions, ConfirmDialog } from '../../../shared/ui/confirm-dialog';
@@ -71,6 +76,7 @@ const DETAIL: ManagedRouteDetail = managedDetail(
 describe('RouteDetailPage', () => {
   let fixture: ComponentFixture<RouteDetailPage>;
   let repository: FakeRouteAdminRepository;
+  let settings: FakeSystemSettingsStore;
   let confirmAction: ReturnType<typeof vi.fn<ConfirmDialog['confirmAction']>>;
   let success: ReturnType<typeof vi.fn<ToastService['success']>>;
   let query: Record<string, string>;
@@ -121,6 +127,7 @@ describe('RouteDetailPage', () => {
     query = {};
     map = new FakeMapRenderer();
     repository = fakeRouteAdminRepository();
+    settings = fakeSystemSettingsStore();
     repository.get.mockResolvedValue(DETAIL);
     confirmAction = vi
       .fn<ConfirmDialog['confirmAction']>()
@@ -133,6 +140,7 @@ describe('RouteDetailPage', () => {
       providers: [
         provideRouter([]),
         provideFakeMapRenderer(map),
+        provideSystemSettings(settings),
         { provide: RouteAdminRepository, useValue: repository },
         {
           provide: ActivatedRoute,
@@ -303,6 +311,43 @@ describe('RouteDetailPage', () => {
 
     expect(repository.createSegment).not.toHaveBeenCalled();
     expect(text()).toContain('Ingresa al menos 2 puntos, uno por línea.');
+  });
+
+  it('reads the system settings when it opens', async () => {
+    await create();
+
+    expect(settings.load).toHaveBeenCalled();
+  });
+
+  it('validates the segment with the limits of the system settings', async () => {
+    settings.use({ routeNameMaxLength: 10, segmentMaxPoints: 2 });
+    await create();
+    await press(button('Agregar tramo'));
+
+    segmentForm().setValue({
+      name: 'Nombre muy largo',
+      position: '',
+      coordinates: ['-3.9, -79.2', '-3.91, -79.21', '-3.92, -79.22'].join(String.fromCharCode(10)),
+    });
+    await submitSegment();
+
+    expect(repository.createSegment).not.toHaveBeenCalled();
+    const inputErrors = [...root().querySelectorAll('app-segments-section ion-input')].map(
+      (el) => (el as unknown as { errorText: string }).errorText,
+    );
+    expect(inputErrors).toContain('El nombre admite máximo 10 caracteres.');
+    expect(text()).toContain('Un tramo admite máximo 2 puntos.');
+  });
+
+  it('stops offering to add segments once the route holds the configured maximum', async () => {
+    settings.use({ maxSegmentsPerRoute: 2 });
+    await create();
+
+    const add = button('Agregar tramo');
+    expect(add?.hasAttribute('disabled') || add?.getAttribute('aria-disabled') === 'true').toBe(
+      true,
+    );
+    expect(text()).toContain('Máximo de 2 tramos por ruta alcanzado.');
   });
 
   it('edits a segment with its values preloaded', async () => {

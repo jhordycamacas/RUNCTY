@@ -1,13 +1,16 @@
+import { DEFAULT_SETTINGS, SystemSettings } from '../../../core/settings/system-settings';
 import { Route } from '../../../routes/domain/route';
 import { parseDecimal } from './form-parsing';
 import { RouteInput } from './managed-route';
 
-const MAX_NAME = 80;
-const MAX_DESCRIPTION = 500;
 const MAX_POINT_LABEL = 80;
-const MAX_DISTANCE_KM = 500;
-const MAX_ELEVATION_M = 10000;
 const MAX_CATEGORY = 40;
+
+/** The parameters the route form validates against (Configuración). */
+export type RouteLimits = Pick<
+  SystemSettings,
+  'routeNameMaxLength' | 'routeDescriptionMaxLength' | 'routeMaxDistanceKm' | 'routeMaxElevationM'
+>;
 
 /** The route form works with text; `active` is a toggle. */
 export interface RouteForm {
@@ -84,13 +87,25 @@ const pointLabel = (value: string) =>
     `El nombre del punto admite máximo ${MAX_POINT_LABEL} caracteres.`,
   );
 
-/** Validates the form with the limits of the API and converts it into the body it expects. */
-export function parseRouteForm(form: RouteForm): RouteFormResult {
+/**
+ * Validates the form with the limits of the API (the system settings, the defaults when they could
+ * not be read) and converts it into the body it expects.
+ */
+export function parseRouteForm(
+  form: RouteForm,
+  limits: RouteLimits = DEFAULT_SETTINGS,
+): RouteFormResult {
+  const {
+    routeNameMaxLength: maxName,
+    routeDescriptionMaxLength: maxDescription,
+    routeMaxDistanceKm: maxDistanceKm,
+    routeMaxElevationM: maxElevationM,
+  } = limits;
   const name = requiredText(
     form.name,
-    MAX_NAME,
+    maxName,
     'El nombre es obligatorio.',
-    `El nombre admite máximo ${MAX_NAME} caracteres.`,
+    `El nombre admite máximo ${maxName} caracteres.`,
   );
   const description = form.description.trim();
   const startLabel = pointLabel(form.startLabel);
@@ -118,8 +133,8 @@ export function parseRouteForm(form: RouteForm): RouteFormResult {
     name: name.error,
     cityId: form.cityId ? undefined : 'Elige la ciudad o zona de la ruta.',
     description:
-      description.length > MAX_DESCRIPTION
-        ? `La descripción admite máximo ${MAX_DESCRIPTION} caracteres.`
+      description.length > maxDescription
+        ? `La descripción admite máximo ${maxDescription} caracteres.`
         : undefined,
     startLabel: startLabel.error,
     startLat: startLat.error,
@@ -130,14 +145,14 @@ export function parseRouteForm(form: RouteForm): RouteFormResult {
     distanceKm:
       distanceKm === null
         ? 'Ingresa la distancia en kilómetros, por ejemplo 5,2.'
-        : distanceKm <= 0 || distanceKm > MAX_DISTANCE_KM
-          ? `La distancia debe ser mayor que 0 y máximo ${MAX_DISTANCE_KM} km.`
+        : distanceKm <= 0 || distanceKm > maxDistanceKm
+          ? `La distancia debe ser mayor que 0 y máximo ${maxDistanceKm} km.`
           : undefined,
     elevationGainM:
       elevationGainM === null
         ? 'Ingresa el desnivel en metros; usa 0 si es plano.'
-        : elevationGainM < 0 || elevationGainM > MAX_ELEVATION_M
-          ? `El desnivel debe estar entre 0 y ${MAX_ELEVATION_M} m.`
+        : elevationGainM < 0 || elevationGainM > maxElevationM
+          ? `El desnivel debe estar entre 0 y ${maxElevationM} m.`
           : undefined,
     surface: surface.error,
     difficulty: difficulty.error,
