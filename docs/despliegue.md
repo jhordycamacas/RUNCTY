@@ -2,7 +2,7 @@
 
 Guía paso a paso para publicar RUNCTY en el proyecto real `runcty-73d70`: la **API Django** en Cloud Run y la **web Angular** (web del corredor y panel de administración, un solo build) en Firebase Hosting. Para probar en local contra el proyecto real, sigue [conectar-google.md](conectar-google.md).
 
-> Estado: **pendiente de ejecutar por el propietario**. Los archivos y scripts están listos y verificados por lectura y análisis de sintaxis, pero ningún comando de esta guía se ha ejecutado contra Google Cloud todavía. Spec: [specs/transversal/despliegue.md](../specs/transversal/despliegue.md).
+> Estado: **PENDIENTE por decisión del propietario** (el proyecto no tiene facturación; ver [retomar-despliegue.md](retomar-despliegue.md)). Los archivos y scripts están listos y verificados por lectura y análisis de sintaxis, pero ningún comando de esta guía se ha ejecutado contra Google Cloud todavía. Spec: [specs/transversal/despliegue.md](../specs/transversal/despliegue.md).
 
 | Pieza | Dónde queda | Quién la sirve |
 | --- | --- | --- |

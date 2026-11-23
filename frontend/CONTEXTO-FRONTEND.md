@@ -22,7 +22,8 @@ Documento vivo y corto. Para el detalle técnico y los comandos ver `README.md`;
 | Producción | `environment.prod.ts` | `npm run build`; la API es un marcador hasta el despliegue |
 
 - Emuladores: `firebase emulators:start`, luego `python manage.py seed` y `runserver` en `backend/` (o `docker compose up`).
-- `googleMapsApiKey` es `null` en los tres entornos; el responsable pega la clave del navegador (nunca una sin restringir en git).
+- `googleMapsApiKey` es `null` en los tres entornos; el responsable pega la clave del navegador (nunca una sin restringir en git). La clave todavía no está creada y el renderizador de Google no se verificó en un navegador real ni en el celular.
+- La configuración web de Firebase de `environment.prod.ts` y `environment.real.ts` es pública y ya está en git; `apiBaseUrl` de producción es un marcador (`https://api.example.com/api/v1`) que `deploy/deploy-web.ps1 -ApiUrl` reescribe.
 
 ## Mapas
 
@@ -48,7 +49,22 @@ Documento vivo y corto. Para el detalle técnico y los comandos ver `README.md`;
 - Depuración del WebView: `chrome://inspect` en Chrome de escritorio, o por CDP reenviando el socket `webview_devtools_remote_<pid>` con `adb forward`.
 - Ruta corta (`D:\RUNCTY`): Gradle falla con rutas largas en Windows.
 
+### Solución de problemas en el celular (2026-11-22)
+
+| Síntoma | Causa | Qué hacer |
+| --- | --- | --- |
+| Franja blanca con garabatos azules arriba | No era la web: era la barra de acción nativa del tema de arranque y el splash blanco por defecto de Capacitor, visibles detrás del WebView transparente (borde a borde). Corregido en `db0ea21` (`AndroidManifest.xml`, `res/values/styles.xml`, `res/values/window_colors.xml`) | Reinstalar el APK reciente. Para diagnosticar: `adb shell uiautomator dump` y buscar `android:id/action_bar_container`; una captura del WebView por CDP sin franja confirma que no es la web |
+| La app aparece en horizontal | No había bloqueo de orientación | Ya está `android:screenOrientation="portrait"` |
+| «Error de conexión al servidor» | El cable USB se cortó y se perdieron los `adb reverse` (4200, 8000, 9099) | Repetir los tres `adb reverse` |
+| Las llamadas públicas (ciudades) fallan con 400 | Sesión de Firebase guardada de un usuario inexistente; `getIdToken` fallaba y abortaba la llamada | Corregido en `12431ac` (`core/auth/sdk-firebase-auth.gateway.ts`): un token no renovable cuenta como «sin token» |
+
+### Probar contra el proyecto real en el navegador
+
+- `npm run start:real` sirve en `http://127.0.0.1:4200`. Abrir esa dirección (no `localhost`) en una ventana de incógnito: si queda otro `ng serve` (emuladores) escuchando en `[::1]:4200`, `localhost` abre ese y el ingreso de la cuenta real da «Correo o contraseña incorrectos». Ver quién escucha: `netstat -ano`.
+
 ## Pruebas
 
 - `npx ng test --watch=false` (Vitest + jsdom), `npx tsc --noEmit -p tsconfig.app.json`, `npx tsc --noEmit -p tsconfig.spec.json`, `npm run lint`, `npx ng build -c real`.
 - Sin red real en las pruebas: los mapas usan `FakeMapRenderer` o `fakeGoogleMaps()` (`src/app/shared/map/testing`).
+- Totales conocidos: 857 pruebas en 117 archivos (`odd/tasks/google-maps.md`). Algunas pruebas con `ion-input` que leen el texto de error con `textContent` fallan a veces; la causa no está confirmada: repetir el archivo solo antes de dar un fallo por real.
+- Diseño del admin (`3153394`): sección activa con tinte fucsia, botón primario fucsia (`--rc-primary`), `color-scheme` por tema para `<select>` y autocompletado nativos, y la regla global de foco con `:where` para no duplicar la caja en `app-select-field`.

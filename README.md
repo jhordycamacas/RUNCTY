@@ -237,7 +237,7 @@ npm run admin:build                        # build de producción del panel
 - Pulido de la app y del panel que dejó la auditoría del 2026-11-10 (botón de emergencia, preferencias que se aplican, reenvío del correo de verificación, panel responsive y confirmación al cambiar roles). El detalle y el plan están en [CONTEXTO.md](CONTEXTO.md), sección 14.
 - Probar en el navegador la gestión de rutas del panel.
 - Google Maps (falta la clave; mientras tanto los mapas usan Leaflet con OpenStreetMap y las coordenadas se cargan a mano).
-- Desplegar en Google Cloud (API en Cloud Run y web en Firebase Hosting): scripts y guía listos, pendiente de ejecutar; ver [docs/despliegue.md](docs/despliegue.md).
+- Desplegar en Google Cloud (API en Cloud Run y web en Firebase Hosting): scripts y guía listos, **pendiente** por decisión del propietario (facturación); ver [docs/despliegue.md](docs/despliegue.md) y [docs/retomar-despliegue.md](docs/retomar-despliegue.md).
 - Decisiones de producto: consentimiento parental de menores, texto legal LOPDP y valores por defecto de las notificaciones (ver [CONTEXTO.md](CONTEXTO.md)).
 
 El detalle de las tareas y su evidencia está en [odd/tasks/foundation-sprint1.md](odd/tasks/foundation-sprint1.md) y [odd/tasks/design-system-sprint2.md](odd/tasks/design-system-sprint2.md).

@@ -159,6 +159,8 @@ Se quitó de la pantalla. El pánico se activará con los botones de volumen del
 | La app no abre en el navegador | Revisar que `ng serve` siga corriendo; volver a ejecutar `npx ng serve --host 127.0.0.1` en `frontend/`. |
 | No hay datos o el login falla | Volver a cargar el seed: `docker compose up -d --build` y esperar `runcty-seed` en Exited (0). Crear de nuevo el corredor. |
 | El celular no conecta | Presentar en el navegador. Si se quiere vista móvil: F12 → icono de dispositivo móvil. |
-| El celular muestra una franja blanca arriba | Es un problema conocido del WebView en Android 14. Seguir en el navegador. |
+| El celular muestra una franja blanca arriba | Estaba corregido en `db0ea21` (barra de acción nativa y splash por defecto); si reaparece, hay que reinstalar el APK reciente. Mientras tanto, seguir en el navegador. Ver `docs/bitacora-2026-11-22.md`. |
+| La app muestra «error de conexión al servidor» en el celular | Se cortó el cable USB y se perdieron los túneles: repetir los tres `adb reverse` del checklist. |
+| Se quiere demostrar contra el proyecto real y no contra los emuladores | Detener `runcty-api`; `manage.py runserver 8000` en `backend/` y `npm run start:real` en `frontend/`; abrir `http://127.0.0.1:4200` en incógnito. Solo hay el administrador, Loja, parámetros, catálogos y roles (sin rutas hasta `seed --data-only`). No dejar otro `ng serve` encendido. |
 | Docker no arranca | Mostrar las capturas y los diagramas PNG de `D:\Proyecto5to\Docs\Entregables` y explicar el flujo con los diagramas de secuencia. |
 | No abre el Documento de Visión | Abrir los PDF de `Entregables\Final` (casos de uso, clases, contexto). |

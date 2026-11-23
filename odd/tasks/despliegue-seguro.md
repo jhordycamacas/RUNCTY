@@ -29,6 +29,9 @@ Spec: `specs/transversal/despliegue.md`. Guide: `docs/despliegue.md`. Route: wri
       `CONTEXTO.md` section 20, `backend/CONTEXTO-BACKEND.md`, `specs/transversal/despliegue.md`,
       `specs/README.md`.
 - [ ] T6 (owner) Run the scripts and tick the open acceptance criteria of the spec.
+      STATUS 2026-11-22: PENDING by the owner's decision. `billingEnabled False` on `runcty-73d70`
+      (Cloud Run/Cloud Build need billing; the $50 prepayment was not made). Options A/B/C and exact
+      steps: `docs/retomar-despliegue.md`.
 
 ## Evidence
 - `firebase.json` parses with `json.load`; emulators/firestore/storage/functions sections kept.

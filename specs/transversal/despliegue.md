@@ -1,6 +1,6 @@
 # Despliegue en Google Cloud
 
-> Spec transversal · API en Cloud Run y web en Firebase Hosting · Estado: **Pendiente de ejecutar por el propietario** (archivos y scripts listos el 2026-11-22; ningún comando se ha ejecutado contra Google Cloud) · Sprint: apoyo de la defensa del 2026-11-23
+> Spec transversal · API en Cloud Run y web en Firebase Hosting · Estado: **Pendiente (decisión del propietario: facturación)**; antes: Pendiente de ejecutar por el propietario (archivos y scripts listos el 2026-11-22; ningún comando se ha ejecutado contra Google Cloud) · Sprint: apoyo de la defensa del 2026-11-23
 
 Fija cómo se publica RUNCTY en el proyecto real `runcty-73d70` y qué seguridad mínima debe cumplir. La guía paso a paso para el propietario está en [docs/despliegue.md](../../docs/despliegue.md); las decisiones técnicas generales, en [Arquitectura](arquitectura.md); los requisitos de seguridad medibles, en [RNF](rnf-requisitos-no-funcionales.md).
 

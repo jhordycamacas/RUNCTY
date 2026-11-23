@@ -824,10 +824,10 @@ Totales de las specs: 28 `Hecha`, 38 `Parcial` y 87 `Pendiente` (153).
 
 ### 18.3 Problemas conocidos
 
-- En el celular Android (Infinix, Android 14, WebView 157), tras el cambio a borde a borde, la cabecera de cada pestaña se ve como una franja blanca. Las medidas del diseño son correctas; es un problema de composición del WebView que se sigue investigando.
+- **Resuelto el 2026-11-22 (`db0ea21`):** en el celular Android (Infinix, Android 14, WebView 157) la cabecera se veía como una franja blanca; no era el diseño web sino la barra de acción nativa y el splash por defecto de Capacitor. Diagnóstico y arreglo en la sección 21.1.
 - El emulador de Firebase Auth pierde los usuarios cada vez que se reinicia el contenedor `runcty-firebase`.
 - La recarga en vivo en el celular necesita el cable USB y `adb reverse` de los puertos 4200, 8000 y 9099.
-- La clave de Google Maps está pendiente (la entrega el usuario); mientras tanto se usa OpenStreetMap.
+- La clave de Google Maps está pendiente (la entrega el usuario); mientras tanto se usa OpenStreetMap. El renderizador de Google ya existe (`4ab6692`); ver la sección 21.5.
 - Jira (proyecto RUN) difiere del backlog final del Excel en 15 historias; se presentan el Excel y las specs como versión vigente (hoja «Jira vs Excel final» de `Trazabilidad diagramas RUNCTY.xlsx`).
 
 ### 18.4 Cómo levantar todo
@@ -858,13 +858,13 @@ Decisión del dueño del producto: nada de negocio queda escrito en el código. 
 
 **Se queda en el código, a propósito:** las claves con orden o comportamiento (severidad, nivel, tipo y cobertura de ciudad, días de la semana, permisos, estructura de las preferencias), la forma de los datos (largo de textos, formato `HH:MM`, coordenadas), reglas de datos personales (edad, cédula, contraseña), seguridad y despliegue (reautenticación, tasas por entorno), topes del resumen y la vista de reserva del mapa. La tabla con el motivo de cada uno está en la spec 27.
 
-**Reglas de Firestore:** ya no repiten rangos de negocio. El perfil deportivo solo valida su forma y el país de una ciudad solo debe tener dos letras; la API valida el resto con los parámetros vigentes. Las pruebas de reglas de `functions/test/rules` (código heredado) todavía esperan los rangos antiguos.
+**Reglas de Firestore:** ya no repiten rangos de negocio. El perfil deportivo solo valida su forma y el país de una ciudad solo debe tener dos letras; la API valida el resto con los parámetros vigentes. Las pruebas de reglas de `functions/test/rules` (código heredado) todavía esperan los rangos antiguos y fallarán contra las reglas nuevas (no se corrigen: la carpeta se borrará en S6).
 
 **Pendiente:** mostrar el nombre de un rol creado por el administrador en el resumen (hoy se ve su identificador) y revisar con Gacelas los límites de cada parámetro.
 
 ## 20. Despliegue en Google Cloud (2026-11-22)
 
-Estado: **archivos y guía listos; pendiente de ejecutar por el propietario** (ningún comando remoto se ha corrido). Guía: `docs/despliegue.md`. Spec: `specs/transversal/despliegue.md`. Tareas: `odd/tasks/despliegue-seguro.md`.
+Estado: **archivos y guía listos; despliegue PENDIENTE por decisión del propietario** (bloqueo de facturación; ningún comando remoto de despliegue se ha corrido; ver la sección 21.6 y `docs/retomar-despliegue.md`). Guía: `docs/despliegue.md`. Spec: `specs/transversal/despliegue.md`. Tareas: `odd/tasks/despliegue-seguro.md`.
 
 **Qué va dónde**
 
@@ -882,4 +882,46 @@ Estado: **archivos y guía listos; pendiente de ejecutar por el propietario** (n
 
 **Archivos:** `backend/Dockerfile`, `backend/.dockerignore`, `deploy/common.ps1`, `deploy/deploy-backend.ps1`, `deploy/deploy-web.ps1`, `firebase.json` (sección `hosting`), `.firebaserc` (alias `production`), `docs/despliegue.md`, `backend/CONTEXTO-BACKEND.md`.
 
-**Pendiente:** ejecutar los dos scripts, crear el administrador (`create_admin`), verificar y marcar los criterios abiertos de la spec; presupuesto con alertas antes de desplegar.
+**Pendiente:** ejecutar los dos scripts, verificar y marcar los criterios abiertos de la spec; presupuesto con alertas antes de desplegar. El administrador real ya existe (sección 21.4).
+
+## 21. Sesión del 2026-11-22: lo que pasó y cómo retomar
+
+Cronología completa, con la tabla de problemas y soluciones: `docs/bitacora-2026-11-22.md`. Despliegue pendiente: `docs/retomar-despliegue.md`.
+
+### 21.1 Celular Android
+
+- La «franja blanca con garabatos azules» **no era el diseño web**: era la barra de acción nativa del tema de arranque del framework más el splash por defecto de Capacitor (blanco con una X azul), visibles detrás del WebView al volverse transparente la barra de estado (borde a borde). Se diagnosticó con un volcado de `uiautomator` (`android:id/action_bar_container` en la franja) y una captura del WebView por CDP sin franja.
+- Arreglo `db0ea21` (`frontend/android/app/src/main/`): `android:screenOrientation="portrait"` en `AndroidManifest.xml` (el teléfono estaba en horizontal), `res/values/window_colors.xml` y `windowBackground` `#0B0B0F`, tema de arranque con `windowActionBar=false`, `windowNoTitle=true` y `postSplashScreenTheme`, y tema base sin barra de acción.
+- Los túneles `adb reverse` de 4200, 8000 y 9099 se pierden cuando el cable USB se corta (síntoma: «error de conexión al servidor»): repetirlos.
+- Una sesión de Firebase guardada de un usuario que ya no existe hacía fallar `getIdToken` con 400 y abortaba hasta las llamadas públicas (ciudades). `12431ac`: un token que no se puede refrescar cuenta como «sin token».
+
+### 21.2 Admin web
+
+`3153394` y `a3ad392`: sección activa con tinte fucsia, botones primarios fucsia (`--rc-primary`), `color-scheme` y `<select>` nativos con colores del tema, sin doble caja de foco en `app-select-field`, enlaces de lista sin subrayado, y Resumen con título «Resumen» y el mismo fondo que las otras pestañas.
+
+### 21.3 Todo configurable
+
+Plan en `odd/tasks/todo-configurable.md`; spec 27 `Hecha`. Criterio: **texto libre** para las clasificaciones del administrador, **parámetros** (`systemSettings/global`, 26) para los valores de cálculo, **catálogo administrable** (`sportLevels`, `sportGoals`) para lo que elige el corredor, y **en el código** lo estructural (lista y motivos en la spec 27). Commits: `4147854`, `26710e7`, `d886077`, `e3e0a90`, `e2369fe`, `cde60dd`, `c5e6b4c`, `1ae71e4`, `67de615`. Pruebas: backend 1204 (recomputado el 2026-11-22) y frontend 857 (`odd/tasks/google-maps.md`); al cerrar la tarea eran 1184 y 835. Las carpetas heredadas `admin/` (Next.js), `frontend/mobile/` (Expo) y `functions/` están reemplazadas por `frontend/` y `backend/`; `functions/test/rules/firestore.rules.test.ts` fallará (rangos antiguos).
+
+### 21.4 Proyecto real de Firebase
+
+- `runcty-73d70` (bucket `runcty-73d70.firebasestorage.app`), creado por el propietario. Authentication con correo y contraseña activada (no ingreso con Google: se recomendó y se descartó a propósito; no está en el backlog); Firestore creado; Analytics no se usa.
+- Configuración web pública en `frontend/src/environments/environment.prod.ts` (`d405cfd`) y `environment.real.ts` (`153c41b`).
+- `backend/.env` lo crea el propietario (nunca el asistente): `DJANGO_DEBUG=true` solo para pruebas locales por HTTP, `FIREBASE_PROJECT_ID`, `FIREBASE_STORAGE_BUCKET`, `GOOGLE_APPLICATION_CREDENTIALS` con una clave **fuera del repositorio**, y `CORS_ALLOWED_ORIGINS` con `http://127.0.0.1:4200`.
+- Comandos: `create_admin` (`ae6a840`) y `reset_password` (`81e6329`); piden la contraseña con `getpass`, sin argumento de contraseña. `seed` se niega fuera de los emuladores salvo `--data-only`. La política de contraseña del backend replica la de la app (8 o más, letra y número). El primer administrador real ya existe.
+- Correr contra el proyecto real: terminal 1 `cd backend; .venv\Scripts\python manage.py runserver 8000` (detener antes el contenedor `runcty-api`; para volver, `docker compose up -d api`); terminal 2 `cd frontend; npm run start:real`. PowerShell 5 no admite `&&`.
+- Verificado: la clave de la cuenta de servicio funciona, el proveedor correo y contraseña está activo y los dominios autorizados son `localhost`, `firebaseapp.com` y `web.app` (`127.0.0.1` no figura; no afecta al ingreso con contraseña).
+- **Incidente de ingreso:** «Correo o contraseña incorrectos» con la cuenta real porque un `ng serve` sobrante (emuladores) escuchaba en `[::1]:4200` y `localhost` apuntaba a él, mientras `start:real` usaba `127.0.0.1:4200`. Arreglo: detener el sobrante y abrir `http://127.0.0.1:4200` en incógnito. Diagnóstico: `netstat -ano` y la línea de comandos de los procesos; prueba REST a `identitytoolkit` con un correo falso (`INVALID_LOGIN_CREDENTIALS` = clave y proveedor correctos). El correo de restablecimiento lo envía Firebase con su propio servicio (spam, Authentication > Templates o SMTP propio); `reset_password` fue la salida.
+- **Seguridad:** el propietario escribió una contraseña real en el chat; se recomendó cambiarla.
+
+### 21.5 Mapas
+
+`4ab6692` y `9b1ea26`: `GoogleMapRenderer` detrás del puerto `MapRenderer`; `provideMapRenderer(environment.googleMapsApiKey)` usa Google con clave y Leaflet/OpenStreetMap sin clave o si Google no carga o rechaza la clave. Restricciones de la clave: referentes `127.0.0.1:4200`, `localhost:4200`, `web.app`, `firebaseapp.com` y `https://localhost` (APK). **La clave no está creada y el renderizador no se verificó en un navegador real ni en el celular.** Las posiciones de otros corredores en vivo son RF-16 (Sprint 4) y no existen.
+
+### 21.6 Despliegue pendiente y qué sigue
+
+- **Despliegue: PENDIENTE por decisión del propietario.** Archivos listos (`82d1611`, `55e6a16`), nada desplegado. Bloqueo: `billingEnabled False` en `runcty-73d70`; Google pidió un prepago de 50 USD que el propietario no hizo (tenía 56 USD; no se sabe si el saldo se reembolsa). `gcloud` instalado con su cuenta personal y el proyecto activo; `firebase login` no hecho. Opciones A (Hosting gratis + API en Render), B (Cloud Run + Hosting con Blaze) y C (solo local) con sus pasos en `docs/retomar-despliegue.md`. Decisiones abiertas: la opción y el Cloud Run sin autenticación.
+- **Defensa lunes 2026-11-23:** plan en `docs/presentacion-2026-11-23.md` y `docs/guia-exposicion-runcty.pdf`. La demo corre desde el navegador contra los emuladores (5 rutas de ejemplo y datos del Sprint 3) o contra el proyecto real (solo administrador, Loja, parámetros, catálogos y roles; `seed --data-only` añade rutas).
+- **Repositorio:** nada se ha enviado a GitHub desde `1577a3a`; la lista de commits solo locales está en `docs/bitacora-2026-11-22.md`, sección 3. Sin confirmar: `frontend/angular.json` (reformateo y `analytics` que añadió el CLI de Angular; la configuración `real` ya está en `153c41b`) y `D:\tmp_run_*.txt` fuera del repositorio.
+- **Pruebas del frontend inestables:** algunas con `ion-input` que leen el texto de error con `textContent` fallan a veces; causa no confirmada.
+- **Pendiente de producto:** pantallas del Sprint 3 (incidentes, fuentes, puntos de apoyo, senderos con resguardo, alertas); EP-10 (estrellas, opiniones, favoritas); EP-11 (rutas verificadas por clubes); sugerencias personalizadas; botón de pánico con hardware; clave de Google Maps; oferta de persistencia de los emuladores de Firebase; renombrar el código al español (alinear con el diagrama de clases); nombre de los roles personalizados en el Resumen del admin.

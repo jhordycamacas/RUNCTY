@@ -87,9 +87,9 @@ Abre `http://127.0.0.1:4200` e inicia sesión con tu administrador. `npm run sta
 
 Si la app va a correr en un celular, el origen del live-reload será la IP de tu red y habrá que añadirla a `CORS_ALLOWED_ORIGINS`; la app Android de producción no necesita cambios en este paso.
 
-## 7. Claves de Google Maps (pendiente)
+## 7. Claves de Google Maps (pendiente de crear)
 
-El adaptador de Google Maps **todavía no está implementado**: los mapas usan Leaflet con OpenStreetMap. Cuando se integre, crea dos claves en Google Cloud, APIs y servicios, Credenciales:
+El renderizador de Google Maps **ya está implementado** (`4ab6692`), pero la clave **no está creada**: sin clave, o si Google no carga o la rechaza, los mapas usan Leaflet con OpenStreetMap. Para activarlo (el detalle está en `specs/05-catalogo-de-rutas.md`, sección «Mapa de la ruta»), crea la clave del navegador en Google Cloud, APIs y servicios, Credenciales y pégala en `googleMapsApiKey` de los entornos (nunca una clave sin restringir en git). Hasta ahora no se verificó en un navegador real ni en el celular. Se recomiendan dos claves, que se crean en Google Cloud, APIs y servicios, Credenciales:
 
 | Clave | Uso | Restricciones |
 | --- | --- | --- |
@@ -111,3 +111,10 @@ Antes de activarlas, configura en Facturación un **presupuesto con alertas** (p
 | Una consulta falla con `failed-precondition` pidiendo un índice | Los índices aún se están construyendo o no se desplegaron | Despliega los índices (sección 5) y espera a que terminen en la consola |
 | Latencia alta en Firestore | La ubicación (región) de la base de datos queda fijada al crearla y no se puede cambiar | Es solo rendimiento en pruebas; para otra región habría que crear otro proyecto o base de datos |
 | La página redirige a HTTPS y no carga | Falta `DJANGO_DEBUG=true` en `backend/.env` | Añádelo (solo local) |
+| «Correo o contraseña incorrectos» con la cuenta real, y la cuenta sí existe | Quedó un segundo `ng serve` (emuladores) escuchando en `[::1]:4200`; `localhost` se resuelve a él y `npm run start:real` está en `127.0.0.1:4200` | Detén el servidor sobrante (`netstat -ano` para ver quién escucha en 4200) y abre `http://127.0.0.1:4200` en una ventana de incógnito |
+| Dudas de si la clave y el proveedor están bien | Hay que separarlos de un problema de cuenta | Prueba REST a `identitytoolkit` con un correo falso: `INVALID_LOGIN_CREDENTIALS` indica que la clave web y el proveedor correo y contraseña funcionan |
+| `localhost` y `127.0.0.1` se comportan distinto | Son orígenes distintos para el navegador, y `localhost` puede resolverse a IPv6 | Usa siempre `http://127.0.0.1:4200` con `start:real` |
+| En el celular: «error de conexión al servidor» | Se cortó el cable USB y se perdieron los `adb reverse` | Repite `adb reverse tcp:4200 tcp:4200`, `tcp:8000` y `tcp:9099` |
+| Una llamada pública (ciudades) falla con 400 de `getIdToken` | Sesión de Firebase guardada de un usuario que ya no existe | Corregido en `12431ac`; si persiste, cierra sesión o borra los datos de la app |
+| El correo de restablecimiento no llega | Lo envía Firebase con su servicio propio; suele ir a spam o falta la plantilla | Revisa spam, Authentication, Templates, o configura un SMTP propio; mientras tanto usa `reset_password --email <correo>` |
+| La API no responde en 8000 con `runserver` | El contenedor `runcty-api` ocupa el puerto | `docker stop runcty-api`; para volver a los emuladores, `docker compose up -d api` |
