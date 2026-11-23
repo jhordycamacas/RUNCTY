@@ -1,6 +1,6 @@
 # Conectar RUNCTY al proyecto real de Firebase (pruebas locales)
 
-Esta guía te lleva de cero a tener la app y la API corriendo en tu computador **contra el proyecto real** `runcty-73d70` (no contra los emuladores), con tu propio administrador. Para los emuladores y la cuenta de prueba sigue el [README](../README.md#emuladores-y-datos-semilla-sin-docker).
+Esta guía te lleva de cero a tener la app y la API corriendo en tu computador **contra el proyecto real** `runcty-73d70` (no contra los emuladores), con tu propio administrador. Para los emuladores y la cuenta de prueba sigue el [README](../README.md#emuladores-y-datos-semilla-sin-docker). Para **publicar** la API (Cloud Run) y la web (Firebase Hosting) sigue [despliegue.md](despliegue.md).
 
 | Dato | Valor |
 | --- | --- |

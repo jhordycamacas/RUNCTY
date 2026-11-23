@@ -1,6 +1,6 @@
 # Specs de RUNCTY (SDD)
 
-Las specs describen **qué** debe hacer RUNCTY antes de escribir código. Están agrupadas por **capacidad** (una por épica del backlog), no por sprint: cada spec reúne todos los sub-requisitos `RF-XX-N` de su capacidad. Hoy hay 26 specs de capacidad, una de [configuración del sistema](27-configuracion-del-sistema.md) (sin épica del backlog, **Parcial**: backend hecho, pantalla de administración pendiente) y 4 transversales que cubren los 153 sub-requisitos del backlog: **28 Hecha, 38 Parcial y 87 Pendiente**.
+Las specs describen **qué** debe hacer RUNCTY antes de escribir código. Están agrupadas por **capacidad** (una por épica del backlog), no por sprint: cada spec reúne todos los sub-requisitos `RF-XX-N` de su capacidad. Hoy hay 26 specs de capacidad, una de [configuración del sistema](27-configuracion-del-sistema.md) (sin épica del backlog, **Parcial**: backend hecho, pantalla de administración pendiente) y 5 transversales que cubren los 153 sub-requisitos del backlog: **28 Hecha, 38 Parcial y 87 Pendiente**.
 
 ## Flujo SDD en este repositorio
 
@@ -68,6 +68,7 @@ Notas: EP-01, EP-25 y EP-26 comparten los IDs `RF-01-N` (el backlog dividió RF-
 | [Arquitectura](transversal/arquitectura.md) | Estructura `backend/` + `frontend/`, capas, autenticación, permisos y contrato de la API. |
 | [Sistema de diseño](transversal/sistema-de-diseno.md) | Paleta blanco, gris y fucsia, tokens, temas, tipografía y reglas de accesibilidad. |
 | [Panel de administración](transversal/panel-de-administracion.md) | Estructura del panel, tema, pantalla Resumen y endpoint `GET /admin/summary`. |
+| [Despliegue en Google Cloud](transversal/despliegue.md) | API en Cloud Run, web en Firebase Hosting, mínimo privilegio y cabeceras de seguridad. Pendiente de ejecutar por el propietario. |
 
 ## Plan de sprints: planificado frente a real
 

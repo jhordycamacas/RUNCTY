@@ -861,3 +861,25 @@ Decisión del dueño del producto: nada de negocio queda escrito en el código. 
 **Reglas de Firestore:** ya no repiten rangos de negocio. El perfil deportivo solo valida su forma y el país de una ciudad solo debe tener dos letras; la API valida el resto con los parámetros vigentes. Las pruebas de reglas de `functions/test/rules` (código heredado) todavía esperan los rangos antiguos.
 
 **Pendiente:** mostrar el nombre de un rol creado por el administrador en el resumen (hoy se ve su identificador) y revisar con Gacelas los límites de cada parámetro.
+
+## 20. Despliegue en Google Cloud (2026-11-22)
+
+Estado: **archivos y guía listos; pendiente de ejecutar por el propietario** (ningún comando remoto se ha corrido). Guía: `docs/despliegue.md`. Spec: `specs/transversal/despliegue.md`. Tareas: `odd/tasks/despliegue-seguro.md`.
+
+**Qué va dónde**
+
+- **API Django** -> Cloud Run, servicio `runcty-api`, `southamerica-east1`, 0 a 3 instancias, cuenta de servicio `runcty-api@runcty-73d70.iam.gserviceaccount.com` con solo `roles/datastore.user` y `roles/firebaseauth.admin`; `DJANGO_SECRET_KEY` en Secret Manager; sin clave JSON ni `DJANGO_DEBUG`.
+- **Web Angular** (corredor y panel admin, un solo build) -> Firebase Hosting (`runcty-73d70.web.app` y `.firebaseapp.com`), con reglas e índices de Firestore en el mismo despliegue.
+
+**Decisiones y por qué**
+
+- Cloud Run público (`--allow-unauthenticated`): el navegador no puede mandar el token de identidad de Google; la API ya autentica con el ID token de Firebase y deniega por defecto.
+- Cuenta de servicio propia con dos roles, en lugar de la de Compute por defecto (Editor): mínimo privilegio. Storage no se concede porque el código aún no lo usa.
+- Scripts de PowerShell con confirmación en cada paso remoto, idempotentes; el de backend sube una copia limpia (sin `.env` ni claves) y el de la web solo reescribe la línea `apiBaseUrl` de `environment.prod.ts`.
+- `DJANGO_NUM_PROXIES=1` es obligatorio en Cloud Run (si no, redirección HTTPS sin fin). Sin sondas HTTP: `ALLOWED_HOSTS` rechazaría el host interno; se usa la sonda TCP por defecto.
+- Un worker con 8 hilos por instancia: los límites de tasa son por proceso (caché en memoria); un caché compartido requeriría infraestructura nueva y queda como riesgo documentado.
+- Cabeceras de seguridad en Hosting: CSP sin `unsafe-eval` (con `unsafe-inline` solo en estilos, por Angular e Ionic), HSTS, `nosniff`, `X-Frame-Options: DENY`, Referrer y Permissions-Policy.
+
+**Archivos:** `backend/Dockerfile`, `backend/.dockerignore`, `deploy/common.ps1`, `deploy/deploy-backend.ps1`, `deploy/deploy-web.ps1`, `firebase.json` (sección `hosting`), `.firebaserc` (alias `production`), `docs/despliegue.md`, `backend/CONTEXTO-BACKEND.md`.
+
+**Pendiente:** ejecutar los dos scripts, crear el administrador (`create_admin`), verificar y marcar los criterios abiertos de la spec; presupuesto con alertas antes de desplegar.

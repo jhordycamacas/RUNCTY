@@ -83,6 +83,9 @@ that block is for local development only. The services run with every Linux capa
 `no-new-privileges` and memory, CPU and process limits; `api` and `seed` also have a read-only
 root filesystem. Base images are pinned by tag and digest.
 
+Production (Google Cloud Run): see [CONTEXTO-BACKEND.md](CONTEXTO-BACKEND.md) and
+[docs/despliegue.md](../docs/despliegue.md); the image listens on `$PORT` (8000 by default).
+
 Standalone image: `docker build -t runcty-api backend` then
 `docker run --env-file <file outside the repo> -p 8000:8000 runcty-api`. The image runs
 gunicorn as a non-root user and contains no configuration or credentials.

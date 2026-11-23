@@ -132,7 +132,7 @@ npm run seed            # en otra terminal: crea la ciudad Loja, los roles del s
 
 Usuario administrador de prueba (solo emulador): `admin@runcty.dev` / `Admin123!`. El seed se niega a correr si el proyecto no empieza con `demo-` o si los emuladores no están en la máquina local o en el servicio `firebase` de Docker.
 
-Para probar contra el **proyecto real de Firebase** (sin emuladores y con tu propio administrador) sigue [docs/conectar-google.md](docs/conectar-google.md).
+Para probar contra el **proyecto real de Firebase** (sin emuladores y con tu propio administrador) sigue [docs/conectar-google.md](docs/conectar-google.md). Para publicar la API en Cloud Run y la web en Firebase Hosting, sigue [docs/despliegue.md](docs/despliegue.md).
 
 Para conservar los datos entre sesiones usa `npm run emulators:persist` (guarda en `emulator-data/`, ignorado por git).
 
@@ -237,7 +237,7 @@ npm run admin:build                        # build de producción del panel
 - Pulido de la app y del panel que dejó la auditoría del 2026-11-10 (botón de emergencia, preferencias que se aplican, reenvío del correo de verificación, panel responsive y confirmación al cambiar roles). El detalle y el plan están en [CONTEXTO.md](CONTEXTO.md), sección 14.
 - Probar en el navegador la gestión de rutas del panel.
 - Google Maps (falta la clave; mientras tanto los mapas usan Leaflet con OpenStreetMap y las coordenadas se cargan a mano).
-- Conectar el proyecto real de Firebase (plan Blaze) para desplegar.
+- Desplegar en Google Cloud (API en Cloud Run y web en Firebase Hosting): scripts y guía listos, pendiente de ejecutar; ver [docs/despliegue.md](docs/despliegue.md).
 - Decisiones de producto: consentimiento parental de menores, texto legal LOPDP y valores por defecto de las notificaciones (ver [CONTEXTO.md](CONTEXTO.md)).
 
 El detalle de las tareas y su evidencia está en [odd/tasks/foundation-sprint1.md](odd/tasks/foundation-sprint1.md) y [odd/tasks/design-system-sprint2.md](odd/tasks/design-system-sprint2.md).
