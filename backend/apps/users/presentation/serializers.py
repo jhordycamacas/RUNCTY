@@ -49,12 +49,7 @@ class UserSerializer(UserSummarySerializer):
 class UserSearchSerializer(StrictSerializer):
     """Query string of `GET /users`. `parse_search_query` validates the values."""
 
-    firstName = text_field(required=False)
-    lastName = text_field(required=False)
-    email = text_field(required=False)
-    idNumber = text_field(required=False)
-    birthDate = text_field(required=False)
-    cityId = text_field(required=False)
+    q = text_field(required=False)
     limit = text_field(required=False)
     cursor = text_field(required=False)
 

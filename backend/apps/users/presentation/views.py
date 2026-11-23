@@ -17,6 +17,7 @@ from apps.users.application.use_cases import (
     get_profile,
     get_profile_photo,
     get_sport_profile,
+    get_user_detail,
     register_user,
     save_preferences,
     save_profile_photo,
@@ -72,6 +73,28 @@ class UsersView(APIView):
             adapter("AUTH_GATEWAY"),
         )
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
+
+class UserDetailView(APIView):
+    """The admin reads one account. The rating comes with the group runs (RF-01-2)."""
+
+    permission_classes = [CanReadUsers]
+
+    def get_throttles(self):
+        return [throttle() for throttle in SENSITIVE_THROTTLES]
+
+    def get(self, request, uid: str) -> Response:
+        detail = get_user_detail(
+            uid, adapter("USER_REPOSITORY"), adapter("SPORT_PROFILE_REPOSITORY")
+        )
+        sport_profile = detail.sport_profile
+        return Response(
+            {
+                "user": UserSerializer(detail.user).data,
+                "sportProfile": sport_profile.to_document() if sport_profile else None,
+                "rating": None,  # {"average", "count"} once the group runs can be rated
+            }
+        )
 
 
 class OwnProfileView(APIView):

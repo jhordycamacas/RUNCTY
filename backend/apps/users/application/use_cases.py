@@ -1,11 +1,12 @@
-"""RF-01: the account's own profile, sport profile and preferences, and the user search.
+"""RF-01: the account's own profile, sport profile and preferences, and the admin user search
+and detail.
 
 Every use case on an account acts on the uid of the verified token; none takes a uid from
 the client.
 """
 
 from collections.abc import Mapping
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import date
 
 from apps.catalogs.application.ports import CatalogRepository
@@ -31,9 +32,19 @@ from apps.users.domain.search import (
     ScanBudget,
     SearchQuery,
     UserPage,
-    equality_filters,
-    matches_name_prefixes,
+    equality_filter,
+    matches_text,
 )
+
+_MAX_UID = 128
+
+
+@dataclass(frozen=True, slots=True)
+class UserDetail:
+    """What the admin panel shows of one account: the profile and the sport profile."""
+
+    user: Usuario
+    sport_profile: PerfilDeportivo | None
 
 
 def _not_found(reason: str, message: str) -> DomainError:
@@ -158,7 +169,8 @@ def search_users(
     query: SearchQuery, users: UserRepository, budget: ScanBudget = DEFAULT_SCAN_BUDGET
 ) -> UserPage:
     """RF-01-2: one page of the profiles that match `query`, scanning at most the budget."""
-    filters = equality_filters(query.filters)
+    equality = equality_filter(query.text)
+    filters = [equality] if equality else []
     found: list[Usuario] = []
     cursor = query.cursor
     scanned = 0
@@ -169,7 +181,8 @@ def search_users(
         for user in batch:
             cursor = user.uid
             scanned += 1
-            if matches_name_prefixes(user, query.filters):
+            # The store already matched an id number or an email, so only names are left.
+            if equality or matches_text(user, query.text):
                 found.append(user)
                 if len(found) == query.limit:
                     # More profiles may match after this one; the next page resumes here.
@@ -179,6 +192,20 @@ def search_users(
 
     # Scan budget exhausted: the admin continues from the last scanned profile.
     return UserPage(found, cursor)
+
+
+def get_user_detail(
+    uid: str, users: UserRepository, sport_profiles: SportProfileRepository
+) -> UserDetail:
+    """The profile and sport profile of any account. Never the photo or the preferences."""
+    if not 0 < len(uid) <= _MAX_UID:
+        raise DomainError(
+            ErrorKind.INVALID_ARGUMENT, "invalid-argument", "A valid uid is required."
+        )
+    user = users.get(uid)
+    if user is None:
+        raise _not_found("user-not-found", "The user does not exist.")
+    return UserDetail(user, sport_profiles.get(uid))
 
 
 def delete_account(caller: Principal, now: float, users: UserRepository, auth: AuthGateway) -> None:

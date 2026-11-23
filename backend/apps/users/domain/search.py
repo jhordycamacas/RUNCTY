@@ -1,10 +1,10 @@
-"""RF-01-2: user search for the admin panel.
+"""RF-01-2: user search for the admin panel, from one text box.
 
-Exact filters (email, id number, birth date, city) are equality filters of the store. Names
-are matched in memory with a case- and accent-insensitive prefix over a bounded scan:
-Firestore cannot match without accents, and the pilot (one club in Loja) has hundreds of
-users, not millions. Each request reads at most `ScanBudget.max_scanned` profiles and
-returns a cursor to continue.
+The text is read as an exact id number (10 digits), an exact email (it has an `@`) or a name.
+Id number and email are equality filters of the store. Names are matched in memory with a
+case- and accent-insensitive prefix over a bounded scan: Firestore cannot match without
+accents, and the pilot (one club in Loja) has hundreds of users, not millions. Each request
+reads at most `ScanBudget.max_scanned` profiles and returns a cursor to continue.
 """
 
 import re
@@ -17,22 +17,17 @@ from apps.users.domain.models import Usuario
 
 _DEFAULT_PAGE_SIZE = 20
 MAX_PAGE_SIZE = 50
-_MAX_FILTER = 120
+_MAX_TEXT = 120
 _MAX_CURSOR = 128
 
-_EQUALITY_FIELDS = ("email", "idNumber", "birthDate", "cityId")
-_TEXT_FILTERS = ("firstName", "lastName", *_EQUALITY_FIELDS)
-_FORMATS = {
-    "idNumber": re.compile(r"[0-9]{10}"),
-    "birthDate": re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}"),
-}
+_ID_NUMBER = re.compile(r"[0-9]{10}")
 
 EqualityFilter = tuple[str, str]
 
 
 @dataclass(frozen=True, slots=True)
 class SearchQuery:
-    filters: Mapping[str, str]
+    text: str  # trimmed; empty lists everyone
     limit: int
     cursor: str | None  # uid of the last profile scanned for the previous page
 
@@ -67,19 +62,11 @@ def _parse_limit(value: object) -> int:
 
 def parse_search_query(raw: Mapping[str, object] | None) -> SearchQuery:
     data = raw or {}
-    filters: dict[str, str] = {}
-    for name in _TEXT_FILTERS:
-        value = data.get(name)
-        if value is None:
-            continue
-        if not isinstance(value, str) or len(value) > _MAX_FILTER:
-            raise _invalid("invalid-filter", f'Filter "{name}" must be text.')
-        text = value.strip().lower() if name == "email" else value.strip()
-        if not text:
-            continue
-        if name in _FORMATS and not _FORMATS[name].fullmatch(text):
-            raise _invalid("invalid-filter", f'Filter "{name}" has an invalid format.')
-        filters[name] = text
+    text = data.get("q")
+    if text is not None and (not isinstance(text, str) or len(text) > _MAX_TEXT):
+        raise _invalid(
+            "invalid-filter", 'The search text "q" must be text of up to 120 characters.'
+        )
 
     cursor = data.get("cursor")
     # A cursor is a document id: a path separator would point outside the collection.
@@ -89,11 +76,16 @@ def parse_search_query(raw: Mapping[str, object] | None) -> SearchQuery:
         raise _invalid("invalid-cursor", "cursor must be a document id.")
 
     limit = _parse_limit(data["limit"]) if "limit" in data else _DEFAULT_PAGE_SIZE
-    return SearchQuery(filters=filters, limit=limit, cursor=cursor or None)
+    return SearchQuery(text=(text or "").strip(), limit=limit, cursor=cursor or None)
 
 
-def equality_filters(filters: Mapping[str, str]) -> list[EqualityFilter]:
-    return [(name, filters[name]) for name in _EQUALITY_FIELDS if name in filters]
+def equality_filter(text: str) -> EqualityFilter | None:
+    """The exact match the store can answer: an id number or an email, else None."""
+    if _ID_NUMBER.fullmatch(text):
+        return ("idNumber", text)
+    if "@" in text:
+        return ("email", text.lower())
+    return None
 
 
 def normalize_name(value: str) -> str:
@@ -103,8 +95,13 @@ def normalize_name(value: str) -> str:
     return " ".join(without_accents.lower().split())
 
 
-def matches_name_prefixes(user: Usuario, filters: Mapping[str, str]) -> bool:
-    return all(
-        normalize_name(name).startswith(normalize_name(filters.get(filter_name, "")))
-        for name, filter_name in ((user.first_name, "firstName"), (user.last_name, "lastName"))
-    )
+def matches_text(user: Usuario, text: str) -> bool:
+    """Whether every word of `text` starts a word of the name, or `text` starts the email.
+
+    The email is only compared up to its `@`, so the domain never matches.
+    """
+    query = normalize_name(text)
+    name_words = normalize_name(f"{user.first_name} {user.last_name}").split()
+    if all(any(word.startswith(part) for word in name_words) for part in query.split()):
+        return True
+    return " " not in query and user.email.split("@")[0].lower().startswith(query)

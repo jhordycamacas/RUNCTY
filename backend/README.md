@@ -98,7 +98,8 @@ gunicorn as a non-root user and contains no configuration or credentials.
 | `GET /api/v1/health/services` | `admin` role | which Google services are configured (booleans) |
 | `GET /api/v1/me` | any signed-in user | `uid`, `email`, `emailVerified`, `role`, `perms` |
 | `POST /api/v1/users` | signed in, own uid | 201 with the caller's new profile. Body: `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber?`, `consent: {lopdp: true}` |
-| `GET /api/v1/users` | `users.read` | `{"users": [{uid, email, firstName, lastName, birthDate, cityId, role}], "nextCursor"}`. Query: `firstName`, `lastName`, `email`, `idNumber`, `birthDate`, `cityId`, `limit`, `cursor` |
+| `GET /api/v1/users` | `users.read` | `{"users": [{uid, email, firstName, lastName, birthDate, cityId, role}], "nextCursor"}`. Query: `q`, `limit`, `cursor` |
+| `GET /api/v1/users/{uid}` | `users.read` | `{"user": <as /users/me>, "sportProfile": {...} or null, "rating": null}`; 404 `user-not-found` |
 | `GET /api/v1/users/me` | owner | `uid`, `email`, `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber`, `role` |
 | `PATCH /api/v1/users/me` | owner | the updated profile. Body: any of `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber` |
 | `DELETE /api/v1/users/me` | owner, signed in within 5 minutes | 204 |
@@ -182,14 +183,21 @@ Values that break a rule of a model are reported the same way, with these field 
   sign in and retry, and an account already gone from Auth is not an error. An account whose
   stored claims say `admin` is deleted only if the role mirror shows another admin, read in
   the same transaction; otherwise 400 `last-admin` and nothing is deleted.
-- **`GET /users`** (admin search) matches `email`, `idNumber`, `birthDate` and `cityId`
-  exactly in Firestore, and `firstName` and `lastName` as case- and accent-insensitive
-  prefixes in memory. A page holds `limit` users (default 20, at most 50) and a request
+- **`GET /users`** (admin search) takes one text `q` (trimmed, up to 120 characters, empty
+  lists everyone). Ten ASCII digits are an exact `idNumber` and a text with `@` is an exact
+  lowercased `email`, both matched in Firestore; anything else is matched in memory,
+  case- and accent-insensitive: every word of `q` must start a word of the first or last
+  name, or the whole `q` must start the email before its `@`. A page holds `limit` users (default 20, at most 50) and a request
   scans at most 1000 profiles, so a page can come back short or empty with a `nextCursor`:
   send it as `cursor` to continue, until it is `null`. Reasons: `invalid-filter`,
   `invalid-limit`, `invalid-cursor` (400); an unknown parameter is `invalid-argument`. The
   id number and the consent record are never returned. It uses the tighter
   `THROTTLE_RATE_SENSITIVE` budget.
+- **`GET /users/{uid}`** (admin detail, `users.read`, same tighter budget) joins the
+  profile (as `GET /users/me`, with `idNumber`) and `users/{uid}/private/sportProfile`
+  (`null` when missing). `rating` is always `null` until the group runs can be rated, then
+  `{average, count}`. The photo and the preferences are never returned. `/users/me` is a
+  literal route listed first, so it is never read as a uid.
 
 ### Roles
 

@@ -74,7 +74,8 @@ Decididas por el equipo o derivadas de otros documentos:
 | Endpoint | Permiso | Descripción |
 | --- | --- | --- |
 | `POST /users` | sesión | Crea el perfil de quien tiene el token (`201` con el usuario). Cuerpo: `firstName`, `lastName`, `birthDate` (`AAAA-MM-DD`), `cityId`, `idNumber` opcional (10 dígitos) y `consent: {lopdp: true}`. |
-| `GET /users` | `users.read` | Búsqueda de administrador por `firstName`, `lastName`, `email`, `idNumber`, `birthDate`, `cityId`; paginada con `limit` (máx. 50) y `cursor`; responde `{users, nextCursor}` sin identificación. |
+| `GET /users` | `users.read` | Búsqueda de administrador con un solo texto `q` (hasta 120 caracteres; vacío lista a todos): 10 dígitos = identificación exacta, con `@` = correo exacto, otro texto = nombres y apellidos por prefijo de cada palabra sin distinguir mayúsculas ni tildes, o prefijo del correo antes de la `@`. Paginada con `limit` (máx. 50) y `cursor`; responde `{users, nextCursor}` sin identificación. Los filtros anteriores (`firstName`, `lastName`, `email`, `idNumber`, `birthDate`, `cityId`) ya no existen y se rechazan como parámetros desconocidos. |
+| `GET /users/{uid}` | `users.read` | Ficha de una cuenta para el administrador: `{user, sportProfile, rating}`. `user` es el mismo objeto de `GET /users/me` (con `idNumber`), `sportProfile` es el del corredor o `null`, y `rating` es siempre `null` por ahora: será `{average, count}` cuando existan las calificaciones de las salidas grupales. No incluye foto ni preferencias. Cuenta inexistente: 404 `user-not-found`. |
 | `GET /users/me` · `PATCH /users/me` · `DELETE /users/me` | sesión | Perfil propio, cambio parcial de datos personales (una identificación vacía la elimina) y eliminación de la cuenta (inicio de sesión de menos de 5 minutos). |
 | `GET/PUT/DELETE /users/me/sport-profile` | sesión | Perfil deportivo propio: `level`, `goals[]`, `usualPaceSecPerKm`, `preferredDistanceKm`. |
 | `GET/PUT/DELETE /users/me/photo` | sesión | Foto de perfil propia. `GET` responde `{photo}` (data URL o `null`); `PUT` recibe `{photo}` y responde lo guardado; `DELETE` responde 204 y es idempotente. No existe un endpoint para leer la foto de otra cuenta. |
@@ -148,10 +149,12 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 - [x] Requiere el permiso `users.read`; sin él la pantalla no es accesible.
 - [x] Todo el texto de la interfaz está en español; un código de error de la API sin traducción cae en el mensaje genérico (`frontend/src/app/core/errors/error-messages.ts`).
 - [x] Cada control tiene etiqueta, objetivo táctil de 48 px y contraste de texto 4,5:1; sin scroll horizontal de la página en pantallas angostas (360 px) y el área sigue pensada para escritorio.
+- [x] Backend (2026-11-22): `GET /users?q=` busca con un solo texto (identificación de 10 dígitos, correo con `@`, o prefijos de nombres, apellidos y correo sin tildes ni mayúsculas) y rechaza los filtros anteriores como parámetros desconocidos.
+- [x] Backend (2026-11-22): `GET /users/{uid}` entrega la ficha `{user, sportProfile, rating}` solo con `users.read` (un corredor recibe 403); `rating` es `null` hasta que existan las calificaciones de salidas grupales (`{average, count}`) y no incluye foto ni preferencias; una cuenta inexistente da 404 `user-not-found`.
 
 **Implementación:** `frontend/src/app/admin/users/presentation/users-admin.page.ts`, `frontend/src/app/admin/users/application/admin-users.store.ts`, `frontend/src/app/admin/users/domain/user-search.ts`, `frontend/src/app/admin/users/domain/managed-user.ts`, `frontend/src/app/admin/users/infrastructure/http-user-admin.repository.ts`, `backend/apps/users/presentation/views.py`
 
-**Pruebas:** `frontend/src/app/admin/users/domain/user-search.spec.ts`, `frontend/src/app/admin/users/infrastructure/http-user-admin.repository.spec.ts`, `frontend/src/app/admin/users/application/admin-users.store.spec.ts`, `frontend/src/app/admin/users/presentation/users-admin.page.spec.ts`
+**Pruebas:** `backend/tests/test_user_search.py`, `backend/tests/test_user_detail.py`, `frontend/src/app/admin/users/domain/user-search.spec.ts`, `frontend/src/app/admin/users/infrastructure/http-user-admin.repository.spec.ts`, `frontend/src/app/admin/users/application/admin-users.store.spec.ts`, `frontend/src/app/admin/users/presentation/users-admin.page.spec.ts`
 
 ### RF-01-3 — Actualizar usuario
 
