@@ -63,6 +63,9 @@ SPORT_PROFILE_REPOSITORY = (
 PREFERENCES_REPOSITORY = (
     "apps.users.infrastructure.firestore_private_documents.FirestorePreferencesRepository"
 )
+PROFILE_PHOTO_REPOSITORY = (
+    "apps.users.infrastructure.firestore_private_documents.FirestoreProfilePhotoRepository"
+)
 SOURCE_REPOSITORY = (
     "apps.safety_data.infrastructure.document_repositories.FirestoreSourceRepository"
 )

@@ -37,6 +37,8 @@ Comprobaciones: `.venv/Scripts/python -m pytest -q` (1204 pruebas en verde el 20
 
 Nada de negocio está fijo en el código: los parámetros (penalizaciones, umbrales, ventanas, radios, límites) viven en `systemSettings/global` (`GET`/`PUT /settings`, permiso `settings.manage`) y las opciones del perfil deportivo en `catalogs/{id}` (`sportLevels`, `sportGoals`). Cambiar una penalización, umbral, ventana, margen o la zona horaria recalcula todas las rutas. Lo que se queda en código a propósito está en `specs/27-configuracion-del-sistema.md`.
 
+**Foto de perfil.** `GET`/`PUT`/`DELETE /users/me/photo` guardan la foto como data URL en `users/{uid}/private/photo` (`data`, `mime`, `updatedAt`), no en Cloud Storage: Storage exige el plan de pago y el proyecto no tiene facturación. La API valida tipo (jpeg, png, webp), base64, bytes mágicos y tamaño (`profilePhotoMaxKb`, 20–500, defecto 100; el cliente reduce a `profilePhotoMaxPx`, 64–1024, defecto 256). Solo existe la foto propia; eliminar la cuenta la borra con el resto de `private`.
+
 ## Comandos de gestión (`manage.py`)
 
 | Comando | Para qué |

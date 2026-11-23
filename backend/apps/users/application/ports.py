@@ -1,6 +1,7 @@
 from typing import Protocol
 
 from apps.users.domain.models import PerfilDeportivo, PreferenciaUsuario, Usuario
+from apps.users.domain.profile_photo import ProfilePhoto
 from apps.users.domain.search import EqualityFilter
 
 
@@ -54,6 +55,16 @@ class PreferencesRepository(Protocol):
     def get(self, uid: str) -> PreferenciaUsuario | None: ...
 
     def save(self, uid: str, preferences: PreferenciaUsuario) -> None:
+        """Creates or replaces the whole document."""
+        ...
+
+    def delete(self, uid: str) -> None: ...
+
+
+class ProfilePhotoRepository(Protocol):
+    def get(self, uid: str) -> ProfilePhoto | None: ...
+
+    def save(self, uid: str, photo: ProfilePhoto) -> None:
         """Creates or replaces the whole document."""
         ...
 

@@ -104,6 +104,7 @@ gunicorn as a non-root user and contains no configuration or credentials.
 | `DELETE /api/v1/users/me` | owner, signed in within 5 minutes | 204 |
 | `GET`, `PUT`, `DELETE /api/v1/users/me/sport-profile` | owner | `level`, `goals`, `usualPaceSecPerKm`, `preferredDistanceKm` (204 on delete) |
 | `GET`, `PUT`, `DELETE /api/v1/users/me/preferences` | owner | `language`, `fontScale`, `appearance`, `units`, `notifications`, `locationPrivacy` (204 on delete) |
+| `GET`, `PUT`, `DELETE /api/v1/users/me/photo` | owner | `{"photo": "data:image/jpeg;base64,..."}`; `GET` gives `{"photo": null}` when none; 400 `fields.photo` in `required`, `invalid-format`, `invalid-image`, `too-large` (204 on delete) |
 | `GET /api/v1/roles` | `admin.access` | `{"roles": [{id, name, description, permissions, system}]}` |
 | `POST /api/v1/roles` | `roles.manage` | 201 with the role. Body: `id`, `name`, `description?`, `permissions` |
 | `PUT /api/v1/roles/{id}` | `roles.manage` | `{"syncedUsers": n}`. Body: `name`, `description?`, `permissions` |
@@ -165,6 +166,15 @@ Values that break a rule of a model are reported the same way, with these field 
   then use their defaults), and `DELETE` is idempotent. A stored sport profile that no
   longer matches the schema counts as missing; invalid stored preferences fall back to the
   default field by field.
+- **Profile photo** (`users/{uid}/private/photo` = `{data, mime, updatedAt}`). The photo is
+  stored in Firestore because Cloud Storage needs the paid plan and the project has no
+  billing. `PUT` takes a data URL (`image/jpeg`, `image/png` or `image/webp`, base64); the
+  decoded size must fit `profilePhotoMaxKb` and the magic bytes must match the mime. A string
+  longer than the largest valid data URL is refused with `too-large` before any decoding. The
+  client resizes to `profilePhotoMaxPx`; the API does not re-encode. There is no endpoint
+  to read another account's photo, and the admin summary scan skips the photo payload. The
+  request body limit is Django's default `DATA_UPLOAD_MAX_MEMORY_SIZE` (2.5 MB), which holds
+  the largest photo (500 KB is about 670 KB of base64).
 - **`DELETE /users/me`** needs a sign-in at most 300 seconds old (`auth_time` of the token),
   so the client re-authenticates first; otherwise 400 `recent-sign-in-required`. One Firestore
   transaction deletes `users/{uid}` and every document under `users/{uid}/private`; then the
@@ -218,7 +228,7 @@ has zones. A zone's parent must be an existing city, not another zone. `GET` nee
 
 `systemSettings/global` holds the numbers that used to be constants: penalty per severity,
 level thresholds, incident window and margin, time zone, radii, route limits, sport profile
-ranges, safe route tolerance and country. `SystemSettings` (`apps/system_settings/domain`)
+ranges, safe route tolerance, profile photo size and country. `SystemSettings` (`apps/system_settings/domain`)
 validates each one with its type and bounds (`400 invalid-argument` with the reason per field in
 `error.fields`: `required`, `invalid`, `out-of-range`, `invalid-time-zone`,
 `invalid-country-code`, `must-not-be-below-previous`, `must-be-below-high`,

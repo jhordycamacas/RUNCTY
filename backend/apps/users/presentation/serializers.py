@@ -1,6 +1,11 @@
 from rest_framework import serializers
 
-from apps.shared.presentation.serializers import MAX_ITEMS, StrictSerializer, text_field
+from apps.shared.presentation.serializers import (
+    MAX_ITEMS,
+    StrictSerializer,
+    raw_field,
+    text_field,
+)
 
 
 class PersonalDataSerializer(StrictSerializer):
@@ -74,3 +79,9 @@ class PreferencesSerializer(StrictSerializer):
     units = text_field()
     notifications = NotificationsSerializer()
     locationPrivacy = text_field()
+
+
+class ProfilePhotoSerializer(StrictSerializer):
+    """The data URL is checked, and its size bounded, by the domain."""
+
+    photo = raw_field()

@@ -5,11 +5,12 @@ from google.cloud.firestore import SERVER_TIMESTAMP, DocumentReference
 from apps.shared.infrastructure.firebase.app import firestore_client
 from apps.shared.infrastructure.firebase.collections import USER_PRIVATE, USERS
 from apps.users.domain.models import PerfilDeportivo, PreferenciaUsuario
+from apps.users.domain.profile_photo import ProfilePhoto
 
 
 class _FirestorePrivateDocument:
     document_id: str
-    model: type[PerfilDeportivo] | type[PreferenciaUsuario]
+    model: type[PerfilDeportivo] | type[PreferenciaUsuario] | type[ProfilePhoto]
 
     def _document(self, uid: str) -> DocumentReference:
         user = firestore_client().collection(USERS).document(uid)
@@ -39,3 +40,10 @@ class FirestorePreferencesRepository(_FirestorePrivateDocument):
 
     document_id = "preferences"
     model = PreferenciaUsuario
+
+
+class FirestoreProfilePhotoRepository(_FirestorePrivateDocument):
+    """`ProfilePhotoRepository` adapter: the photo lives in Firestore, not in Cloud Storage."""
+
+    document_id = "photo"
+    model = ProfilePhoto

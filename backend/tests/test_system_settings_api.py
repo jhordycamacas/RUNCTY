@@ -232,3 +232,13 @@ class TestParametersApplyAcrossTheApi:
 
         assert rejected.status_code == 400
         assert accepted.status_code == 200
+
+    def test_the_photo_limits_are_served_and_validated(self, client):
+        served = client.get(SETTINGS_URL, **RUNNER).json()["settings"]
+        rejected = client.put(SETTINGS_URL, {"profilePhotoMaxPx": 2000}, format="json", **ADMIN)
+        saved = client.put(SETTINGS_URL, {"profilePhotoMaxPx": 512}, format="json", **ADMIN)
+
+        assert (served["profilePhotoMaxKb"], served["profilePhotoMaxPx"]) == (100, 256)
+        assert rejected.status_code == 400
+        assert rejected.json()["error"]["fields"] == {"profilePhotoMaxPx": "out-of-range"}
+        assert saved.json()["settings"]["profilePhotoMaxPx"] == 512

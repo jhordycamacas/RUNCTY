@@ -44,6 +44,7 @@ from apps.system_settings.infrastructure.firestore_settings_repository import (
     FirestoreSettingsRepository,
 )
 from apps.users.domain.models import PerfilDeportivo, PreferenciaUsuario, Usuario
+from apps.users.domain.profile_photo import ProfilePhoto
 
 # The parameters every test runs with: the defaults of the system settings.
 SETTINGS = SystemSettings.defaults()
@@ -481,6 +482,11 @@ class InMemorySportProfileRepository(_InMemoryPrivateDocuments):
 class InMemoryPreferencesRepository(_InMemoryPrivateDocuments):
     document_id = "preferences"
     model = PreferenciaUsuario
+
+
+class InMemoryProfilePhotoRepository(_InMemoryPrivateDocuments):
+    document_id = "photo"
+    model = ProfilePhoto
 
 
 class InMemorySummarySource:

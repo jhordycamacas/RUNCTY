@@ -18,11 +18,13 @@ from apps.shared.domain.permissions import ADMIN_ROLE
 from apps.system_settings.domain.models import SystemSettings
 from apps.users.application.ports import (
     PreferencesRepository,
+    ProfilePhotoRepository,
     SportProfileRepository,
     UserRepository,
 )
 from apps.users.domain.account_deletion import is_recent_sign_in
 from apps.users.domain.models import PerfilDeportivo, PreferenciaUsuario, Usuario
+from apps.users.domain.profile_photo import ProfilePhoto
 from apps.users.domain.role_assignment import resolve_role_assignment
 from apps.users.domain.search import (
     DEFAULT_SCAN_BUDGET,
@@ -137,6 +139,19 @@ def save_preferences(
     saved = PreferenciaUsuario.parse(data)
     preferences.save(uid, saved)
     return saved
+
+
+def get_profile_photo(uid: str, photos: ProfilePhotoRepository) -> ProfilePhoto | None:
+    """The caller's photo, or None for an account that never saved one."""
+    return photos.get(uid)
+
+
+def save_profile_photo(
+    uid: str, raw: object, photos: ProfilePhotoRepository, settings: SystemSettings
+) -> ProfilePhoto:
+    photo = ProfilePhoto.parse(raw, settings)
+    photos.save(uid, photo)
+    return photo
 
 
 def search_users(

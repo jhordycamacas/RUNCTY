@@ -76,6 +76,8 @@ Parámetros (claves camelCase del JSON y del documento `systemSettings/global`):
 | `distanceMinKm`, `distanceMaxKm` | número 0,1–500 y 0,1–1000, `máx > mín` | 1, 50 | Rango de la distancia preferida del perfil deportivo |
 | `safeRouteDistanceTolerance` | número 0,01–1 | 0,2 | Tolerancia de distancia de la ruta segura (±20 %) |
 | `safeRouteMaxDistanceKm` | entero 1–1000 | 500 | Distancia máxima pedida en una ruta segura |
+| `profilePhotoMaxKb` | entero 20–500 | 100 | Tamaño máximo de la foto de perfil ya decodificada; la API rechaza lo que lo supere |
+| `profilePhotoMaxPx` | entero 64–1024 | 256 | Lado en píxeles al que los clientes reducen la foto de perfil antes de enviarla |
 | `countryCode` | dos letras mayúsculas | `EC` | País que se estampa en las ciudades nuevas |
 
 Los servicios leen el documento una vez por petición y pasan el objeto de parámetros a los casos de uso y a las funciones puras del dominio; no hay constantes de negocio en el código fuera de los valores por defecto.

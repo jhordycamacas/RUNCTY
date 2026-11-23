@@ -8,9 +8,11 @@ from google.api_core.exceptions import Conflict, NotFound
 from google.cloud.firestore import DELETE_FIELD, SERVER_TIMESTAMP
 
 from apps.users.domain.models import PerfilDeportivo, PreferenciaUsuario, Usuario
+from apps.users.domain.profile_photo import ProfilePhoto
 from apps.users.infrastructure import firestore_private_documents, firestore_user_repository
 from apps.users.infrastructure.firestore_private_documents import (
     FirestorePreferencesRepository,
+    FirestoreProfilePhotoRepository,
     FirestoreSportProfileRepository,
 )
 from apps.users.infrastructure.firestore_user_repository import (
@@ -211,6 +213,7 @@ class TestFirestorePrivateDocuments:
         [
             (FirestoreSportProfileRepository, "sportProfile"),
             (FirestorePreferencesRepository, "preferences"),
+            (FirestoreProfilePhotoRepository, "photo"),
         ],
     )
     def test_each_model_lives_in_its_own_document_of_the_owner(
@@ -244,3 +247,18 @@ class TestFirestorePrivateDocuments:
         self.private_document(client).get.return_value = snapshot("sportProfile")
 
         assert FirestoreSportProfileRepository().get("u1") is None
+
+    def test_the_photo_is_stored_as_data_and_mime(self, client):
+        photo = ProfilePhoto("data:image/png;base64,AAAA", "image/png")
+
+        FirestoreProfilePhotoRepository().save("u1", photo)
+        self.private_document(client).get.return_value = snapshot("photo", photo.to_document())
+
+        self.private_document(client).set.assert_called_once_with(
+            {
+                "data": "data:image/png;base64,AAAA",
+                "mime": "image/png",
+                "updatedAt": SERVER_TIMESTAMP,
+            }
+        )
+        assert FirestoreProfilePhotoRepository().get("u1") == photo

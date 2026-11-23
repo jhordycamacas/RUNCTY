@@ -1,6 +1,7 @@
 """System parameters (`systemSettings/global`): the numbers and rules that drive the safety index,
-the searches, the limits of a route and the sport profile ranges. An admin edits them (RF-02,
-`settings.manage`); every use case receives the current `SystemSettings` as a parameter.
+the searches, the limits of a route, the sport profile ranges and the profile photo size. An admin
+edits them (RF-02, `settings.manage`); every use case receives the current `SystemSettings` as a
+parameter.
 
 `parse` validates client input and raises an `invalid-argument` domain error naming every
 rejected field. `from_document` reads what is stored and never raises: a missing or invalid
@@ -54,6 +55,8 @@ _LIMITS = (
     _Limit("distance_max_km", "distanceMaxKm", 0.1, 1000, whole=False),
     _Limit("safe_route_distance_tolerance", "safeRouteDistanceTolerance", 0.01, 1, whole=False),
     _Limit("safe_route_max_distance_km", "safeRouteMaxDistanceKm", 1, 1000),
+    _Limit("profile_photo_max_kb", "profilePhotoMaxKb", 20, 500),
+    _Limit("profile_photo_max_px", "profilePhotoMaxPx", 64, 1024),
 )
 _TEXT_KEYS = {"time_zone": "timeZone", "country_code": "countryCode"}
 _KEYS = {**{limit.attr: limit.key for limit in _LIMITS}, **_TEXT_KEYS}
@@ -147,6 +150,9 @@ class SystemSettings:
     # Safe routes within plus or minus this share of the requested distance, up to a maximum.
     safe_route_distance_tolerance: float = 0.2
     safe_route_max_distance_km: int = 500
+    # Profile photo: the largest decoded image the API stores, and the side the clients resize to.
+    profile_photo_max_kb: int = 100
+    profile_photo_max_px: int = 256
     country_code: str = "EC"
 
     @classmethod

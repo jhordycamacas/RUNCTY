@@ -37,6 +37,7 @@ class TestDefaults:
             500,
         )
         assert DEFAULTS.country_code == "EC"
+        assert (DEFAULTS.profile_photo_max_kb, DEFAULTS.profile_photo_max_px) == (100, 256)
 
     def test_survive_a_document_round_trip(self):
         assert SystemSettings.parse(DEFAULTS.to_document()) == DEFAULTS
@@ -169,10 +170,25 @@ class TestParse:
             "routeMaxElevationM",
             "segmentMaxPoints",
             "safeRouteMaxDistanceKm",
+            "profilePhotoMaxKb",
+            "profilePhotoMaxPx",
         ],
     )
     def test_every_limit_rejects_zero_and_negative_values(self, key):
         assert fields_of({key: -5}) == {key: "out-of-range"}
+
+    @pytest.mark.parametrize(
+        ("key", "low", "high"),
+        [("profilePhotoMaxKb", 20, 500), ("profilePhotoMaxPx", 64, 1024)],
+    )
+    def test_profile_photo_limits_are_bounded(self, key, low, high):
+        assert fields_of({key: low - 1}) == {key: "out-of-range"}
+        assert fields_of({key: high + 1}) == {key: "out-of-range"}
+        parsed = SystemSettings.parse({**DEFAULTS.to_document(), key: low})
+        assert parsed.to_document()[key] == low
+        assert (
+            SystemSettings.parse({**DEFAULTS.to_document(), key: high}).to_document()[key] == high
+        )
 
 
 class TestFromDocument:

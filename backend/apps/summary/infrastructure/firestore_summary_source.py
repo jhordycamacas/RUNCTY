@@ -4,6 +4,7 @@ from apps.routes.domain.models import Ruta
 from apps.shared.infrastructure.firebase.app import firestore_client
 from apps.shared.infrastructure.firebase.collections import ROUTES, USER_PRIVATE, USERS
 from apps.summary.domain.metrics import UserRecord
+from apps.users.domain.models import PreferenciaUsuario
 
 TIME_SLOTS = "timeSlots"
 RISK_FACTORS = "riskFactors"
@@ -27,7 +28,10 @@ class FirestoreSummarySource:
         return records
 
     def private_documents(self, limit: int) -> list[tuple[str, Mapping[str, object]]]:
-        query = firestore_client().collection_group(USER_PRIVATE).limit(limit)
+        # Only the preference fields are read: the photo document (up to ~700 KB of base64)
+        # would otherwise travel with every scan. The other documents are counted by id.
+        fields = list(PreferenciaUsuario().to_document())
+        query = firestore_client().collection_group(USER_PRIVATE).select(fields).limit(limit)
         return [(snapshot.id, snapshot.to_dict() or {}) for snapshot in query.stream()]
 
     def routes(self, limit: int) -> list[Ruta]:

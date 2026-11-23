@@ -1,11 +1,11 @@
 # EP-01 — Gestión de usuarios
 
-> Spec de capacidad · Debe tener · **1/8 Hecha, 7 Parcial, 0 Pendiente**
+> Spec de capacidad · Debe tener · **1/9 Hecha, 8 Parcial, 0 Pendiente**
 
 | Campo | Valor |
 | --- | --- |
 | Épica | EP-01 · Gestión de usuarios |
-| Requisitos | RF-01-1, RF-01-2, RF-01-3, RF-01-4, RF-01-9, RF-01-10, RF-01-11, RF-01-12 (8 sub-requisitos) |
+| Requisitos | RF-01-1, RF-01-2, RF-01-3, RF-01-4, RF-01-9, RF-01-10, RF-01-11, RF-01-12 (8 sub-requisitos) más la extensión EXT-01-1 (foto de perfil, pedida por el dueño el 2026-11-22; no está en el Excel) |
 | Requisito de usuario (UR) | UR-01 |
 | RNF | RNF-01, RNF-02, RNF-08, RNF-18 (transversales: RNF-10, RNF-11, RNF-21, RNF-23) |
 | Prioridad | Debe tener |
@@ -32,6 +32,7 @@ Entradas, proceso y salidas del requisito padre en el Excel (RF-01):
 - Consulta de usuarios por el administrador con filtros (RF-01-2).
 - Actualización de los datos personales propios y eliminación de la cuenta propia (RF-01-3, RF-01-4).
 - Perfil deportivo del corredor: crear, consultar, actualizar y eliminar (RF-01-9 a RF-01-12).
+- Foto de perfil propia: poner, cambiar y quitar (EXT-01-1).
 
 **No incluye**
 
@@ -76,10 +77,11 @@ Decididas por el equipo o derivadas de otros documentos:
 | `GET /users` | `users.read` | Búsqueda de administrador por `firstName`, `lastName`, `email`, `idNumber`, `birthDate`, `cityId`; paginada con `limit` (máx. 50) y `cursor`; responde `{users, nextCursor}` sin identificación. |
 | `GET /users/me` · `PATCH /users/me` · `DELETE /users/me` | sesión | Perfil propio, cambio parcial de datos personales (una identificación vacía la elimina) y eliminación de la cuenta (inicio de sesión de menos de 5 minutos). |
 | `GET/PUT/DELETE /users/me/sport-profile` | sesión | Perfil deportivo propio: `level`, `goals[]`, `usualPaceSecPerKm`, `preferredDistanceKm`. |
+| `GET/PUT/DELETE /users/me/photo` | sesión | Foto de perfil propia. `GET` responde `{photo}` (data URL o `null`); `PUT` recibe `{photo}` y responde lo guardado; `DELETE` responde 204 y es idempotente. No existe un endpoint para leer la foto de otra cuenta. |
 
-Documento `users/{uid}`: `email`, `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber?`, `role` (espejo del claim). Subdocumentos privados: `users/{uid}/private/sportProfile` y `users/{uid}/private/preferences`.
+Documento `users/{uid}`: `email`, `firstName`, `lastName`, `birthDate`, `cityId`, `idNumber?`, `role` (espejo del claim). Subdocumentos privados: `users/{uid}/private/sportProfile`, `users/{uid}/private/preferences` y `users/{uid}/private/photo` (`data`, `mime`, `updatedAt`). La foto vive en Firestore y no en Cloud Storage porque Storage exige el plan de pago y el dueño no tiene facturación; el cliente la recorta a un cuadrado y la reduce antes de enviarla.
 
-Códigos de error propios: `profile-exists` (409), `profile-not-found`, `sport-profile-not-found`, `not-accepted` (falta el consentimiento), `recent-sign-in-required`, `last-admin`, `invalid-cursor`, `invalid-filter`, `invalid-limit`, además de los errores por campo (`required`, `max-length`, `invalid-format`, `invalid-date`, `out-of-range`).
+Códigos de error propios: `profile-exists` (409), `profile-not-found`, `sport-profile-not-found`, `not-accepted` (falta el consentimiento), `recent-sign-in-required`, `last-admin`, `invalid-cursor`, `invalid-filter`, `invalid-limit`, además de los errores por campo (`required`, `max-length`, `invalid-format`, `invalid-date`, `out-of-range`). La foto responde bajo `fields.photo`: `required`, `invalid-format` (no es un data URL `image/jpeg`, `image/png` o `image/webp` en base64), `invalid-image` (base64 inválido o bytes que no coinciden con el tipo) y `too-large` (más de `profilePhotoMaxKb`, [CFG-2](27-configuracion-del-sistema.md)).
 
 ## Historias
 
@@ -93,6 +95,7 @@ Códigos de error propios: `profile-exists` (409), `profile-not-found`, `sport-p
 | [RF-01-10](#rf-01-10--leer-perfiles-deportivos) | Leer perfiles deportivos | Corredor | Sprint 1 · Semana 5 | Parcial |
 | [RF-01-11](#rf-01-11--actualizar-perfil-deportivo) | Actualizar perfil deportivo | Corredor | Sprint 1 · Semana 5 | Parcial |
 | [RF-01-12](#rf-01-12--eliminar-perfil-deportivo) | Eliminar perfil deportivo | Corredor | Sprint 1 · Semana 5 | Parcial |
+| [EXT-01-1](#ext-01-1--foto-de-perfil) | Foto de perfil | Usuario | Fuera del plan (2026-11-22) | Parcial |
 
 Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = implementada pero con criterios sin cumplir o sin verificar; `Pendiente` = sin implementar.
 
@@ -287,6 +290,30 @@ Leyenda: `Hecha` = todos los criterios marcados con evidencia; `Parcial` = imple
 **Implementación:** `frontend/src/app/sport-profile/presentation/sport-profile.page.ts`, `frontend/src/app/sport-profile/application/sport-profile.store.ts`, `backend/apps/users/presentation/views.py`
 
 **Pruebas:** `frontend/src/app/sport-profile/presentation/sport-profile.page.spec.ts`, `frontend/src/app/sport-profile/application/sport-profile.store.spec.ts`, `backend/tests/test_private_documents_api.py`
+
+### EXT-01-1 — Foto de perfil
+
+- **Historia de usuario:** Como usuario · Deseo poner, cambiar y quitar mi foto de perfil desde la pantalla de mi cuenta. Para reconocer mi cuenta y personalizar mi perfil.
+- **Actor:** Usuario · **Prioridad:** Debe tener · **Sprint planificado:** fuera del plan (pedido del dueño, 2026-11-22) · **Dependencia:** N/A · **Caso de uso:** Gestionar foto de perfil
+- **Estado:** `Parcial` — Backend hecho y con pruebas automáticas; falta la pantalla (frontend) y la verificación en un celular. Seguimiento en `odd/tasks/foto-de-perfil.md`.
+
+| Entrada | Proceso | Salida |
+| --- | --- | --- |
+| Imagen elegida de la galería o tomada con la cámara | El cliente la recorta a un cuadrado, la reduce a `profilePhotoMaxPx` y la codifica en JPEG hasta caber en `profilePhotoMaxKb`; la API valida y guarda un data URL en `users/{uid}/private/photo`. | Foto guardada, mostrada en el perfil, o error por campo. |
+
+**Criterios de aceptación**
+
+- [x] `GET/PUT/DELETE /users/me/photo` actúan solo sobre la cuenta del token; no hay endpoint para leer la foto de otra cuenta.
+- [x] Solo se acepta un data URL base64 `image/jpeg`, `image/png` o `image/webp` cuyos bytes coinciden con el tipo declarado; si no, 400 con `fields.photo` en `required`, `invalid-format`, `invalid-image` o `too-large`.
+- [x] El tamaño máximo (`profilePhotoMaxKb`, 20–500, por defecto 100) y el lado en píxeles (`profilePhotoMaxPx`, 64–1024, por defecto 256) son parámetros del sistema; cambiar el primero cambia lo que acepta la API.
+- [x] Una carga mayor al límite se rechaza antes de decodificarla.
+- [x] `DELETE` es idempotente y eliminar la cuenta elimina también la foto.
+- [ ] La pantalla de la cuenta permite elegir o tomar la foto, ver la vista previa, guardarla y quitarla (frontend, tarea T2).
+- [ ] Verificado de punta a punta en un celular contra la API y Firebase.
+
+**Implementación:** `backend/apps/users/domain/profile_photo.py`, `backend/apps/users/application/use_cases.py`, `backend/apps/users/infrastructure/firestore_private_documents.py`, `backend/apps/users/presentation/views.py`, `backend/apps/system_settings/domain/models.py`
+
+**Pruebas:** `backend/tests/test_profile_photo_domain.py`, `backend/tests/test_profile_photo_use_cases.py`, `backend/tests/test_profile_photo_api.py`, `backend/tests/test_firestore_user_adapters.py`, `backend/tests/test_firestore_summary_source.py`, `backend/tests/test_system_settings_domain.py`
 
 ## Dependencias
 

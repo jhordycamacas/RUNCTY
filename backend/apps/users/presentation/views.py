@@ -15,9 +15,11 @@ from apps.users.application.use_cases import (
     delete_account,
     get_preferences,
     get_profile,
+    get_profile_photo,
     get_sport_profile,
     register_user,
     save_preferences,
+    save_profile_photo,
     save_sport_profile,
     search_users,
     update_personal_data,
@@ -26,6 +28,7 @@ from apps.users.domain.search import parse_search_query
 from apps.users.presentation.serializers import (
     PersonalDataSerializer,
     PreferencesSerializer,
+    ProfilePhotoSerializer,
     RegistrationSerializer,
     SportProfileSerializer,
     UserSearchSerializer,
@@ -129,4 +132,25 @@ class OwnPreferencesView(APIView):
     def delete(self, request) -> Response:
         # Deleting the document restores the defaults (RF-01-16).
         adapter("PREFERENCES_REPOSITORY").delete(request.user.uid)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class OwnPhotoView(APIView):
+    """The caller's own photo only: no endpoint reads the photo of another account."""
+
+    def get(self, request) -> Response:
+        photo = get_profile_photo(request.user.uid, adapter("PROFILE_PHOTO_REPOSITORY"))
+        return Response({"photo": photo.data if photo else None})
+
+    def put(self, request) -> Response:
+        photo = save_profile_photo(
+            request.user.uid,
+            validated_body(ProfilePhotoSerializer, request).get("photo"),
+            adapter("PROFILE_PHOTO_REPOSITORY"),
+            current_settings(),
+        )
+        return Response({"photo": photo.data})
+
+    def delete(self, request) -> Response:
+        adapter("PROFILE_PHOTO_REPOSITORY").delete(request.user.uid)
         return Response(status=status.HTTP_204_NO_CONTENT)
