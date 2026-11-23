@@ -72,12 +72,12 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
     ProgressBar,
   ],
   template: `
-    <app-admin-header [title]="greeting()" />
+    <app-admin-header title="Resumen" />
     <ion-content>
       <div class="page">
         <header class="hero">
           <div>
-            <p class="eyebrow">{{ today() }}</p>
+            <p class="eyebrow">{{ greeting() }} · {{ today() }}</p>
             <p class="lead">Así va la app móvil de Gacelas Running Team.</p>
           </div>
           <div class="refresh">
@@ -288,10 +288,6 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
     </ion-content>
   `,
   styles: `
-    ion-content {
-      --background: transparent;
-    }
-
     // Full width inside the frame, one gutter on every side and between every block, so the
     // edges line up with the page title above.
     .page {

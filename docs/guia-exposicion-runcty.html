@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Guía de exposición RUNCTY</title>
+<style>
+@page{size:A4;margin:18mm 16mm}
+body{font-family:Segoe UI,Arial,sans-serif;font-size:10.5pt;line-height:1.45;color:#16161d}
+h1{font-size:24pt;margin:0 0 4px;color:#d6006f}h2{font-size:15pt;border-bottom:2px solid #ff2d95;padding-bottom:3px;margin-top:22px;page-break-after:avoid}
+h3{font-size:12pt;margin:14px 0 4px;page-break-after:avoid}
+table{border-collapse:collapse;width:100%;margin:8px 0;font-size:9pt}th,td{border:1px solid #c9c9d4;padding:4px 6px;vertical-align:top;text-align:left}
+th{background:#f3e3ec}tr{page-break-inside:avoid}code{background:#f1f1f5;padding:0 3px;border-radius:3px;font-size:8.5pt}
+.box{border-left:4px solid #ff2d95;background:#fff3f9;padding:6px 10px;margin:8px 0}.small{color:#555;font-size:9pt}
+.pb{page-break-before:always}
+</style></head><body>
+
+<h1>Guía de exposición de RUNCTY</h1>
+<p class="small">Gacelas Running Team · UTPL · Defensa del 23/11/2026 · Del requisito a la app, pasando por los diagramas y el código</p>
+
+<h2>1. La idea en una frase</h2>
+<p>«Cada requisito del cliente se convirtió en una épica, cada épica en historias, cada historia en un sprint, y cada una tiene su diagrama, su spec y su código. Se puede seguir el hilo en los dos sentidos.»</p>
+<div class="box"><b>Cadena de trazabilidad:</b><br>Requisito de usuario (UR) → Requisito funcional (RF-xx-y) → Épica (EP-xx) → Historia → Sprint → Diagramas (caso de uso, secuencia, actividad, clases) → Spec (<code>specs/NN-*.md</code>) → Código (<code>backend/apps/…</code>, <code>frontend/src/app/…</code>) → Pantalla de la app.</div>
+
+<h2>2. Cómo dar confianza con la trazabilidad</h2>
+<ol>
+<li><b>Muestra una sola cadena completa, no todas.</b> Elige EP-07 (seguridad de rutas) o EP-01 (crear cuenta) y recórrela de punta a punta. Una cadena bien demostrada convence más que 26 mencionadas.</li>
+<li><b>Ten la tabla a mano:</b> <code>docs/trazabilidad-diagramas.md</code> (26 épicas × sprint × diagramas × clases × código × app) y el Excel <code>Trazabilidad diagramas RUNCTY.xlsx</code>.</li>
+<li><b>Sé honesto con el estado.</b> Dilo tú antes de que pregunten: 153 historias = 28 Hecha, 38 Parcial, 87 Pendiente. Sprint 1 y 2 funcionan; Sprint 3 tiene el backend completo (974 pruebas) y falta parte de sus pantallas. La honestidad genera más confianza que decir «todo está hecho».</li>
+<li><b>Los números cuadran en todos lados</b>: 17 requisitos de usuario, 24 funcionales, 26 no funcionales, 26 épicas, 153 historias, 5 sprints (24 / 19 / 23 / 29 / 58).</li>
+<li><b>Demuestra con el código:</b> abre el archivo donde vive la clase del diagrama (tabla de la sección 5). Que el nombre del diagrama y el del código sea el mismo es la mejor prueba.</li>
+<li><b>Si preguntan algo que no sabes:</b> «Eso está en la épica X, spec N; lo abro». Ir a la spec demuestra método.</li>
+</ol>
+
+<h2>3. Guion sugerido (12 minutos)</h2>
+<table>
+<tr><th>Min</th><th>Qué mostrar</th><th>Qué decir</th></tr>
+<tr><td>0–1</td><td>Portada del documento de visión</td><td>Problema: corredores sin información de seguridad de las rutas. Solución: app móvil + panel web del club.</td></tr>
+<tr><td>1–3</td><td>Requisitos → épicas</td><td>17 UR, 24 RF, 26 RNF; 26 épicas; priorización y 5 sprints.</td></tr>
+<tr><td>3–5</td><td>Trazabilidad (tabla)</td><td>La cadena de la sección 1; una épica de ejemplo.</td></tr>
+<tr><td>5–7</td><td>Diagramas del anexo</td><td>Caso de uso general (Fig. 2) enlaza a los específicos; secuencia y actividad de una historia; <b>un solo diagrama de clases</b> en español con 44 clases.</td></tr>
+<tr><td>7–10</td><td>Demo: admin web y app</td><td>Admin: Resumen, Rutas → Tramos y factores (mapa e índice). App: Inicio, Rutas (mapa y nivel de seguridad), Correr, Alertas (campana).</td></tr>
+<tr><td>10–11</td><td>Código y specs</td><td>Arquitectura hexagonal; una clase del diagrama en el código; spec con su estado.</td></tr>
+<tr><td>11–12</td><td>Estado y lo que sigue</td><td>Sprints 1–2 hechos, Sprint 3 backend hecho, Sprint 4: pánico por botón de volumen, valoraciones, rutas verificadas por club.</td></tr>
+</table>
+<p class="small">Muestren la demo desde el navegador (<code>http://localhost:4200</code>); admin local: <code>admin@runcty.dev</code>. Guion detallado con clics: <code>docs/presentacion-2026-11-23.md</code>.</p>
+
+<h2 class="pb">4. Los diagramas: qué es cada uno y qué decir</h2>
+<table>
+<tr><th>Diagrama</th><th>Qué muestra</th><th>Cómo explicarlo</th></tr>
+<tr><td>Contexto</td><td>Sistema y actores externos (Corredor, Administrador, Representante de club, Contacto de confianza, mapas, Firebase).</td><td>«Quién usa el sistema y con qué servicios habla.»</td></tr>
+<tr><td>Casos de uso general y por épica</td><td>Qué puede hacer cada actor. El general enlaza a los específicos de cada épica.</td><td>«Del general bajo a la épica que me pregunten.»</td></tr>
+<tr><td>Secuencia</td><td>Un caso de uso paso a paso entre actor, pantalla, API y base de datos, en orden temporal.</td><td>«Quién llama a quién y qué responde.» Ejemplo: Crear cuenta.</td></tr>
+<tr><td>Actividad</td><td>El flujo del mismo caso con decisiones y caminos alternos (errores, validaciones).</td><td>«El camino feliz y qué pasa si algo falla.»</td></tr>
+<tr><td>Clases (único)</td><td>El modelo del dominio: 44 clases con atributos, multiplicidad, rol y nombre de cada asociación.</td><td>«Es el vocabulario del sistema. Los nombres del diagrama son los del código.»</td></tr>
+</table>
+<p>Cada caso de uso tiene su secuencia y su actividad, con el mismo nombre. Se exportan desde Enterprise Architect (<code>RunCty.eap</code>) a <code>Entregables\Diagramas secuencia y actividad</code>; el de clases está en <code>Entregables\Diagramas de clases revisados\clases_modelo_de_dominio_completo.png</code>.</p>
+
+<h2 class="pb">5. Las clases: qué significa cada una y dónde está en el código</h2>
+<p class="small">Backend en <code>backend/apps/&lt;app&gt;/domain/</code>; la capa application tiene los casos de uso, infrastructure los adaptadores a Firestore y presentation la API REST. Las clases marcadas «pendiente» aún no tienen código (sprints 4 y 5).</p>
+
+<h3>Identidad y administración (Sprint 1)</h3>
+<table><tr><th>Clase</th><th>Qué es</th><th>Dónde</th></tr>
+<tr><td>Usuario</td><td>Persona registrada: nombre, correo, fecha de nacimiento, ciudad.</td><td><code>users/domain/models.py:57</code></td></tr>
+<tr><td>PerfilDeportivo</td><td>Nivel, objetivos y ritmo del corredor.</td><td><code>users/domain/models.py:177</code> · app: <code>sport-profile/</code></td></tr>
+<tr><td>Credencial</td><td>Acceso (correo y contraseña); lo gestiona Firebase Auth.</td><td><code>auth/</code> (frontend), <code>shared/infrastructure/firebase/auth_gateway.py</code></td></tr>
+<tr><td>Rol</td><td>Conjunto de permisos asignable a usuarios.</td><td><code>roles/domain/models.py:29</code> · admin: <code>admin/roles/</code></td></tr>
+<tr><td>PreferenciaUsuario / PreferenciaNotificaciones</td><td>Tema, tamaño de letra, unidades, privacidad y avisos.</td><td><code>users/domain/models.py:229,236</code> · app: <code>preferences/</code></td></tr>
+<tr><td>Ciudad</td><td>Ciudad o zona donde opera el club (Loja).</td><td><code>cities/domain/models.py:75</code> · admin: <code>admin/cities/</code></td></tr></table>
+
+<h3>Rutas y seguridad (Sprints 2 y 3)</h3>
+<table><tr><th>Clase</th><th>Qué es</th><th>Dónde</th></tr>
+<tr><td>Ruta</td><td>Recorrido de running con distancia, ciudad y estado.</td><td><code>routes/domain/models.py:148</code> · app: <code>routes/</code> · admin: <code>admin/routes/</code></td></tr>
+<tr><td>PuntoRuta</td><td>Coordenada de la ruta (traza para el mapa).</td><td><code>routes/domain/models.py:116</code></td></tr>
+<tr><td>Tramo</td><td>Parte de una ruta que se evalúa por separado.</td><td><code>routes/domain/models.py:296</code></td></tr>
+<tr><td>FranjaHoraria</td><td>Horario (mañana, tarde, noche) con su propio nivel de riesgo.</td><td><code>routes/domain/models.py:321</code></td></tr>
+<tr><td>FactorDeRiesgo</td><td>Condición que resta seguridad (poca luz, tráfico…); penaliza 10/20/35.</td><td><code>routes/domain/models.py:385</code></td></tr>
+<tr><td>IndiceSeguridad / IndiceSeguridadRuta / IndiceSeguridadTramo</td><td>Puntaje 0–100 y nivel: Alto ≥70, Medio 40–69, Bajo &lt;40.</td><td><code>routes/domain/safety.py:78,94,111</code></td></tr>
+<tr><td>CalculadoraIndiceSeguridad</td><td>Servicio de dominio que calcula el índice con factores e incidentes del último año.</td><td><code>routes/domain/safety.py:140</code></td></tr>
+<tr><td>PuntoDeApoyo</td><td>Lugar útil al corredor (agua, hospital, policía).</td><td><code>support_points/domain/models.py:62</code></td></tr>
+<tr><td>ResguardoPolicial</td><td>Sendero con presencia policial.</td><td><code>support_points/domain/models.py:129</code></td></tr>
+<tr><td>IncidenteSeguridad</td><td>Hecho de inseguridad con fecha, hora y lugar; baja el índice.</td><td><code>safety_data/domain/models.py:115</code></td></tr>
+<tr><td>FuenteInformacion</td><td>Origen del dato de seguridad (institución, reporte).</td><td><code>safety_data/domain/models.py:54</code></td></tr>
+<tr><td>AlertaZonaRiesgo</td><td>Aviso de una zona peligrosa; llega a la campana de la app.</td><td><code>risk_alerts/domain/models.py:39</code> · app: <code>alerts/</code></td></tr>
+<tr><td>SolicitudRutaSegura</td><td>Petición de una ruta recomendada según horario y seguridad.</td><td><code>safe_routes/domain/models.py:31</code></td></tr></table>
+
+<h3>Pendientes (Sprints 4 y 5; se explican, aún sin código)</h3>
+<table><tr><th>Clases</th><th>Qué son</th></tr>
+<tr><td>ContactoConfianza, AlertaPanico, SesionUbicacionCompartida</td><td>Seguridad personal: a quién avisar, el pánico (botón de volumen) y compartir ubicación en vivo.</td></tr>
+<tr><td>ValoracionRuta, RutaSugeridaClub</td><td>Estrellas y opiniones; rutas verificadas por un club (insignia desde el admin).</td></tr>
+<tr><td>Entrenamiento, RecorridoGPS, MetaPersonal, RetoCorredores, ParticipacionReto</td><td>Registro de carreras (la pantalla Correr ya mide GPS), metas y retos.</td></tr>
+<tr><td>ReporteComunitario, ValidacionReporte, Notificacion</td><td>Reportes de la comunidad y avisos.</td></tr>
+<tr><td>Club, MembresiaClub, PuntoEncuentro, SalidaGrupal, SolicitudCompania</td><td>Vida de club: salidas grupales y compañeros para correr.</td></tr>
+<tr><td>Evento, InscripcionEvento, Anunciante, CampanaPublicitaria</td><td>Carreras y publicidad.</td></tr></table>
+<p class="small">La lista sale de <code>docs/trazabilidad-diagramas.md</code>; el PNG del diagrama es la fuente final, revísenlo antes de citar un nombre.</p>
+
+<h2 class="pb">6. Arquitectura: cómo contarla en 1 minuto</h2>
+<p>Arquitectura hexagonal en cuatro capas. El dominio no conoce frameworks; los casos de uso dependen de puertos; los adaptadores (Firestore, HTTP) los implementan.</p>
+<table><tr><th>Capa</th><th>Backend (Django)</th><th>Frontend (Angular + Ionic)</th></tr>
+<tr><td>Dominio</td><td><code>domain/</code>: entidades y reglas</td><td><code>domain/</code>: tipos y puertos</td></tr>
+<tr><td>Aplicación</td><td><code>application/use_cases.py</code>, <code>ports.py</code></td><td><code>application/</code>: stores</td></tr>
+<tr><td>Infraestructura</td><td><code>infrastructure/</code>: Firestore</td><td><code>infrastructure/</code>: repositorios HTTP</td></tr>
+<tr><td>Presentación</td><td><code>presentation/</code>: views DRF</td><td><code>presentation/</code>: páginas</td></tr></table>
+<p><b>Ejemplo para recorrer en vivo (EP-07, índice de seguridad):</b> pantalla <code>admin/routes/presentation/route-detail.page.ts</code> → <code>http-route-admin.repository.ts</code> → <code>backend/apps/routes/presentation/views.py</code> (<code>RiskFactorsView</code>) → <code>application/use_cases.py</code> (<code>with_recalc</code>) → <code>domain/safety.py</code> (<code>CalculadoraIndiceSeguridad</code>). Es la misma historia de los diagramas de secuencia.</p>
+
+<h2>7. Módulos del código (para ubicarse)</h2>
+<table><tr><th>Módulo</th><th>Backend</th><th>Frontend</th></tr>
+<tr><td>Cuentas y perfil</td><td>users, identity</td><td>auth, account, sport-profile, preferences</td></tr>
+<tr><td>Roles</td><td>roles</td><td>admin/roles</td></tr>
+<tr><td>Ciudades</td><td>cities</td><td>admin/cities, cities</td></tr>
+<tr><td>Rutas y seguridad</td><td>routes, safety_data, support_points, safe_routes</td><td>routes, admin/routes</td></tr>
+<tr><td>Alertas</td><td>risk_alerts</td><td>alerts</td></tr>
+<tr><td>Correr</td><td>(Sprint 4: entrenamientos)</td><td>run (GPS con Capacitor)</td></tr>
+<tr><td>Resumen del admin</td><td>summary</td><td>admin/summary</td></tr>
+<tr><td>Transversal</td><td>shared (errores, permisos, Firebase)</td><td>core (API, guards), shared/ui, shared/map</td></tr></table>
+
+<h2>8. Specs (SDD): la fuente de verdad</h2>
+<p>Cada épica tiene su spec en <code>specs/NN-nombre.md</code> con historias, criterios y estado. Primero se escribe la spec y luego el código. Totales en <code>specs/README.md</code>.</p>
+<table><tr><th>Spec</th><th>Estado</th></tr>
+<tr><td>01 Usuarios · 02 Roles · 04 Ciudades · 05 Rutas y tramos · 25 Autenticación · 26 Preferencias</td><td>Sprint 1–2: hechas (01, 25, 26 con partes en Parcial)</td></tr>
+<tr><td>06 Puntos de apoyo · 07 Evaluación de seguridad · 08 Incidentes y fuentes · 09 Rutas seguras</td><td>Backend hecho; pantallas pendientes (Parcial). 07 con RF-07-1 a 11 hechos</td></tr>
+<tr><td>03, 10–24</td><td>Pendientes (Sprints 4 y 5)</td></tr></table>
+<p>Transversales: <code>specs/transversal/arquitectura.md</code>, <code>panel-de-administracion.md</code>, <code>sistema-de-diseno.md</code>, <code>rnf-requisitos-no-funcionales.md</code>.</p>
+
+<h2 class="pb">9. Preguntas probables y cómo responder</h2>
+<table><tr><th>Pregunta</th><th>Respuesta corta</th></tr>
+<tr><td>¿Cómo sé que los requisitos están cubiertos?</td><td>Tabla de trazabilidad: cada RF tiene épica, sprint, diagrama, spec y código; el estado sale del número de historias Hecha/Parcial/Pendiente.</td></tr>
+<tr><td>¿Por qué el Sprint 3 está «Parcial»?</td><td>El backend y sus pruebas están completos; faltan las pantallas del admin y de la app. No se marca Hecha hasta que el usuario lo pueda usar.</td></tr>
+<tr><td>¿Por qué un solo diagrama de clases?</td><td>Es el modelo del dominio completo; evita duplicar y se mantiene igual al código.</td></tr>
+<tr><td>¿Dónde está el botón de pánico?</td><td>Sprint 4 (EP-15). Decisión: se activa con el botón de volumen del teléfono, nunca en pantalla, para no activarlo por error.</td></tr>
+<tr><td>¿Y Google Maps?</td><td>Hoy usamos OpenStreetMap detrás de una interfaz (<code>MapRenderer</code>); cambiar a Google Maps es reemplazar un adaptador cuando llegue la clave.</td></tr>
+<tr><td>¿Cómo se calcula el índice de seguridad?</td><td>Parte de 100; cada factor de riesgo resta 10, 20 o 35; los incidentes del último año en esa franja horaria también restan. Alto ≥70, Medio 40–69, Bajo &lt;40.</td></tr>
+<tr><td>¿Jira y Excel coinciden?</td><td>El Excel es el final; el Jira difiere en 15 historias y se dejó así por decisión del equipo.</td></tr></table>
+
+<h2>10. Lista antes de entrar</h2>
+<ul>
+<li>Contenedores arriba (<code>docker compose up -d</code>) y <code>ng serve --host 127.0.0.1</code> en <code>frontend</code>; entrar a <code>http://localhost:4200</code>.</li>
+<li>Admin sembrado: <code>admin@runcty.dev</code>. Si reiniciaron Firebase, el usuario de la app se pierde: vuelvan a registrarlo y verifiquen el correo.</li>
+<li>Documento de visión con las correcciones de la revisión (anexos 3 y 4, trazabilidad, sin «mapa de épicas»).</li>
+<li>Abrir de antemano: diagrama de clases, tabla de trazabilidad, spec 07, <code>safety.py</code>.</li>
+<li>Repartir quién habla cada bloque y cronometrar: 12 minutos.</li>
+</ul>
+</body></html>
