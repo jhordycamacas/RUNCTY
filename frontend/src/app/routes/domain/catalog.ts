@@ -10,10 +10,11 @@ import {
   TrainingSlot,
   getNextTrainingSlot,
 } from '../../training/domain/training-slots';
-import { Difficulty, Route, RouteSlotSafety, Segment, SegmentSlotSafety } from './route';
+import { Route, RouteSlotSafety, Segment, SegmentSlotSafety } from './route';
 
 export type DistanceBucket = 'all' | 'upTo5' | 'from5to10' | 'over10';
-export type DifficultyFilter = Difficulty | 'all';
+/** A difficulty typed by the admins, or `all`. */
+export type DifficultyFilter = string;
 
 export interface RouteFilters {
   distance: DistanceBucket;
@@ -41,6 +42,13 @@ function inBucket(km: number, bucket: DistanceBucket): boolean {
     default:
       return true;
   }
+}
+
+/** The distinct difficulties found in the routes, in alphabetical order. */
+export function listDifficulties(routes: readonly Route[]): string[] {
+  const found = new Set<string>();
+  for (const route of routes) if (route.difficulty) found.add(route.difficulty);
+  return [...found].sort((a, b) => a.localeCompare(b, 'es'));
 }
 
 export function filterRoutes(routes: readonly Route[], filters: RouteFilters): Route[] {

@@ -1,4 +1,4 @@
-import { DIFFICULTIES, Difficulty, Route, SURFACES, Surface } from '../../../routes/domain/route';
+import { Route } from '../../../routes/domain/route';
 import { parseDecimal } from './form-parsing';
 import { RouteInput } from './managed-route';
 
@@ -7,6 +7,7 @@ const MAX_DESCRIPTION = 500;
 const MAX_POINT_LABEL = 80;
 const MAX_DISTANCE_KM = 500;
 const MAX_ELEVATION_M = 10000;
+const MAX_CATEGORY = 40;
 
 /** The route form works with text; `active` is a toggle. */
 export interface RouteForm {
@@ -48,11 +49,6 @@ export const EMPTY_ROUTE_FORM: RouteForm = {
 
 export type RouteFormResult =
   { input: RouteInput; errors?: undefined } | { input?: undefined; errors: RouteFormErrors };
-
-const isSurface = (value: string): value is Surface =>
-  (SURFACES as readonly string[]).includes(value);
-const isDifficulty = (value: string): value is Difficulty =>
-  (DIFFICULTIES as readonly string[]).includes(value);
 
 function requiredText(value: string, max: number, missing: string, tooLong: string) {
   const text = value.trim();
@@ -105,6 +101,18 @@ export function parseRouteForm(form: RouteForm): RouteFormResult {
   const endLng = longitude(form.endLng);
   const distanceKm = parseDecimal(form.distanceKm);
   const elevationGainM = parseDecimal(form.elevationGainM);
+  const surface = requiredText(
+    form.surface,
+    MAX_CATEGORY,
+    'Escribe la superficie, por ejemplo Asfalto.',
+    `La superficie admite máximo ${MAX_CATEGORY} caracteres.`,
+  );
+  const difficulty = requiredText(
+    form.difficulty,
+    MAX_CATEGORY,
+    'Escribe la dificultad, por ejemplo Media.',
+    `La dificultad admite máximo ${MAX_CATEGORY} caracteres.`,
+  );
 
   const candidates: RouteFormErrors = {
     name: name.error,
@@ -131,8 +139,8 @@ export function parseRouteForm(form: RouteForm): RouteFormResult {
         : elevationGainM < 0 || elevationGainM > MAX_ELEVATION_M
           ? `El desnivel debe estar entre 0 y ${MAX_ELEVATION_M} m.`
           : undefined,
-    surface: isSurface(form.surface) ? undefined : 'Elige la superficie.',
-    difficulty: isDifficulty(form.difficulty) ? undefined : 'Elige la dificultad.',
+    surface: surface.error,
+    difficulty: difficulty.error,
   };
   const errors = Object.fromEntries(
     Object.entries(candidates).filter(([, message]) => message !== undefined),
@@ -145,9 +153,7 @@ export function parseRouteForm(form: RouteForm): RouteFormResult {
     endLat.number === null ||
     endLng.number === null ||
     distanceKm === null ||
-    elevationGainM === null ||
-    !isSurface(form.surface) ||
-    !isDifficulty(form.difficulty)
+    elevationGainM === null
   ) {
     return { errors };
   }
@@ -160,8 +166,8 @@ export function parseRouteForm(form: RouteForm): RouteFormResult {
       end: { label: endLabel.text, lat: endLat.number, lng: endLng.number },
       distanceKm,
       elevationGainM,
-      surface: form.surface,
-      difficulty: form.difficulty,
+      surface: surface.text,
+      difficulty: difficulty.text,
       active: form.active,
     },
   };

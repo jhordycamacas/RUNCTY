@@ -4,14 +4,12 @@
  * computed by the backend on every change; the client only displays what the API returns.
  */
 import {
-  Difficulty,
   LatLng,
   Route,
   RouteDetail,
   RoutePoint,
   Segment,
   Severity,
-  Surface,
 } from '../../../routes/domain/route';
 
 export const RISK_FACTOR_TYPES = [
@@ -67,8 +65,8 @@ export interface RouteInput {
   end: RoutePoint;
   distanceKm: number;
   elevationGainM: number;
-  surface: Surface;
-  difficulty: Difficulty;
+  surface: string;
+  difficulty: string;
   active: boolean;
 }
 

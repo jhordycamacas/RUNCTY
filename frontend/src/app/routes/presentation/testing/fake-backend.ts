@@ -118,10 +118,10 @@ export function catalogRoutes(): Route[] {
     route('tebaida', {
       name: 'Parque Lineal La Tebaida',
       distanceKm: 7.5,
-      difficulty: 'intermediate',
-      surface: 'mixed',
+      difficulty: 'Intermedio',
+      surface: 'Mixto',
       safety: [slot('morning', '05:00', '07:00', 55), slot('evening', '18:00', '20:00', 80)],
     }),
-    route('nueva', { name: 'Ruta nueva', distanceKm: 12, difficulty: 'advanced', safety: [] }),
+    route('nueva', { name: 'Ruta nueva', distanceKm: 12, difficulty: 'Avanzado', safety: [] }),
   ];
 }

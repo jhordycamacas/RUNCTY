@@ -123,6 +123,18 @@ class TestRoutesSummary:
     def levels(self, *levels) -> dict:
         return {f"slot-{i}": {"level": level, "score": 50} for i, level in enumerate(levels)}
 
+    def test_groups_surface_and_difficulty_by_stored_text(self):
+        routes = [
+            route("a", surface="Adoquín", difficulty="Media"),
+            route("b", surface="Adoquín", difficulty="Alta"),
+            route("c", surface="", difficulty="Media"),
+        ]
+
+        summary = routes_summary(routes, {"loja": "Loja"}, 0, [])
+
+        assert summary["bySurface"] == {"Adoquín": 2, "Sin definir": 1}
+        assert summary["byDifficulty"] == {"Media": 2, "Alta": 1}
+
     def test_counts_by_status_difficulty_surface_and_distance(self):
         routes = [
             route("a", km=5.5, difficulty="advanced", surface="trail"),
@@ -134,8 +146,8 @@ class TestRoutesSummary:
         assert summary["total"] == 2
         assert (summary["active"], summary["inactive"]) == (1, 1)
         assert summary["totalKm"] == 10.0
-        assert summary["byDifficulty"] == {"beginner": 1, "intermediate": 0, "advanced": 1}
-        assert summary["bySurface"] == {"asphalt": 1, "trail": 1, "mixed": 0, "track": 0}
+        assert summary["byDifficulty"] == {"advanced": 1, "beginner": 1}
+        assert summary["bySurface"] == {"asphalt": 1, "trail": 1}
         assert summary["timeSlots"] == 3
         assert summary["riskFactors"] == {
             "total": 4,

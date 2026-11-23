@@ -17,8 +17,8 @@ const INPUT: RouteInput = {
   end: { label: 'B', lat: -3.91, lng: -79.21 },
   distanceKm: 3,
   elevationGainM: 0,
-  surface: 'asphalt',
-  difficulty: 'beginner',
+  surface: 'Asfalto',
+  difficulty: 'Principiante',
   active: true,
 };
 

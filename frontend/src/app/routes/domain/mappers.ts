@@ -4,10 +4,8 @@
  * defaults instead of throwing.
  */
 import {
-  DIFFICULTIES,
   SAFETY_LEVELS,
   SEVERITIES,
-  SURFACES,
   LatLng,
   Route,
   RouteDetail,
@@ -29,6 +27,9 @@ export const asString = (value: unknown, fallback = ''): string =>
   typeof value === 'string' ? value : fallback;
 const asNumber = (value: unknown, fallback = 0): number =>
   typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+/** Trimmed free text, or null when it is missing or blank. */
+const asText = (value: unknown): string | null =>
+  typeof value === 'string' && value.trim() ? value.trim() : null;
 export const asTime = (value: unknown): string | null =>
   typeof value === 'string' && TIME_PATTERN.test(value) ? value : null;
 
@@ -118,8 +119,8 @@ export function toRoute(raw: unknown): Route {
     end: toRoutePoint(data['end']),
     distanceKm: asNumber(data['distanceKm']),
     elevationGainM: asNumber(data['elevationGainM']),
-    surface: oneOf(SURFACES, data['surface']),
-    difficulty: oneOf(DIFFICULTIES, data['difficulty']),
+    surface: asText(data['surface']),
+    difficulty: asText(data['difficulty']),
     active: data['active'] === true,
     segmentCount: asNumber(data['segmentCount']),
     safety,

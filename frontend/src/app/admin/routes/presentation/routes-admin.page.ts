@@ -10,7 +10,6 @@ import {
   ViewWillEnter,
 } from '@ionic/angular';
 import { formatDistance } from '../../../preferences/domain/units';
-import { DIFFICULTY_LABELS } from '../../../routes/domain/labels';
 import { Route } from '../../../routes/domain/route';
 import { ConfirmDialog } from '../../../shared/ui/confirm-dialog';
 import { Notice } from '../../../shared/ui/notice';
@@ -259,7 +258,7 @@ export class RoutesAdminPage implements ViewWillEnter {
   }
 
   protected difficulty(route: Route): string {
-    return route.difficulty ? DIFFICULTY_LABELS[route.difficulty] : 'Sin dificultad';
+    return route.difficulty ?? 'Sin dificultad';
   }
 
   /** "1 tramo", "4 tramos". */

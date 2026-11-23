@@ -19,8 +19,6 @@ from apps.shared.domain.errors import DomainError, ErrorKind
 if TYPE_CHECKING:  # The incident model imports this module.
     from apps.safety_data.domain.models import IncidenteSeguridad
 
-SURFACES = ("asphalt", "trail", "mixed", "track")
-DIFFICULTIES = ("beginner", "intermediate", "advanced")
 RISK_FACTOR_TYPES = (
     "poor_lighting",
     "traffic",
@@ -38,6 +36,7 @@ _MAX_LABEL = 80
 _MAX_DESCRIPTION = 500
 _MAX_FACTOR_DESCRIPTION = 200
 _MAX_SLOT_LABEL = 40
+_MAX_CATEGORY = 40
 _MAX_DISTANCE_KM = 500
 _MAX_ELEVATION_M = 10000
 _MIN_POINTS = 2
@@ -195,12 +194,18 @@ class Ruta:
                 "invalid-elevation-gain",
                 f"Elevation gain must be between 0 and {_MAX_ELEVATION_M} m.",
             )
-        surface = data.get("surface")
-        if not isinstance(surface, str) or surface not in SURFACES:
-            raise _invalid("invalid-surface", "Unknown surface.")
-        difficulty = data.get("difficulty")
-        if not isinstance(difficulty, str) or difficulty not in DIFFICULTIES:
-            raise _invalid("invalid-difficulty", "Unknown difficulty.")
+        surface = required_text(
+            data.get("surface"),
+            _MAX_CATEGORY,
+            "invalid-surface",
+            f"Surface is required (max {_MAX_CATEGORY} chars).",
+        )
+        difficulty = required_text(
+            data.get("difficulty"),
+            _MAX_CATEGORY,
+            "invalid-difficulty",
+            f"Difficulty is required (max {_MAX_CATEGORY} chars).",
+        )
         active = data.get("active", True)
         if not isinstance(active, bool):
             raise _invalid("invalid-active", "active must be a boolean.")
@@ -221,11 +226,7 @@ class Ruta:
 
     @classmethod
     def from_document(cls, route_id: str, data: Mapping[str, object]) -> "Ruta":
-        surface, difficulty, safety = (
-            data.get("surface"),
-            data.get("difficulty"),
-            data.get("safety"),
-        )
+        safety = data.get("safety")
         return cls(
             id=route_id,
             name=stored_text(data.get("name"), route_id),
@@ -235,8 +236,8 @@ class Ruta:
             end=PuntoRuta.from_document(data.get("end")),
             distance_km=stored_number(data.get("distanceKm")),
             elevation_gain_m=stored_number(data.get("elevationGainM")),
-            surface=surface if surface in SURFACES else "mixed",
-            difficulty=difficulty if difficulty in DIFFICULTIES else "intermediate",
+            surface=stored_text(data.get("surface")),
+            difficulty=stored_text(data.get("difficulty")),
             active=data.get("active") is True,
             segment_count=int(stored_number(data.get("segmentCount"))),
             safety=dict(safety) if isinstance(safety, Mapping) else {},

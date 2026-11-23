@@ -64,6 +64,11 @@ class TestParseRoute:
             active=True,
         )
 
+    def test_surface_and_difficulty_are_trimmed_free_text(self):
+        route = Ruta.parse(valid_route(surface="  Adoquín ", difficulty="Media"), "r1")
+
+        assert (route.surface, route.difficulty) == ("Adoquín", "Media")
+
     def test_defaults_description_to_empty_and_active_to_true(self):
         raw = valid_route()
         del raw["description"], raw["active"]
@@ -88,8 +93,13 @@ class TestParseRoute:
             ({"distanceKm": 501}, "invalid-distance"),
             ({"distanceKm": True}, "invalid-distance"),
             ({"elevationGainM": -1}, "invalid-elevation-gain"),
-            ({"surface": "gravel"}, "invalid-surface"),
-            ({"difficulty": "expert"}, "invalid-difficulty"),
+            ({"surface": ""}, "invalid-surface"),
+            ({"surface": "   "}, "invalid-surface"),
+            ({"surface": "x" * 41}, "invalid-surface"),
+            ({"surface": 3}, "invalid-surface"),
+            ({"difficulty": ""}, "invalid-difficulty"),
+            ({"difficulty": "x" * 41}, "invalid-difficulty"),
+            ({"difficulty": None}, "invalid-difficulty"),
             ({"active": "yes"}, "invalid-active"),
             ({"active": None}, "invalid-active"),
         ],
@@ -285,10 +295,10 @@ class TestStoredDocuments:
         }
 
     def test_a_route_reads_tolerantly(self):
-        route = Ruta.from_document("r1", {"name": 7, "surface": "ice", "safety": "x"})
+        route = Ruta.from_document("r1", {"name": 7, "surface": "Adoquín", "safety": "x"})
 
         assert route.name == "r1"
-        assert (route.surface, route.difficulty, route.active) == ("mixed", "intermediate", False)
+        assert (route.surface, route.difficulty, route.active) == ("Adoquín", "", False)
         assert route.safety == {}
 
     def test_a_route_keeps_the_computed_fields(self):

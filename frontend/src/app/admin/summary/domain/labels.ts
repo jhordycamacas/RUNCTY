@@ -1,4 +1,4 @@
-import { DIFFICULTY_LABELS, SEVERITY_LABELS, SURFACE_LABELS } from '../../../routes/domain/labels';
+import { SEVERITY_LABELS } from '../../../routes/domain/labels';
 
 /** Spanish labels for the keys the summary groups by; an unknown key is shown as it comes. */
 const ROLE_LABELS: Record<string, string> = {
@@ -17,8 +17,6 @@ const labelFrom = (labels: Record<string, string>) => (key: string) => labels[ke
 
 export const roleLabel = labelFrom(ROLE_LABELS);
 export const appearanceLabel = labelFrom(APPEARANCE_LABELS);
-export const difficultyLabel = labelFrom(DIFFICULTY_LABELS);
-export const surfaceLabel = labelFrom(SURFACE_LABELS);
 export const severityLabel = labelFrom(SEVERITY_LABELS);
 
 /** Greeting for the hour of the day (0 to 23). */

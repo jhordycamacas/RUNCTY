@@ -7,9 +7,7 @@ import { PreferencesStore } from '../../preferences/application/preferences.stor
 import { distanceParts } from '../../preferences/domain/units';
 import { routeSafetyForSlot } from '../domain/catalog';
 import {
-  DIFFICULTY_LABELS,
   SEVERITY_LABELS,
-  SURFACE_LABELS,
   factorTypeLabel,
   formatElevation,
 } from '../domain/labels';
@@ -216,8 +214,8 @@ export class RouteCard {
     const units = this.preferences.preferences().units;
     return [
       `${formatElevation(elevationGainM, units)} de desnivel`,
-      difficulty ? DIFFICULTY_LABELS[difficulty] : null,
-      surface ? SURFACE_LABELS[surface] : null,
+      difficulty,
+      surface,
     ]
       .filter(Boolean)
       .join(' · ');

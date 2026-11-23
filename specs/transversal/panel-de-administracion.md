@@ -58,7 +58,7 @@ Historia: como administrador, deseo que al entrar al panel lo primero que vea se
 1. Saludo con la fecha de hoy en español.
 2. Fichas KPI (números grandes, etiqueta pequeña en mayúsculas): Usuarios, Altas en 7 días, Rutas activas, Rutas con nivel Bajo, Ciudades y zonas.
 3. Altas por semana (últimas 8 semanas): gráfico de barras verticales con valor sobre cada barra, categorías debajo, líneas de guía y base.
-4. Gráficos de pastel (anillo con total al centro y leyenda con cantidad y porcentaje): rutas por dificultad, por superficie, factores de riesgo por severidad, usuarios por rol y nivel de seguridad de las rutas (Alto, Medio, Bajo, Sin índice; nunca «segura» ni «insegura»).
+4. Gráficos de pastel (anillo con total al centro y leyenda con cantidad y porcentaje): rutas por dificultad y por superficie (agrupadas por el texto guardado; más de cinco valores distintos se suman en «Otras»), factores de riesgo por severidad, usuarios por rol y nivel de seguridad de las rutas (Alto, Medio, Bajo, Sin índice; nunca «segura» ni «insegura»).
 5. Gráficos de barras verticales: rutas por ciudad y rutas más largas (km, hasta 6 rutas).
 6. Perfil deportivo completado: barra de progreso con porcentaje; preferencias de apariencia y notificaciones activas.
 7. Fichas «Próximamente» (sin cifras): Entrenamientos registrados, Alertas SOS y Eventos.
@@ -120,8 +120,8 @@ Historia: como administrador, deseo ver en un solo lugar cifras reales de uso de
   },
   "routes": {
     "total": 5, "active": 4, "inactive": 1, "totalKm": 41.3,
-    "byDifficulty": { "beginner": 2, "intermediate": 2, "advanced": 1 },
-    "bySurface": { "asphalt": 3, "trail": 1, "mixed": 1, "track": 0 },
+    "byDifficulty": { "Principiante": 2, "Intermedio": 2, "Avanzado": 1 },
+    "bySurface": { "Asfalto": 3, "Sendero": 1, "Mixto": 1 },
     "byCity": [{ "cityId": "loja", "cityName": "Loja", "count": 5 }],
     "safetyLevels": { "high": 2, "medium": 2, "low": 1, "unrated": 0 },
     "distances": [{ "name": "Parque Jipiro", "distanceKm": 10.8 }],

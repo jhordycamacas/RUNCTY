@@ -2,13 +2,9 @@
  * Route catalog (RF-05) with its safety index per time slot (RF-07), as the runner app reads it.
  * The index is computed by the backend; the app only displays it.
  */
-export const SURFACES = ['asphalt', 'trail', 'mixed', 'track'] as const;
-export const DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const;
 export const SEVERITIES = ['low', 'medium', 'high'] as const;
 export const SAFETY_LEVELS = ['high', 'medium', 'low'] as const;
 
-export type Surface = (typeof SURFACES)[number];
-export type Difficulty = (typeof DIFFICULTIES)[number];
 export type Severity = (typeof SEVERITIES)[number];
 export type SafetyLevel = (typeof SAFETY_LEVELS)[number];
 
@@ -55,8 +51,9 @@ export interface Route {
   /** NaN-free; 0 when missing. */
   distanceKm: number;
   elevationGainM: number;
-  surface: Surface | null;
-  difficulty: Difficulty | null;
+  /** Free text typed by the admin; null when the stored value is blank. */
+  surface: string | null;
+  difficulty: string | null;
   /** Inactive routes are only listed to who can manage routes. */
   active: boolean;
   segmentCount: number;

@@ -1,5 +1,6 @@
 import {
   filterRoutes,
+  listDifficulties,
   listTimeSlots,
   pickDefaultSlot,
   resolveSlotKey,
@@ -19,10 +20,10 @@ import { route, segment, slot } from './testing/fixtures';
 
 describe('filterRoutes', () => {
   const routes = [
-    route('a', { distanceKm: 3, difficulty: 'beginner' }),
-    route('b', { distanceKm: 5, difficulty: 'intermediate' }),
-    route('c', { distanceKm: 7.5, difficulty: 'intermediate' }),
-    route('d', { distanceKm: 10, difficulty: 'advanced' }),
+    route('a', { distanceKm: 3, difficulty: 'Principiante' }),
+    route('b', { distanceKm: 5, difficulty: 'Intermedio' }),
+    route('c', { distanceKm: 7.5, difficulty: 'Intermedio' }),
+    route('d', { distanceKm: 10, difficulty: 'Avanzado' }),
     route('e', { distanceKm: 12, difficulty: null }),
   ];
   const ids = (list: Route[]) => list.map((r) => r.id);
@@ -47,9 +48,9 @@ describe('filterRoutes', () => {
 
   it('combines distance and difficulty', () => {
     expect(
-      ids(filterRoutes(routes, { distance: 'from5to10', difficulty: 'intermediate' })),
+      ids(filterRoutes(routes, { distance: 'from5to10', difficulty: 'Intermedio' })),
     ).toEqual(['c']);
-    expect(ids(filterRoutes(routes, { distance: 'all', difficulty: 'advanced' }))).toEqual(['d']);
+    expect(ids(filterRoutes(routes, { distance: 'all', difficulty: 'Avanzado' }))).toEqual(['d']);
   });
 });
 
@@ -178,5 +179,18 @@ describe('labels', () => {
     expect(words).toContain('Alto');
     expect(words).toContain('Medio');
     expect(words).toContain('Bajo');
+  });
+});
+
+describe('listDifficulties', () => {
+  it('lists each typed difficulty once, sorted, ignoring routes without one', () => {
+    const routes = [
+      route('a', { difficulty: 'Media' }),
+      route('b', { difficulty: 'Alta' }),
+      route('c', { difficulty: 'Media' }),
+      route('d', { difficulty: null }),
+    ];
+
+    expect(listDifficulties(routes)).toEqual(['Alta', 'Media']);
   });
 });

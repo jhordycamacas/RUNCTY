@@ -12,8 +12,8 @@ const ROUTE: RouteInput = {
   end: { label: 'Sur', lat: -3.98, lng: -79.21 },
   distanceKm: 3.2,
   elevationGainM: 15,
-  surface: 'asphalt',
-  difficulty: 'beginner',
+  surface: 'Asfalto',
+  difficulty: 'Principiante',
   active: true,
 };
 const SEGMENT: SegmentInput = {

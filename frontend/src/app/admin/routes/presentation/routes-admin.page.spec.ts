@@ -19,13 +19,13 @@ const ROUTES = [
   route('jipiro', {
     name: 'Parque Jipiro',
     distanceKm: 3.2,
-    difficulty: 'beginner',
+    difficulty: 'Principiante',
     safety: [slot('morning', '05:00', '07:00', 90), slot('night', '18:00', '20:00', 30)],
   }),
   route('tebaida', {
     name: 'La Tebaida',
     distanceKm: 7.5,
-    difficulty: 'advanced',
+    difficulty: 'Avanzado',
     active: false,
     safety: [slot('morning', '05:00', '07:00', 55)],
   }),

@@ -70,7 +70,7 @@ Decididas por el equipo o derivadas de otros documentos:
 | --- | --- | --- |
 | `GET /routes?cityId=` | sesión | Lista del catálogo (el administrador ve también las inactivas); incluye el nivel de seguridad por franja. |
 | `GET /routes/{id}` | sesión | Detalle con `segments`; las franjas y los factores solo con `routes.manage`. |
-| `POST /routes` | `routes.manage` | Crea una ruta (`201 {id}`). Cuerpo: `name`, `cityId`, `description`, `start`, `end`, `distanceKm`, `elevationGainM`, `surface` (`asphalt`, `trail`, `mixed`, `track`), `difficulty` (`beginner`, `intermediate`, `advanced`), `active`. |
+| `POST /routes` | `routes.manage` | Crea una ruta (`201 {id}`). Cuerpo: `name`, `cityId`, `description`, `start`, `end`, `distanceKm`, `elevationGainM`, `surface` y `difficulty` (texto libre, 1 a 40 caracteres, los escribe el administrador), `active`. |
 | `PUT /routes/{id}` · `DELETE /routes/{id}` | `routes.manage` | Reemplaza los datos de la ruta o la elimina en cascada con sus tramos, franjas y factores (`204`). |
 | `POST /routes/{id}/segments` | `routes.manage` | Agrega un tramo: `name`, `coordinates[]`, `order` opcional (`201 {id}`). |
 | `PUT` · `DELETE /routes/{id}/segments/{segmentId}` | `routes.manage` | Modifica o elimina el tramo (`204`). |

@@ -15,26 +15,19 @@ import { CityRoutes } from '../application/city-routes';
 import {
   DEFAULT_FILTERS,
   DISTANCE_BUCKET_LABELS,
-  DifficultyFilter,
   DistanceBucket,
   RouteFilters,
   filterRoutes,
+  listDifficulties,
   listTimeSlots,
   resolveSlotKey,
   sortRoutesForSlot,
 } from '../domain/catalog';
-import { DIFFICULTY_LABELS } from '../domain/labels';
-import { DIFFICULTIES } from '../domain/route';
 import { RouteCard } from './route-card';
 
 const DISTANCE_OPTIONS: ChipOption[] = (
   Object.keys(DISTANCE_BUCKET_LABELS) as DistanceBucket[]
 ).map((value) => ({ value, label: DISTANCE_BUCKET_LABELS[value] }));
-
-const DIFFICULTY_OPTIONS: ChipOption[] = [
-  { value: 'all', label: 'Todas' },
-  ...DIFFICULTIES.map((value) => ({ value, label: DIFFICULTY_LABELS[value] })),
-];
 
 /** Rutas tab: the active routes of the runner's city with their safety level per time slot. */
 @Component({
@@ -102,7 +95,7 @@ const DIFFICULTY_OPTIONS: ChipOption[] = [
           />
           <app-choice-chips
             label="Dificultad"
-            [options]="difficultyOptions"
+            [options]="difficultyOptions()"
             [value]="filters().difficulty"
             (selected)="setDifficulty($event)"
           />
@@ -154,11 +147,15 @@ export class RoutesListPage {
   protected readonly data = inject(CityRoutes);
 
   protected readonly distanceOptions = DISTANCE_OPTIONS;
-  protected readonly difficultyOptions = DIFFICULTY_OPTIONS;
   protected readonly chosenSlot = signal<string | null>(null);
   protected readonly filters = signal<RouteFilters>(DEFAULT_FILTERS);
 
   private readonly now = new Date();
+  /** "Todas" plus the difficulties typed in the loaded routes. */
+  protected readonly difficultyOptions = computed<ChipOption[]>(() => [
+    { value: 'all', label: 'Todas' },
+    ...listDifficulties(this.data.routes()).map((value) => ({ value, label: value })),
+  ]);
   private readonly slots = computed(() => listTimeSlots(this.data.routes()));
   protected readonly slotOptions = computed<ChipOption[]>(() =>
     this.slots().map((slot) => ({ value: slot.key, label: slot.label })),
@@ -184,7 +181,7 @@ export class RoutesListPage {
   }
 
   protected setDifficulty(value: string): void {
-    this.filters.update((f) => ({ ...f, difficulty: value as DifficultyFilter }));
+    this.filters.update((f) => ({ ...f, difficulty: value }));
   }
 
   protected clearFilters(): void {

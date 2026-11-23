@@ -12,8 +12,6 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IonButton, IonContent, IonSpinner, IonToggle } from '@ionic/angular';
 import { userMessage } from '../../../core/errors/user-message';
-import { DIFFICULTY_LABELS, SURFACE_LABELS } from '../../../routes/domain/labels';
-import { DIFFICULTIES, SURFACES } from '../../../routes/domain/route';
 import { formValues } from '../../../shared/forms/form-values';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
 import { Notice } from '../../../shared/ui/notice';
@@ -161,18 +159,16 @@ const LIST_URL = '/admin/rutas';
           </div>
 
           <div class="pair">
-            <app-select-field
+            <app-text-field
               formControlName="surface"
               label="Superficie"
-              placeholder="Elige la superficie"
-              [options]="surfaces"
+              [maxlength]="40"
               [error]="errorFor('surface')"
             />
-            <app-select-field
+            <app-text-field
               formControlName="difficulty"
               label="Dificultad"
-              placeholder="Elige la dificultad"
-              [options]="difficulties"
+              [maxlength]="40"
               [error]="errorFor('difficulty')"
             />
           </div>
@@ -272,11 +268,6 @@ export class RouteFormPage implements HasUnsavedChanges {
   protected readonly placeOptions = computed(() =>
     (this.store.places() ?? []).map((place) => ({ value: place.id, label: place.name })),
   );
-  protected readonly surfaces = SURFACES.map((value) => ({ value, label: SURFACE_LABELS[value] }));
-  protected readonly difficulties = DIFFICULTIES.map((value) => ({
-    value,
-    label: DIFFICULTY_LABELS[value],
-  }));
 
   protected readonly form = inject(FormBuilder).nonNullable.group<RouteForm>({
     ...EMPTY_ROUTE_FORM,

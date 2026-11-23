@@ -26,8 +26,8 @@ const VALID: Partial<RouteForm> = {
   endLng: '-79.21',
   distanceKm: '3,2',
   elevationGainM: '15',
-  surface: 'asphalt',
-  difficulty: 'beginner',
+  surface: 'Asfalto',
+  difficulty: 'Principiante',
 };
 
 const STORED = route('jipiro', {
@@ -110,7 +110,7 @@ describe('RouteFormPage', () => {
 
     expect(repository.createRoute).not.toHaveBeenCalled();
     expect(text()).toContain('Elige la ciudad o zona de la ruta.');
-    expect(text()).toContain('Elige la dificultad.');
+    expect(text()).toContain('Escribe la dificultad, por ejemplo Media.');
   });
 
   it('preselects the city chosen in the list for a new route', async () => {

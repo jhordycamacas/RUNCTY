@@ -95,7 +95,7 @@ gunicorn as a non-root user and contains no configuration or credentials.
 | `DELETE /api/v1/cities/{id}` | `cities.manage` | 204 |
 | `GET /api/v1/routes` | signed in | `{"routes": [...]}` sorted by name; inactive routes only with `routes.manage`. Query: `cityId` |
 | `GET /api/v1/routes/{id}` | signed in | the route with `segments` (in route order, each with its `safety`); `timeSlots` and each segment's `riskFactors` only with `routes.manage`, which also reads inactive routes |
-| `POST /api/v1/routes`, `PUT`, `DELETE /api/v1/routes/{id}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `name`, `cityId`, `description?`, `start`, `end` (`{lat, lng, label}`), `distanceKm`, `elevationGainM`, `surface`, `difficulty`, `active?` |
+| `POST /api/v1/routes`, `PUT`, `DELETE /api/v1/routes/{id}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `name`, `cityId`, `description?`, `start`, `end` (`{lat, lng, label}`), `distanceKm`, `elevationGainM`, `surface`, `difficulty` (free text, 1-40 chars), `active?` |
 | `POST /api/v1/routes/{id}/segments`, `PUT`, `DELETE .../segments/{sid}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `name`, `coordinates` (`[{lat, lng}]`), `order?` |
 | `POST /api/v1/routes/{id}/time-slots`, `PUT`, `DELETE .../time-slots/{slotId}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `startTime`, `endTime`, `label?`, `validFrom?`, `validTo?` |
 | `POST /api/v1/routes/{id}/segments/{sid}/risk-factors`, `PUT`, `DELETE .../risk-factors/{fid}` | `routes.manage` | 201 `{"id"}`, 204, 204. Body: `type`, `severity`, `description`, `startTime?`, `endTime?` |

@@ -9,8 +9,8 @@ const fullRoute = {
   end: { lat: -3.98, lng: -79.2, label: 'Entrada sur' },
   distanceKm: 3.2,
   elevationGainM: 15,
-  surface: 'asphalt',
-  difficulty: 'beginner',
+  surface: 'Asfalto',
+  difficulty: 'Principiante',
   active: true,
   segmentCount: 2,
   safety: {
@@ -50,8 +50,8 @@ describe('toRoute', () => {
       cityId: 'loja',
       distanceKm: 3.2,
       elevationGainM: 15,
-      surface: 'asphalt',
-      difficulty: 'beginner',
+      surface: 'Asfalto',
+      difficulty: 'Principiante',
       segmentCount: 2,
       start: { lat: -3.97, lng: -79.2, label: 'Entrada norte' },
     });
@@ -75,11 +75,18 @@ describe('toRoute', () => {
     });
   });
 
+  it('keeps surface and difficulty as the trimmed text that was stored', () => {
+    const route = toRoute({ id: 'x', surface: ' Adoquín ', difficulty: 'Media' });
+
+    expect(route.surface).toBe('Adoquín');
+    expect(route.difficulty).toBe('Media');
+  });
+
   it('does not crash on missing or malformed fields', () => {
     const route = toRoute({
       id: 'x',
       distanceKm: 'far',
-      surface: 'lava',
+      surface: '   ',
       difficulty: 3,
       start: { lat: 'a' },
       safety: {

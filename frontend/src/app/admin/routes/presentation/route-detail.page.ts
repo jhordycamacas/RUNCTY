@@ -10,7 +10,6 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IonButton, IonContent, IonSpinner, ViewWillEnter } from '@ionic/angular';
 import { formatDistance } from '../../../preferences/domain/units';
-import { DIFFICULTY_LABELS, SURFACE_LABELS } from '../../../routes/domain/labels';
 import { routeMapScene } from '../../../routes/presentation/route-map';
 import { MapView } from '../../../shared/map/map-view';
 import { HasUnsavedChanges } from '../../../shared/forms/unsaved-changes.guard';
@@ -315,8 +314,8 @@ export class RouteDetailPage implements ViewWillEnter, HasUnsavedChanges {
     return [
       formatDistance(route.distanceKm, 'metric'),
       `${Math.round(route.elevationGainM)} m de desnivel`,
-      route.difficulty ? DIFFICULTY_LABELS[route.difficulty] : null,
-      route.surface ? SURFACE_LABELS[route.surface] : null,
+      route.difficulty,
+      route.surface,
     ]
       .filter(Boolean)
       .join(' · ');

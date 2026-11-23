@@ -19,8 +19,8 @@ const VALID: RouteForm = {
   endLng: '-79.21',
   distanceKm: '3,2',
   elevationGainM: '15',
-  surface: 'asphalt',
-  difficulty: 'beginner',
+  surface: 'Asfalto',
+  difficulty: 'Principiante',
   active: true,
 };
 
@@ -34,8 +34,8 @@ describe('parseRouteForm', () => {
       end: { label: 'Entrada sur', lat: -3.98, lng: -79.21 },
       distanceKm: 3.2,
       elevationGainM: 15,
-      surface: 'asphalt',
-      difficulty: 'beginner',
+      surface: 'Asfalto',
+      difficulty: 'Principiante',
       active: true,
     });
   });
@@ -51,8 +51,8 @@ describe('parseRouteForm', () => {
       endLat: 'Ingresa la latitud, por ejemplo -3.99313.',
       endLng: 'Ingresa la longitud, por ejemplo -79.20422.',
       distanceKm: 'Ingresa la distancia en kilómetros, por ejemplo 5,2.',
-      surface: 'Elige la superficie.',
-      difficulty: 'Elige la dificultad.',
+      surface: 'Escribe la superficie, por ejemplo Asfalto.',
+      difficulty: 'Escribe la dificultad, por ejemplo Media.',
     });
   });
 
@@ -66,6 +66,8 @@ describe('parseRouteForm', () => {
       endLng: '-181',
       distanceKm: '0',
       elevationGainM: '10001',
+      surface: 'a'.repeat(41),
+      difficulty: 'a'.repeat(41),
     }).errors;
 
     expect(errors).toEqual({
@@ -76,7 +78,15 @@ describe('parseRouteForm', () => {
       endLng: 'La longitud debe estar entre -180 y 180.',
       distanceKm: 'La distancia debe ser mayor que 0 y máximo 500 km.',
       elevationGainM: 'El desnivel debe estar entre 0 y 10000 m.',
+      surface: 'La superficie admite máximo 40 caracteres.',
+      difficulty: 'La dificultad admite máximo 40 caracteres.',
     });
+  });
+
+  it('keeps the typed surface and difficulty, trimmed', () => {
+    const { input } = parseRouteForm({ ...VALID, surface: ' Adoquín ', difficulty: 'Media ' });
+
+    expect(input).toMatchObject({ surface: 'Adoquín', difficulty: 'Media' });
   });
 
   it('rejects text where a number is expected', () => {
@@ -116,8 +126,8 @@ describe('toRouteForm', () => {
         end: { lat: -3.98, lng: -79.21, label: 'Sur' },
         distanceKm: 3.2,
         elevationGainM: 15,
-        surface: 'mixed',
-        difficulty: 'advanced',
+        surface: 'Mixto',
+        difficulty: 'Avanzado',
         active: false,
       }),
     );
@@ -134,8 +144,8 @@ describe('toRouteForm', () => {
       endLng: '-79.21',
       distanceKm: '3.2',
       elevationGainM: '15',
-      surface: 'mixed',
-      difficulty: 'advanced',
+      surface: 'Mixto',
+      difficulty: 'Avanzado',
       active: false,
     });
     expect(parseRouteForm(form).errors).toBeUndefined();

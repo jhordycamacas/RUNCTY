@@ -16,9 +16,7 @@ import {
   segmentSafetyForSlot,
 } from '../domain/catalog';
 import {
-  DIFFICULTY_LABELS,
   SAFETY_DISCLAIMER,
-  SURFACE_LABELS,
   formatElevation,
   formatSegmentLength,
 } from '../domain/labels';
@@ -354,14 +352,8 @@ export class RouteDetailPage {
   protected readonly elevation = computed(() =>
     formatElevation(this.route()?.elevationGainM ?? 0, this.units()),
   );
-  protected readonly difficulty = computed(() => {
-    const value = this.route()?.difficulty;
-    return value ? DIFFICULTY_LABELS[value] : 'Sin dato';
-  });
-  protected readonly surface = computed(() => {
-    const value = this.route()?.surface;
-    return value ? SURFACE_LABELS[value] : 'Sin dato';
-  });
+  protected readonly difficulty = computed(() => this.route()?.difficulty ?? 'Sin dato');
+  protected readonly surface = computed(() => this.route()?.surface ?? 'Sin dato');
   protected readonly mapsUrl = computed(() => {
     const start = this.route()?.start;
     return start ? googleMapsUrl(start) : null;

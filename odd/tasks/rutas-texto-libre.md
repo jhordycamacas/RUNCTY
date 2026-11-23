@@ -23,9 +23,9 @@ changed without a deploy.
 Sport-level, goals, risk factor types, incident types and the other catalogs (separate step).
 
 ## Tasks
-- [ ] T1 Backend: model, use cases, serializers, seed, summary, tests (RED first)
-- [ ] T2 Frontend: domain, admin form, runner views/filters, summary, tests
-- [ ] T3 Specs and docs updated; full backend and frontend tests green
+- [x] T1 Backend: model, use cases, serializers, seed, summary, tests (RED first)
+- [x] T2 Frontend: domain, admin form, runner views/filters, summary, tests
+- [x] T3 Specs and docs updated; full backend and frontend tests green
 
 ## Acceptance
 - Creating/editing a route with surface "Adoquín" and difficulty "Media" works and shows back the
@@ -35,3 +35,8 @@ Sport-level, goals, risk factor types, incident types and the other catalogs (se
 
 ## Route
 Delegated direct: one writer (2+ non-trivial files across backend and frontend).
+
+## Evidence
+- Backend: `.venv/Scripts/python -m pytest tests -q` -> 981 passed; `ruff check apps tests` clean.
+- Frontend: `ng test --include` routes, admin/routes, admin/summary -> 34 files, 241 tests passed; `tsc --noEmit -p tsconfig.app.json` clean.
+- Summary groups by stored text (blank -> "Sin definir"); the donut caps at 5 slices, the tail becomes "Otras".

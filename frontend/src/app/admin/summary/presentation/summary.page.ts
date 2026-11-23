@@ -19,14 +19,13 @@ import { Notice } from '../../../shared/ui/notice';
 import { SummaryStore } from '../application/summary.store';
 import {
   appearanceLabel,
-  difficultyLabel,
   greeting,
   roleLabel,
   severityLabel,
-  surfaceLabel,
   weekLabel,
 } from '../domain/labels';
 import { RouteDistance, RoutesByCity, WeekCount } from '../domain/summary';
+import { topCounts } from '../domain/top-counts';
 import { Bar, BarChart } from './bar-chart';
 import { BarItem, BarList } from './bar-list';
 import { CATEGORICAL, ChartColor } from './chart-math';
@@ -193,7 +192,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                 <app-donut-chart
                   subject="Rutas por dificultad"
                   centerLabel="Rutas"
-                  [slices]="slices(routes.byDifficulty, difficultyLabel)"
+                  [slices]="textSlices(routes.byDifficulty)"
                 />
               </section>
               <section class="column" aria-labelledby="surface-title">
@@ -201,7 +200,7 @@ const items = (counts: Record<string, number>, label: (key: string) => string): 
                 <app-donut-chart
                   subject="Rutas por superficie"
                   centerLabel="Rutas"
-                  [slices]="slices(routes.bySurface, surfaceLabel)"
+                  [slices]="textSlices(routes.bySurface)"
                 />
               </section>
               <section class="column" aria-labelledby="factors-title">
@@ -482,8 +481,6 @@ export class SummaryPage implements ViewWillEnter {
     void this.store.load();
   }
 
-  protected readonly difficultyLabel = difficultyLabel;
-  protected readonly surfaceLabel = surfaceLabel;
   protected readonly severityLabel = severityLabel;
   protected readonly roleLabel = roleLabel;
 
@@ -495,6 +492,15 @@ export class SummaryPage implements ViewWillEnter {
       label: label(key),
       value,
       color: CATEGORICAL[index % CATEGORICAL.length],
+    }));
+  }
+
+  /** Slices of values typed by the admins, as stored; the tail beyond the colors is `Otras`. */
+  protected textSlices(counts: Record<string, number>): DonutSlice[] {
+    return topCounts(counts, CATEGORICAL.length).map(([label, value], index) => ({
+      label,
+      value,
+      color: CATEGORICAL[index],
     }));
   }
 

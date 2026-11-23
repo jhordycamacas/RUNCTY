@@ -1,21 +1,8 @@
 import { UnitSystem } from '../../preferences/domain/preferences';
 import { formatDistance } from '../../preferences/domain/units';
-import { Difficulty, SafetyLevel, Severity, Surface } from './route';
+import { SafetyLevel, Severity } from './route';
 
 /** Spanish UI labels for the route catalog. */
-export const SURFACE_LABELS: Record<Surface, string> = {
-  asphalt: 'Asfalto',
-  trail: 'Sendero',
-  mixed: 'Mixto',
-  track: 'Pista',
-};
-
-export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
-  beginner: 'Principiante',
-  intermediate: 'Intermedio',
-  advanced: 'Avanzado',
-};
-
 const FACTOR_TYPE_LABELS: Record<string, string> = {
   poor_lighting: 'Iluminación deficiente',
   traffic: 'Tráfico',

@@ -259,7 +259,7 @@ class TestRouteWrites:
         assert firebase.docs == {}
 
     def test_domain_rules_use_the_callable_reason_codes(self, client):
-        response = client.post(ROUTES, {**ROUTE, "surface": "ice"}, format="json", **ADMIN)
+        response = client.post(ROUTES, {**ROUTE, "surface": ""}, format="json", **ADMIN)
 
         assert response.status_code == 400
         assert error_of(response)["reason"] == "invalid-surface"

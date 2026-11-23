@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 
 from apps.cities.domain.models import Ciudad
-from apps.routes.domain.models import DIFFICULTIES, SURFACES, Ruta
+from apps.routes.domain.models import Ruta
 from apps.routes.domain.safety import SEVERITIES
 from apps.users.domain.models import APPEARANCES, UNIT_SYSTEMS, PreferenciaUsuario
 
@@ -19,6 +19,7 @@ LONGEST_ROUTES = 8
 _LEVELS_WORST_FIRST = ("low", "medium", "high")
 _SPORT_PROFILE = "sportProfile"
 _PREFERENCES = "preferences"
+_UNSPECIFIED = "Sin definir"
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,6 +54,12 @@ def registrations_by_week(created: Iterable[datetime], now: datetime) -> list[di
 def _count_in(values: Iterable[str], keys: Sequence[str]) -> dict[str, int]:
     counts = Counter(values)
     return {key: counts.get(key, 0) for key in keys}
+
+
+def _count_by_text(values: Iterable[str]) -> dict[str, int]:
+    """Counts per stored text, most frequent first; a blank value counts as `Sin definir`."""
+    counts = Counter(value or _UNSPECIFIED for value in values)
+    return dict(sorted(counts.items(), key=lambda item: (-item[1], item[0].casefold())))
 
 
 def users_summary(
@@ -121,8 +128,8 @@ def routes_summary(
         "active": active,
         "inactive": len(routes) - active,
         "totalKm": round(sum(route.distance_km for route in routes), 1),
-        "byDifficulty": _count_in((route.difficulty for route in routes), DIFFICULTIES),
-        "bySurface": _count_in((route.surface for route in routes), SURFACES),
+        "byDifficulty": _count_by_text(route.difficulty for route in routes),
+        "bySurface": _count_by_text(route.surface for route in routes),
         "byCity": by_city,
         "safetyLevels": {level: levels[level] for level in ("high", "medium", "low", "unrated")},
         "distances": [

@@ -170,7 +170,7 @@ class TestCreateRoute:
         del firebase.cities["loja"]
         deps, _ = make(existing=False)
 
-        assert failure(lambda: create_route(route_input(surface="ice"), deps)).reason == (
+        assert failure(lambda: create_route(route_input(surface=""), deps)).reason == (
             "invalid-surface"
         )
 
