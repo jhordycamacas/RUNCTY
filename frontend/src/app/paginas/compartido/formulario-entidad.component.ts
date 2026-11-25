@@ -38,7 +38,7 @@ const TIPO_INPUT: Record<string, string> = {
         <ion-buttons slot="start">
           <ion-back-button [defaultHref]="'/' + entidad().endpoint"></ion-back-button>
         </ion-buttons>
-        <ion-title>{{ esEdicion() ? 'Editar' : 'Nuevo' }}: {{ entidad().titulo }}</ion-title>
+        <ion-title>{{ esEdicion() ? 'Editar' : 'Agregar' }}: {{ entidad().titulo }}</ion-title>
       </ion-toolbar>
     </ion-header>
 

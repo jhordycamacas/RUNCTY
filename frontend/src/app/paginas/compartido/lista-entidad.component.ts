@@ -105,7 +105,7 @@ const OPCIONES_SI_NO: Opcion[] = [
         @if (cargando()) {
           <div class="pie"><ion-spinner name="crescent"></ion-spinner></div>
         } @else if (!error() && registros().length === 0) {
-          <p class="estado-vacio">No hay {{ entidad().plural.toLowerCase() }} registrados. Pulsa + para crear uno.</p>
+          <p class="estado-vacio">Todavía no hay registros de {{ entidad().plural.toLowerCase() }}. Pulsa + para agregar el primero.</p>
         } @else if (hayMas()) {
           <div class="pie">
             <ion-button fill="outline" (click)="cargar(pagina() + 1)">
@@ -119,7 +119,7 @@ const OPCIONES_SI_NO: Opcion[] = [
 
       <ion-fab slot="fixed" vertical="bottom" horizontal="end">
         <ion-fab-button [routerLink]="['/', entidad().endpoint, 'nuevo']" [queryParams]="filtros()"
-          [attr.aria-label]="'Nuevo ' + entidad().titulo.toLowerCase()">
+          [attr.aria-label]="'Agregar ' + entidad().titulo.toLowerCase()">
           <ion-icon name="add"></ion-icon>
         </ion-fab-button>
       </ion-fab>
