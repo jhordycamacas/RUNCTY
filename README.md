@@ -59,7 +59,7 @@ Requisitos: Python 3.12, MySQL 8.4 (servicio en el puerto 3307), Node 22 y, para
    python manage.py createsuperuser
    python manage.py runserver 0.0.0.0:8000
    ```
-3. **Frontend web:** `cd frontend`, `npm install`, `npm start` y abre http://localhost:8100.
+3. **Frontend web:** `cd frontend`, `npm install`, `npx ng serve --port 8100` y abre http://localhost:8100.
 4. **Android:** `npm run build`, `npx cap sync android` y, desde `frontend/android`, `.\gradlew.bat assembleDebug`; instala `app/build/outputs/apk/debug/app-debug.apk` en el emulador.
 
 Pruebas: `python manage.py test` en `backend` (325 pruebas) y `npx ng test --watch=false` en `frontend`.
