@@ -112,6 +112,16 @@ Decision of the owner (2026-11-24): rebuild following the course guide (referenc
   dist, www, app/build, .apk, .env). Not verified here: install/run in the emulator (owner), live browser console check.
   Known gaps: default Capacitor launcher icon (not the RUNCTY logo); clearing an optional number on edit is not possible
   (empty optional numbers are omitted so backend defaults apply). Engram mirror: pending.
+- 2026-11-24 follow-up (delegated writer): commit `95a1e2f` `seed` now loads coherent Loja data for all 36 models
+  (6 usuarios, 2 ciudades, 2 clubes, 3 eventos, etc.; only users with a contacto de confianza have panic alerts, club
+  routes in the club's city, inscriptions only in open events with free spots, no future incidents, no self retos or
+  solicitudes; route factors unchanged so safety levels stay the same). New test runs seed twice, asserts the 36 models
+  have rows, identical counts, and `full_clean()` passes on every seeded row. Commit `1e4eac5` neutral wording:
+  empty list "Todavía no hay registros de <plural>. Pulsa + para agregar el primero.", form header "Agregar: <Entidad>",
+  FAB aria-label "Agregar <entidad>"; new spec `paginas/compartido/lista-entidad.spec.ts`.
+  Verification: `manage.py test` (sqlite) 325 tests OK; MySQL `seed` twice: identical counts, every model >= 1
+  (e.g. Usuario=6, Tramo=13, FranjaHoraria=10, FactorRiesgo=8, Inscripcion=4, Campana=3); `ng test` 7 files, 23 tests
+  passed; `npm run build` OK, 0 warnings.
 
 ## Next step
 
