@@ -66,9 +66,9 @@ Decision of the owner (2026-11-24): rebuild following the course guide (referenc
 - [x] T1 Backend Django + MySQL: settings from `.env`, apps and models above with validations, migrations, serializers,
       ViewSets and routers under `/api/`, admin, `/api/docs/` (Swagger) and `/api/schema/`, CORS for web and Android,
       seed command with Loja data, tests of status codes (200, 201, 204, 400, 404) per entity. Route: delegated (writer; 2+ non-trivial files).
-- [ ] T2 Frontend Angular + Ionic: `core/` (models, API services, config) and `paginas/` (list, form, detail per entity), routes,
+- [x] T2 Frontend Angular + Ionic: `core/` (models, API services, config) and `paginas/` (list, form, detail per entity), routes,
       menu by module, backend validation errors shown in forms, RUNCTY design tokens, `npm run build` and tests green. Route: delegated (writer).
-- [ ] T3 Android: Capacitor app `RUNCTY`, `10.0.2.2:8000`, cleartext, debug APK. Route: delegated (writer).
+- [x] T3 Android: Capacitor app `RUNCTY`, `10.0.2.2:8000`, cleartext, debug APK. Route: delegated (writer).
 - [ ] T4 Documents: README for the branch and Word "Requisitos, trazabilidad y evidencias" with the matrix and screenshot slots. Route: inline.
 - [ ] T5 Push branch `RUNCTY_INGWEB` to GitHub.
 
@@ -92,6 +92,27 @@ Decision of the owner (2026-11-24): rebuild following the course guide (referenc
   Pending for the owner: run `sql/01_crear_base.sql` as root, create `backend/.env`, `migrate` and `seed` against MySQL.
   Note: rule "valorar solo si la recorrió" not enforced (only one valoracion per user+route).
 
+- 2026-11-24 T2 (delegated writer): commits `35f248e` (remove old Firebase Angular app), `6265111` (core: `api.config.ts`,
+  `modelos.ts` with 36 interfaces, generic `CrudService<T>` + typed `ApiService` registry, `entidades.ts` metadata derived
+  from `/api/schema/`, `errores.ts`), `0e9233f` (108 thin pages `<entidad>-lista|form|detalle.page.ts` in 10 module folders,
+  shared metadata-driven lista/formulario/detalle components in `paginas/compartido/`, `inicio.page.ts`, ruta detail with
+  safety index per franja and Alto/Medio/Bajo badges, solicitud-ruta-segura form showing `rutas_recomendadas`, side menu
+  with `ion-split-pane`, lazy routes `/inicio`, `/<endpoint>`, `/<endpoint>/nuevo`, `/<endpoint>/:id`, `/<endpoint>/:id/editar`).
+  Same versions as the reference (Angular 22.2, Ionic 9.0.10, Capacitor 8.6, Vitest). Initial budget warning raised
+  500 kB -> 1.5 MB (bundle 1.21 MB raw / 224 kB transfer); error limit stays 2 MB.
+  Verification: `npm run build` OK without warnings (Initial total 1.21 MB); `npx ng test --watch=false` 6 files, 22 tests
+  passed (errores mapping, CrudService URL/params, api.config base URL, formulario body/validation, RutaFormPage shows the
+  backend 400 message under `nombre`, ruta list/detail render). Tests written alongside the code; no RED observed.
+  CORS: `curl -H "Origin: http://localhost:8100" /api/rutas/` -> 200 with `access-control-allow-origin: http://localhost:8100`.
+- 2026-11-24 T3 (delegated writer): commit `433637d`. `capacitor.config.ts` appId `ec.runcty.ingweb`, appName `RUNCTY`,
+  `androidScheme: 'http'`, `cleartext: true` (reference approach) plus `usesCleartextTraffic` and
+  `res/xml/network_security_config.xml` (10.0.2.2, localhost, 127.0.0.1). `gradlew.bat assembleDebug` with JDK 21:
+  BUILD SUCCESSFUL; `frontend/android/app/build/outputs/apk/debug/app-debug.apk` (4,996,801 bytes); `aapt dump badging`:
+  `application-label:'RUNCTY'`, package `ec.runcty.ingweb`. Build outputs stay ignored (git ls-files has no node_modules,
+  dist, www, app/build, .apk, .env). Not verified here: install/run in the emulator (owner), live browser console check.
+  Known gaps: default Capacitor launcher icon (not the RUNCTY logo); clearing an optional number on edit is not possible
+  (empty optional numbers are omitted so backend defaults apply). Engram mirror: pending.
+
 ## Next step
 
-T2.
+T4.
