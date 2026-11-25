@@ -1,5 +1,6 @@
 from io import StringIO
 
+from django.apps import apps
 from django.core.management import call_command
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -7,6 +8,11 @@ from rest_framework.test import APITestCase
 from config import pruebas as f
 from config.pruebas import CrudApiMixin
 from rutas.models import Ruta
+
+APPS_PROYECTO = {
+    'usuarios', 'ciudades', 'rutas', 'seguridad', 'seguridad_personal',
+    'entrenamiento', 'comunidad', 'clubes', 'eventos', 'publicidad',
+}
 
 
 class CiudadApiTests(CrudApiMixin, APITestCase):
@@ -54,6 +60,21 @@ class SeedTests(APITestCase):
         self.assertEqual(niveles['Parque Recreacional Jipiro'], 'Alto')
         self.assertEqual(niveles['Malecón del río Zamora'], 'Medio')  # 100 - 35 - 20 = 45
         self.assertEqual(niveles['Subida a Zamora Huayco'], 'Medio')  # 100 - 35 - 20 = 45
+
+    def test_seed_llena_todas_las_entidades_con_datos_validos(self):
+        modelos = [m for m in apps.get_models() if m._meta.app_label in APPS_PROYECTO]
+        self.assertEqual(len(modelos), 36)
+        call_command('seed', stdout=StringIO())
+        primera = {m.__name__: m.objects.count() for m in modelos}
+        call_command('seed', stdout=StringIO())
+        segunda = {m.__name__: m.objects.count() for m in modelos}
+        self.assertEqual(primera, segunda)
+        vacios = [nombre for nombre, total in primera.items() if total == 0]
+        self.assertEqual(vacios, [])
+        for modelo in modelos:
+            for objeto in modelo.objects.all():
+                with self.subTest(modelo=modelo.__name__, pk=objeto.pk):
+                    objeto.full_clean()
 
 
 class ZonaApiTests(CrudApiMixin, APITestCase):
