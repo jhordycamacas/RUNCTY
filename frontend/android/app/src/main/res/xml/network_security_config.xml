@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solo desarrollo: permite http sin cifrar hacia el backend Django de la PC. -->
+<!-- 10.0.2.2 es la PC vista desde el emulador; para un teléfono real agrega aquí la IP de la PC. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>
