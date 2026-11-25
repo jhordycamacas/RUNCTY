@@ -1,8 +1,0 @@
-// Self-hosted variable fonts (SIL OFL 1.1) from npm, bundled with the app: no network at runtime,
-// so the phone works offline. Each package declares its subsets with `unicode-range`, so the
-// browser only loads the latin files that Spanish text needs.
-// Outfit: geometric, for the runner app. Geist: clean grotesk, for the admin web. Oswald:
-// condensed, only for the big metric numerals.
-@use '@fontsource-variable/outfit';
-@use '@fontsource-variable/oswald';
-@use '@fontsource-variable/geist';
