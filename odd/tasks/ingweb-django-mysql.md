@@ -70,7 +70,7 @@ Decision of the owner (2026-11-24): rebuild following the course guide (referenc
       menu by module, backend validation errors shown in forms, RUNCTY design tokens, `npm run build` and tests green. Route: delegated (writer).
 - [x] T3 Android: Capacitor app `RUNCTY`, `10.0.2.2:8000`, cleartext, debug APK. Route: delegated (writer).
 - [x] T4 Documents: README for the branch and Word "Requisitos, trazabilidad y evidencias" with the matrix and screenshot slots. Route: inline.
-- [ ] T5 Push branch `RUNCTY_INGWEB` to GitHub.
+- [x] T5 Push branch `RUNCTY_INGWEB` to GitHub.
 
 ## Acceptance criteria
 
@@ -137,4 +137,4 @@ Decision of the owner (2026-11-24): rebuild following the course guide (referenc
 
 ## Next step
 
-T5: push `RUNCTY_INGWEB`. Owner: create `backend/.env` from `.env.example` (DB password given in the session) to run the server without inline env vars.
+Delivered: branch pushed to origin (2026-11-24). Owner: create `backend/.env` from `.env.example` (DB password given in the session) to run the server without inline env vars.
