@@ -6,13 +6,16 @@ node_modules/
 .env.*
 !.env.example
 
-# Python (backend)
+# Python (backend Django)
+.venv/
 backend/.venv/
 backend/.env
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+db.sqlite3
+backend/staticfiles/
 
 # Frontend (Angular + Ionic + Capacitor)
 frontend/node_modules/
@@ -22,38 +25,22 @@ frontend/www/
 frontend/android/.gradle/
 frontend/android/local.properties
 frontend/android/app/build/
+android/app/build/
 **/build/
 
 # Build outputs
-lib/
 dist/
-.next/
-.expo/
-web-build/
+www/
 coverage/
 
-# Firebase
-firebase-debug.log
-firebase-debug.*.log
-firestore-debug.log
-storage-debug.log
-ui-debug.log
-database-debug.log
-pubsub-debug.log
-.firebase/
-emulator-data/
-
-# Google service-account keys (kept outside the repository)
-*service-account*.json
-
 # Native credentials and signing
+*service-account*.json
 google-services.json
 GoogleService-Info.plist
 *.keystore
 *.jks
 *.p8
 *.p12
-*.mobileprovision
 
 # OS / editors
 .DS_Store
