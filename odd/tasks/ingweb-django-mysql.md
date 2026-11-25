@@ -69,7 +69,7 @@ Decision of the owner (2026-11-24): rebuild following the course guide (referenc
 - [x] T2 Frontend Angular + Ionic: `core/` (models, API services, config) and `paginas/` (list, form, detail per entity), routes,
       menu by module, backend validation errors shown in forms, RUNCTY design tokens, `npm run build` and tests green. Route: delegated (writer).
 - [x] T3 Android: Capacitor app `RUNCTY`, `10.0.2.2:8000`, cleartext, debug APK. Route: delegated (writer).
-- [ ] T4 Documents: README for the branch and Word "Requisitos, trazabilidad y evidencias" with the matrix and screenshot slots. Route: inline.
+- [x] T4 Documents: README for the branch and Word "Requisitos, trazabilidad y evidencias" with the matrix and screenshot slots. Route: inline.
 - [ ] T5 Push branch `RUNCTY_INGWEB` to GitHub.
 
 ## Acceptance criteria
@@ -122,7 +122,19 @@ Decision of the owner (2026-11-24): rebuild following the course guide (referenc
   Verification: `manage.py test` (sqlite) 325 tests OK; MySQL `seed` twice: identical counts, every model >= 1
   (e.g. Usuario=6, Tramo=13, FranjaHoraria=10, FactorRiesgo=8, Inscripcion=4, Campana=3); `ng test` 7 files, 23 tests
   passed; `npm run build` OK, 0 warnings.
+- 2026-11-24 T4 (inline): MySQL database `runcty` and user `runcty_app` created with root; `migrate` and `seed` applied
+  on MySQL; `manage.py test` on MySQL: 325 tests OK. Evidence in `docs/evidencias/` taken from real runs: MySQL queries
+  (SHOW TABLES, DESCRIBE, JOIN), Swagger, Django admin, real CRUD request sequences (201/200/200/200/204/404/400) for
+  rutas, usuarios, clubes, eventos and the franja overlap rule, per-entity CRUD test matrix (36 entities x 8 operations),
+  web pages with Playwright (0 console errors except the expected 400), the 36 entity lists (`docs/evidencias/web/`),
+  and the Android emulator (Pixel7_API36) with `adb screencap`: data loaded from 10.0.2.2:8000, backend 400 shown under
+  the field, create (201) and delete (204, then API 404) from Android. Terminal images are rendered from the real
+  command output (the screen capture of the desktop is blocked in this environment). Fix `545242d`: gender-neutral
+  toasts. Word + PDF `docs/RUNCTY_Requisitos_Trazabilidad_Evidencias.*` (31 pages, validator passed): requirements,
+  architecture, traceability matrix (24 RF), 26 numbered captures and Annex A. Root README rewritten for this branch.
+  Known scope notes in the matrix (*): RF-10 "only if run" not enforced; RF-12 no live GPS; RF-15 no SMS/push;
+  RF-16/RF-18 records only, no real time or push.
 
 ## Next step
 
-T4.
+T5: push `RUNCTY_INGWEB`. Owner: create `backend/.env` from `.env.example` (DB password given in the session) to run the server without inline env vars.
