@@ -179,7 +179,7 @@ export class DetalleEntidadComponent {
       next: () => {
         // 204 No Content.
         this.eliminando.set(false);
-        void this.avisar(`${entidad.titulo} eliminado.`, 'success');
+        void this.avisar(`Registro eliminado: ${entidad.titulo}.`, 'success');
         void this.nav.navigateBack(['/', entidad.endpoint]).then(() => this.datos.notificarCambio(entidad.endpoint));
       },
       error: (e) => {

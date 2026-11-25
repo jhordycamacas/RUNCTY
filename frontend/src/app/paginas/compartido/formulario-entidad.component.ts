@@ -213,7 +213,7 @@ export class FormularioEntidadComponent implements OnInit {
       next: (registro) => {
         this.guardando.set(false);
         this.datos.notificarCambio(entidad.endpoint);
-        void this.avisar(`${entidad.titulo} ${id ? 'actualizado' : 'creado'} correctamente.`, 'success');
+        void this.avisar(`${id ? 'Cambios guardados' : 'Registro creado'}: ${entidad.titulo}.`, 'success');
         this.guardado.emit(registro);
         if (this.navegarAlGuardar()) {
           void this.router.navigate(['/', entidad.endpoint, registro.id], { replaceUrl: true });
